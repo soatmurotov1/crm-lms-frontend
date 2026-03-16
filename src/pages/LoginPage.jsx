@@ -52,10 +52,6 @@ export default function LoginPage() {
       }
 
       localStorage.setItem("crm_access_token", result.accessToken);
-      localStorage.setItem(
-        "crm_login_success_message",
-        "Dashboardga muvaffaqiyatli kirdingiz",
-      );
       showToast("success", "Tizimga muvaffaqiyatli kirdingiz");
 
       setTimeout(() => {

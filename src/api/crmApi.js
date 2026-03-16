@@ -61,10 +61,19 @@ export const groupsApi = {
   getAll: async () => unwrap(await apiClient.get("/groups/all")),
   getStudentsByGroup: async (groupId) =>
     unwrap(await apiClient.get(`/groups/students/${groupId}`)),
+  getLessonsByGroup: async (groupId) =>
+    unwrap(await apiClient.get(`/groups/lesson/${groupId}`)),
   create: async (payload) => unwrap(await apiClient.post("/groups", payload)),
   update: async (id, payload) =>
     unwrap(await apiClient.put(`/groups/${id}`, payload)),
   remove: async (id) => unwrap(await apiClient.delete(`/groups/${id}`)),
+};
+
+export const attendanceApi = {
+  getByLesson: async (lessonId) =>
+    unwrap(await apiClient.get(`/attendance/${lessonId}`)),
+  create: async (payload) => unwrap(await apiClient.post("/attendance", payload)),
+  update: async (payload) => unwrap(await apiClient.put("/attendance", payload)),
 };
 
 export const usersApi = {

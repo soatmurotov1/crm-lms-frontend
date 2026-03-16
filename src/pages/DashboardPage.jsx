@@ -33,6 +33,16 @@ const statsData = [
   { id: 4, key: "archived", icon: "🗂️" },
 ];
 
+const WEEKDAY_ENUMS = [
+  "SUNDAY",
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+];
+
 const defaultCourses = [
   {
     id: 1,
@@ -91,6 +101,7 @@ const translations = {
     pending: "Kutilmoqda",
     balance: "Qoldiq",
     schedule: "Dars jadvali",
+    noScheduleToday: "Bugun dars yo‘q",
     active: "Faol",
     today: "Bugun",
     teachersText: "Bu yerda o‘qituvchilar ro‘yxati chiqadi.",
@@ -140,6 +151,7 @@ const translations = {
     pending: "Pending",
     balance: "Balance",
     schedule: "Class schedule",
+    noScheduleToday: "No classes today",
     active: "Active",
     today: "Today",
     teachersText: "Teachers list will appear here.",
@@ -189,6 +201,7 @@ const translations = {
     pending: "Ожидается",
     balance: "Остаток",
     schedule: "Расписание занятий",
+    noScheduleToday: "Сегодня занятий нет",
     active: "Активный",
     today: "Сегодня",
     teachersText: "Здесь будет список учителей.",
@@ -268,7 +281,6 @@ function SelectField({ label, name, value, onChange, items, theme, choose }) {
 
 export default function DashboardPage({ initialMenu = "home" }) {
   const navigate = useNavigate();
-  const loginToastTimerRef = useRef(null);
 
   const [activeMenu, setActiveMenu] = useState(initialMenu);
   const [activeManagement, setActiveManagement] = useState("courses");
@@ -288,9 +300,9 @@ export default function DashboardPage({ initialMenu = "home" }) {
     frozen: 0,
     archived: 0,
   });
-  const [loginToast, setLoginToast] = useState({
-    show: false,
-    message: "",
+  const [scheduleData, setScheduleData] = useState({
+    groups: [],
+    coursesById: {},
   });
 
   const [formData, setFormData] = useState({
@@ -306,9 +318,53 @@ export default function DashboardPage({ initialMenu = "home" }) {
 
   const t = useMemo(() => translations[language], [language]);
   const authUser = useMemo(() => getAuthUserFromStorage(), []);
-  const greetingName =
-    authUser?.fullName || authUser?.email?.split("@")[0] || "Foydalanuvchi";
+  const greetingName = useMemo(() => {
+    const baseName =
+      authUser?.fullName || authUser?.email?.split("@")[0] || "Foydalanuvchi";
+    const parts = String(baseName)
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    if (parts.length >= 2) {
+      return `${parts[parts.length - 1]} ${parts.slice(0, -1).join(" ")}`;
+    }
+
+    return baseName;
+  }, [authUser]);
   const greetingText = `${t.greeting}, ${greetingName}!`;
+
+  const todaySchedule = useMemo(() => {
+    const todayEnum = WEEKDAY_ENUMS[new Date().getDay()];
+
+    const toEndTime = (startTime, durationMinutes) => {
+      if (!startTime || !durationMinutes) return "-";
+
+      const [hour = 0, minute = 0] = String(startTime)
+        .split(":")
+        .map((n) => Number(n));
+      const startMinutes = hour * 60 + minute;
+      const endMinutes = startMinutes + Number(durationMinutes || 0);
+      const endHour = Math.floor(endMinutes / 60) % 24;
+      const endMinute = endMinutes % 60;
+
+      return `${String(endHour).padStart(2, "0")}:${String(endMinute).padStart(2, "0")}`;
+    };
+
+    return (scheduleData.groups || [])
+      .filter((group) => Array.isArray(group.weekDays) && group.weekDays.includes(todayEnum))
+      .map((group) => {
+        const course = scheduleData.coursesById[group.courseId];
+        const duration = Number(course?.durationLesson || 0);
+        return {
+          id: group.id,
+          name: group.name || "-",
+          startTime: group.startTime || "-",
+          endTime: toEndTime(group.startTime, duration),
+        };
+      })
+      .sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
+  }, [scheduleData]);
 
   const loadCourses = async () => {
     try {
@@ -338,9 +394,10 @@ export default function DashboardPage({ initialMenu = "home" }) {
 
   useEffect(() => {
     const loadDashboardStats = async () => {
-      const [studentsRes, groupsRes] = await Promise.allSettled([
+      const [studentsRes, groupsRes, coursesRes] = await Promise.allSettled([
         studentsApi.getAll(),
         groupsApi.getAll(),
+        coursesApi.getAll(),
       ]);
 
       const students =
@@ -352,6 +409,16 @@ export default function DashboardPage({ initialMenu = "home" }) {
         groupsRes.status === "fulfilled" && Array.isArray(groupsRes.value?.data)
           ? groupsRes.value.data
           : [];
+      const courses =
+        coursesRes.status === "fulfilled" &&
+        Array.isArray(coursesRes.value?.data)
+          ? coursesRes.value.data
+          : [];
+
+      setScheduleData({
+        groups,
+        coursesById: Object.fromEntries(courses.map((course) => [course.id, course])),
+      });
 
       setDashboardStats({
         activeStudents: students.filter(
@@ -382,24 +449,6 @@ export default function DashboardPage({ initialMenu = "home" }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showManagementPanel]);
-
-  useEffect(() => {
-    const message = localStorage.getItem("crm_login_success_message");
-    if (!message) return;
-
-    localStorage.removeItem("crm_login_success_message");
-    setLoginToast({ show: true, message });
-
-    loginToastTimerRef.current = setTimeout(() => {
-      setLoginToast((prev) => ({ ...prev, show: false }));
-    }, 2400);
-
-    return () => {
-      if (loginToastTimerRef.current) {
-        clearTimeout(loginToastTimerRef.current);
-      }
-    };
-  }, []);
 
   const theme = darkMode
     ? {
@@ -775,9 +824,6 @@ export default function DashboardPage({ initialMenu = "home" }) {
             <h1 className={`text-3xl md:text-4xl font-bold ${theme.text}`}>
               {greetingText}
             </h1>
-            <p className={`mt-2 text-base md:text-lg ${theme.soft}`}>
-              {t.welcome}
-            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
@@ -831,33 +877,32 @@ export default function DashboardPage({ initialMenu = "home" }) {
               </h2>
 
               <div className="space-y-4">
-                <div
-                  className={`flex items-center justify-between rounded-2xl border p-4 ${theme.rowBorder}`}
-                >
-                  <div>
-                    <h3 className={`font-semibold text-lg ${theme.text}`}>
-                      Frontend N45
-                    </h3>
-                    <p className={theme.soft}>08:30 - 10:00</p>
+                {todaySchedule.length === 0 && (
+                  <div
+                    className={`rounded-2xl border p-4 text-sm ${theme.rowBorder} ${theme.soft}`}
+                  >
+                    {t.noScheduleToday}
                   </div>
-                  <span className="px-4 py-2 rounded-full bg-violet-100 text-violet-700 text-sm">
-                    {t.active}
-                  </span>
-                </div>
+                )}
 
-                <div
-                  className={`flex items-center justify-between rounded-2xl border p-4 ${theme.rowBorder}`}
-                >
-                  <div>
-                    <h3 className={`font-semibold text-lg ${theme.text}`}>
-                      Backend N21
-                    </h3>
-                    <p className={theme.soft}>11:00 - 12:30</p>
+                {todaySchedule.map((lesson) => (
+                  <div
+                    key={lesson.id}
+                    className={`flex items-center justify-between rounded-2xl border p-4 ${theme.rowBorder}`}
+                  >
+                    <div>
+                      <h3 className={`font-semibold text-lg ${theme.text}`}>
+                        {lesson.name}
+                      </h3>
+                      <p className={theme.soft}>
+                        {lesson.startTime} - {lesson.endTime}
+                      </p>
+                    </div>
+                    <span className="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm">
+                      {t.today}
+                    </span>
                   </div>
-                  <span className="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm">
-                    {t.today}
-                  </span>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -908,18 +953,6 @@ export default function DashboardPage({ initialMenu = "home" }) {
 
   return (
     <div className={`min-h-screen flex ${theme.app}`}>
-      <div
-        className={`fixed top-4 right-4 z-60 transform transition-all duration-500 ${
-          loginToast.show
-            ? "translate-x-0 opacity-100"
-            : "translate-x-8 opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="rounded-2xl px-5 py-3 shadow-xl text-white min-w-75 text-center bg-emerald-500">
-          {loginToast.message}
-        </div>
-      </div>
-
       <aside
         className={`relative w-60 border-r p-4 flex flex-col ${theme.sidebar}`}
       >

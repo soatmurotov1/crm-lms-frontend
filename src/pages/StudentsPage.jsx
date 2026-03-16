@@ -12,6 +12,7 @@ export default function StudentsPage() {
     email: "",
     password: "",
     birth_date: "",
+    photo: null,
   });
 
   const loadStudents = async () => {
@@ -20,7 +21,7 @@ export default function StudentsPage() {
       setError("");
       const result = await studentsApi.getAll();
       const list = Array.isArray(result?.data) ? result.data : [];
-      setStudents(list);
+      setStudents([...list].sort((a, b) => Number(a.id) - Number(b.id)));
     } catch (apiError) {
       setError(
         apiError?.response?.data?.message || "Studentlarni olishda xato",
@@ -38,6 +39,11 @@ export default function StudentsPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setFormData((prev) => ({ ...prev, photo: file }));
   };
 
   const handleCreateStudent = async () => {
@@ -58,9 +64,16 @@ export default function StudentsPage() {
         email: formData.email.trim(),
         password: formData.password,
         birth_date: formData.birth_date,
+        photo: formData.photo,
       });
       setOpenModal(false);
-      setFormData({ fullName: "", email: "", password: "", birth_date: "" });
+      setFormData({
+        fullName: "",
+        email: "",
+        password: "",
+        birth_date: "",
+        photo: null,
+      });
       await loadStudents();
     } catch (apiError) {
       alert(apiError?.response?.data?.message || "Talaba qo'shishda xato");
@@ -89,6 +102,7 @@ export default function StudentsPage() {
           <thead className="bg-gray-100">
             <tr className="text-left">
               <th className="p-4">#</th>
+              <th className="p-4">Rasm</th>
               <th className="p-4">Ism</th>
               <th className="p-4">Guruh</th>
               <th className="p-4">Telefon</th>
@@ -98,7 +112,7 @@ export default function StudentsPage() {
           <tbody>
             {loading ? (
               <tr className="border-t">
-                <td className="p-4" colSpan={4}>
+                <td className="p-4" colSpan={5}>
                   Yuklanmoqda...
                 </td>
               </tr>
@@ -106,6 +120,19 @@ export default function StudentsPage() {
               students.map((s) => (
                 <tr key={s.id} className="border-t">
                   <td className="p-4">{s.id}</td>
+                  <td className="p-4">
+                    {s.photo ? (
+                      <img
+                        src={s.photo}
+                        alt={s.fullName}
+                        className="w-10 h-10 rounded-full object-cover border"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-slate-100 border flex items-center justify-center text-xs text-slate-600">
+                        Rasm yo'q
+                      </div>
+                    )}
+                  </td>
                   <td className="p-4">{s.fullName}</td>
                   <td className="p-4">-</td>
                   <td className="p-4">{s.email}</td>
@@ -115,7 +142,7 @@ export default function StudentsPage() {
 
             {!loading && !students.length && (
               <tr className="border-t">
-                <td className="p-4" colSpan={4}>
+                <td className="p-4" colSpan={5}>
                   {error || "Ma'lumot topilmadi"}
                 </td>
               </tr>
@@ -161,6 +188,13 @@ export default function StudentsPage() {
             name="birth_date"
             value={formData.birth_date}
             onChange={handleChange}
+            className="border w-full p-3 rounded-lg mb-4"
+          />
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
             className="border w-full p-3 rounded-lg mb-4"
           />
 

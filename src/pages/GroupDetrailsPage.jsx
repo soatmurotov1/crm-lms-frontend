@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import HomeworkDetailPage from "./HomeworkDetailPage";
-import { groupsApi } from "../api/crmApi";
+import { attendanceApi, groupsApi } from "../api/crmApi";
 
 const makeDateHeaders = () => {
   return [
@@ -14,6 +14,17 @@ const makeDateHeaders = () => {
     { day: "Fri", num: 27 },
     { day: "Sat", num: 28 },
   ];
+};
+
+const dayByIndex = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const lessonDateLabel = (value) => {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return { day: "-", num: "-" };
+  return {
+    day: dayByIndex[date.getDay()] || "-",
+    num: date.getDate(),
+  };
 };
 
 const defaultStudents = [];
@@ -194,7 +205,6 @@ export default function GroupDetailsPage({
   group,
   onBack,
 }) {
-  const dateHeaders = useMemo(() => makeDateHeaders(), []);
   const fileRef = useRef(null);
 
   const [groupDeleted, setGroupDeleted] = useState(false);
@@ -213,6 +223,9 @@ export default function GroupDetailsPage({
 
   const [students, setStudents] = useState(group?.students || defaultStudents);
   const [studentsLoading, setStudentsLoading] = useState(false);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceSavingMap, setAttendanceSavingMap] = useState({});
+  const [lessons, setLessons] = useState([]);
   const [teachers, setTeachers] = useState(
     group?.teacher
       ? [{ id: group?.teacherId || 1, name: group.teacher, phone: "-" }]
@@ -221,27 +234,56 @@ export default function GroupDetailsPage({
   const [homeworks, setHomeworks] = useState(defaultHomeworks);
   const [videos, setVideos] = useState(defaultVideos);
 
-  const [attendance, setAttendance] = useState(() => {
-    const result = {};
-    defaultStudents.forEach((student) => {
-      result[student.id] = {};
-      makeDateHeaders().forEach((d) => {
-        result[student.id][`${d.day}-${d.num}`] = "";
+  const [attendance, setAttendance] = useState({});
+
+  const dateHeaders = useMemo(() => {
+    if (!Array.isArray(lessons) || lessons.length === 0) {
+      return makeDateHeaders().map((item) => ({
+        ...item,
+        key: `${item.day}-${item.num}`,
+        lessonId: null,
+      }));
+    }
+
+    return [...lessons]
+      .sort(
+        (a, b) =>
+          new Date(a.created_at || 0).getTime() -
+          new Date(b.created_at || 0).getTime(),
+      )
+      .slice(-9)
+      .map((lesson) => {
+        const label = lessonDateLabel(lesson.created_at);
+        return {
+          day: label.day,
+          num: label.num,
+          key: `lesson-${lesson.id}`,
+          lessonId: lesson.id,
+        };
       });
-    });
-    result[1]["Fri-20"] = "Yo‘q";
-    result[2]["Fri-20"] = "Bor";
-    return result;
-  });
+  }, [lessons]);
 
   useEffect(() => {
     if (!group?.id) return;
 
-    const loadStudents = async () => {
+    const loadStudentsAndAttendance = async () => {
       try {
         setStudentsLoading(true);
-        const result = await groupsApi.getStudentsByGroup(group.id);
-        const list = Array.isArray(result?.data) ? result.data : [];
+        setAttendanceLoading(true);
+
+        const [studentsResult, lessonsResult] = await Promise.all([
+          groupsApi.getStudentsByGroup(group.id),
+          groupsApi.getLessonsByGroup(group.id),
+        ]);
+
+        const list = Array.isArray(studentsResult?.data)
+          ? studentsResult.data
+          : [];
+        const lessonList = Array.isArray(lessonsResult?.data)
+          ? lessonsResult.data
+          : [];
+
+        setLessons(lessonList);
         setStudents(
           list.map((student) => ({
             id: student.id,
@@ -250,14 +292,45 @@ export default function GroupDetailsPage({
             active: true,
           })),
         );
+
+        const attendanceByStudent = {};
+
+        await Promise.all(
+          lessonList.map(async (lesson) => {
+            try {
+              const attendanceResult = await attendanceApi.getByLesson(lesson.id);
+              const rows = Array.isArray(attendanceResult?.data)
+                ? attendanceResult.data
+                : [];
+
+              rows.forEach((row) => {
+                const studentId = row?.student?.id;
+                if (!studentId) return;
+                if (!attendanceByStudent[studentId]) {
+                  attendanceByStudent[studentId] = {};
+                }
+                attendanceByStudent[studentId][`lesson-${lesson.id}`] = row.isPresent
+                  ? "Bor"
+                  : "Yo‘q";
+              });
+            } catch {
+              // Ignore single lesson attendance load failure and keep UI usable.
+            }
+          }),
+        );
+
+        setAttendance(attendanceByStudent);
       } catch {
         setStudents([]);
+        setLessons([]);
+        setAttendance({});
       } finally {
         setStudentsLoading(false);
+        setAttendanceLoading(false);
       }
     };
 
-    loadStudents();
+    loadStudentsAndAttendance();
   }, [group?.id]);
 
   useEffect(() => {
@@ -267,9 +340,8 @@ export default function GroupDetailsPage({
       students.forEach((student) => {
         next[student.id] = prev[student.id] || {};
         dateHeaders.forEach((d) => {
-          const key = `${d.day}-${d.num}`;
-          if (!(key in next[student.id])) {
-            next[student.id][key] = "";
+          if (!(d.key in next[student.id])) {
+            next[student.id][d.key] = "";
           }
         });
       });
@@ -286,6 +358,7 @@ export default function GroupDetailsPage({
   const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showVideoUploadModal, setShowVideoUploadModal] = useState(false);
+  const [groupDeleteLoading, setGroupDeleteLoading] = useState(false);
 
   const [selectedHomework, setSelectedHomework] = useState(null);
   const [homeworkDetailTab, setHomeworkDetailTab] = useState("kutayotgan");
@@ -345,27 +418,59 @@ export default function GroupDetailsPage({
         ? "px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-medium"
         : "px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-sm font-medium";
 
-  const toggleAttendance = (studentId, key) => {
-    setAttendance((prev) => {
-      const current = prev[studentId]?.[key] || "";
-      const next = current === "" ? "Bor" : current === "Bor" ? "Yo‘q" : "";
-      return {
-        ...prev,
-        [studentId]: {
-          ...prev[studentId],
-          [key]: next,
-        },
-      };
-    });
-  };
+  const setAttendanceValue = async (studentId, header, next) => {
+    if (!header?.lessonId) {
+      alert("Bu sana uchun dars topilmadi");
+      return;
+    }
 
-  const attendancePill = (value) => {
-    if (value === "Bor")
-      return "bg-emerald-500 text-white border border-emerald-500";
-    if (value === "Yo‘q") return "bg-red-500 text-white border border-red-500";
-    return darkMode
-      ? "border border-slate-700 bg-slate-900 text-slate-300"
-      : "border border-slate-200 bg-white text-slate-500";
+    const key = header.key;
+    const loadingKey = `${studentId}-${header.lessonId}`;
+    const current = attendance[studentId]?.[key] || "";
+
+    if (current === next) {
+      return;
+    }
+
+    setAttendance((prev) => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        [key]: next,
+      },
+    }));
+    setAttendanceSavingMap((prev) => ({ ...prev, [loadingKey]: true }));
+
+    try {
+      await attendanceApi.update({
+        lessonId: header.lessonId,
+        studentId,
+        isPresent: next === "Bor",
+      });
+    } catch (error) {
+      if (error?.response?.status === 404) {
+        await attendanceApi.create({
+          lessonId: header.lessonId,
+          studentId,
+          isPresent: next === "Bor",
+        });
+      } else {
+        setAttendance((prev) => ({
+          ...prev,
+          [studentId]: {
+            ...prev[studentId],
+            [key]: current,
+          },
+        }));
+        alert(error?.response?.data?.message || "Davomatni saqlashda xato");
+      }
+    } finally {
+      setAttendanceSavingMap((prev) => {
+        const copy = { ...prev };
+        delete copy[loadingKey];
+        return copy;
+      });
+    }
   };
 
   const openEditModal = () => {
@@ -429,7 +534,7 @@ export default function GroupDetailsPage({
     setAttendance((prev) => {
       const newAttendance = {};
       dateHeaders.forEach((d) => {
-        newAttendance[`${d.day}-${d.num}`] = "";
+        newAttendance[d.key] = "";
       });
       return {
         ...prev,
@@ -522,10 +627,24 @@ export default function GroupDetailsPage({
     setVideos((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const deleteGroup = () => {
+  const deleteGroup = async () => {
     const isOk = window.confirm("Rostan ham guruhni o‘chirmoqchimisiz?");
     if (!isOk) return;
-    setGroupDeleted(true);
+
+    if (!group?.id) {
+      alert("Guruh ID topilmadi");
+      return;
+    }
+
+    try {
+      setGroupDeleteLoading(true);
+      await groupsApi.remove(group.id);
+      setGroupDeleted(true);
+    } catch (error) {
+      alert(error?.response?.data?.message || "Guruhni o'chirishda xato");
+    } finally {
+      setGroupDeleteLoading(false);
+    }
   };
 
   const filteredHomeworkStudents =
@@ -599,10 +718,11 @@ export default function GroupDetailsPage({
               </button>
 
               <button
+                disabled={groupDeleteLoading}
                 onClick={deleteGroup}
-                className="w-10 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white transition shrink-0"
+                className="w-10 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white transition shrink-0 disabled:opacity-60"
               >
-                🗑️
+                {groupDeleteLoading ? "..." : "🗑️"}
               </button>
             </div>
           </div>
@@ -820,7 +940,7 @@ export default function GroupDetailsPage({
                   <div
                     className={`text-xs sm:text-sm font-medium ${theme.text}`}
                   >
-                    2026 Fevral
+                    {attendanceLoading ? "Yuklanmoqda..." : "Davomat"}
                   </div>
                 </div>
 
@@ -839,7 +959,7 @@ export default function GroupDetailsPage({
 
                           {dateHeaders.map((item) => (
                             <th
-                              key={`${item.day}-${item.num}`}
+                              key={item.key}
                               className={`px-1 py-3 text-center ${theme.text}`}
                             >
                               <div className="text-[10px]">{item.day}</div>
@@ -887,19 +1007,52 @@ export default function GroupDetailsPage({
                             </td>
 
                             {dateHeaders.map((item) => {
-                              const key = `${item.day}-${item.num}`;
+                              const key = item.key;
                               const value = attendance[student.id]?.[key] || "";
+                              const savingKey = `${student.id}-${item.lessonId}`;
+                              const isSaving = !!attendanceSavingMap[savingKey];
+                              const isBor = value === "Bor";
+                              const isYoq = value === "Yo‘q";
 
                               return (
                                 <td key={key} className="px-1 py-2 text-center">
-                                  <button
-                                    onClick={() =>
-                                      toggleAttendance(student.id, key)
-                                    }
-                                    className={`w-full max-w-[64px] h-10 rounded-full text-[11px] font-medium transition ${attendancePill(value)}`}
-                                  >
-                                    {value || ""}
-                                  </button>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <button
+                                      disabled={isSaving || !item.lessonId}
+                                      onClick={() =>
+                                        setAttendanceValue(student.id, item, "Bor")
+                                      }
+                                      className={`px-2 py-1 rounded-lg text-[10px] border transition disabled:opacity-60 ${
+                                        isBor
+                                          ? "bg-emerald-500 text-white border-emerald-500"
+                                          : darkMode
+                                            ? "border-slate-700 text-slate-300"
+                                            : "border-slate-200 text-slate-600"
+                                      }`}
+                                    >
+                                      Bor
+                                    </button>
+                                    <button
+                                      disabled={isSaving || !item.lessonId}
+                                      onClick={() =>
+                                        setAttendanceValue(student.id, item, "Yo‘q")
+                                      }
+                                      className={`px-2 py-1 rounded-lg text-[10px] border transition disabled:opacity-60 ${
+                                        isYoq
+                                          ? "bg-red-500 text-white border-red-500"
+                                          : darkMode
+                                            ? "border-slate-700 text-slate-300"
+                                            : "border-slate-200 text-slate-600"
+                                      }`}
+                                    >
+                                      Yo‘q
+                                    </button>
+                                  </div>
+                                  {isSaving && (
+                                    <div className={`mt-1 text-[10px] ${theme.soft}`}>
+                                      ...
+                                    </div>
+                                  )}
                                 </td>
                               );
                             })}
@@ -938,21 +1091,58 @@ export default function GroupDetailsPage({
 
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                           {dateHeaders.map((item) => {
-                            const key = `${item.day}-${item.num}`;
+                            const key = item.key;
                             const value = attendance[student.id]?.[key] || "";
+                            const savingKey = `${student.id}-${item.lessonId}`;
+                            const isSaving = !!attendanceSavingMap[savingKey];
+                            const isBor = value === "Bor";
+                            const isYoq = value === "Yo‘q";
 
                             return (
-                              <button
+                              <div
                                 key={key}
-                                onClick={() =>
-                                  toggleAttendance(student.id, key)
-                                }
-                                className={`rounded-xl px-2 py-2 text-xs font-medium transition ${attendancePill(value)}`}
+                                className={`rounded-xl px-2 py-2 text-xs border ${innerBorderClass}`}
                               >
                                 <div>{item.day}</div>
                                 <div className="font-bold">{item.num}</div>
-                                <div>{value || "-"}</div>
-                              </button>
+                                <div className="mt-2 flex items-center gap-1">
+                                  <button
+                                    disabled={isSaving || !item.lessonId}
+                                    onClick={() =>
+                                      setAttendanceValue(student.id, item, "Bor")
+                                    }
+                                    className={`flex-1 px-2 py-1 rounded-lg text-[10px] border transition disabled:opacity-60 ${
+                                      isBor
+                                        ? "bg-emerald-500 text-white border-emerald-500"
+                                        : darkMode
+                                          ? "border-slate-700 text-slate-300"
+                                          : "border-slate-200 text-slate-600"
+                                    }`}
+                                  >
+                                    Bor
+                                  </button>
+                                  <button
+                                    disabled={isSaving || !item.lessonId}
+                                    onClick={() =>
+                                      setAttendanceValue(student.id, item, "Yo‘q")
+                                    }
+                                    className={`flex-1 px-2 py-1 rounded-lg text-[10px] border transition disabled:opacity-60 ${
+                                      isYoq
+                                        ? "bg-red-500 text-white border-red-500"
+                                        : darkMode
+                                          ? "border-slate-700 text-slate-300"
+                                          : "border-slate-200 text-slate-600"
+                                    }`}
+                                  >
+                                    Yo‘q
+                                  </button>
+                                </div>
+                                {isSaving && (
+                                  <div className={`mt-1 text-[10px] ${theme.soft}`}>
+                                    ...
+                                  </div>
+                                )}
+                              </div>
                             );
                           })}
                         </div>
