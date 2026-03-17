@@ -5,6 +5,7 @@ import {
   groupsApi,
   homeworkApi,
   lessonVideosApi,
+  studentsApi,
 } from "../api/crmApi";
 import {
   defaultTeachers,
@@ -263,7 +264,7 @@ export default function GroupDetailsPage({
     });
   }, [students, dateHeaders]);
 
-  const [activeMainTab, setActiveMainTab] = useState("malumotlar");
+  const [activeMainTab, setActiveMainTab] = useState("guruh-darsliklari");
   const [activeLessonTab, setActiveLessonTab] = useState("uyga-vazifa");
   const [lessonPage, setLessonPage] = useState("list");
 
@@ -271,6 +272,7 @@ export default function GroupDetailsPage({
   const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [groupDeleteLoading, setGroupDeleteLoading] = useState(false);
+  const [studentSaving, setStudentSaving] = useState(false);
   const [openPersonMenu, setOpenPersonMenu] = useState(null);
 
   const [selectedHomework, setSelectedHomework] = useState(null);
@@ -291,8 +293,12 @@ export default function GroupDetailsPage({
   });
 
   const [studentForm, setStudentForm] = useState({
-    name: "",
-    phone: "",
+    fullName: "",
+    email: "",
+    password: "",
+    status: "ACTIVE",
+    day: "",
+    photo: null,
   });
 
   const [homeworkForm, setHomeworkForm] = useState({
@@ -531,8 +537,54 @@ export default function GroupDetailsPage({
     alert("O‘qituvchi biriktirish endpointi hozircha frontendga ulanmagan");
   };
 
-  const addStudent = () => {
-    alert("Talabani guruhga qo‘shish endpointi hozircha frontendga ulanmagan");
+  const handleStudentFormChange = (e) => {
+    const { name, value } = e.target;
+    setStudentForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleStudentPhotoChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setStudentForm((prev) => ({ ...prev, photo: file }));
+  };
+
+  const addStudent = async () => {
+    if (
+      !studentForm.fullName.trim() ||
+      !studentForm.email.trim() ||
+      !studentForm.password.trim() ||
+      !studentForm.day
+    ) {
+      alert("Majburiy maydonlarni to'ldiring");
+      return;
+    }
+
+    try {
+      setStudentSaving(true);
+      await studentsApi.create({
+        fullName: studentForm.fullName.trim(),
+        email: studentForm.email.trim(),
+        password: studentForm.password,
+        status: studentForm.status,
+        birth_date: studentForm.day,
+        ...(studentForm.photo ? { photo: studentForm.photo } : {}),
+      });
+
+      setShowStudentModal(false);
+      setStudentForm({
+        fullName: "",
+        email: "",
+        password: "",
+        status: "ACTIVE",
+        day: "",
+        photo: null,
+      });
+
+      alert("Talaba muvaffaqiyatli qo'shildi");
+    } catch (error) {
+      alert(error?.response?.data?.message || "Talabani qo'shishda xato");
+    } finally {
+      setStudentSaving(false);
+    }
   };
 
   const addHomework = async () => {
@@ -785,196 +837,473 @@ export default function GroupDetailsPage({
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)] gap-3 overflow-hidden">
-            <div className="min-h-0 overflow-hidden flex flex-col gap-3">
-              <div className={infoCardClass}>
-                <div className="flex items-center justify-between gap-3 mb-3 min-w-0">
-                  <h3
-                    className={`text-sm sm:text-base font-semibold ${theme.text}`}
-                  >
-                    Ma&apos;lumotlar
-                  </h3>
+          <div className="shrink-0 flex items-center gap-3 border-b border-slate-200 overflow-x-auto">
+            <button
+              onClick={() => {
+                setActiveMainTab("malumotlar");
+                setLessonPage("list");
+              }}
+              className={tabClass(activeMainTab === "malumotlar")}
+            >
+              Ma&apos;lumotlar
+            </button>
+            <button
+              onClick={() => {
+                setActiveMainTab("guruh-darsliklari");
+                setLessonPage("list");
+              }}
+              className={tabClass(activeMainTab === "guruh-darsliklari")}
+            >
+              Guruh darsliklari
+            </button>
+            <button
+              onClick={() => {
+                setActiveMainTab("akademik-davomat");
+                setLessonPage("list");
+              }}
+              className={tabClass(activeMainTab === "akademik-davomat")}
+            >
+              Akademik davomat
+            </button>
+          </div>
 
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs border shrink-0 ${theme.chip}`}
-                  >
-                    {groupData.course}
-                  </span>
-                </div>
+          {activeMainTab !== "guruh-darsliklari" && (
+            <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)] gap-3 overflow-hidden">
+              <div className="min-h-0 overflow-hidden flex flex-col gap-3">
+                <div className={infoCardClass}>
+                  <div className="flex items-center justify-between gap-3 mb-3 min-w-0">
+                    <h3
+                      className={`text-sm sm:text-base font-semibold ${theme.text}`}
+                    >
+                      Ma&apos;lumotlar
+                    </h3>
 
-                <div className="space-y-2 text-xs sm:text-sm min-w-0">
-                  <div>
-                    <p className={theme.soft}>Kurs nomi</p>
-                    <p className={`font-medium break-words ${theme.text}`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs border shrink-0 ${theme.chip}`}
+                    >
                       {groupData.course}
-                    </p>
+                    </span>
                   </div>
 
-                  <div>
-                    <p className={theme.soft}>Kurs to‘lovi</p>
-                    <p className={`font-medium break-words ${theme.text}`}>
-                      {Number(groupData.price || 0).toLocaleString()} so‘m
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className={theme.soft}>O‘tish kunlari</p>
-                    <p className={`font-medium break-words ${theme.text}`}>
-                      {groupDays.join(", ")}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className={theme.soft}>O‘tish vaqti</p>
-                    <p className={`font-medium break-words ${theme.text}`}>
-                      {groupData.lessonTime || groupData.time}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className={theme.soft}>O‘qish davomiyligi</p>
-                    <p className={`font-medium break-words ${theme.text}`}>
-                      {groupData.duration}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className={theme.soft}>Xona</p>
-                    <p className={`font-medium break-words ${theme.text}`}>
-                      {groupData.room}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className={infoCardClass}>
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <h3
-                    className={`text-sm sm:text-base font-semibold ${theme.text}`}
-                  >
-                    O‘qituvchilar
-                  </h3>
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[11px] border ${theme.chip}`}
-                  >
-                    {teachers.length} ta
-                  </span>
-                </div>
-
-                <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
-                  {teachers.map((teacher) => (
-                    <article key={teacher.id} className={personCardClass}>
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={avatarClass}>
-                          {getInitial(teacher.name)}
-                        </div>
-
-                        <div className="min-w-0">
-                          <p
-                            className={`text-sm font-semibold truncate ${theme.text}`}
-                          >
-                            {teacher.name}
-                          </p>
-                          <p className={`text-xs truncate ${theme.soft}`}>
-                            {teacher.phone}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="relative shrink-0">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setOpenPersonMenu((prev) =>
-                              prev?.type === "teacher" &&
-                              prev?.id === teacher.id
-                                ? null
-                                : { type: "teacher", id: teacher.id },
-                            )
-                          }
-                          className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
-                            darkMode
-                              ? "border-slate-600 text-slate-200 hover:bg-slate-800"
-                              : "border-slate-200 text-slate-600 hover:bg-slate-100"
-                          }`}
-                        >
-                          ...
-                        </button>
-
-                        {openPersonMenu?.type === "teacher" &&
-                          openPersonMenu?.id === teacher.id && (
-                            <div
-                              className={`absolute right-0 top-9 z-30 min-w-[120px] rounded-xl border shadow-lg p-1 ${
-                                darkMode
-                                  ? "bg-slate-900 border-slate-700"
-                                  : "bg-white border-slate-200"
-                              }`}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => editTeacher(teacher.id)}
-                                className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                  darkMode
-                                    ? "text-slate-200 hover:bg-slate-800"
-                                    : "text-slate-700 hover:bg-slate-50"
-                                }`}
-                              >
-                                Tahrirlash
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => deleteTeacher(teacher.id)}
-                                className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                  darkMode
-                                    ? "text-red-300 hover:bg-red-500/10"
-                                    : "text-red-600 hover:bg-red-50"
-                                }`}
-                              >
-                                O‘chirish
-                              </button>
-                            </div>
-                          )}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </div>
-
-              <div className={`${infoCardClass} flex-1 overflow-hidden`}>
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <h3
-                    className={`text-sm sm:text-base font-semibold ${theme.text}`}
-                  >
-                    Talabalar
-                  </h3>
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[11px] border ${theme.chip}`}
-                  >
-                    {students.length} ta
-                  </span>
-                </div>
-
-                <div className="h-full overflow-y-auto pr-1 space-y-2">
-                  {studentsLoading ? (
-                    <div className={`text-sm ${theme.soft}`}>
-                      Yuklanmoqda...
+                  <div className="space-y-2 text-xs sm:text-sm min-w-0">
+                    <div>
+                      <p className={theme.soft}>Kurs nomi</p>
+                      <p className={`font-medium break-words ${theme.text}`}>
+                        {groupData.course}
+                      </p>
                     </div>
-                  ) : students.length === 0 ? (
-                    <div className={`text-sm ${theme.soft}`}>
-                      Talabalar topilmadi
+
+                    <div>
+                      <p className={theme.soft}>Kurs to‘lovi</p>
+                      <p className={`font-medium break-words ${theme.text}`}>
+                        {Number(groupData.price || 0).toLocaleString()} so‘m
+                      </p>
                     </div>
-                  ) : (
-                    students.map((student) => (
-                      <article key={student.id} className={personCardClass}>
+
+                    <div>
+                      <p className={theme.soft}>O‘tish kunlari</p>
+                      <p className={`font-medium break-words ${theme.text}`}>
+                        {groupDays.join(", ")}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className={theme.soft}>O‘tish vaqti</p>
+                      <p className={`font-medium break-words ${theme.text}`}>
+                        {groupData.lessonTime || groupData.time}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className={theme.soft}>O‘qish davomiyligi</p>
+                      <p className={`font-medium break-words ${theme.text}`}>
+                        {groupData.duration}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className={theme.soft}>Xona</p>
+                      <p className={`font-medium break-words ${theme.text}`}>
+                        {groupData.room}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={infoCardClass}>
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <h3
+                      className={`text-sm sm:text-base font-semibold ${theme.text}`}
+                    >
+                      O‘qituvchilar
+                    </h3>
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[11px] border ${theme.chip}`}
+                    >
+                      {teachers.length} ta
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                    {teachers.map((teacher) => (
+                      <article key={teacher.id} className={personCardClass}>
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={avatarClass}>
-                            {getInitial(student.name)}
+                            {getInitial(teacher.name)}
                           </div>
 
                           <div className="min-w-0">
                             <p
                               className={`text-sm font-semibold truncate ${theme.text}`}
                             >
+                              {teacher.name}
+                            </p>
+                            <p className={`text-xs truncate ${theme.soft}`}>
+                              {teacher.phone}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="relative shrink-0">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setOpenPersonMenu((prev) =>
+                                prev?.type === "teacher" &&
+                                prev?.id === teacher.id
+                                  ? null
+                                  : { type: "teacher", id: teacher.id },
+                              )
+                            }
+                            className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
+                              darkMode
+                                ? "border-slate-600 text-slate-200 hover:bg-slate-800"
+                                : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                            }`}
+                          >
+                            ...
+                          </button>
+
+                          {openPersonMenu?.type === "teacher" &&
+                            openPersonMenu?.id === teacher.id && (
+                              <div
+                                className={`absolute right-0 top-9 z-30 min-w-[120px] rounded-xl border shadow-lg p-1 ${
+                                  darkMode
+                                    ? "bg-slate-900 border-slate-700"
+                                    : "bg-white border-slate-200"
+                                }`}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => editTeacher(teacher.id)}
+                                  className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                                    darkMode
+                                      ? "text-slate-200 hover:bg-slate-800"
+                                      : "text-slate-700 hover:bg-slate-50"
+                                  }`}
+                                >
+                                  Tahrirlash
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => deleteTeacher(teacher.id)}
+                                  className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                                    darkMode
+                                      ? "text-red-300 hover:bg-red-500/10"
+                                      : "text-red-600 hover:bg-red-50"
+                                  }`}
+                                >
+                                  O‘chirish
+                                </button>
+                              </div>
+                            )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={`${infoCardClass} flex-1 overflow-hidden`}>
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <h3
+                      className={`text-sm sm:text-base font-semibold ${theme.text}`}
+                    >
+                      Talabalar
+                    </h3>
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[11px] border ${theme.chip}`}
+                    >
+                      {students.length} ta
+                    </span>
+                  </div>
+
+                  <div className="h-full overflow-y-auto pr-1 space-y-2">
+                    {studentsLoading ? (
+                      <div className={`text-sm ${theme.soft}`}>
+                        Yuklanmoqda...
+                      </div>
+                    ) : students.length === 0 ? (
+                      <div className={`text-sm ${theme.soft}`}>
+                        Talabalar topilmadi
+                      </div>
+                    ) : (
+                      students.map((student) => (
+                        <article key={student.id} className={personCardClass}>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={avatarClass}>
+                              {getInitial(student.name)}
+                            </div>
+
+                            <div className="min-w-0">
+                              <p
+                                className={`text-sm font-semibold truncate ${theme.text}`}
+                              >
+                                {student.name}
+                              </p>
+                              <p className={`text-xs truncate ${theme.soft}`}>
+                                {student.phone}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-medium border ${
+                                darkMode
+                                  ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              }`}
+                            >
+                              Faol
+                            </span>
+
+                            <div className="relative">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setOpenPersonMenu((prev) =>
+                                    prev?.type === "student" &&
+                                    prev?.id === student.id
+                                      ? null
+                                      : { type: "student", id: student.id },
+                                  )
+                                }
+                                className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
+                                  darkMode
+                                    ? "border-slate-600 text-slate-200 hover:bg-slate-800"
+                                    : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                                }`}
+                              >
+                                ...
+                              </button>
+
+                              {openPersonMenu?.type === "student" &&
+                                openPersonMenu?.id === student.id && (
+                                  <div
+                                    className={`absolute right-0 top-9 z-30 min-w-[120px] rounded-xl border shadow-lg p-1 ${
+                                      darkMode
+                                        ? "bg-slate-900 border-slate-700"
+                                        : "bg-white border-slate-200"
+                                    }`}
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => editStudent(student.id)}
+                                      className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                                        darkMode
+                                          ? "text-slate-200 hover:bg-slate-800"
+                                          : "text-slate-700 hover:bg-slate-50"
+                                      }`}
+                                    >
+                                      Tahrirlash
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => deleteStudent(student.id)}
+                                      className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                                        darkMode
+                                          ? "text-red-300 hover:bg-red-500/10"
+                                          : "text-red-600 hover:bg-red-50"
+                                      }`}
+                                    >
+                                      O‘chirish
+                                    </button>
+                                  </div>
+                                )}
+                            </div>
+                          </div>
+                        </article>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`${theme.card} border rounded-2xl shadow-sm min-w-0 min-h-0 flex flex-col overflow-hidden`}
+              >
+                <div
+                  className={`shrink-0 px-4 py-3 flex items-center justify-between gap-3 border-b min-w-0 ${innerBorderClass}`}
+                >
+                  <h3
+                    className={`text-sm sm:text-base font-semibold ${theme.text}`}
+                  >
+                    Davomat
+                  </h3>
+                  <div
+                    className={`text-xs sm:text-sm font-medium ${theme.text}`}
+                  >
+                    {attendanceLoading ? "Yuklanmoqda..." : "Davomat"}
+                  </div>
+                </div>
+
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <div className="hidden lg:block h-full overflow-auto">
+                    <table className="w-full text-sm table-fixed">
+                      <thead
+                        className={`${darkMode ? "bg-slate-800" : "bg-slate-50"} sticky top-0 z-10`}
+                      >
+                        <tr>
+                          <th
+                            className={`text-left px-3 py-3 w-[260px] ${theme.text}`}
+                          >
+                            Nomi
+                          </th>
+
+                          {dateHeaders.map((item) => (
+                            <th
+                              key={item.key}
+                              className={`px-1 py-3 text-center ${theme.text}`}
+                            >
+                              <div className="text-[10px]">{item.day}</div>
+                              <div className="text-xs font-semibold">
+                                {item.num}
+                              </div>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {students.map((student) => (
+                          <tr
+                            key={student.id}
+                            className={`border-t ${theme.rowBorder} ${
+                              darkMode
+                                ? "hover:bg-slate-800/40"
+                                : "hover:bg-slate-50"
+                            }`}
+                          >
+                            <td className="px-3 py-2">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div
+                                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                                    darkMode
+                                      ? "bg-slate-800 text-slate-200"
+                                      : "bg-slate-100 text-slate-600"
+                                  }`}
+                                >
+                                  {getInitial(student.name)}
+                                </div>
+
+                                <div className="min-w-0">
+                                  <p
+                                    className={`font-medium truncate ${theme.text}`}
+                                  >
+                                    {student.name}
+                                  </p>
+                                  <p className={`text-xs ${theme.soft}`}>
+                                    Faol
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+
+                            {dateHeaders.map((item) => {
+                              const key = item.key;
+                              const value = attendance[student.id]?.[key] || "";
+                              const savingKey = `${student.id}-${item.lessonId}`;
+                              const isSaving = !!attendanceSavingMap[savingKey];
+                              const isBor = value === "Bor";
+                              const isYoq = value === "Yo'q";
+
+                              return (
+                                <td key={key} className="px-1 py-2 text-center">
+                                  <div className="flex items-center justify-center gap-1">
+                                    <button
+                                      disabled={isSaving || !item.lessonId}
+                                      onClick={() =>
+                                        setAttendanceValue(
+                                          student.id,
+                                          item,
+                                          "Bor",
+                                        )
+                                      }
+                                      className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
+                                        isBor
+                                          ? "bg-emerald-500 text-white border-emerald-500"
+                                          : darkMode
+                                            ? "border-slate-700 text-slate-300"
+                                            : "border-slate-200 text-slate-600"
+                                      }`}
+                                    >
+                                      Bor
+                                    </button>
+                                    <button
+                                      disabled={isSaving || !item.lessonId}
+                                      onClick={() =>
+                                        setAttendanceValue(
+                                          student.id,
+                                          item,
+                                          "Yo'q",
+                                        )
+                                      }
+                                      className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
+                                        isYoq
+                                          ? "bg-red-500 text-white border-red-500"
+                                          : darkMode
+                                            ? "border-slate-700 text-slate-300"
+                                            : "border-slate-200 text-slate-600"
+                                      }`}
+                                    >
+                                      Yo'q
+                                    </button>
+                                  </div>
+                                  {isSaving && (
+                                    <div
+                                      className={`mt-1 text-[10px] ${theme.soft}`}
+                                    >
+                                      ...
+                                    </div>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 lg:hidden h-full overflow-y-auto">
+                    {students.map((student) => (
+                      <div
+                        key={student.id}
+                        className={`rounded-2xl border p-3 ${innerBorderClass}`}
+                      >
+                        <div className="flex items-center gap-3 mb-3 min-w-0">
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                              darkMode
+                                ? "bg-slate-800 text-slate-200"
+                                : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            {getInitial(student.name)}
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className={`font-medium truncate ${theme.text}`}>
                               {student.name}
                             </p>
                             <p className={`text-xs truncate ${theme.soft}`}>
@@ -983,155 +1312,7 @@ export default function GroupDetailsPage({
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-medium border ${
-                              darkMode
-                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            }`}
-                          >
-                            Faol
-                          </span>
-
-                          <div className="relative">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setOpenPersonMenu((prev) =>
-                                  prev?.type === "student" &&
-                                  prev?.id === student.id
-                                    ? null
-                                    : { type: "student", id: student.id },
-                                )
-                              }
-                              className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
-                                darkMode
-                                  ? "border-slate-600 text-slate-200 hover:bg-slate-800"
-                                  : "border-slate-200 text-slate-600 hover:bg-slate-100"
-                              }`}
-                            >
-                              ...
-                            </button>
-
-                            {openPersonMenu?.type === "student" &&
-                              openPersonMenu?.id === student.id && (
-                                <div
-                                  className={`absolute right-0 top-9 z-30 min-w-[120px] rounded-xl border shadow-lg p-1 ${
-                                    darkMode
-                                      ? "bg-slate-900 border-slate-700"
-                                      : "bg-white border-slate-200"
-                                  }`}
-                                >
-                                  <button
-                                    type="button"
-                                    onClick={() => editStudent(student.id)}
-                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                      darkMode
-                                        ? "text-slate-200 hover:bg-slate-800"
-                                        : "text-slate-700 hover:bg-slate-50"
-                                    }`}
-                                  >
-                                    Tahrirlash
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => deleteStudent(student.id)}
-                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                      darkMode
-                                        ? "text-red-300 hover:bg-red-500/10"
-                                        : "text-red-600 hover:bg-red-50"
-                                    }`}
-                                  >
-                                    O‘chirish
-                                  </button>
-                                </div>
-                              )}
-                          </div>
-                        </div>
-                      </article>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div
-              className={`${theme.card} border rounded-2xl shadow-sm min-w-0 min-h-0 flex flex-col overflow-hidden`}
-            >
-              <div
-                className={`shrink-0 px-4 py-3 flex items-center justify-between gap-3 border-b min-w-0 ${innerBorderClass}`}
-              >
-                <h3
-                  className={`text-sm sm:text-base font-semibold ${theme.text}`}
-                >
-                  Davomat
-                </h3>
-                <div className={`text-xs sm:text-sm font-medium ${theme.text}`}>
-                  {attendanceLoading ? "Yuklanmoqda..." : "Davomat"}
-                </div>
-              </div>
-
-              <div className="flex-1 min-h-0 overflow-hidden">
-                <div className="hidden lg:block h-full overflow-auto">
-                  <table className="w-full text-sm table-fixed">
-                    <thead
-                      className={`${darkMode ? "bg-slate-800" : "bg-slate-50"} sticky top-0 z-10`}
-                    >
-                      <tr>
-                        <th
-                          className={`text-left px-3 py-3 w-[260px] ${theme.text}`}
-                        >
-                          Nomi
-                        </th>
-
-                        {dateHeaders.map((item) => (
-                          <th
-                            key={item.key}
-                            className={`px-1 py-3 text-center ${theme.text}`}
-                          >
-                            <div className="text-[10px]">{item.day}</div>
-                            <div className="text-xs font-semibold">
-                              {item.num}
-                            </div>
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {students.map((student) => (
-                        <tr
-                          key={student.id}
-                          className={`border-t ${theme.rowBorder} ${
-                            darkMode
-                              ? "hover:bg-slate-800/40"
-                              : "hover:bg-slate-50"
-                          }`}
-                        >
-                          <td className="px-3 py-2">
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                                  darkMode
-                                    ? "bg-slate-800 text-slate-200"
-                                    : "bg-slate-100 text-slate-600"
-                                }`}
-                              >
-                                {getInitial(student.name)}
-                              </div>
-
-                              <div className="min-w-0">
-                                <p
-                                  className={`font-medium truncate ${theme.text}`}
-                                >
-                                  {student.name}
-                                </p>
-                                <p className={`text-xs ${theme.soft}`}>Faol</p>
-                              </div>
-                            </div>
-                          </td>
-
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                           {dateHeaders.map((item) => {
                             const key = item.key;
                             const value = attendance[student.id]?.[key] || "";
@@ -1141,8 +1322,13 @@ export default function GroupDetailsPage({
                             const isYoq = value === "Yo'q";
 
                             return (
-                              <td key={key} className="px-1 py-2 text-center">
-                                <div className="flex items-center justify-center gap-1">
+                              <div
+                                key={key}
+                                className={`rounded-xl px-2 py-2 text-xs border ${innerBorderClass}`}
+                              >
+                                <div>{item.day}</div>
+                                <div className="font-bold">{item.num}</div>
+                                <div className="mt-2 flex items-center gap-1">
                                   <button
                                     disabled={isSaving || !item.lessonId}
                                     onClick={() =>
@@ -1152,7 +1338,7 @@ export default function GroupDetailsPage({
                                         "Bor",
                                       )
                                     }
-                                    className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
+                                    className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
                                       isBor
                                         ? "bg-emerald-500 text-white border-emerald-500"
                                         : darkMode
@@ -1171,7 +1357,7 @@ export default function GroupDetailsPage({
                                         "Yo'q",
                                       )
                                     }
-                                    className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
+                                    className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
                                       isYoq
                                         ? "bg-red-500 text-white border-red-500"
                                         : darkMode
@@ -1189,109 +1375,19 @@ export default function GroupDetailsPage({
                                     ...
                                   </div>
                                 )}
-                              </td>
+                              </div>
                             );
                           })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 lg:hidden h-full overflow-y-auto">
-                  {students.map((student) => (
-                    <div
-                      key={student.id}
-                      className={`rounded-2xl border p-3 ${innerBorderClass}`}
-                    >
-                      <div className="flex items-center gap-3 mb-3 min-w-0">
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                            darkMode
-                              ? "bg-slate-800 text-slate-200"
-                              : "bg-slate-100 text-slate-600"
-                          }`}
-                        >
-                          {getInitial(student.name)}
-                        </div>
-
-                        <div className="min-w-0">
-                          <p className={`font-medium truncate ${theme.text}`}>
-                            {student.name}
-                          </p>
-                          <p className={`text-xs truncate ${theme.soft}`}>
-                            {student.phone}
-                          </p>
                         </div>
                       </div>
-
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                        {dateHeaders.map((item) => {
-                          const key = item.key;
-                          const value = attendance[student.id]?.[key] || "";
-                          const savingKey = `${student.id}-${item.lessonId}`;
-                          const isSaving = !!attendanceSavingMap[savingKey];
-                          const isBor = value === "Bor";
-                          const isYoq = value === "Yo'q";
-
-                          return (
-                            <div
-                              key={key}
-                              className={`rounded-xl px-2 py-2 text-xs border ${innerBorderClass}`}
-                            >
-                              <div>{item.day}</div>
-                              <div className="font-bold">{item.num}</div>
-                              <div className="mt-2 flex items-center gap-1">
-                                <button
-                                  disabled={isSaving || !item.lessonId}
-                                  onClick={() =>
-                                    setAttendanceValue(student.id, item, "Bor")
-                                  }
-                                  className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
-                                    isBor
-                                      ? "bg-emerald-500 text-white border-emerald-500"
-                                      : darkMode
-                                        ? "border-slate-700 text-slate-300"
-                                        : "border-slate-200 text-slate-600"
-                                  }`}
-                                >
-                                  Bor
-                                </button>
-                                <button
-                                  disabled={isSaving || !item.lessonId}
-                                  onClick={() =>
-                                    setAttendanceValue(student.id, item, "Yo'q")
-                                  }
-                                  className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
-                                    isYoq
-                                      ? "bg-red-500 text-white border-red-500"
-                                      : darkMode
-                                        ? "border-slate-700 text-slate-300"
-                                        : "border-slate-200 text-slate-600"
-                                  }`}
-                                >
-                                  Yo'q
-                                </button>
-                              </div>
-                              {isSaving && (
-                                <div
-                                  className={`mt-1 text-[10px] ${theme.soft}`}
-                                >
-                                  ...
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {false && (
+          {activeMainTab === "guruh-darsliklari" && lessonPage === "list" && (
             <div
               className={`${theme.card} border rounded-2xl shadow-sm flex-1 min-h-0 overflow-hidden`}
             >
@@ -1400,10 +1496,11 @@ export default function GroupDetailsPage({
                         {homeworks.map((item, index) => (
                           <tr
                             key={item.id}
+                            onClick={() => openHomeworkDetail(item)}
                             className={`border-b ${theme.rowBorder} ${
                               darkMode
-                                ? "hover:bg-slate-800/40"
-                                : "hover:bg-slate-50"
+                                ? "hover:bg-slate-800/40 cursor-pointer"
+                                : "hover:bg-slate-50 cursor-pointer"
                             }`}
                           >
                             <td className={`px-3 py-3 ${theme.text}`}>
@@ -1452,7 +1549,10 @@ export default function GroupDetailsPage({
                             <td className="px-3 py-3 text-center">
                               <button
                                 disabled={deletingHomeworkId === item.id}
-                                onClick={() => deleteHomework(item.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteHomework(item.id);
+                                }}
                                 className="text-red-500 text-xs disabled:opacity-60"
                               >
                                 {deletingHomeworkId === item.id
@@ -1590,141 +1690,144 @@ export default function GroupDetailsPage({
             </div>
           )}
 
-          {false && (
-            <div
-              className={`${theme.card} border rounded-2xl shadow-sm flex-1 min-h-0 overflow-auto p-4 sm:p-6`}
-            >
-              <div className="max-w-4xl mx-auto">
-                <button
-                  onClick={() => setLessonPage("list")}
-                  className={`mb-6 ${theme.soft} hover:opacity-80 text-sm`}
-                >
-                  ← Orqaga
-                </button>
+          {activeMainTab === "guruh-darsliklari" &&
+            lessonPage === "create-homework" && (
+              <div
+                className={`${theme.card} border rounded-2xl shadow-sm flex-1 min-h-0 overflow-auto p-4 sm:p-6`}
+              >
+                <div className="max-w-4xl mx-auto">
+                  <button
+                    onClick={() => setLessonPage("list")}
+                    className={`mb-6 ${theme.soft} hover:opacity-80 text-sm`}
+                  >
+                    ← Orqaga
+                  </button>
 
-                <h2 className={`text-2xl font-bold mb-6 ${theme.text}`}>
-                  Yangi uyga vazifa yaratish
-                </h2>
+                  <h2 className={`text-2xl font-bold mb-6 ${theme.text}`}>
+                    Yangi uyga vazifa yaratish
+                  </h2>
 
-                <div className="space-y-6">
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${theme.text}`}
-                    >
-                      * Dars
-                    </label>
-                    <select
-                      className={inputClass}
-                      value={homeworkForm.lessonId}
-                      onChange={(e) =>
-                        setHomeworkForm({
-                          ...homeworkForm,
-                          lessonId: e.target.value,
-                          title:
-                            lessons.find(
-                              (lesson) =>
-                                Number(lesson.id) === Number(e.target.value),
-                            )?.title || homeworkForm.title,
-                        })
-                      }
-                    >
-                      <option value="">Darslardan birini tanlang</option>
-                      {lessons.map((lesson) => (
-                        <option key={lesson.id} value={lesson.id}>
-                          {lesson.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${theme.text}`}
-                    >
-                      * Sarlavha
-                    </label>
-                    <input
-                      className={inputClass}
-                      placeholder="Uyga vazifa sarlavhasi"
-                      value={homeworkForm.title}
-                      onChange={(e) =>
-                        setHomeworkForm({
-                          ...homeworkForm,
-                          title: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${theme.text}`}
-                    >
-                      Tugash muddati (soat)
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      className={inputClass}
-                      value={homeworkForm.durationTime}
-                      onChange={(e) =>
-                        setHomeworkForm({
-                          ...homeworkForm,
-                          durationTime: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${theme.text}`}
-                    >
-                      Fayl yuklash
-                    </label>
-
-                    <label
-                      className={`flex items-center justify-center w-full rounded-xl border border-dashed ${innerBorderClass} px-4 py-6 cursor-pointer ${darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
-                    >
-                      <input
-                        type="file"
-                        className="hidden"
+                  <div className="space-y-6">
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${theme.text}`}
+                      >
+                        * Dars
+                      </label>
+                      <select
+                        className={inputClass}
+                        value={homeworkForm.lessonId}
                         onChange={(e) =>
                           setHomeworkForm({
                             ...homeworkForm,
-                            file: e.target.files?.[0] || null,
+                            lessonId: e.target.value,
+                            title:
+                              lessons.find(
+                                (lesson) =>
+                                  Number(lesson.id) === Number(e.target.value),
+                              )?.title || homeworkForm.title,
+                          })
+                        }
+                      >
+                        <option value="">Darslardan birini tanlang</option>
+                        {lessons.map((lesson) => (
+                          <option key={lesson.id} value={lesson.id}>
+                            {lesson.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${theme.text}`}
+                      >
+                        * Sarlavha
+                      </label>
+                      <input
+                        className={inputClass}
+                        placeholder="Uyga vazifa sarlavhasi"
+                        value={homeworkForm.title}
+                        onChange={(e) =>
+                          setHomeworkForm({
+                            ...homeworkForm,
+                            title: e.target.value,
                           })
                         }
                       />
-                      <span className={theme.soft}>
-                        ⬇ Yuklash{" "}
-                        {homeworkForm.file?.name
-                          ? `- ${homeworkForm.file.name}`
-                          : ""}
-                      </span>
-                    </label>
-                  </div>
+                    </div>
 
-                  <div className="flex items-center justify-end gap-3 pt-2">
-                    <button
-                      onClick={() => setLessonPage("list")}
-                      className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
-                    >
-                      Bekor qilish
-                    </button>
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${theme.text}`}
+                      >
+                        Tugash muddati (soat)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        className={inputClass}
+                        value={homeworkForm.durationTime}
+                        onChange={(e) =>
+                          setHomeworkForm({
+                            ...homeworkForm,
+                            durationTime: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
 
-                    <button
-                      disabled={homeworkSaving}
-                      onClick={addHomework}
-                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
-                    >
-                      {homeworkSaving ? "Saqlanmoqda..." : "E&apos;lon qilish"}
-                    </button>
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${theme.text}`}
+                      >
+                        Fayl yuklash
+                      </label>
+
+                      <label
+                        className={`flex items-center justify-center w-full rounded-xl border border-dashed ${innerBorderClass} px-4 py-6 cursor-pointer ${darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
+                      >
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={(e) =>
+                            setHomeworkForm({
+                              ...homeworkForm,
+                              file: e.target.files?.[0] || null,
+                            })
+                          }
+                        />
+                        <span className={theme.soft}>
+                          ⬇ Yuklash{" "}
+                          {homeworkForm.file?.name
+                            ? `- ${homeworkForm.file.name}`
+                            : ""}
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                      <button
+                        onClick={() => setLessonPage("list")}
+                        className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+                      >
+                        Bekor qilish
+                      </button>
+
+                      <button
+                        disabled={homeworkSaving}
+                        onClick={addHomework}
+                        className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
+                      >
+                        {homeworkSaving
+                          ? "Saqlanmoqda..."
+                          : "E&apos;lon qilish"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {showEditModal && (
             <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
@@ -1873,19 +1976,49 @@ export default function GroupDetailsPage({
                 <div className="space-y-3">
                   <input
                     className={inputClass}
-                    placeholder="O‘quvchi ismi"
-                    value={studentForm.name}
-                    onChange={(e) =>
-                      setStudentForm({ ...studentForm, name: e.target.value })
-                    }
+                    name="fullName"
+                    placeholder="Full name"
+                    value={studentForm.fullName}
+                    onChange={handleStudentFormChange}
                   />
                   <input
                     className={inputClass}
-                    placeholder="Telefon raqami"
-                    value={studentForm.phone}
-                    onChange={(e) =>
-                      setStudentForm({ ...studentForm, phone: e.target.value })
-                    }
+                    name="email"
+                    type="email"
+                    placeholder="Email"
+                    value={studentForm.email}
+                    onChange={handleStudentFormChange}
+                  />
+                  <input
+                    className={inputClass}
+                    name="password"
+                    type="password"
+                    placeholder="Parol"
+                    value={studentForm.password}
+                    onChange={handleStudentFormChange}
+                  />
+                  <select
+                    className={inputClass}
+                    name="status"
+                    value={studentForm.status}
+                    onChange={handleStudentFormChange}
+                  >
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                    <option value="FREEZE">FREEZE</option>
+                  </select>
+                  <input
+                    className={inputClass}
+                    name="day"
+                    type="date"
+                    value={studentForm.day}
+                    onChange={handleStudentFormChange}
+                  />
+                  <input
+                    className={inputClass}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleStudentPhotoChange}
                   />
                 </div>
 
@@ -1897,10 +2030,11 @@ export default function GroupDetailsPage({
                     Bekor qilish
                   </button>
                   <button
+                    disabled={studentSaving}
                     onClick={addStudent}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm disabled:opacity-60"
                   >
-                    Qo‘shish
+                    {studentSaving ? "Saqlanmoqda..." : "Qo‘shish"}
                   </button>
                 </div>
               </div>
