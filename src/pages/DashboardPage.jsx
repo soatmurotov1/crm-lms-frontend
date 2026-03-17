@@ -321,10 +321,7 @@ export default function DashboardPage({ initialMenu = "home" }) {
   const greetingName = useMemo(() => {
     const baseName =
       authUser?.fullName || authUser?.email?.split("@")[0] || "Foydalanuvchi";
-    const parts = String(baseName)
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
+    const parts = String(baseName).trim().split(/\s+/).filter(Boolean);
 
     if (parts.length >= 2) {
       return `${parts[parts.length - 1]} ${parts.slice(0, -1).join(" ")}`;
@@ -352,7 +349,10 @@ export default function DashboardPage({ initialMenu = "home" }) {
     };
 
     return (scheduleData.groups || [])
-      .filter((group) => Array.isArray(group.weekDays) && group.weekDays.includes(todayEnum))
+      .filter(
+        (group) =>
+          Array.isArray(group.weekDays) && group.weekDays.includes(todayEnum),
+      )
       .map((group) => {
         const course = scheduleData.coursesById[group.courseId];
         const duration = Number(course?.durationLesson || 0);
@@ -417,7 +417,9 @@ export default function DashboardPage({ initialMenu = "home" }) {
 
       setScheduleData({
         groups,
-        coursesById: Object.fromEntries(courses.map((course) => [course.id, course])),
+        coursesById: Object.fromEntries(
+          courses.map((course) => [course.id, course]),
+        ),
       });
 
       setDashboardStats({
@@ -816,28 +818,44 @@ export default function DashboardPage({ initialMenu = "home" }) {
     return null;
   };
 
+  const handleStatCardClick = (key) => {
+    if (key === "activeStudents") {
+      setSelectedGroup(null);
+      setShowManagementPanel(false);
+      setActiveMenu("students");
+      return;
+    }
+
+    if (key === "groups") {
+      setSelectedGroup(null);
+      setShowManagementPanel(false);
+      setActiveMenu("groups");
+    }
+  };
+
   const renderContent = () => {
     if (activeMenu === "home") {
       return (
         <>
-          <div className="mb-8">
-            <h1 className={`text-3xl md:text-4xl font-bold ${theme.text}`}>
-              {greetingText}
-            </h1>
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
             {statsData.map((item) => (
-              <div
+              <button
                 key={item.id}
-                className={`${theme.card} border rounded-2xl p-5 shadow-sm`}
+                type="button"
+                onClick={() => handleStatCardClick(item.key)}
+                className={`${theme.card} border rounded-2xl p-5 shadow-sm text-left ${
+                  {
+                    activeStudents: "cursor-pointer hover:shadow-md",
+                    groups: "cursor-pointer hover:shadow-md",
+                  }[item.key] || "cursor-default"
+                }`}
               >
                 <div className="text-3xl mb-3">{item.icon}</div>
                 <p className={`mb-2 text-sm ${theme.soft}`}>{t[item.key]}</p>
                 <h3 className={`text-3xl font-bold ${theme.text}`}>
                   {dashboardStats[item.key] ?? 0}
                 </h3>
-              </div>
+              </button>
             ))}
           </div>
 
@@ -945,7 +963,16 @@ export default function DashboardPage({ initialMenu = "home" }) {
     }
 
     if (activeMenu === "students")
-      return <StudentsPage theme={theme} darkMode={darkMode} />;
+      return (
+        <StudentsPage
+          theme={theme}
+          darkMode={darkMode}
+          onOpenGroupDetails={(group) => {
+            setSelectedGroup(group);
+            setActiveMenu("groups");
+          }}
+        />
+      );
     if (activeMenu === "management") return renderManagementContent();
 
     return null;

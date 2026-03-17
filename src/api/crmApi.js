@@ -39,6 +39,8 @@ export const studentsApi = {
   getAll: async () => unwrap(await apiClient.get("/students/all")),
   create: async (payload) =>
     unwrap(await apiClient.post("/students", toFormData(payload))),
+  update: async (id, payload) =>
+    unwrap(await apiClient.put(`/students/${id}`, toFormData(payload))),
 };
 
 export const roomsApi = {
@@ -72,8 +74,49 @@ export const groupsApi = {
 export const attendanceApi = {
   getByLesson: async (lessonId) =>
     unwrap(await apiClient.get(`/attendance/${lessonId}`)),
-  create: async (payload) => unwrap(await apiClient.post("/attendance", payload)),
-  update: async (payload) => unwrap(await apiClient.put("/attendance", payload)),
+  create: async (payload) =>
+    unwrap(await apiClient.post("/attendance", payload)),
+  update: async (payload) =>
+    unwrap(await apiClient.put("/attendance", payload)),
+};
+
+export const lessonsApi = {
+  getByGroup: async (groupId) =>
+    unwrap(await apiClient.get(`/lessons/group/${groupId}`)),
+};
+
+export const homeworkApi = {
+  getByGroup: async (groupId) =>
+    unwrap(await apiClient.get(`/homework/group/${groupId}`)),
+  getByStatus: async (homeworkId, status) =>
+    unwrap(
+      await apiClient.get(`/homework/${homeworkId}`, { params: { status } }),
+    ),
+  getStatuses: async (homeworkId) => {
+    const statuses = ["PENDING", "APPROVED", "REJECTED", "NOT_REVIEWED"];
+    const results = await Promise.allSettled(
+      statuses.map((status) => homeworkApi.getByStatus(homeworkId, status)),
+    );
+
+    return statuses.reduce((acc, status, index) => {
+      const response = results[index];
+      acc[status] =
+        response.status === "fulfilled" && Array.isArray(response.value?.data)
+          ? response.value.data
+          : [];
+      return acc;
+    }, {});
+  },
+  create: async (payload) =>
+    unwrap(await apiClient.post("/homework", toFormData(payload))),
+  remove: async (id) => unwrap(await apiClient.delete(`/homework/${id}`)),
+};
+
+export const lessonVideosApi = {
+  getByGroup: async (groupId) =>
+    unwrap(await apiClient.get(`/lesson-videos/${groupId}`)),
+  create: async (payload) =>
+    unwrap(await apiClient.post("/lesson-videos", toFormData(payload))),
 };
 
 export const usersApi = {

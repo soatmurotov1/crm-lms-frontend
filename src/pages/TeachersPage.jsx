@@ -210,15 +210,6 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
     }
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await teachersApi.remove(id);
-      await loadTeachers();
-    } catch (error) {
-      alert(error?.response?.data?.message || "O'qituvchini o'chirishda xato");
-    }
-  };
-
   const toggleArchive = (id) => {
     alert("Arxiv uchun alohida endpoint yo'q");
   };
@@ -230,12 +221,9 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
     try {
       const groupsRes = await groupsApi.getAll();
       const groupsList = Array.isArray(groupsRes?.data) ? groupsRes.data : [];
-      const relatedGroups =
-        currentUser?.role === "TEACHER"
-          ? groupsList.filter(
-              (group) => Number(group.teacherId) === Number(teacher.id),
-            )
-          : groupsList;
+      const relatedGroups = groupsList.filter(
+        (group) => Number(group.teacherId) === Number(teacher.id),
+      );
 
       const studentsResults = await Promise.allSettled(
         relatedGroups.map((group) => groupsApi.getStudentsByGroup(group.id)),
@@ -246,7 +234,11 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
         const students =
           studentsResult?.status === "fulfilled" &&
           Array.isArray(studentsResult.value?.data)
-            ? studentsResult.value.data
+            ? [...studentsResult.value.data].sort((a, b) =>
+                String(a?.fullName || "").localeCompare(
+                  String(b?.fullName || ""),
+                ),
+              )
             : [];
 
         return {
@@ -275,24 +267,10 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
 
           <div className="flex flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 w-full xl:w-auto">
             <button
-              className={`px-4 py-2.5 rounded-xl border text-sm ${
-                darkMode
-                  ? "border-slate-700 text-slate-200 hover:bg-slate-800"
-                  : "border-slate-200 text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              Export
-            </button>
-
-            <button
               onClick={openAddDrawer}
               className="bg-violet-600 hover:bg-violet-700 text-white px-4 sm:px-5 py-3 rounded-xl font-medium"
             >
               + O‘qituvchi qo‘shish
-            </button>
-
-            <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-5 py-3 rounded-xl font-medium">
-              Exceldan yuklash
             </button>
           </div>
         </div>
@@ -446,18 +424,6 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                             </button>
 
                             <button
-                              onClick={() => handleDelete(teacher.id)}
-                              className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                                darkMode
-                                  ? "border-slate-700 hover:bg-red-900/30"
-                                  : "border-slate-200 hover:bg-red-50"
-                              }`}
-                              title="O‘chirish"
-                            >
-                              🗑️
-                            </button>
-
-                            <button
                               onClick={() => openTeacherGroups(teacher)}
                               className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
                                 darkMode
@@ -575,18 +541,6 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                     </button>
 
                     <button
-                      onClick={() => handleDelete(teacher.id)}
-                      className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-red-900/30"
-                          : "border-slate-200 hover:bg-red-50"
-                      }`}
-                      title="O‘chirish"
-                    >
-                      🗑️
-                    </button>
-
-                    <button
                       onClick={() => openTeacherGroups(teacher)}
                       className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
                         darkMode
@@ -634,9 +588,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
           >
             <div className="flex items-center justify-between gap-3 mb-4">
               <h3 className={`text-lg font-semibold ${theme.text}`}>
-                {currentUser?.role === "TEACHER"
-                  ? `${activeTeacher.fullName} guruhlari`
-                  : "Barcha guruhlar"}
+                {`${activeTeacher.fullName} guruhlari`}
               </h3>
               <button
                 onClick={() => {
@@ -678,16 +630,13 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                         Talabalar topilmadi
                       </p>
                     ) : (
-                      <div className="flex flex-wrap gap-2">
+                      <ol className="space-y-1 text-sm list-decimal list-inside">
                         {group.students.map((student) => (
-                          <span
-                            key={student.id}
-                            className={`px-2 py-1 rounded-lg text-xs border ${theme.chip}`}
-                          >
-                            {student.fullName}
-                          </span>
+                          <li key={student.id} className={theme.text}>
+                            {student.fullName || "-"}
+                          </li>
                         ))}
-                      </div>
+                      </ol>
                     )}
                   </div>
                 ))}

@@ -1,197 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import HomeworkDetailPage from "./HomeworkDetailPage";
-import { attendanceApi, groupsApi } from "../api/crmApi";
-
-const makeDateHeaders = () => {
-  return [
-    { day: "Fri", num: 20 },
-    { day: "Sat", num: 21 },
-    { day: "Sun", num: 22 },
-    { day: "Mon", num: 23 },
-    { day: "Tue", num: 24 },
-    { day: "Wed", num: 25 },
-    { day: "Thu", num: 26 },
-    { day: "Fri", num: 27 },
-    { day: "Sat", num: 28 },
-  ];
-};
-
-const dayByIndex = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const lessonDateLabel = (value) => {
-  const date = value ? new Date(value) : null;
-  if (!date || Number.isNaN(date.getTime())) return { day: "-", num: "-" };
-  return {
-    day: dayByIndex[date.getDay()] || "-",
-    num: date.getDate(),
-  };
-};
-
-const defaultStudents = [];
-
-const defaultTeachers = [{ id: 1, name: "Jinibijoev", phone: "+998912879856" }];
-
-const defaultHomeworkStudents = [
-  {
-    id: 1,
-    name: "Sardor Xushvaqtov Bahodir o'g'li",
-    sentAt: "11 Mart, 2026 14:50",
-    status: "kutayotgan",
-  },
-  {
-    id: 2,
-    name: "Jamoliddin Maxammadibrohimov Xusniddin o'g'li",
-    sentAt: "10 Mart, 2026 17:22",
-    status: "kutayotgan",
-  },
-  {
-    id: 3,
-    name: "Abrorbek Soatmurotov Alimboy o'g'li",
-    sentAt: "10 Mart, 2026 13:36",
-    status: "kutayotgan",
-  },
-  {
-    id: 4,
-    name: "Dilshod Olimov Farhod o'g'li",
-    sentAt: "10 Mart, 2026 15:39",
-    status: "kutayotgan",
-  },
-  {
-    id: 5,
-    name: "Bunyodbek G'ulomjonov",
-    sentAt: "11 Mart, 2026 10:16",
-    status: "kutayotgan",
-  },
-  {
-    id: 6,
-    name: "Axrorbek Mengilov",
-    sentAt: "10 Mart, 2026 19:53",
-    status: "kutayotgan",
-  },
-  {
-    id: 7,
-    name: "Sirojiddin Oyosboyev",
-    sentAt: "10 Mart, 2026 13:54",
-    status: "qabul",
-  },
-  {
-    id: 8,
-    name: "Olimjon Murtozoyev",
-    sentAt: "11 Mart, 2026 09:25",
-    status: "qabul",
-  },
-  {
-    id: 9,
-    name: "Sabina Norbekova",
-    sentAt: "10 Mart, 2026 17:33",
-    status: "qaytarilgan",
-  },
-  {
-    id: 10,
-    name: "Qo'chqorboyev Abbos Abulqosim o'g'li",
-    sentAt: "10 Mart, 2026 19:52",
-    status: "bajarilmagan",
-  },
-  { id: 11, name: "Murodjon Soliyev", sentAt: "-", status: "bajarilmagan" },
-];
-
-const defaultHomeworks = [
-  {
-    id: 1,
-    title: "crm continue backend finish",
-    total: 15,
-    submitted: 11,
-    checked: 0,
-    assignedAt: "10 Mart, 2026 09:30",
-    deadline: "11 Mart, 2026 01:30",
-    lessonDate: "09 Mart, 2026",
-    description: "Backendni tugatish",
-    studentStatuses: defaultHomeworkStudents,
-  },
-  {
-    id: 2,
-    title: "crm project continue",
-    total: 15,
-    submitted: 11,
-    checked: 0,
-    assignedAt: "04 Mart, 2026 21:39",
-    deadline: "05 Mart, 2026 13:39",
-    lessonDate: "04 Mart, 2026",
-    description: "Project davom ettirish",
-    studentStatuses: defaultHomeworkStudents,
-  },
-  {
-    id: 3,
-    title: "React continue, nested route, NavLink",
-    total: 15,
-    submitted: 12,
-    checked: 0,
-    assignedAt: "25 Fev, 2026 23:10",
-    deadline: "26 Fev, 2026 15:10",
-    lessonDate: "25 Fev, 2026",
-    description: "Nested route va NavLink",
-    studentStatuses: defaultHomeworkStudents,
-  },
-];
-
-const defaultVideos = [
-  {
-    id: 1,
-    name: "62.2.mov",
-    lessonName: "crm continue",
-    status: "Tayyor",
-    lessonDate: "10 Mart, 2026",
-    size: "2.77 GB",
-    uploadedAt: "10 Mart, 2026",
-  },
-  {
-    id: 2,
-    name: "62.1.mov",
-    lessonName: "crm continue",
-    status: "Tayyor",
-    lessonDate: "10 Mart, 2026",
-    size: "1.21 GB",
-    uploadedAt: "10 Mart, 2026",
-  },
-  {
-    id: 3,
-    name: "61.2.mov",
-    lessonName: "crm continue backend finish",
-    status: "Tayyor",
-    lessonDate: "09 Mart, 2026",
-    size: "1.82 GB",
-    uploadedAt: "10 Mart, 2026",
-  },
-  {
-    id: 4,
-    name: "61.1.mov",
-    lessonName: "crm continue backend finish",
-    status: "Tayyor",
-    lessonDate: "09 Mart, 2026",
-    size: "1.76 GB",
-    uploadedAt: "10 Mart, 2026",
-  },
-  {
-    id: 5,
-    name: "60.1.mov",
-    lessonName: "crm project continue lesson, studentGroup model",
-    status: "Tayyor",
-    lessonDate: "06 Mart, 2026",
-    size: "1.37 GB",
-    uploadedAt: "09 Mart, 2026",
-  },
-  {
-    id: 6,
-    name: "59.1.mov",
-    lessonName: "crm project continue",
-    status: "Tayyor",
-    lessonDate: "05 Mart, 2026",
-    size: "1.77 GB",
-    uploadedAt: "06 Mart, 2026",
-  },
-];
-
-const getInitial = (name = "") => name.trim().charAt(0).toUpperCase();
+import {
+  attendanceApi,
+  groupsApi,
+  homeworkApi,
+  lessonVideosApi,
+} from "../api/crmApi";
+import {
+  defaultTeachers,
+  getInitial,
+  lessonDateLabel,
+  makeDateHeaders,
+} from "./group-details/constants";
 
 export default function GroupDetailsPage({
   theme = {
@@ -221,18 +41,24 @@ export default function GroupDetailsPage({
     },
   );
 
-  const [students, setStudents] = useState(group?.students || defaultStudents);
+  const [students, setStudents] = useState(group?.students || []);
   const [studentsLoading, setStudentsLoading] = useState(false);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceSavingMap, setAttendanceSavingMap] = useState({});
+  const [homeworksLoading, setHomeworksLoading] = useState(false);
+  const [videosLoading, setVideosLoading] = useState(false);
+  const [homeworkSaving, setHomeworkSaving] = useState(false);
+  const [deletingHomeworkId, setDeletingHomeworkId] = useState(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoLessonId, setVideoLessonId] = useState("");
   const [lessons, setLessons] = useState([]);
   const [teachers, setTeachers] = useState(
     group?.teacher
       ? [{ id: group?.teacherId || 1, name: group.teacher, phone: "-" }]
       : defaultTeachers,
   );
-  const [homeworks, setHomeworks] = useState(defaultHomeworks);
-  const [videos, setVideos] = useState(defaultVideos);
+  const [homeworks, setHomeworks] = useState([]);
+  const [videos, setVideos] = useState([]);
 
   const [attendance, setAttendance] = useState({});
 
@@ -298,7 +124,9 @@ export default function GroupDetailsPage({
         await Promise.all(
           lessonList.map(async (lesson) => {
             try {
-              const attendanceResult = await attendanceApi.getByLesson(lesson.id);
+              const attendanceResult = await attendanceApi.getByLesson(
+                lesson.id,
+              );
               const rows = Array.isArray(attendanceResult?.data)
                 ? attendanceResult.data
                 : [];
@@ -309,9 +137,8 @@ export default function GroupDetailsPage({
                 if (!attendanceByStudent[studentId]) {
                   attendanceByStudent[studentId] = {};
                 }
-                attendanceByStudent[studentId][`lesson-${lesson.id}`] = row.isPresent
-                  ? "Bor"
-                  : "Yo‘q";
+                attendanceByStudent[studentId][`lesson-${lesson.id}`] =
+                  row.isPresent ? "Bor" : "Yo‘q";
               });
             } catch {
               // Ignore single lesson attendance load failure and keep UI usable.
@@ -332,6 +159,18 @@ export default function GroupDetailsPage({
 
     loadStudentsAndAttendance();
   }, [group?.id]);
+
+  useEffect(() => {
+    loadHomeworks();
+    loadVideos();
+  }, [group?.id]);
+
+  useEffect(() => {
+    if (!showVideoUploadModal) return;
+    if (videoLessonId) return;
+    if (!Array.isArray(lessons) || lessons.length === 0) return;
+    setVideoLessonId(String(lessons[0].id));
+  }, [showVideoUploadModal, lessons, videoLessonId]);
 
   useEffect(() => {
     setAttendance((prev) => {
@@ -361,7 +200,6 @@ export default function GroupDetailsPage({
   const [groupDeleteLoading, setGroupDeleteLoading] = useState(false);
 
   const [selectedHomework, setSelectedHomework] = useState(null);
-  const [homeworkDetailTab, setHomeworkDetailTab] = useState("kutayotgan");
 
   const [editForm, setEditForm] = useState({
     name: groupData.name,
@@ -384,9 +222,10 @@ export default function GroupDetailsPage({
   });
 
   const [homeworkForm, setHomeworkForm] = useState({
+    lessonId: "",
     title: "",
-    description: "",
-    fileName: "",
+    durationTime: "16",
+    file: null,
   });
 
   const actionBtnClass = darkMode
@@ -399,10 +238,6 @@ export default function GroupDetailsPage({
   const inputClass = darkMode
     ? "w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none"
     : "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none";
-
-  const textareaClass = darkMode
-    ? "w-full min-h-[180px] rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-sm text-slate-100 outline-none resize-none"
-    : "w-full min-h-[180px] rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-800 outline-none resize-none";
 
   const tabClass = (active) =>
     active
@@ -417,6 +252,115 @@ export default function GroupDetailsPage({
       : darkMode
         ? "px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-medium"
         : "px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-sm font-medium";
+
+  const formatDateTime = (value) => {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleString("uz-UZ", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatDate = (value) => {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("uz-UZ", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  const loadHomeworks = async () => {
+    if (!group?.id) {
+      setHomeworks([]);
+      return;
+    }
+
+    try {
+      setHomeworksLoading(true);
+      const result = await homeworkApi.getByGroup(group.id);
+      const list = Array.isArray(result?.data) ? result.data : [];
+
+      const mapped = await Promise.all(
+        list.map(async (item) => {
+          const statuses = await homeworkApi.getStatuses(item.id);
+          const pending = statuses.PENDING.length;
+          const approved = statuses.APPROVED.length;
+          const rejected = statuses.REJECTED.length;
+          const notReviewed = statuses.NOT_REVIEWED.length;
+          const total = pending + approved + rejected + notReviewed;
+
+          const createdAt = item.created_at ? new Date(item.created_at) : null;
+          const deadlineDate = createdAt
+            ? new Date(
+                createdAt.getTime() +
+                  Number(item.durationTime || 16) * 60 * 60 * 1000,
+              )
+            : null;
+
+          return {
+            id: item.id,
+            title: item.title,
+            lessonId: item.lessonId,
+            file: item.file || "",
+            total,
+            submitted: pending + approved + rejected,
+            checked: approved + rejected,
+            pending,
+            approved,
+            rejected,
+            notReviewed,
+            assignedAt: formatDateTime(item.created_at),
+            deadline: formatDateTime(deadlineDate),
+            lessonDate: formatDate(item.lesson?.created_at || item.created_at),
+          };
+        }),
+      );
+
+      setHomeworks(mapped);
+    } catch {
+      setHomeworks([]);
+    } finally {
+      setHomeworksLoading(false);
+    }
+  };
+
+  const loadVideos = async () => {
+    if (!group?.id) {
+      setVideos([]);
+      return;
+    }
+
+    try {
+      setVideosLoading(true);
+      const result = await lessonVideosApi.getByGroup(group.id);
+      const list = Array.isArray(result?.data) ? result.data : [];
+
+      setVideos(
+        list.map((item) => ({
+          id: item.id,
+          name: item.file ? String(item.file).split("/").pop() : "Video",
+          lessonName: item.lesson?.title || "-",
+          status: "Tayyor",
+          lessonDate: formatDate(item.lesson?.created_at),
+          size: "-",
+          uploadedAt: formatDateTime(item.created_at),
+          file: item.file,
+        })),
+      );
+    } catch {
+      setVideos([]);
+    } finally {
+      setVideosLoading(false);
+    }
+  };
 
   const setAttendanceValue = async (studentId, header, next) => {
     if (!header?.lessonId) {
@@ -504,127 +448,111 @@ export default function GroupDetailsPage({
   };
 
   const addTeacher = () => {
-    if (!teacherForm.name.trim() || !teacherForm.phone.trim()) return;
-    setTeachers((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        name: teacherForm.name.trim(),
-        phone: teacherForm.phone.trim(),
-      },
-    ]);
-    setTeacherForm({ name: "", phone: "" });
-    setShowTeacherModal(false);
+    alert("O‘qituvchi biriktirish endpointi hozircha frontendga ulanmagan");
   };
 
   const addStudent = () => {
-    if (!studentForm.name.trim() || !studentForm.phone.trim()) return;
-    const newId = Date.now();
-
-    setStudents((prev) => [
-      ...prev,
-      {
-        id: newId,
-        name: studentForm.name.trim(),
-        phone: studentForm.phone.trim(),
-        active: true,
-      },
-    ]);
-
-    setAttendance((prev) => {
-      const newAttendance = {};
-      dateHeaders.forEach((d) => {
-        newAttendance[d.key] = "";
-      });
-      return {
-        ...prev,
-        [newId]: newAttendance,
-      };
-    });
-
-    setStudentForm({ name: "", phone: "" });
-    setShowStudentModal(false);
+    alert("Talabani guruhga qo‘shish endpointi hozircha frontendga ulanmagan");
   };
 
-  const addHomework = () => {
-    if (!homeworkForm.title.trim()) return;
+  const addHomework = async () => {
+    if (!group?.id) {
+      alert("Guruh tanlanmagan");
+      return;
+    }
 
-    const today = new Date();
-    const dateText = today.toLocaleDateString("uz-UZ");
+    if (!homeworkForm.lessonId) {
+      alert("Darsni tanlang");
+      return;
+    }
 
-    setHomeworks((prev) => [
-      {
-        id: Date.now(),
+    if (!homeworkForm.title.trim()) {
+      alert("Sarlavha kiriting");
+      return;
+    }
+
+    try {
+      setHomeworkSaving(true);
+      await homeworkApi.create({
+        groupId: Number(group.id),
+        lessonId: Number(homeworkForm.lessonId),
         title: homeworkForm.title.trim(),
-        total: students.length,
-        submitted: 0,
-        checked: 0,
-        assignedAt: dateText,
-        deadline: "-",
-        lessonDate: dateText,
-        description: homeworkForm.description,
-        fileName: homeworkForm.fileName,
-        studentStatuses: defaultHomeworkStudents,
-      },
-      ...prev,
-    ]);
+        durationTime: Number(homeworkForm.durationTime || 16),
+        file: homeworkForm.file || undefined,
+      });
 
-    setHomeworkForm({
-      title: "",
-      description: "",
-      fileName: "",
-    });
-
-    setLessonPage("list");
-    setActiveLessonTab("uyga-vazifa");
+      await loadHomeworks();
+      setHomeworkForm({
+        lessonId: "",
+        title: "",
+        durationTime: "16",
+        file: null,
+      });
+      setLessonPage("list");
+      setActiveLessonTab("uyga-vazifa");
+    } catch (error) {
+      alert(error?.response?.data?.message || "Uyga vazifa yaratishda xato");
+    } finally {
+      setHomeworkSaving(false);
+    }
   };
 
-  const handleVideoUpload = (file) => {
+  const handleVideoUpload = async (file) => {
+    if (!group?.id) {
+      alert("Guruh tanlanmagan");
+      return;
+    }
+
+    if (!videoLessonId) {
+      alert("Darsni tanlang");
+      return;
+    }
+
     if (!file) return;
 
-    const today = new Date().toLocaleDateString("uz-UZ");
-    const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
-
-    setVideos((prev) => [
-      {
-        id: Date.now(),
-        name: file.name,
-        lessonName: "Yangi video",
-        status: "Tayyor",
-        lessonDate: today,
-        size: `${sizeMb} MB`,
-        uploadedAt: today,
-      },
-      ...prev,
-    ]);
-
-    setShowVideoUploadModal(false);
+    try {
+      setVideoUploading(true);
+      await lessonVideosApi.create({
+        groupId: Number(group.id),
+        lessonId: Number(videoLessonId),
+        file,
+      });
+      await loadVideos();
+      setShowVideoUploadModal(false);
+    } catch (error) {
+      alert(error?.response?.data?.message || "Video yuklashda xato");
+    } finally {
+      setVideoUploading(false);
+    }
   };
 
   const openHomeworkDetail = (homework) => {
     setSelectedHomework(homework);
-    setHomeworkDetailTab("kutayotgan");
   };
 
   const deleteTeacher = (id) => {
-    setTeachers((prev) => prev.filter((item) => item.id !== id));
+    alert("O‘qituvchini olib tashlash endpointi hozircha frontendga ulanmagan");
   };
 
   const deleteStudent = (id) => {
-    setStudents((prev) => prev.filter((item) => item.id !== id));
-    setAttendance((prev) => {
-      const copy = { ...prev };
-      delete copy[id];
-      return copy;
-    });
+    alert(
+      "Talabani guruhdan chiqarish endpointi hozircha frontendga ulanmagan",
+    );
   };
 
-  const deleteHomework = (id) => {
-    setHomeworks((prev) => prev.filter((item) => item.id !== id));
-  };
+  const deleteHomework = async (id) => {
+    const isOk = window.confirm("Rostan ham uyga vazifani o‘chirmoqchimisiz?");
+    if (!isOk) return;
 
-  const deleteVideo = (id) => {
-    setVideos((prev) => prev.filter((item) => item.id !== id));
+    try {
+      setDeletingHomeworkId(id);
+      await homeworkApi.remove(id);
+      await loadHomeworks();
+    } catch (error) {
+      alert(error?.response?.data?.message || "Uyga vazifani o‘chirishda xato");
+    } finally {
+      setDeletingHomeworkId(null);
+    }
   };
 
   const deleteGroup = async () => {
@@ -646,15 +574,6 @@ export default function GroupDetailsPage({
       setGroupDeleteLoading(false);
     }
   };
-
-  const filteredHomeworkStudents =
-    selectedHomework?.studentStatuses?.filter(
-      (item) => item.status === homeworkDetailTab,
-    ) || [];
-
-  const getCountByStatus = (status) =>
-    selectedHomework?.studentStatuses?.filter((item) => item.status === status)
-      .length || 0;
 
   if (groupDeleted) {
     return (
@@ -1020,7 +939,11 @@ export default function GroupDetailsPage({
                                     <button
                                       disabled={isSaving || !item.lessonId}
                                       onClick={() =>
-                                        setAttendanceValue(student.id, item, "Bor")
+                                        setAttendanceValue(
+                                          student.id,
+                                          item,
+                                          "Bor",
+                                        )
                                       }
                                       className={`px-2 py-1 rounded-lg text-[10px] border transition disabled:opacity-60 ${
                                         isBor
@@ -1035,7 +958,11 @@ export default function GroupDetailsPage({
                                     <button
                                       disabled={isSaving || !item.lessonId}
                                       onClick={() =>
-                                        setAttendanceValue(student.id, item, "Yo‘q")
+                                        setAttendanceValue(
+                                          student.id,
+                                          item,
+                                          "Yo‘q",
+                                        )
                                       }
                                       className={`px-2 py-1 rounded-lg text-[10px] border transition disabled:opacity-60 ${
                                         isYoq
@@ -1049,7 +976,9 @@ export default function GroupDetailsPage({
                                     </button>
                                   </div>
                                   {isSaving && (
-                                    <div className={`mt-1 text-[10px] ${theme.soft}`}>
+                                    <div
+                                      className={`mt-1 text-[10px] ${theme.soft}`}
+                                    >
                                       ...
                                     </div>
                                   )}
@@ -1109,7 +1038,11 @@ export default function GroupDetailsPage({
                                   <button
                                     disabled={isSaving || !item.lessonId}
                                     onClick={() =>
-                                      setAttendanceValue(student.id, item, "Bor")
+                                      setAttendanceValue(
+                                        student.id,
+                                        item,
+                                        "Bor",
+                                      )
                                     }
                                     className={`flex-1 px-2 py-1 rounded-lg text-[10px] border transition disabled:opacity-60 ${
                                       isBor
@@ -1124,7 +1057,11 @@ export default function GroupDetailsPage({
                                   <button
                                     disabled={isSaving || !item.lessonId}
                                     onClick={() =>
-                                      setAttendanceValue(student.id, item, "Yo‘q")
+                                      setAttendanceValue(
+                                        student.id,
+                                        item,
+                                        "Yo‘q",
+                                      )
                                     }
                                     className={`flex-1 px-2 py-1 rounded-lg text-[10px] border transition disabled:opacity-60 ${
                                       isYoq
@@ -1138,7 +1075,9 @@ export default function GroupDetailsPage({
                                   </button>
                                 </div>
                                 {isSaving && (
-                                  <div className={`mt-1 text-[10px] ${theme.soft}`}>
+                                  <div
+                                    className={`mt-1 text-[10px] ${theme.soft}`}
+                                  >
                                     ...
                                   </div>
                                 )}
@@ -1249,6 +1188,17 @@ export default function GroupDetailsPage({
                       </thead>
 
                       <tbody>
+                        {homeworksLoading && (
+                          <tr>
+                            <td
+                              colSpan={9}
+                              className={`px-3 py-6 text-center ${theme.soft}`}
+                            >
+                              Uyga vazifalar yuklanmoqda...
+                            </td>
+                          </tr>
+                        )}
+
                         {homeworks.map((item, index) => (
                           <tr
                             key={item.id}
@@ -1303,10 +1253,13 @@ export default function GroupDetailsPage({
                             </td>
                             <td className="px-3 py-3 text-center">
                               <button
+                                disabled={deletingHomeworkId === item.id}
                                 onClick={() => deleteHomework(item.id)}
-                                className="text-red-500 text-xs"
+                                className="text-red-500 text-xs disabled:opacity-60"
                               >
-                                O‘chirish
+                                {deletingHomeworkId === item.id
+                                  ? "O‘chirilmoqda..."
+                                  : "O‘chirish"}
                               </button>
                             </td>
                           </tr>
@@ -1359,6 +1312,17 @@ export default function GroupDetailsPage({
                       </thead>
 
                       <tbody>
+                        {videosLoading && (
+                          <tr>
+                            <td
+                              colSpan={7}
+                              className={`px-3 py-6 text-center ${theme.soft}`}
+                            >
+                              Videolar yuklanmoqda...
+                            </td>
+                          </tr>
+                        )}
+
                         {videos.map((video) => (
                           <tr
                             key={video.id}
@@ -1371,9 +1335,18 @@ export default function GroupDetailsPage({
                             <td className={`px-3 py-3 ${theme.text}`}>
                               <div className="flex items-center gap-2">
                                 <span className="text-emerald-500">◔</span>
-                                <span className="underline cursor-pointer">
-                                  {video.name}
-                                </span>
+                                {video.file ? (
+                                  <a
+                                    href={video.file}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="underline cursor-pointer"
+                                  >
+                                    {video.name}
+                                  </a>
+                                ) : (
+                                  <span>{video.name}</span>
+                                )}
                               </div>
                             </td>
                             <td className={`px-3 py-3 ${theme.text}`}>
@@ -1393,13 +1366,10 @@ export default function GroupDetailsPage({
                             <td className={`px-3 py-3 ${theme.text}`}>
                               {video.uploadedAt}
                             </td>
-                            <td className="px-3 py-3 text-center">
-                              <button
-                                onClick={() => deleteVideo(video.id)}
-                                className="text-red-500 text-xs"
-                              >
-                                O‘chirish
-                              </button>
+                            <td
+                              className={`px-3 py-3 text-center ${theme.soft}`}
+                            >
+                              -
                             </td>
                           </tr>
                         ))}
@@ -1444,30 +1414,29 @@ export default function GroupDetailsPage({
                       <label
                         className={`block text-sm font-medium mb-2 ${theme.text}`}
                       >
-                        * Mavzu
+                        * Dars
                       </label>
                       <select
                         className={inputClass}
-                        value={homeworkForm.title}
+                        value={homeworkForm.lessonId}
                         onChange={(e) =>
                           setHomeworkForm({
                             ...homeworkForm,
-                            title: e.target.value,
+                            lessonId: e.target.value,
+                            title:
+                              lessons.find(
+                                (lesson) =>
+                                  Number(lesson.id) === Number(e.target.value),
+                              )?.title || homeworkForm.title,
                           })
                         }
                       >
-                        <option value="">Mavzulardan birini tanlang</option>
-                        <option value="crm continue backend finish">
-                          crm continue backend finish
-                        </option>
-                        <option value="crm project continue">
-                          crm project continue
-                        </option>
-                        <option value="React continue, nested route, NavLink">
-                          React continue, nested route, NavLink
-                        </option>
-                        <option value="React hooks">React hooks</option>
-                        <option value="Custom vazifa">Custom vazifa</option>
+                        <option value="">Darslardan birini tanlang</option>
+                        {lessons.map((lesson) => (
+                          <option key={lesson.id} value={lesson.id}>
+                            {lesson.title}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -1475,39 +1444,39 @@ export default function GroupDetailsPage({
                       <label
                         className={`block text-sm font-medium mb-2 ${theme.text}`}
                       >
-                        * Izoh
+                        * Sarlavha
                       </label>
+                      <input
+                        className={inputClass}
+                        placeholder="Uyga vazifa sarlavhasi"
+                        value={homeworkForm.title}
+                        onChange={(e) =>
+                          setHomeworkForm({
+                            ...homeworkForm,
+                            title: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
 
-                      <div
-                        className={`rounded-xl border ${innerBorderClass} overflow-hidden`}
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${theme.text}`}
                       >
-                        <div
-                          className={`${darkMode ? "bg-slate-800" : "bg-slate-50"} px-3 py-2 border-b ${innerBorderClass} flex items-center gap-4 text-sm`}
-                        >
-                          <span>H1</span>
-                          <span>H2</span>
-                          <span>Sans Serif</span>
-                          <span>Normal</span>
-                          <span>B</span>
-                          <span>I</span>
-                          <span>U</span>
-                          <span>S</span>
-                          <span>❝</span>
-                          <span>{"</>"}</span>
-                        </div>
-
-                        <textarea
-                          className={textareaClass}
-                          placeholder="Uyga vazifa izohi..."
-                          value={homeworkForm.description}
-                          onChange={(e) =>
-                            setHomeworkForm({
-                              ...homeworkForm,
-                              description: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
+                        Tugash muddati (soat)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        className={inputClass}
+                        value={homeworkForm.durationTime}
+                        onChange={(e) =>
+                          setHomeworkForm({
+                            ...homeworkForm,
+                            durationTime: e.target.value,
+                          })
+                        }
+                      />
                     </div>
 
                     <div>
@@ -1526,14 +1495,14 @@ export default function GroupDetailsPage({
                           onChange={(e) =>
                             setHomeworkForm({
                               ...homeworkForm,
-                              fileName: e.target.files?.[0]?.name || "",
+                              file: e.target.files?.[0] || null,
                             })
                           }
                         />
                         <span className={theme.soft}>
                           ⬇ Yuklash{" "}
-                          {homeworkForm.fileName
-                            ? `- ${homeworkForm.fileName}`
+                          {homeworkForm.file?.name
+                            ? `- ${homeworkForm.file.name}`
                             : ""}
                         </span>
                       </label>
@@ -1548,10 +1517,13 @@ export default function GroupDetailsPage({
                       </button>
 
                       <button
+                        disabled={homeworkSaving}
                         onClick={addHomework}
-                        className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white"
+                        className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
                       >
-                        E&apos;lon qilish
+                        {homeworkSaving
+                          ? "Saqlanmoqda..."
+                          : "E&apos;lon qilish"}
                       </button>
                     </div>
                   </div>
@@ -1756,8 +1728,29 @@ export default function GroupDetailsPage({
               Qo'shish
             </h3>
 
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Darsni tanlang
+              </label>
+              <select
+                value={videoLessonId}
+                onChange={(e) => setVideoLessonId(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              >
+                <option value="">Darslardan birini tanlang</option>
+                {lessons.map((lesson) => (
+                  <option key={lesson.id} value={lesson.id}>
+                    {lesson.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div
-              onClick={() => fileRef.current?.click()}
+              onClick={() => {
+                if (!videoLessonId || videoUploading) return;
+                fileRef.current?.click();
+              }}
               className="border-2 border-dashed border-emerald-300 rounded-2xl p-10 sm:p-16 text-center cursor-pointer hover:bg-slate-50"
             >
               <div className="text-emerald-500 text-4xl mb-4">🧰</div>
@@ -1765,6 +1758,11 @@ export default function GroupDetailsPage({
                 Videofaylni yuklash uchun ushbu hudud ustiga bosing yoki faylni
                 shu yerga olib keling
               </p>
+              {!videoLessonId && (
+                <p className="text-red-500 text-sm mt-2">
+                  Avval darsni tanlang
+                </p>
+              )}
               <p className="text-slate-400 text-sm mt-2">
                 Videofayl .mp4, .webm, .mpeg, .avi, .mkv, .mov formatlaridan
                 birida bo‘lishi kerak
@@ -1781,8 +1779,9 @@ export default function GroupDetailsPage({
 
             <div className="flex justify-end mt-5">
               <button
+                disabled={videoUploading}
                 onClick={() => setShowVideoUploadModal(false)}
-                className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+                className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-60"
               >
                 Bekor qilish
               </button>
