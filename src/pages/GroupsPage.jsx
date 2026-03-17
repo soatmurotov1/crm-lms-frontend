@@ -78,14 +78,38 @@ export default function GroupsPage({
         groupsRes.status === "fulfilled" && Array.isArray(groupsRes.value?.data)
           ? groupsRes.value.data
           : [];
+      const groupsWithCounts = await Promise.all(
+        groupsList.map(async (group) => {
+          try {
+            const studentsRes = await groupsApi.getStudentsByGroup(group.id);
+            const count = Array.isArray(studentsRes?.data)
+              ? studentsRes.data.length
+              : 0;
+            return {
+              ...group,
+              studentsCount: count,
+            };
+          } catch {
+            return {
+              ...group,
+              studentsCount: Number(
+                group.studentsCount ??
+                  group.studentCount ??
+                  group.students?.length ??
+                  0,
+              ),
+            };
+          }
+        }),
+      );
       const isTeacher = currentUser?.role === "TEACHER";
 
       setGroups(
         isTeacher
-          ? groupsList.filter(
+          ? groupsWithCounts.filter(
               (group) => Number(group.teacherId) === Number(currentUser?.id),
             )
-          : groupsList,
+          : groupsWithCounts,
       );
       setCourses(
         coursesRes.status === "fulfilled" &&
@@ -120,12 +144,13 @@ export default function GroupsPage({
 
   const tabGroups = useMemo(() => {
     if (activeTab === "ARCHIVE") {
-      return groups.filter(
-        (group) => group.status && group.status !== "ACTIVE",
-      );
+      return groups.filter((group) => group.status === "INACTIVE");
     }
 
-    return groups.filter((group) => !group.status || group.status === "ACTIVE");
+    return groups.filter(
+      (group) =>
+        !group.status || group.status === "ACTIVE" || group.status === "FREEZE",
+    );
   }, [groups, activeTab]);
 
   const filteredGroups = useMemo(() => {
@@ -151,26 +176,21 @@ export default function GroupsPage({
     });
   }, [tabGroups, search, coursesById, teachersById, roomsById, currentUser]);
 
-  const activeGroupsCount = useMemo(
-    () =>
-      groups.filter((group) => !group.status || group.status === "ACTIVE")
-        .length,
-    [groups],
-  );
+  const activeGroupsCount = useMemo(() => tabGroups.length, [tabGroups]);
 
   const groupTeachersCount = useMemo(
     () =>
       new Set(
-        groups
+        tabGroups
           .map((group) => group.teacherId)
           .filter((teacherId) => teacherId !== undefined && teacherId !== null),
       ).size,
-    [groups],
+    [tabGroups],
   );
 
   const totalStudents = useMemo(
     () =>
-      groups.reduce(
+      tabGroups.reduce(
         (sum, group) =>
           sum +
           Number(
@@ -181,7 +201,7 @@ export default function GroupsPage({
           ),
         0,
       ),
-    [groups],
+    [tabGroups],
   );
 
   const getTeacherName = (group) =>
@@ -318,6 +338,40 @@ export default function GroupsPage({
     }
   };
 
+  const handleOpenGroupDetails = async (group, course, roomName) => {
+    let preloadedStudents = [];
+
+    try {
+      const studentsRes = await groupsApi.getStudentsByGroup(group.id);
+      preloadedStudents = Array.isArray(studentsRes?.data)
+        ? studentsRes.data.map((student) => ({
+            id: student.id,
+            fullName: student.fullName,
+            email: student.email || "-",
+          }))
+        : [];
+    } catch {
+      preloadedStudents = [];
+    }
+
+    onOpenGroupDetails?.({
+      id: group.id,
+      name: group.name,
+      course: course?.name || "-",
+      courseId: group.courseId,
+      teacher: getTeacherName(group),
+      teacherId: group.teacherId,
+      room: roomName,
+      roomId: group.roomId,
+      lessonTime: group.startTime,
+      days: group.weekDays || [],
+      duration: course?.durationLesson ? `${course.durationLesson} minut` : "-",
+      startDate: group.startDate,
+      startTime: group.startTime,
+      students: preloadedStudents,
+    });
+  };
+
   return (
     <div className="space-y-6 w-full min-w-0 overflow-x-hidden">
       <div className={`${theme.card} border rounded-2xl p-5 shadow-sm`}>
@@ -447,11 +501,18 @@ export default function GroupsPage({
                   return (
                     <tr
                       key={group.id}
-                      className={`border-t ${theme.rowBorder}`}
+                      onClick={() =>
+                        handleOpenGroupDetails(group, course, roomName)
+                      }
+                      className={`border-t ${theme.rowBorder} ${
+                        darkMode
+                          ? "hover:bg-slate-800/30 cursor-pointer"
+                          : "hover:bg-slate-50 cursor-pointer"
+                      }`}
                     >
                       <td className="px-4 py-3">
                         <span
-                          className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(
+                          className={`px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer ${getStatusBadgeClass(
                             group.status,
                           )}`}
                         >
@@ -459,7 +520,15 @@ export default function GroupsPage({
                         </span>
                       </td>
                       <td className={`px-4 py-3 font-medium ${theme.text}`}>
-                        {group.name || "-"}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleOpenGroupDetails(group, course, roomName)
+                          }
+                          className="hover:underline cursor-pointer text-left"
+                        >
+                          {group.name || "-"}
+                        </button>
                       </td>
                       <td className={`px-4 py-3 ${theme.text}`}>
                         {course?.name || "-"}
@@ -476,7 +545,7 @@ export default function GroupsPage({
                         </p>
                       </td>
                       <td className={`px-4 py-3 ${theme.text}`}>
-                        {group.userId ? `ID: ${group.userId}` : "-"}
+                        {group.user?.fullName || "-"}
                       </td>
                       <td className={`px-4 py-3 ${theme.text}`}>{roomName}</td>
                       <td className={`px-4 py-3 ${theme.text}`}>
@@ -488,35 +557,22 @@ export default function GroupsPage({
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() =>
-                              onOpenGroupDetails?.({
-                                id: group.id,
-                                name: group.name,
-                                course: course?.name || "-",
-                                teacher: getTeacherName(group),
-                                room: roomName,
-                                lessonTime: group.startTime,
-                                days: group.weekDays || [],
-                                duration: course?.durationLesson
-                                  ? `${course.durationLesson} minut`
-                                  : "-",
-                              })
-                            }
-                            className={`px-3 py-1.5 rounded-lg border text-xs ${theme.text}`}
+                            type="button"
+                            onClick={() => {
+                              handleOpenGroupDetails(group, course, roomName);
+                            }}
+                            className="px-3 h-8 rounded-lg border text-xs font-medium"
                           >
-                            Ko'rish
+                            Davomat
                           </button>
                           <button
-                            onClick={() => openEditDrawer(group)}
-                            className={`px-3 py-1.5 rounded-lg border text-xs ${theme.text}`}
+                            type="button"
+                            onClick={() => {
+                              handleOpenGroupDetails(group, course, roomName);
+                            }}
+                            className={`w-8 h-8 rounded-lg border text-sm leading-none flex items-center justify-center ${theme.text}`}
                           >
-                            Tahrirlash
-                          </button>
-                          <button
-                            onClick={() => handleDelete(group.id)}
-                            className="px-3 py-1.5 rounded-lg border text-xs text-red-500"
-                          >
-                            O'chirish
+                            ...
                           </button>
                         </div>
                       </td>

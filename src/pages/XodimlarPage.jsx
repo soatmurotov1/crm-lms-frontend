@@ -184,6 +184,7 @@ export default function EmployeesPage({ theme, darkMode }) {
         await usersApi.update(editingEmployeeId, {
           fullName: formData.fullName.trim(),
           email: formData.email.trim(),
+          role: formData.role || undefined,
           position: formData.position.trim(),
           address: formData.address.trim() || undefined,
           ...(formData.photo instanceof File ? { photo: formData.photo } : {}),
@@ -679,7 +680,6 @@ export default function EmployeesPage({ theme, darkMode }) {
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  disabled={editingEmployeeId !== null}
                   className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
                 >
                   <option value="">Tanlang</option>

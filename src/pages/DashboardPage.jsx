@@ -43,33 +43,6 @@ const WEEKDAY_ENUMS = [
   "SATURDAY",
 ];
 
-const defaultCourses = [
-  {
-    id: 1,
-    title: "Nemis tili",
-    description: "Izoh yo‘q",
-    durationMin: "60",
-    durationMonth: "12",
-    price: "300000",
-  },
-  {
-    id: 2,
-    title: "Math",
-    description: "Izoh yo‘q",
-    durationMin: "120",
-    durationMonth: "9",
-    price: "400000",
-  },
-  {
-    id: 3,
-    title: "SAT foundation",
-    description: "SAT matematika qismi 0 dan boshlab o‘rgatiladi",
-    durationMin: "60",
-    durationMonth: "6",
-    price: "350000",
-  },
-];
-
 const categories = [
   { id: 1, name: "Web dasturlash" },
   { id: 2, name: "English" },
@@ -285,6 +258,7 @@ export default function DashboardPage({ initialMenu = "home" }) {
   const [activeMenu, setActiveMenu] = useState(initialMenu);
   const [activeManagement, setActiveManagement] = useState("courses");
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [groupDetailsKey, setGroupDetailsKey] = useState(0);
   const [showManagementPanel, setShowManagementPanel] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState("uz");
@@ -833,6 +807,12 @@ export default function DashboardPage({ initialMenu = "home" }) {
     }
   };
 
+  const openGroupDetails = (group) => {
+    setSelectedGroup(group ? { ...group } : null);
+    setGroupDetailsKey((prev) => prev + 1);
+    setActiveMenu("groups");
+  };
+
   const renderContent = () => {
     if (activeMenu === "home") {
       return (
@@ -869,21 +849,21 @@ export default function DashboardPage({ initialMenu = "home" }) {
                 <div className="rounded-2xl bg-emerald-50 p-5">
                   <p className="text-slate-500 mb-2">{t.paid}</p>
                   <h3 className="text-2xl font-bold text-emerald-600">
-                    12 500 000 so‘m
+                    7 500 000 so‘m
                   </h3>
                 </div>
 
                 <div className="rounded-2xl bg-yellow-50 p-5">
                   <p className="text-slate-500 mb-2">{t.pending}</p>
                   <h3 className="text-2xl font-bold text-yellow-600">
-                    3 800 000 so‘m
+                    2 800 000 so‘m
                   </h3>
                 </div>
 
                 <div className="rounded-2xl bg-red-50 p-5">
                   <p className="text-slate-500 mb-2">{t.balance}</p>
                   <h3 className="text-2xl font-bold text-red-500">
-                    2 100 000 so‘m
+                    2 130 000 so‘m
                   </h3>
                 </div>
               </div>
@@ -941,6 +921,7 @@ export default function DashboardPage({ initialMenu = "home" }) {
       if (selectedGroup) {
         return (
           <GroupDetailsPage
+            key={groupDetailsKey}
             theme={theme}
             darkMode={darkMode}
             group={selectedGroup}
@@ -954,10 +935,7 @@ export default function DashboardPage({ initialMenu = "home" }) {
           theme={theme}
           darkMode={darkMode}
           currentUser={authUser}
-          onOpenGroupDetails={(group) => {
-            setSelectedGroup(group);
-            setActiveMenu("groups");
-          }}
+          onOpenGroupDetails={openGroupDetails}
         />
       );
     }
@@ -967,10 +945,7 @@ export default function DashboardPage({ initialMenu = "home" }) {
         <StudentsPage
           theme={theme}
           darkMode={darkMode}
-          onOpenGroupDetails={(group) => {
-            setSelectedGroup(group);
-            setActiveMenu("groups");
-          }}
+          onOpenGroupDetails={openGroupDetails}
         />
       );
     if (activeMenu === "management") return renderManagementContent();

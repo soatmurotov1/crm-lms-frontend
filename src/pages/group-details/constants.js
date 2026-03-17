@@ -189,4 +189,7 @@ export const defaultVideos = [
   },
 ];
 
-export const getInitial = (name = "") => name.trim().charAt(0).toUpperCase();
+export const getInitial = (name = "") => {
+  const safe = String(name ?? "").trim();
+  return safe ? safe.charAt(0).toUpperCase() : "?";
+};
