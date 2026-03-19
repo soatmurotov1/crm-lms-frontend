@@ -21,6 +21,9 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error?.response?.status === 401) {
       localStorage.removeItem("crm_access_token");
+      if (window.location.pathname !== "/") {
+        window.location.replace("/");
+      }
     }
     return Promise.reject(error);
   },

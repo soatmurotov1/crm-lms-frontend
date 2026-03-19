@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { usersApi } from "../api/crmApi";
+import { usersApi } from "../../api/crmApi";
 
 const roles = [
   "SUPERADMIN",

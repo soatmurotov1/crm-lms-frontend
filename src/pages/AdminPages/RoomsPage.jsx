@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { roomsApi } from "../api/crmApi";
+import { roomsApi } from "../../api/crmApi";
 
 export default function RoomsPage({ theme, darkMode }) {
   const [showDrawer, setShowDrawer] = useState(false);

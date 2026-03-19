@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { homeworkApi } from "../api/crmApi";
+import { homeworkApi } from "../../api/crmApi";
 
 const TAB_TO_STATUS = {
   kutayotgan: "PENDING",

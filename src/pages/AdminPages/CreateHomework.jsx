@@ -43,16 +43,13 @@ export default function CreateHomework() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-
         <button
           onClick={submit}
           className="bg-green-500 text-white px-6 py-2 rounded"
         >
           E'lon qilish
         </button>
-
       </div>
-
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authApi } from "../api/crmApi";
+import { authApi } from "../../api/crmApi";
 
 export default function LoginPage() {
   const navigate = useNavigate();

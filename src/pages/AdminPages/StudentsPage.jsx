@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { groupsApi, studentsApi } from "../api/crmApi";
+import { groupsApi, studentsApi } from "../../api/crmApi";
 
 export default function StudentsPage({
   theme = {

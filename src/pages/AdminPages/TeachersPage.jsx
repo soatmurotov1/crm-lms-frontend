@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { groupsApi, teachersApi } from "../api/crmApi";
+import { groupsApi, teachersApi } from "../../api/crmApi";
 
 const formatDate = (value) => {
   if (!value) return "-";

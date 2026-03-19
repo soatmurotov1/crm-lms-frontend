@@ -109,7 +109,8 @@ export default function CreateHomeworkSection({
                 }
               />
               <span className={theme.soft}>
-                ⬇ Yuklash {homeworkForm.file?.name ? `- ${homeworkForm.file.name}` : ""}
+                ⬇ Yuklash{" "}
+                {homeworkForm.file?.name ? `- ${homeworkForm.file.name}` : ""}
               </span>
             </label>
           </div>
@@ -127,7 +128,7 @@ export default function CreateHomeworkSection({
               onClick={addHomework}
               className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
             >
-              {homeworkSaving ? "Saqlanmoqda..." : "E&apos;lon qilish"}
+              {homeworkSaving ? "Saqlanmoqda..." : "E'lon qilish"}
             </button>
           </div>
         </div>

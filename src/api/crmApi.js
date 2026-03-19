@@ -71,6 +71,17 @@ export const groupsApi = {
   remove: async (id) => unwrap(await apiClient.delete(`/groups/${id}`)),
 };
 
+export const studentGroupApi = {
+  create: async (payload) =>
+    unwrap(await apiClient.post("/student-group", payload)),
+  remove: async (payload) =>
+    unwrap(
+      await apiClient.delete("/student-group", {
+        data: payload,
+      }),
+    ),
+};
+
 export const attendanceApi = {
   getByLesson: async (lessonId) =>
     unwrap(await apiClient.get(`/attendance/${lessonId}`)),
@@ -83,6 +94,7 @@ export const attendanceApi = {
 export const lessonsApi = {
   getByGroup: async (groupId) =>
     unwrap(await apiClient.get(`/lessons/group/${groupId}`)),
+  create: async (payload) => unwrap(await apiClient.post("/lessons", payload)),
 };
 
 export const homeworkApi = {

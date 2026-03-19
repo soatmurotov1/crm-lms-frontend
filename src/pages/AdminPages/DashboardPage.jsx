@@ -6,8 +6,8 @@ import TeachersPage from "./TeachersPage";
 import StudentsPage from "./StudentsPage";
 import GroupsPage from "./GroupsPage";
 import GroupDetailsPage from "./GroupDetrailsPage";
-import { coursesApi, groupsApi, studentsApi } from "../api/crmApi";
-import { getAuthUserFromStorage } from "../utils/authToken";
+import { coursesApi, groupsApi, studentsApi } from "../../api/crmApi";
+import { getAuthUserFromStorage } from "../../utils/authToken";
 
 const menuItems = [
   { id: 1, key: "home", icon: "🏠" },
@@ -22,8 +22,6 @@ const managementItems = [
   { id: 2, key: "rooms", icon: "🚪" },
   { id: 3, key: "employees", icon: "👤" },
   { id: 4, key: "teachers", icon: "👨‍🏫" },
-  { id: 5, key: "faq", icon: "❓" },
-  { id: 6, key: "inspection", icon: "🛡️" },
 ];
 
 const statsData = [
@@ -64,8 +62,6 @@ const translations = {
     courses: "Kurslar",
     rooms: "Xonalar",
     employees: "Hodimlar",
-    faq: "FAQ",
-    inspection: "Tekshiruv",
     activeStudents: "Faol talabalar",
     frozen: "Muzlatilganlar",
     archived: "Arxivdagilar",
@@ -164,8 +160,6 @@ const translations = {
     courses: "Курсы",
     rooms: "Комнаты",
     employees: "Сотрудники",
-    faq: "FAQ",
-    inspection: "Проверка",
     activeStudents: "Активные студенты",
     frozen: "Замороженные",
     archived: "В архиве",
@@ -252,14 +246,18 @@ function SelectField({ label, name, value, onChange, items, theme, choose }) {
   );
 }
 
-export default function DashboardPage({ initialMenu = "home" }) {
+export default function DashboardPage({
+  initialMenu = "home",
+  initialManagement = "courses",
+}) {
   const navigate = useNavigate();
 
   const [activeMenu, setActiveMenu] = useState(initialMenu);
-  const [activeManagement, setActiveManagement] = useState("courses");
+  const [activeManagement, setActiveManagement] = useState(initialManagement);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupDetailsKey, setGroupDetailsKey] = useState(0);
   const [showManagementPanel, setShowManagementPanel] = useState(false);
+  const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState("uz");
   const [showCourseDrawer, setShowCourseDrawer] = useState(false);
@@ -289,6 +287,8 @@ export default function DashboardPage({ initialMenu = "home" }) {
 
   const managementButtonRef = useRef(null);
   const managementPanelRef = useRef(null);
+  const profileButtonRef = useRef(null);
+  const profilePanelRef = useRef(null);
 
   const t = useMemo(() => translations[language], [language]);
   const authUser = useMemo(() => getAuthUserFromStorage(), []);
@@ -304,6 +304,58 @@ export default function DashboardPage({ initialMenu = "home" }) {
     return baseName;
   }, [authUser]);
   const greetingText = `${t.greeting}, ${greetingName}!`;
+  const profileName =
+    authUser?.fullName || authUser?.email?.split("@")[0] || "Foydalanuvchi";
+  const profileInitial =
+    String(profileName).trim().charAt(0).toUpperCase() || "F";
+  const profileRole = String(authUser?.role || "USER").toUpperCase();
+
+  useEffect(() => {
+    setActiveMenu(initialMenu);
+    setActiveManagement(initialManagement);
+
+    if (initialMenu !== "groups") {
+      setSelectedGroup(null);
+    }
+  }, [initialMenu, initialManagement]);
+
+  const menuPathMap = {
+    home: "/dashboard",
+    teachers: "/dashboard/teacher",
+    groups: "/dashboard/group",
+    students: "/dashboard/student",
+    management: "/dashboard",
+  };
+
+  const managementPathMap = {
+    courses: "/dashboard",
+    rooms: "/dashboard/room",
+    employees: "/dashboard",
+    teachers: "/dashboard/teacher",
+    faq: "/dashboard",
+    inspection: "/dashboard",
+  };
+
+  const openMenu = (menuKey) => {
+    setSelectedGroup(null);
+    setActiveMenu(menuKey);
+    setShowManagementPanel(false);
+    navigate(menuPathMap[menuKey] || "/dashboard");
+  };
+
+  const openManagementMenu = (managementKey) => {
+    setSelectedGroup(null);
+    setActiveMenu("management");
+    setActiveManagement(managementKey);
+    setShowManagementPanel(false);
+    navigate(managementPathMap[managementKey] || "/dashboard");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("crm_access_token");
+    setShowProfilePanel(false);
+    navigate("/", { replace: true });
+  };
 
   const todaySchedule = useMemo(() => {
     const todayEnum = WEEKDAY_ENUMS[new Date().getDay()];
@@ -425,6 +477,24 @@ export default function DashboardPage({ initialMenu = "home" }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showManagementPanel]);
+
+  useEffect(() => {
+    const handleProfileOutside = (event) => {
+      if (
+        showProfilePanel &&
+        profilePanelRef.current &&
+        !profilePanelRef.current.contains(event.target) &&
+        profileButtonRef.current &&
+        !profileButtonRef.current.contains(event.target)
+      ) {
+        setShowProfilePanel(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleProfileOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleProfileOutside);
+  }, [showProfilePanel]);
 
   const theme = darkMode
     ? {
@@ -794,16 +864,12 @@ export default function DashboardPage({ initialMenu = "home" }) {
 
   const handleStatCardClick = (key) => {
     if (key === "activeStudents") {
-      setSelectedGroup(null);
-      setShowManagementPanel(false);
-      setActiveMenu("students");
+      openMenu("students");
       return;
     }
 
     if (key === "groups") {
-      setSelectedGroup(null);
-      setShowManagementPanel(false);
-      setActiveMenu("groups");
+      openMenu("groups");
     }
   };
 
@@ -989,10 +1055,7 @@ export default function DashboardPage({ initialMenu = "home" }) {
             return (
               <button
                 key={item.id}
-                onClick={() => {
-                  setActiveMenu(item.key);
-                  setShowManagementPanel(false);
-                }}
+                onClick={() => openMenu(item.key)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition cursor-pointer ${
                   activeMenu === item.key
                     ? theme.active
@@ -1027,11 +1090,7 @@ export default function DashboardPage({ initialMenu = "home" }) {
               {managementItems.map((sub) => (
                 <button
                   key={sub.id}
-                  onClick={() => {
-                    setActiveMenu("management");
-                    setActiveManagement(sub.key);
-                    setShowManagementPanel(false);
-                  }}
+                  onClick={() => openManagementMenu(sub.key)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition cursor-pointer ${
                     activeManagement === sub.key && activeMenu === "management"
                       ? theme.submenuActive
@@ -1047,7 +1106,7 @@ export default function DashboardPage({ initialMenu = "home" }) {
         )}
 
         <button
-          onClick={() => navigate("/")}
+          onClick={handleLogout}
           className="mt-auto bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl cursor-pointer transition"
         >
           {t.logout}
@@ -1086,8 +1145,44 @@ export default function DashboardPage({ initialMenu = "home" }) {
               {darkMode ? "☀️" : "🌙"}
             </button>
 
-            <div className="w-10 h-10 rounded-full bg-amber-900 text-white flex items-center justify-center font-bold cursor-pointer">
-              D
+            <div className="relative">
+              <button
+                ref={profileButtonRef}
+                onClick={() => setShowProfilePanel((prev) => !prev)}
+                className="w-10 h-10 rounded-full bg-amber-900 text-white flex items-center justify-center font-bold cursor-pointer"
+                title="Profil"
+              >
+                {profileInitial}
+              </button>
+
+              {showProfilePanel && (
+                <div
+                  ref={profilePanelRef}
+                  className={`absolute right-0 top-12 z-40 w-72 rounded-2xl border p-4 shadow-2xl ${theme.card} ${theme.rowBorder}`}
+                >
+                  <p
+                    className={`text-xs uppercase tracking-wide ${theme.soft}`}
+                  >
+                    Profil
+                  </p>
+                  <h3 className={`text-base font-semibold mt-1 ${theme.text}`}>
+                    {profileName}
+                  </h3>
+                  <p className={`text-sm mt-1 ${theme.soft}`}>
+                    {authUser?.email || "Email yo'q"}
+                  </p>
+                  <p className={`text-xs mt-2 ${theme.soft}`}>
+                    Rol: {profileRole}
+                  </p>
+
+                  <button
+                    onClick={() => setShowProfilePanel(false)}
+                    className="mt-4 w-full rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 py-2.5 text-sm"
+                  >
+                    Yopish
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
