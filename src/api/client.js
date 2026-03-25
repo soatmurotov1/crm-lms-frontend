@@ -3,7 +3,7 @@ import axios from "axios";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 
   (window.location.protocol === 'https:' 
-    ? 'http://152.42.236.206:4040' 
+    ? "https://abrorbek.me/api"
     : 'http://localhost:3000')
     
 
