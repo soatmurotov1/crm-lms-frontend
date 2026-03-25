@@ -1,9 +1,15 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import LoginPage from "./pages/AdminPages/LoginPage";
 import DashboardPage from "./pages/AdminPages/DashboardPage";
+import StudentDashboardPage from "./pages/StudentPages/Dashboard";
+import { getAuthUserFromStorage } from "./utils/authToken";
 
 function hasAccessToken() {
   return Boolean(localStorage.getItem("crm_access_token"));
+}
+
+function getCurrentRole() {
+  return String(getAuthUserFromStorage()?.role || "").toUpperCase();
 }
 
 function RequireAuth({ children }) {
@@ -18,7 +24,42 @@ function RequireAuth({ children }) {
 
 function GuestOnly({ children }) {
   if (hasAccessToken()) {
+    return (
+      <Navigate
+        to={
+          getCurrentRole() === "STUDENT" ? "/student/dashboard" : "/dashboard"
+        }
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+function RequireStudent({ children }) {
+  const location = useLocation();
+
+  if (!hasAccessToken()) {
+    return <Navigate to="/" replace state={{ from: location }} />;
+  }
+
+  if (getCurrentRole() !== "STUDENT") {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+
+function RequireNonStudent({ children }) {
+  const location = useLocation();
+
+  if (!hasAccessToken()) {
+    return <Navigate to="/" replace state={{ from: location }} />;
+  }
+
+  if (getCurrentRole() === "STUDENT") {
+    return <Navigate to="/student/dashboard" replace />;
   }
 
   return children;
@@ -38,74 +79,82 @@ export default function App() {
       <Route
         path="/dashboard"
         element={
-          <RequireAuth>
+          <RequireNonStudent>
             <DashboardPage />
-          </RequireAuth>
+          </RequireNonStudent>
         }
       />
       <Route
         path="/dashboard/teacher"
         element={
-          <RequireAuth>
+          <RequireNonStudent>
             <DashboardPage initialMenu="teachers" />
-          </RequireAuth>
+          </RequireNonStudent>
         }
       />
       <Route
         path="/dashboard/taecher"
         element={
-          <RequireAuth>
+          <RequireNonStudent>
             <DashboardPage initialMenu="teachers" />
-          </RequireAuth>
+          </RequireNonStudent>
         }
       />
       <Route
         path="/dashboard/group"
         element={
-          <RequireAuth>
+          <RequireNonStudent>
             <DashboardPage initialMenu="groups" />
-          </RequireAuth>
+          </RequireNonStudent>
         }
       />
       <Route
         path="/dashboard/student"
         element={
-          <RequireAuth>
+          <RequireNonStudent>
             <DashboardPage initialMenu="students" />
-          </RequireAuth>
+          </RequireNonStudent>
         }
       />
       <Route
         path="/dashboard/room"
         element={
-          <RequireAuth>
+          <RequireNonStudent>
             <DashboardPage initialMenu="management" initialManagement="rooms" />
-          </RequireAuth>
+          </RequireNonStudent>
         }
       />
 
       <Route
         path="/dashboard/teachers"
         element={
-          <RequireAuth>
+          <RequireNonStudent>
             <DashboardPage initialMenu="teachers" />
-          </RequireAuth>
+          </RequireNonStudent>
         }
       />
       <Route
         path="/dashboard/groups"
         element={
-          <RequireAuth>
+          <RequireNonStudent>
             <DashboardPage initialMenu="groups" />
-          </RequireAuth>
+          </RequireNonStudent>
         }
       />
       <Route
         path="/dashboard/students"
         element={
-          <RequireAuth>
+          <RequireNonStudent>
             <DashboardPage initialMenu="students" />
-          </RequireAuth>
+          </RequireNonStudent>
+        }
+      />
+      <Route
+        path="/student/dashboard"
+        element={
+          <RequireStudent>
+            <StudentDashboardPage />
+          </RequireStudent>
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />

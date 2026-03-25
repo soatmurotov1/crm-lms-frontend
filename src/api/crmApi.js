@@ -24,6 +24,10 @@ const toFormData = (payload) => {
 export const authApi = {
   loginAdmin: async (payload) =>
     unwrap(await apiClient.post("/auth/login/admin", payload)),
+  loginTeacher: async (payload) =>
+    unwrap(await apiClient.post("/auth/login/teacher", payload)),
+  loginStudent: async (payload) =>
+    unwrap(await apiClient.post("/auth/login/student", payload)),
 };
 
 export const teachersApi = {

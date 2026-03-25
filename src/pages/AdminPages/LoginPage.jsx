@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../../api/crmApi";
+import { parseAuthToken } from "../../utils/authToken";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -42,10 +43,22 @@ export default function LoginPage() {
 
     try {
       setLoading(true);
-      const result = await authApi.loginAdmin({
+      const payload = {
         email: login,
         password,
-      });
+      };
+
+      let result = null;
+
+      try {
+        result = await authApi.loginAdmin(payload);
+      } catch {
+        try {
+          result = await authApi.loginTeacher(payload);
+        } catch {
+          result = await authApi.loginStudent(payload);
+        }
+      }
 
       if (!result?.accessToken) {
         throw new Error("Token kelmadi");
@@ -54,8 +67,13 @@ export default function LoginPage() {
       localStorage.setItem("crm_access_token", result.accessToken);
       showToast("success", "Tizimga muvaffaqiyatli kirdingiz");
 
+      const authUser = parseAuthToken(result.accessToken);
+      const role = String(authUser?.role || "").toUpperCase();
+      const targetPath =
+        role === "STUDENT" ? "/student/dashboard" : "/dashboard";
+
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate(targetPath);
       }, 800);
     } catch (error) {
       showToast(
