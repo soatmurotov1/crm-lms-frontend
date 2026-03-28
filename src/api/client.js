@@ -1,11 +1,10 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 
-  (window.location.protocol === 'https:' 
+  import.meta.env.VITE_API_BASE_URL ||
+  (window.location.protocol === "https:"
     ? "https://abrorbek.me/api"
-    : 'http://localhost:3000')
-    
+    : "http://localhost:4040/api");
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -29,6 +28,13 @@ apiClient.interceptors.response.use(
         window.location.replace("/");
       }
     }
+    console.error("API Error:", {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error?.response?.status,
+      message: error?.response?.data?.message || error.message,
+      data: error?.response?.data,
+    });
     return Promise.reject(error);
   },
 );

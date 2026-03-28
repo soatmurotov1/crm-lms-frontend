@@ -1393,59 +1393,6 @@ export default function GroupDetailsPage({
                         />
                       </div>
 
-                      <div>
-                        <label
-                          className={`block text-sm font-medium mb-2 ${theme.text}`}
-                        >
-                          Izoh
-                        </label>
-                        <textarea
-                          rows={5}
-                          className={inputClass}
-                          placeholder="Qo'shimcha izoh"
-                          value={lessonForm.description}
-                          onChange={(e) =>
-                            setLessonForm((prev) => ({
-                              ...prev,
-                              description: e.target.value,
-                            }))
-                          }
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          className={`block text-sm font-medium mb-2 ${theme.text}`}
-                        >
-                          Fayl yuklash (ixtiyoriy)
-                        </label>
-
-                        <label
-                          className={`flex items-center justify-center w-full rounded-xl border border-dashed ${innerBorderClass} px-4 py-6 cursor-pointer ${darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
-                        >
-                          <input
-                            type="file"
-                            className="hidden"
-                            onChange={(e) =>
-                              setLessonForm((prev) => ({
-                                ...prev,
-                                file: e.target.files?.[0] || null,
-                              }))
-                            }
-                          />
-                          <span className={theme.soft}>
-                            ⬇ Yuklash{" "}
-                            {lessonForm.file?.name
-                              ? `- ${lessonForm.file.name}`
-                              : ""}
-                          </span>
-                        </label>
-                        <p className={`mt-2 text-xs ${theme.soft}`}>
-                          Eslatma: hozir backend darsga fayl/izoh saqlamaydi,
-                          faqat mavzu saqlanadi.
-                        </p>
-                      </div>
-
                       <div className="flex items-center justify-end gap-3 pt-2">
                         <button
                           onClick={() =>
@@ -2190,35 +2137,6 @@ export default function GroupDetailsPage({
                           })
                         }
                       />
-                    </div>
-
-                    <div>
-                      <label
-                        className={`block text-sm font-medium mb-2 ${theme.text}`}
-                      >
-                        Fayl yuklash
-                      </label>
-
-                      <label
-                        className={`flex items-center justify-center w-full rounded-xl border border-dashed ${innerBorderClass} px-4 py-6 cursor-pointer ${darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
-                      >
-                        <input
-                          type="file"
-                          className="hidden"
-                          onChange={(e) =>
-                            setHomeworkForm({
-                              ...homeworkForm,
-                              file: e.target.files?.[0] || null,
-                            })
-                          }
-                        />
-                        <span className={theme.soft}>
-                          ⬇ Yuklash{" "}
-                          {homeworkForm.file?.name
-                            ? `- ${homeworkForm.file.name}`
-                            : ""}
-                        </span>
-                      </label>
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-2">
