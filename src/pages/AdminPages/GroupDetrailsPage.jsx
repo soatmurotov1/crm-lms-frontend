@@ -16,6 +16,7 @@ import {
   lessonDateLabel,
   makeDateHeaders,
 } from "./group-details/constants";
+import { formatUzDate, formatUzDateTime } from "../../utils/date";
 
 export default function GroupDetailsPage({
   theme = {
@@ -359,30 +360,13 @@ export default function GroupDetailsPage({
         : "px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-sm font-medium";
 
   const formatDateTime = (value) => {
-    if (!value) return "-";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "-";
-    return date.toLocaleString("uz-UZ", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatUzDateTime(value);
   };
 
   const formatPrettyDateTime = (value) => {
-    if (!value) return "-";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "-";
-
-    return date.toLocaleString("uz-UZ", {
+    return formatUzDateTime(value, {
       weekday: "short",
-      day: "2-digit",
       month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -410,14 +394,7 @@ export default function GroupDetailsPage({
   };
 
   const formatDate = (value) => {
-    if (!value) return "-";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "-";
-    return date.toLocaleDateString("uz-UZ", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
+    return formatUzDate(value);
   };
 
   const loadHomeworks = async () => {
@@ -1358,31 +1335,28 @@ export default function GroupDetailsPage({
                 </div>
               </div>
 
-              {activeMainTab === "malumotlar" && (
-                <div
-                  className={`${theme.card} border rounded-2xl shadow-sm min-w-0 min-h-0 flex flex-col overflow-hidden`}
-                >
+              {activeMainTab === "akademik-davomat" && (
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                  {/* Dars yaratish forma */}
                   <div
-                    className={`shrink-0 px-4 py-3 flex items-center justify-between gap-3 border-b min-w-0 ${innerBorderClass}`}
+                    className={`${theme.card} border rounded-2xl shadow-sm p-4 lg:col-span-2 h-fit`}
                   >
                     <h3
-                      className={`text-sm sm:text-base font-semibold ${theme.text}`}
+                      className={`text-base font-semibold ${theme.text} mb-4`}
                     >
                       Yangi dars yaratish
                     </h3>
-                  </div>
-
-                  <div className="flex-1 min-h-0 overflow-auto p-4 sm:p-6">
-                    <div className="max-w-4xl mx-auto space-y-5">
+                    <div className="space-y-4">
                       <div>
                         <label
                           className={`block text-sm font-medium mb-2 ${theme.text}`}
                         >
-                          * Mavzu
+                          * Dars mavzusi
                         </label>
                         <input
+                          type="text"
                           className={inputClass}
-                          placeholder="Mavzuni kiriting"
+                          placeholder="Dars mavzusini kiriting"
                           value={lessonForm.title}
                           onChange={(e) =>
                             setLessonForm((prev) => ({
@@ -1393,7 +1367,7 @@ export default function GroupDetailsPage({
                         />
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 pt-2">
+                      <div className="flex gap-2 pt-2">
                         <button
                           onClick={() =>
                             setLessonForm({
@@ -1402,274 +1376,94 @@ export default function GroupDetailsPage({
                               file: null,
                             })
                           }
-                          className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+                          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
                         >
                           Bekor qilish
                         </button>
-
                         <button
                           disabled={lessonSaving}
                           onClick={addLesson}
-                          className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
+                          className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
                         >
                           {lessonSaving ? "Saqlanmoqda..." : "E'lon qilish"}
                         </button>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
 
-              {activeMainTab === "akademik-davomat" && (
-                <div
-                  className={`${theme.card} border rounded-2xl shadow-sm min-w-0 min-h-0 flex flex-col overflow-hidden`}
-                >
+                  {/* O'quvchilar ro'yxati */}
                   <div
-                    className={`shrink-0 px-4 py-3 flex items-center justify-between gap-3 border-b min-w-0 ${innerBorderClass}`}
+                    className={`${theme.card} border rounded-2xl shadow-sm p-4 lg:col-span-3 overflow-auto max-h-96`}
                   >
                     <h3
-                      className={`text-sm sm:text-base font-semibold ${theme.text}`}
+                      className={`text-base font-semibold ${theme.text} mb-4`}
                     >
-                      Davomat
+                      O'quvchilar ro'yxati
                     </h3>
-                    <div
-                      className={`text-xs sm:text-sm font-medium ${theme.text}`}
-                    >
-                      {attendanceLoading ? "Yuklanmoqda..." : "Davomat"}
-                    </div>
-                  </div>
+                    <div className="space-y-2">
+                      {students.length === 0 ? (
+                        <p className={`text-sm ${theme.soft}`}>
+                          O'quvchilar topilmadi
+                        </p>
+                      ) : (
+                        students.map((student) => {
+                          const isPresent =
+                            attendance[student.id]?.[dateHeaders[0]?.key] ===
+                            "Bor";
+                          const savingKey = `${student.id}-${dateHeaders[0]?.lessonId}`;
+                          const isSaving = !!attendanceSavingMap[savingKey];
 
-                  <div className="flex-1 min-h-0 overflow-hidden">
-                    <div className="hidden lg:block h-full overflow-auto">
-                      <table className="w-full text-sm table-fixed">
-                        <thead
-                          className={`${darkMode ? "bg-slate-800" : "bg-slate-50"} sticky top-0 z-10`}
-                        >
-                          <tr>
-                            <th
-                              className={`text-left px-3 py-3 w-65 ${theme.text}`}
-                            >
-                              Nomi
-                            </th>
-
-                            {dateHeaders.map((item) => (
-                              <th
-                                key={item.key}
-                                className={`px-1 py-3 text-center ${theme.text}`}
-                              >
-                                <div className="text-[10px]">{item.day}</div>
-                                <div className="text-xs font-semibold">
-                                  {item.num}
-                                </div>
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {students.map((student) => (
-                            <tr
-                              key={student.id}
-                              className={`border-t ${theme.rowBorder} ${
-                                darkMode
-                                  ? "hover:bg-slate-800/40"
-                                  : "hover:bg-slate-50"
-                              }`}
-                            >
-                              <td className="px-3 py-2">
-                                <div className="flex items-center gap-3 min-w-0">
-                                  <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                                      darkMode
-                                        ? "bg-slate-800 text-slate-200"
-                                        : "bg-slate-100 text-slate-600"
-                                    }`}
-                                  >
-                                    {getInitial(student.name)}
-                                  </div>
-
-                                  <div className="min-w-0">
-                                    <p
-                                      className={`font-medium truncate ${theme.text}`}
-                                    >
-                                      {student.name}
-                                    </p>
-                                    <p className={`text-xs ${theme.soft}`}>
-                                      Faol
-                                    </p>
-                                  </div>
-                                </div>
-                              </td>
-
-                              {dateHeaders.map((item) => {
-                                const key = item.key;
-                                const value =
-                                  attendance[student.id]?.[key] || "";
-                                const savingKey = `${student.id}-${item.lessonId}`;
-                                const isSaving =
-                                  !!attendanceSavingMap[savingKey];
-                                const isBor = value === "Bor";
-                                const isYoq = value === "Yo'q";
-
-                                return (
-                                  <td
-                                    key={key}
-                                    className="px-1 py-2 text-center"
-                                  >
-                                    <div className="flex items-center justify-center gap-1">
-                                      <button
-                                        disabled={isSaving || !item.lessonId}
-                                        onClick={() =>
-                                          setAttendanceValue(
-                                            student.id,
-                                            item,
-                                            "Bor",
-                                          )
-                                        }
-                                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
-                                          isBor
-                                            ? "bg-emerald-500 text-white border-emerald-500"
-                                            : darkMode
-                                              ? "border-slate-700 text-slate-300"
-                                              : "border-slate-200 text-slate-600"
-                                        }`}
-                                      >
-                                        Bor
-                                      </button>
-                                      <button
-                                        disabled={isSaving || !item.lessonId}
-                                        onClick={() =>
-                                          setAttendanceValue(
-                                            student.id,
-                                            item,
-                                            "Yo'q",
-                                          )
-                                        }
-                                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
-                                          isYoq
-                                            ? "bg-red-500 text-white border-red-500"
-                                            : darkMode
-                                              ? "border-slate-700 text-slate-300"
-                                              : "border-slate-200 text-slate-600"
-                                        }`}
-                                      >
-                                        Yo'q
-                                      </button>
-                                    </div>
-                                    {isSaving && (
-                                      <div
-                                        className={`mt-1 text-[10px] ${theme.soft}`}
-                                      >
-                                        ...
-                                      </div>
-                                    )}
-                                  </td>
-                                );
-                              })}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 lg:hidden h-full overflow-y-auto">
-                      {students.map((student) => (
-                        <div
-                          key={student.id}
-                          className={`rounded-2xl border p-3 ${innerBorderClass}`}
-                        >
-                          <div className="flex items-center gap-3 mb-3 min-w-0">
+                          return (
                             <div
-                              className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                                darkMode
-                                  ? "bg-slate-800 text-slate-200"
-                                  : "bg-slate-100 text-slate-600"
+                              key={student.id}
+                              className={`flex items-center justify-between p-3 rounded-xl border ${innerBorderClass} ${
+                                isPresent
+                                  ? "bg-emerald-50 border-emerald-200"
+                                  : ""
                               }`}
                             >
-                              {getInitial(student.name)}
-                            </div>
-
-                            <div className="min-w-0">
-                              <p
-                                className={`font-medium truncate ${theme.text}`}
-                              >
-                                {student.name}
-                              </p>
-                              <p className={`text-xs truncate ${theme.soft}`}>
-                                {student.phone}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                            {dateHeaders.map((item) => {
-                              const key = item.key;
-                              const value = attendance[student.id]?.[key] || "";
-                              const savingKey = `${student.id}-${item.lessonId}`;
-                              const isSaving = !!attendanceSavingMap[savingKey];
-                              const isBor = value === "Bor";
-                              const isYoq = value === "Yo'q";
-
-                              return (
+                              <div className="flex items-center gap-3 min-w-0">
                                 <div
-                                  key={key}
-                                  className={`rounded-xl px-2 py-2 text-xs border ${innerBorderClass}`}
+                                  className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                                    darkMode
+                                      ? "bg-slate-800 text-slate-200"
+                                      : "bg-slate-100 text-slate-600"
+                                  }`}
                                 >
-                                  <div>{item.day}</div>
-                                  <div className="font-bold">{item.num}</div>
-                                  <div className="mt-2 flex items-center gap-1">
-                                    <button
-                                      disabled={isSaving || !item.lessonId}
-                                      onClick={() =>
-                                        setAttendanceValue(
-                                          student.id,
-                                          item,
-                                          "Bor",
-                                        )
-                                      }
-                                      className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
-                                        isBor
-                                          ? "bg-emerald-500 text-white border-emerald-500"
-                                          : darkMode
-                                            ? "border-slate-700 text-slate-300"
-                                            : "border-slate-200 text-slate-600"
-                                      }`}
-                                    >
-                                      Bor
-                                    </button>
-                                    <button
-                                      disabled={isSaving || !item.lessonId}
-                                      onClick={() =>
-                                        setAttendanceValue(
-                                          student.id,
-                                          item,
-                                          "Yo'q",
-                                        )
-                                      }
-                                      className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition disabled:opacity-60 ${
-                                        isYoq
-                                          ? "bg-red-500 text-white border-red-500"
-                                          : darkMode
-                                            ? "border-slate-700 text-slate-300"
-                                            : "border-slate-200 text-slate-600"
-                                      }`}
-                                    >
-                                      Yo'q
-                                    </button>
-                                  </div>
-                                  {isSaving && (
-                                    <div
-                                      className={`mt-1 text-[10px] ${theme.soft}`}
-                                    >
-                                      ...
-                                    </div>
-                                  )}
+                                  {getInitial(student.name)}
                                 </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
+                                <div className="min-w-0">
+                                  <p
+                                    className={`font-medium truncate ${theme.text}`}
+                                  >
+                                    {student.name}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <button
+                                disabled={isSaving || !dateHeaders[0]?.lessonId}
+                                onClick={() =>
+                                  setAttendanceValue(
+                                    student.id,
+                                    dateHeaders[0],
+                                    isPresent ? "Yo'q" : "Bor",
+                                  )
+                                }
+                                className={`px-4 py-2 rounded-xl text-sm font-medium border transition disabled:opacity-60 ${
+                                  isPresent
+                                    ? "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600"
+                                    : darkMode
+                                      ? "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                                      : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                                }`}
+                              >
+                                {isPresent ? "Yoqilgan ✓" : "O'chilgan"}
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                 </div>

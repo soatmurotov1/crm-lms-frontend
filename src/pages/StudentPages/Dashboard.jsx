@@ -1,25 +1,137 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { groupsApi } from "../../api/crmApi";
 import { getAuthUserFromStorage } from "../../utils/authToken";
 import StudentGroups from "./Groups";
 
 const menuItems = [
-  { key: "home", label: "Bosh sahifa", icon: "🏠" },
-  { key: "groups", label: "Guruhlarim", icon: "👥" },
-  { key: "settings", label: "Sozlamalar", icon: "⚙️" },
+  { id: 1, key: "home", label: "Bosh sahifa", icon: "🏠" },
+  { id: 2, key: "groups", label: "Guruhlarim", icon: "👥" },
+  { id: 3, key: "settings", label: "Sozlamalar", icon: "⚙️" },
 ];
 
-export default function StudentDashboardPage() {
+const translations = {
+  uz: {
+    brand: "Najot Talim",
+    studentPanel: "Student panel",
+    greeting: "Salom",
+    welcome: "Najot Talim platformasiga xush kelibsiz",
+    logout: "Chiqish",
+    home: "Bosh sahifa",
+    groups: "Guruhlarim",
+    settings: "Sozlamalar",
+    homeText:
+      "Bu student uchun asosiy panel. Guruhlarim bo'limida darslaringizni ko'rishingiz mumkin.",
+    settingsText: "Bu bo'lim keyingi bosqichda to'ldiriladi.",
+    loadingGroups: "Guruhlar yuklanmoqda...",
+  },
+  en: {
+    brand: "Najot Talim",
+    studentPanel: "Student Panel",
+    greeting: "Hello",
+    welcome: "Welcome to Najot Talim platform",
+    logout: "Logout",
+    home: "Home",
+    groups: "My Groups",
+    settings: "Settings",
+    homeText:
+      "This is the main student panel. You can view your classes in My Groups section.",
+    settingsText: "This section will be filled in the next step.",
+    loadingGroups: "Loading groups...",
+  },
+  ru: {
+    brand: "Najot Talim",
+    studentPanel: "Студентская панель",
+    greeting: "Привет",
+    welcome: "Добро пожаловать на платформу Najot Talim",
+    logout: "Выход",
+    home: "Главная",
+    groups: "Мои группы",
+    settings: "Настройки",
+    homeText:
+      "Это главная студенческая панель. Вы можете просматривать свои классы в разделе Мои группы.",
+    settingsText: "Этот раздел будет заполнен на следующем этапе.",
+    loadingGroups: "Загрузка групп...",
+  },
+};
+
+export default function StudentDashboardPage({ initialMenu = "home" }) {
   const navigate = useNavigate();
   const authUser = useMemo(() => getAuthUserFromStorage(), []);
-
-  const [activeMenu, setActiveMenu] = useState("groups");
+  const [activeMenu, setActiveMenu] = useState(initialMenu);
   const [groups, setGroups] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(false);
-  const [selectedGroupId, setSelectedGroupId] = useState(null);
-  const [lessonsByGroup, setLessonsByGroup] = useState({});
-  const [lessonsLoading, setLessonsLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [language, setLanguage] = useState("uz");
+  const [showProfilePanel, setShowProfilePanel] = useState(false);
+  const profileButtonRef = useRef(null);
+  const profilePanelRef = useRef(null);
+
+  const t = useMemo(() => translations[language], [language]);
+
+  const theme = darkMode
+    ? {
+        app: "bg-slate-950",
+        sidebar: "bg-slate-900 border-slate-800",
+        main: "bg-slate-950",
+        card: "bg-slate-900 border-slate-800",
+        text: "text-white",
+        soft: "text-slate-400",
+        menu: "text-slate-200",
+        hover: "hover:bg-slate-800",
+        topBtn: "bg-slate-900 border-slate-700 text-white",
+        active: "bg-violet-600 text-white",
+        select: "bg-slate-900 border-slate-700 text-white",
+      }
+    : {
+        app: "bg-slate-100",
+        sidebar: "bg-white border-slate-200",
+        main: "bg-slate-100",
+        card: "bg-white border-slate-200",
+        text: "text-slate-900",
+        soft: "text-slate-500",
+        menu: "text-slate-700",
+        hover: "hover:bg-slate-100",
+        topBtn: "bg-white border-slate-200 text-slate-700",
+        active: "bg-violet-500 text-white",
+        select: "bg-white border-slate-200 text-slate-700",
+      };
+
+  const greetingName = useMemo(() => {
+    const baseName =
+      authUser?.fullName || authUser?.email?.split("@")[0] || "Talaba";
+    const parts = String(baseName).trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[parts.length - 1]} ${parts.slice(0, -1).join(" ")}`;
+    }
+    return baseName;
+  }, [authUser]);
+
+  const greetingText = `${t.greeting}, ${greetingName}!`;
+  const profileName =
+    authUser?.fullName || authUser?.email?.split("@")[0] || "Talaba";
+  const profileInitial =
+    String(profileName).trim().charAt(0).toUpperCase() || "T";
+
+  useEffect(() => {
+    setActiveMenu(initialMenu);
+  }, [initialMenu]);
+
+  useEffect(() => {
+    if (activeMenu === "home") {
+      navigate("/student/dashboard", { replace: true });
+      return;
+    }
+
+    if (activeMenu === "groups") {
+      navigate("/student/groups", { replace: true });
+      return;
+    }
+
+    if (activeMenu === "settings") {
+      navigate("/student/settings", { replace: true });
+    }
+  }, [activeMenu, navigate]);
 
   useEffect(() => {
     const loadGroups = async () => {
@@ -38,124 +150,159 @@ export default function StudentDashboardPage() {
     loadGroups();
   }, []);
 
-  const loadLessons = async (groupId) => {
-    if (!groupId) return;
-
-    const key = String(groupId);
-    if (Array.isArray(lessonsByGroup[key])) return;
-
-    try {
-      setLessonsLoading(true);
-      const result = await groupsApi.getLessonsByGroup(groupId);
-      setLessonsByGroup((prev) => ({
-        ...prev,
-        [key]: Array.isArray(result?.data) ? result.data : [],
-      }));
-    } catch {
-      setLessonsByGroup((prev) => ({
-        ...prev,
-        [key]: [],
-      }));
-    } finally {
-      setLessonsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (selectedGroupId) {
-      loadLessons(selectedGroupId);
-    }
-  }, [selectedGroupId]);
+    const handleProfileOutside = (event) => {
+      if (
+        showProfilePanel &&
+        profilePanelRef.current &&
+        !profilePanelRef.current.contains(event.target) &&
+        profileButtonRef.current &&
+        !profileButtonRef.current.contains(event.target)
+      ) {
+        setShowProfilePanel(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleProfileOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleProfileOutside);
+  }, [showProfilePanel]);
 
   const handleLogout = () => {
     localStorage.removeItem("crm_access_token");
+    setShowProfilePanel(false);
     navigate("/", { replace: true });
   };
 
-  const selectedGroup = groups.find(
-    (group) => Number(group.id) === Number(selectedGroupId),
-  );
-
   return (
-    <div className="min-h-screen bg-slate-100 flex">
-      <aside className="w-72 bg-white border-r border-slate-200 p-5 flex flex-col gap-5">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Najot Ta'lim</h1>
-          <p className="text-xs text-slate-500 mt-1">Student panel</p>
-        </div>
+    <div className={`${theme.app} min-h-screen flex flex-col`}>
+      {/* Header */}
+      <header className={`${theme.sidebar} border-b ${theme.card} shadow-sm`}>
+        <div className="flex items-center justify-between px-6 py-4 gap-4">
+          <h1 className={`text-2xl font-bold ${theme.text}`}>{t.brand}</h1>
 
-        <nav className="space-y-2">
-          {menuItems.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setActiveMenu(item.key)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left cursor-pointer ${
-                activeMenu === item.key
-                  ? "bg-amber-100 text-amber-700"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <span>{item.icon}</span>
-              <span className="font-medium">{item.label}</span>
-            </button>
-          ))}
-        </nav>
+          <div className="flex items-center gap-4">
+            {/* Language & Theme */}
+            <div className="flex gap-2">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className={`px-3 py-2 rounded-lg border text-sm outline-none ${theme.topBtn}`}
+              >
+                <option value="uz">Uz</option>
+                <option value="en">En</option>
+                <option value="ru">Ru</option>
+              </select>
 
-        <button
-          onClick={handleLogout}
-          className="mt-auto rounded-xl bg-red-500 hover:bg-red-600 text-white py-2.5 cursor-pointer"
-        >
-          Chiqish
-        </button>
-      </aside>
-
-      <main className="flex-1 p-6">
-        {activeMenu === "home" && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 className="text-2xl font-bold text-slate-900">
-              Salom, {authUser?.fullName || "Talaba"}
-            </h2>
-            <p className="text-slate-600 mt-2">
-              Bu student uchun asosiy panel. Guruhlarim bo'limida darslaringizni
-              ko'rishingiz mumkin.
-            </p>
-          </div>
-        )}
-
-        {activeMenu === "groups" &&
-          (groupsLoading ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500">
-              Guruhlar yuklanmoqda...
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className={`px-3 py-2 rounded-lg border font-semibold text-sm outline-none ${theme.topBtn}`}
+              >
+                {darkMode ? "☀️" : "🌙"}
+              </button>
             </div>
-          ) : (
-            <StudentGroups
-              groups={groups}
-              selectedGroupId={selectedGroupId}
-              lessonsByGroup={lessonsByGroup}
-              lessonsLoading={lessonsLoading}
-              onSelectGroup={(group) => {
-                if (!group?.id) {
-                  setSelectedGroupId(null);
-                  return;
-                }
 
-                setSelectedGroupId(group.id);
-                loadLessons(group.id);
-              }}
-              onClearSelection={() => setSelectedGroupId(null)}
-              selectedGroup={selectedGroup}
-            />
-          ))}
+            {/* Profile Button */}
+            <div className="relative">
+              <button
+                ref={profileButtonRef}
+                onClick={() => setShowProfilePanel(!showProfilePanel)}
+                className={`w-10 h-10 rounded-full font-bold flex items-center justify-center text-sm cursor-pointer border ${theme.active}`}
+              >
+                {profileInitial}
+              </button>
 
-        {activeMenu === "settings" && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 className="text-xl font-semibold text-slate-900">Sozlamalar</h2>
-            <p className="text-slate-600 mt-2">
-              Bu bo'lim keyingi bosqichda to'ldiriladi.
-            </p>
+              {/* Profile Panel */}
+              {showProfilePanel && (
+                <div
+                  ref={profilePanelRef}
+                  className={`absolute top-full right-0 mt-2 w-64 ${theme.card} border rounded-xl shadow-2xl z-50 p-4`}
+                >
+                  <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-400">
+                    <div
+                      className={`w-12 h-12 rounded-full font-bold flex items-center justify-center ${theme.active}`}
+                    >
+                      {profileInitial}
+                    </div>
+                    <div>
+                      <p className={`text-sm font-semibold ${theme.text}`}>
+                        {profileName}
+                      </p>
+                      <p className={`text-xs ${theme.soft}`}>
+                        {authUser?.email || "student@najot.talim"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium mt-2"
+                  >
+                    {t.logout}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-      </main>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar Menu */}
+        <aside
+          className={`${theme.sidebar} border-r ${theme.card} w-72 overflow-y-auto`}
+        >
+          <nav className="p-4 space-y-2">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveMenu(item.key)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left cursor-pointer transition-all font-medium ${
+                  activeMenu === item.key
+                    ? theme.active
+                    : `${theme.menu} ${theme.hover}`
+                }`}
+              >
+                <span className="text-xl">{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Main Area */}
+        <main className={`${theme.main} flex-1 overflow-y-auto p-6`}>
+          {activeMenu === "home" && (
+            <div className={`${theme.card} border rounded-2xl p-8 shadow-sm`}>
+              <h2 className={`text-3xl font-bold mb-4 ${theme.text}`}>
+                {greetingText}
+              </h2>
+              <p className={theme.soft}>{t.homeText}</p>
+            </div>
+          )}
+
+          {activeMenu === "groups" &&
+            (groupsLoading ? (
+              <div
+                className={`${theme.card} border rounded-2xl p-6 shadow-sm ${theme.soft}`}
+              >
+                {t.loadingGroups}
+              </div>
+            ) : (
+              <StudentGroups groups={groups} />
+            ))}
+
+          {activeMenu === "settings" && (
+            <div className={`${theme.card} border rounded-2xl p-8 shadow-sm`}>
+              <h2 className={`text-2xl font-bold mb-4 ${theme.text}`}>
+                {t.settings}
+              </h2>
+              <p className={theme.soft}>{t.settingsText}</p>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

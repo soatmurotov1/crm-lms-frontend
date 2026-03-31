@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { groupsApi, teachersApi } from "../../api/crmApi";
+import { formatUzTime, toInputDate } from "../../utils/date";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -47,16 +48,8 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
 
       const mapped = list.map((teacher) => {
         const createdAtSource = teacher.created_at || teacher.createdAt;
-        const createdAtIso = createdAtSource
-          ? new Date(createdAtSource).toISOString()
-          : null;
-        const createdAt = createdAtIso ? createdAtIso.slice(0, 10) : "";
-        const createdTime = createdAtSource
-          ? new Date(createdAtSource).toLocaleTimeString("en-GB", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "-";
+        const createdAt = toInputDate(createdAtSource);
+        const createdTime = formatUzTime(createdAtSource);
 
         return {
           id: teacher.id,

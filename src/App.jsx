@@ -153,7 +153,23 @@ export default function App() {
         path="/student/dashboard"
         element={
           <RequireStudent>
-            <StudentDashboardPage />
+            <StudentDashboardPage initialMenu="home" />
+          </RequireStudent>
+        }
+      />
+      <Route
+        path="/student/groups"
+        element={
+          <RequireStudent>
+            <StudentDashboardPage initialMenu="groups" />
+          </RequireStudent>
+        }
+      />
+      <Route
+        path="/student/settings"
+        element={
+          <RequireStudent>
+            <StudentDashboardPage initialMenu="settings" />
           </RequireStudent>
         }
       />

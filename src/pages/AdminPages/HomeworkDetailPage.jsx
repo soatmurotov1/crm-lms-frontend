@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { homeworkApi } from "../../api/crmApi";
+import { formatUzDateTime } from "../../utils/date";
 
 const TAB_TO_STATUS = {
   kutayotgan: "PENDING",
@@ -79,15 +80,8 @@ export default function HomeworkDetailPage({ homework, onBack }) {
   }, [tab, statusRows]);
 
   const formatDateTime = (value) => {
-    if (!value) return "-";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "-";
-    return date.toLocaleString("uz-UZ", {
-      day: "2-digit",
+    return formatUzDateTime(value, {
       month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 

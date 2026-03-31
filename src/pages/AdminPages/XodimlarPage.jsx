@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { usersApi } from "../../api/crmApi";
+import { toInputDate } from "../../utils/date";
 
 const roles = [
   "SUPERADMIN",
@@ -58,12 +59,8 @@ export default function EmployeesPage({ theme, darkMode }) {
           fullName: user.fullName,
           role: user.role,
           email: user.email,
-          hireDate: user.hire_date
-            ? new Date(user.hire_date).toISOString().slice(0, 10)
-            : "",
-          createdAt: user.created_at
-            ? new Date(user.created_at).toISOString().slice(0, 10)
-            : "",
+          hireDate: toInputDate(user.hire_date),
+          createdAt: toInputDate(user.created_at),
           coin: 0,
           position: user.position || "-",
           address: user.address || "",
@@ -412,16 +409,6 @@ export default function EmployeesPage({ theme, darkMode }) {
                     <td className="px-3 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                            darkMode
-                              ? "border-slate-700 hover:bg-slate-800"
-                              : "border-slate-200 hover:bg-slate-50"
-                          }`}
-                        >
-                          👁️
-                        </button>
-
-                        <button
                           onClick={() => handleDelete(employee.id)}
                           className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
                             darkMode
@@ -505,16 +492,6 @@ export default function EmployeesPage({ theme, darkMode }) {
                   </div>
 
                   <div className="flex gap-2 shrink-0">
-                    <button
-                      className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-slate-800"
-                          : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      👁️
-                    </button>
-
                     <button
                       onClick={() => handleDelete(employee.id)}
                       className={`w-9 h-9 rounded-xl border flex items-center justify-center ${

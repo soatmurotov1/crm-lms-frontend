@@ -7,6 +7,7 @@ import {
   studentsApi,
   teachersApi,
 } from "../../api/crmApi";
+import { toInputDate } from "../../utils/date";
 
 const WEEK_DAYS = [
   "MONDAY",
@@ -311,9 +312,7 @@ export default function GroupsPage({
       courseId: String(group.courseId || ""),
       roomId: String(group.roomId || ""),
       teacherId: String(group.teacherId || ""),
-      startDate: group.startDate
-        ? new Date(group.startDate).toISOString().slice(0, 10)
-        : "",
+      startDate: toInputDate(group.startDate),
       startTime: group.startTime || "09:00",
       weekDays: Array.isArray(group.weekDays) ? group.weekDays : [],
       status: group.status || "ACTIVE",

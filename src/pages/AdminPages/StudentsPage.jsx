@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { groupsApi, studentsApi } from "../../api/crmApi";
+import { toInputDate } from "../../utils/date";
 
 export default function StudentsPage({
   theme = {
@@ -108,9 +109,7 @@ export default function StudentsPage({
       fullName: student.fullName || "",
       email: student.email || "",
       password: "",
-      birth_date: student.birth_date
-        ? new Date(student.birth_date).toISOString().slice(0, 10)
-        : "",
+      birth_date: toInputDate(student.birth_date),
       status: student.status || "ACTIVE",
       photo: null,
     });

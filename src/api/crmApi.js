@@ -135,6 +135,15 @@ export const lessonVideosApi = {
     unwrap(await apiClient.post("/lesson-videos", toFormData(payload))),
 };
 
+export const homeworkResponseApi = {
+  getMine: async (homeworkId) =>
+    unwrap(await apiClient.get(`/homework-response/mine/${homeworkId}`)),
+  create: async (payload) =>
+    unwrap(await apiClient.post("/homework-response", toFormData(payload))),
+  update: async (payload) =>
+    unwrap(await apiClient.put("/homework-response", toFormData(payload))),
+};
+
 export const usersApi = {
   getAll: async () => unwrap(await apiClient.get("/users")),
   create: async (payload) =>
