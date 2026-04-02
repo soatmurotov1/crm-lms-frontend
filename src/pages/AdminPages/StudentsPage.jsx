@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { groupsApi, studentsApi } from "../../api/crmApi";
 import { toInputDate } from "../../utils/date";
 
@@ -23,6 +23,12 @@ export default function StudentsPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState({
+    show: false,
+    type: "success",
+    message: "",
+  });
+  const toastTimerRef = useRef(null);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -93,6 +99,25 @@ export default function StudentsPage({
     loadStudents();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
+  const showToast = (type, message) => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+
+    setToast({ show: true, type, message });
+    toastTimerRef.current = setTimeout(() => {
+      setToast((prev) => ({ ...prev, show: false }));
+    }, 2600);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -129,19 +154,23 @@ export default function StudentsPage({
 
     try {
       setSaving(true);
+      let createdEmailSent = true;
       const payload = {
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
         birth_date: formData.birth_date,
         status: formData.status,
-        ...(formData.password.trim() ? { password: formData.password } : {}),
+        ...(formData.password.trim()
+          ? { password: formData.password.trim() }
+          : {}),
         ...(formData.photo ? { photo: formData.photo } : {}),
       };
 
       if (editingStudent) {
         await studentsApi.update(editingStudent.id, payload);
       } else {
-        await studentsApi.create(payload);
+        const createdResult = await studentsApi.create(payload);
+        createdEmailSent = createdResult?.emailSent !== false;
       }
 
       setOpenModal(false);
@@ -155,6 +184,14 @@ export default function StudentsPage({
         photo: null,
       });
       await loadStudents();
+      if (!editingStudent) {
+        showToast(
+          createdEmailSent ? "success" : "warning",
+          createdEmailSent
+            ? "Talaba yaratildi va login ma'lumotlari emailga yuborildi"
+            : "Talaba yaratildi, lekin email yuborilmadi",
+        );
+      }
     } catch (apiError) {
       alert(apiError?.response?.data?.message || "Talabani saqlashda xato");
     } finally {
@@ -220,6 +257,26 @@ export default function StudentsPage({
 
   return (
     <div className="space-y-4 min-w-0">
+      <div
+        className={`fixed top-4 right-4 z-50 transform transition-all duration-500 ${
+          toast.show
+            ? "translate-x-0 opacity-100"
+            : "translate-x-8 opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className={`rounded-2xl px-5 py-3 shadow-xl text-white min-w-72 text-center ${
+            toast.type === "error"
+              ? "bg-red-500"
+              : toast.type === "warning"
+                ? "bg-amber-500"
+                : "bg-emerald-500"
+          }`}
+        >
+          {toast.message}
+        </div>
+      </div>
+
       {/* HEADER */}
       <div className="flex justify-between mb-6">
         <h2 className={`text-2xl font-bold ${theme.text}`}>O'quvchilar</h2>
@@ -428,7 +485,7 @@ export default function StudentsPage({
           />
 
           <input
-            type="text"
+            type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}

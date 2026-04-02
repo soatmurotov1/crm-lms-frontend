@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { groupsApi, teachersApi } from "../../api/crmApi";
 import { formatUzTime, toInputDate } from "../../utils/date";
 
@@ -26,6 +26,12 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState({
+    show: false,
+    type: "success",
+    message: "",
+  });
+  const toastTimerRef = useRef(null);
   const [photoPreview, setPhotoPreview] = useState("");
   const [activeTeacher, setActiveTeacher] = useState(null);
   const [teacherGroups, setTeacherGroups] = useState([]);
@@ -77,6 +83,25 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
   useEffect(() => {
     loadTeachers();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
+  const showToast = (type, message) => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+
+    setToast({ show: true, type, message });
+    toastTimerRef.current = setTimeout(() => {
+      setToast((prev) => ({ ...prev, show: false }));
+    }, 2600);
+  };
 
   const filteredTeachers = useMemo(() => {
     return teachers.filter((teacher) => {
@@ -177,6 +202,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
 
     try {
       setSaving(true);
+      let createdEmailSent = true;
       const payload = {
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
@@ -191,11 +217,20 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
       if (editingTeacherId !== null) {
         await teachersApi.update(editingTeacherId, payload);
       } else {
-        await teachersApi.create(payload);
+        const createdResult = await teachersApi.create(payload);
+        createdEmailSent = createdResult?.emailSent !== false;
       }
 
       await loadTeachers();
       closeDrawer();
+      if (editingTeacherId === null) {
+        showToast(
+          createdEmailSent ? "success" : "warning",
+          createdEmailSent
+            ? "O'qituvchi yaratildi va login ma'lumotlari emailga yuborildi"
+            : "O'qituvchi yaratildi, lekin email yuborilmadi",
+        );
+      }
     } catch (error) {
       alert(error?.response?.data?.message || "O'qituvchini saqlashda xato");
     } finally {
@@ -203,8 +238,46 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
     }
   };
 
-  const toggleArchive = (id) => {
-    alert("Arxiv uchun alohida endpoint yo'q");
+  const toggleArchive = async (teacher) => {
+    const isArchived = Boolean(teacher?.archived);
+    const confirmed = window.confirm(
+      isArchived
+        ? "O'qituvchini arxivdan chiqarmoqchimisiz?"
+        : "O'qituvchini arxivga yubormoqchimisiz?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await teachersApi.toggleArchive(teacher.id);
+      await loadTeachers();
+      showToast(
+        "success",
+        isArchived
+          ? "O'qituvchi arxivdan chiqarildi"
+          : "O'qituvchi arxivga yuborildi",
+      );
+    } catch (error) {
+      alert(
+        error?.response?.data?.message || "Arxiv holatini o'zgartirishda xato",
+      );
+    }
+  };
+
+  const deleteArchivedTeacher = async (teacher) => {
+    const confirmed = window.confirm(
+      `${teacher.fullName} ni butunlay o'chirmoqchimisiz?`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await teachersApi.remove(teacher.id);
+      await loadTeachers();
+      showToast("success", "Arxivdagi o'qituvchi o'chirildi");
+    } catch (error) {
+      alert(error?.response?.data?.message || "O'qituvchini o'chirishda xato");
+    }
   };
 
   const openTeacherGroups = async (teacher) => {
@@ -250,6 +323,26 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
 
   return (
     <div className="space-y-6 w-full min-w-0">
+      <div
+        className={`fixed top-4 right-4 z-50 transform transition-all duration-500 ${
+          toast.show
+            ? "translate-x-0 opacity-100"
+            : "translate-x-8 opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className={`rounded-2xl px-5 py-3 shadow-xl text-white min-w-72 text-center ${
+            toast.type === "error"
+              ? "bg-red-500"
+              : toast.type === "warning"
+                ? "bg-amber-500"
+                : "bg-emerald-500"
+          }`}
+        >
+          {toast.message}
+        </div>
+      </div>
+
       <div
         className={`${theme.card} border rounded-2xl p-3 sm:p-4 lg:p-5 shadow-sm overflow-hidden w-full min-w-0`}
       >
@@ -405,16 +498,34 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                         <td className="px-3 py-4">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => toggleArchive(teacher.id)}
+                              onClick={() => toggleArchive(teacher)}
                               className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
                                 darkMode
                                   ? "border-slate-700 hover:bg-slate-800"
                                   : "border-slate-200 hover:bg-slate-50"
                               }`}
-                              title="Arxiv"
+                              title={
+                                teacher.archived
+                                  ? "Arxivdan chiqarish"
+                                  : "Arxivga yuborish"
+                              }
                             >
-                              📦
+                              {teacher.archived ? "♻️" : "📦"}
                             </button>
+
+                            {teacher.archived && (
+                              <button
+                                onClick={() => deleteArchivedTeacher(teacher)}
+                                className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
+                                  darkMode
+                                    ? "border-red-700/60 hover:bg-red-900/30"
+                                    : "border-red-200 hover:bg-red-50"
+                                }`}
+                                title="Arxivdan o'chirish"
+                              >
+                                🗑️
+                              </button>
+                            )}
 
                             <button
                               onClick={() => openTeacherGroups(teacher)}
@@ -522,16 +633,34 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                 <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => toggleArchive(teacher.id)}
+                      onClick={() => toggleArchive(teacher)}
                       className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
                         darkMode
                           ? "border-slate-700 hover:bg-slate-800"
                           : "border-slate-200 hover:bg-slate-50"
                       }`}
-                      title="Arxiv"
+                      title={
+                        teacher.archived
+                          ? "Arxivdan chiqarish"
+                          : "Arxivga yuborish"
+                      }
                     >
-                      📦
+                      {teacher.archived ? "♻️" : "📦"}
                     </button>
+
+                    {teacher.archived && (
+                      <button
+                        onClick={() => deleteArchivedTeacher(teacher)}
+                        className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
+                          darkMode
+                            ? "border-red-700/60 hover:bg-red-900/30"
+                            : "border-red-200 hover:bg-red-50"
+                        }`}
+                        title="Arxivdan o'chirish"
+                      >
+                        🗑️
+                      </button>
+                    )}
 
                     <button
                       onClick={() => openTeacherGroups(teacher)}

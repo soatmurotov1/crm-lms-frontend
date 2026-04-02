@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { groupsApi } from "../../api/crmApi";
+import { groupsApi, studentsApi } from "../../api/crmApi";
 import { getAuthUserFromStorage } from "../../utils/authToken";
 import StudentGroups from "./Groups";
 
@@ -66,6 +66,28 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const profileButtonRef = useRef(null);
   const profilePanelRef = useRef(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordSubmitAttempted, setPasswordSubmitAttempted] = useState(false);
+  const [serverPasswordError, setServerPasswordError] = useState("");
+  const [notice, setNotice] = useState({ type: "", text: "" });
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordTouched, setPasswordTouched] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+  const [showPassword, setShowPassword] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
 
   const t = useMemo(() => translations[language], [language]);
 
@@ -109,9 +131,76 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
 
   const greetingText = `${t.greeting}, ${greetingName}!`;
   const profileName =
-    authUser?.fullName || authUser?.email?.split("@")[0] || "Talaba";
+    studentProfile?.fullName ||
+    authUser?.fullName ||
+    authUser?.email?.split("@")[0] ||
+    "Talaba";
+  const profileEmail = studentProfile?.email || authUser?.email || "-";
+  const profileFullName = String(profileName).trim() || "-";
+  const profileBirthDate = studentProfile?.birth_date
+    ? new Date(studentProfile.birth_date).toLocaleDateString("uz-UZ")
+    : "-";
   const profileInitial =
     String(profileName).trim().charAt(0).toUpperCase() || "T";
+
+  const passwordErrors = useMemo(() => {
+    const errors = {
+      oldPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    };
+
+    const shouldValidateOld =
+      passwordSubmitAttempted || passwordTouched.oldPassword;
+    const shouldValidateNew =
+      passwordSubmitAttempted || passwordTouched.newPassword;
+    const shouldValidateConfirm =
+      passwordSubmitAttempted || passwordTouched.confirmPassword;
+
+    if (shouldValidateOld && !passwordForm.oldPassword.trim()) {
+      errors.oldPassword = "Amaldagi parolni kiriting";
+    }
+
+    if (shouldValidateNew && !passwordForm.newPassword.trim()) {
+      errors.newPassword = "Yangi parolni kiriting";
+    } else if (
+      passwordForm.newPassword &&
+      passwordForm.newPassword.length < 8
+    ) {
+      errors.newPassword = "Kamida 8 xonali bo'lishi kerak";
+    } else if (
+      passwordForm.oldPassword &&
+      passwordForm.newPassword &&
+      passwordForm.oldPassword === passwordForm.newPassword
+    ) {
+      errors.newPassword = "Amaldagi va yangi parol bir xil bo'lmasligi kerak";
+    }
+
+    if (shouldValidateConfirm && !passwordForm.confirmPassword.trim()) {
+      errors.confirmPassword = "Parolni tasdiqlang";
+    } else if (
+      passwordForm.confirmPassword &&
+      passwordForm.newPassword !== passwordForm.confirmPassword
+    ) {
+      errors.confirmPassword = "Yangi parol va tasdiq bir xil bo'lishi kerak";
+    }
+
+    if (serverPasswordError) {
+      errors.oldPassword = serverPasswordError;
+    }
+
+    return errors;
+  }, [
+    passwordForm,
+    passwordSubmitAttempted,
+    passwordTouched,
+    serverPasswordError,
+  ]);
+
+  const hasPasswordErrors =
+    Boolean(passwordErrors.oldPassword) ||
+    Boolean(passwordErrors.newPassword) ||
+    Boolean(passwordErrors.confirmPassword);
 
   useEffect(() => {
     setActiveMenu(initialMenu);
@@ -151,6 +240,22 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   }, []);
 
   useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        setProfileLoading(true);
+        const result = await studentsApi.getMyProfile();
+        setStudentProfile(result?.data || null);
+      } catch {
+        setStudentProfile(null);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  useEffect(() => {
     const handleProfileOutside = (event) => {
       if (
         showProfilePanel &&
@@ -172,6 +277,58 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     localStorage.removeItem("crm_access_token");
     setShowProfilePanel(false);
     navigate("/", { replace: true });
+  };
+
+  const openPasswordModal = () => {
+    setShowPasswordModal(true);
+    setPasswordSubmitAttempted(false);
+    setServerPasswordError("");
+    setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
+    setPasswordTouched({
+      oldPassword: false,
+      newPassword: false,
+      confirmPassword: false,
+    });
+    setShowPassword({
+      oldPassword: false,
+      newPassword: false,
+      confirmPassword: false,
+    });
+  };
+
+  const updatePasswordField = (field, value) => {
+    setServerPasswordError("");
+    setPasswordForm((prev) => ({ ...prev, [field]: value }));
+    setPasswordTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const handleSavePassword = async () => {
+    setPasswordSubmitAttempted(true);
+    setServerPasswordError("");
+
+    if (hasPasswordErrors) {
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+      await studentsApi.changeMyPassword({
+        oldPassword: passwordForm.oldPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      setNotice({ type: "success", text: "Parol muvaffaqiyatli yangilandi" });
+      setShowPasswordModal(false);
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || "Parolni o'zgartirib bo'lmadi";
+      if (String(message).toLowerCase().includes("amaldagi parol")) {
+        setServerPasswordError("Amaldagi parol noto'g'ri");
+      } else {
+        setNotice({ type: "error", text: String(message) });
+      }
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   return (
@@ -251,9 +408,9 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar Menu */}
         <aside
-          className={`${theme.sidebar} border-r ${theme.card} w-72 overflow-y-auto`}
+          className={`${theme.sidebar} border-r ${theme.card} w-72 flex flex-col min-h-0`}
         >
-          <nav className="p-4 space-y-2">
+          <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
             {menuItems.map((item) => (
               <button
                 key={item.id}
@@ -269,6 +426,16 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
               </button>
             ))}
           </nav>
+
+          <div className="px-4 pb-4 pt-2 border-t border-slate-200/70">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl cursor-pointer transition"
+            >
+              {t.logout}
+            </button>
+          </div>
         </aside>
 
         {/* Main Area */}
@@ -294,15 +461,242 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
             ))}
 
           {activeMenu === "settings" && (
-            <div className={`${theme.card} border rounded-2xl p-8 shadow-sm`}>
-              <h2 className={`text-2xl font-bold mb-4 ${theme.text}`}>
-                {t.settings}
-              </h2>
-              <p className={theme.soft}>{t.settingsText}</p>
+            <div className="space-y-6">
+              {notice.text ? (
+                <div
+                  className={`rounded-xl px-4 py-3 text-sm font-medium ${
+                    notice.type === "error"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-emerald-100 text-emerald-700"
+                  }`}
+                >
+                  {notice.text}
+                </div>
+              ) : null}
+
+              <div className={`${theme.card} border rounded-2xl p-6 shadow-sm`}>
+                <h2 className={`text-3xl font-bold mb-8 ${theme.text}`}>
+                  Shaxsiy ma'lumotlar
+                </h2>
+
+                {profileLoading ? (
+                  <p className={theme.soft}>Ma'lumotlar yuklanmoqda...</p>
+                ) : (
+                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    <div className="xl:col-span-5 flex flex-col md:flex-row gap-6 items-center md:items-start">
+                      <div className="text-center">
+                        <img
+                          src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=500&auto=format&fit=crop"
+                          alt="Namuna"
+                          className="w-32 h-32 object-cover border border-slate-400"
+                        />
+                        <p className={`text-xl mt-2 ${theme.text}`}>Namuna</p>
+                        <p className={`text-xl mt-4 ${theme.soft}`}>
+                          500x500 o'lcham, JPEG, JPG, PNG format, maksimum 2MB
+                        </p>
+                      </div>
+
+                      <div className="text-center">
+                        <img
+                          src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=500&auto=format&fit=crop"
+                          alt={profileName}
+                          className="w-36 h-36 rounded-full object-cover"
+                        />
+                        <span className="inline-flex mt-4 bg-emerald-500 text-white text-xs font-semibold px-3 py-1 rounded-md">
+                          Talabga mos
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="xl:col-span-3 space-y-6">
+                      <div>
+                        <p className={`${theme.soft} text-lg`}>Full name</p>
+                        <p className={`${theme.text} text-2xl font-semibold`}>
+                          {profileFullName}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className={`${theme.soft} text-lg`}>Email</p>
+                        <p
+                          className={`${theme.text} text-2xl font-semibold break-all`}
+                        >
+                          {profileEmail}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className={`${theme.soft} text-lg`}>Jinsi</p>
+                        <p className={`${theme.text} text-2xl font-semibold`}>
+                          -
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="xl:col-span-4 space-y-6">
+                      <div>
+                        <p className={`${theme.soft} text-lg`}>
+                          Tug'ilgan sana
+                        </p>
+                        <p className={`${theme.text} text-2xl font-semibold`}>
+                          {profileBirthDate}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className={`${theme.soft} text-lg`}>HH ID</p>
+                        <p className={`${theme.text} text-2xl font-semibold`}>
+                          {studentProfile?.id || authUser?.id || "-"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div
+                  className={`${theme.card} border rounded-2xl p-6 shadow-sm min-h-48`}
+                >
+                  <h3 className={`${theme.text} text-2xl font-semibold mb-6`}>
+                    Kirish
+                  </h3>
+                  <p className={`${theme.text} text-xl break-all`}>
+                    {profileEmail}
+                  </p>
+                </div>
+
+                <div
+                  className={`${theme.card} border rounded-2xl p-6 shadow-sm min-h-48`}
+                >
+                  <div className="flex items-start justify-between">
+                    <h3 className={`${theme.text} text-2xl font-semibold mb-6`}>
+                      Parol
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={openPasswordModal}
+                      className="text-2xl cursor-pointer"
+                      aria-label="Parolni o'zgartirish"
+                    >
+                      ✏️
+                    </button>
+                  </div>
+                  <p className={`${theme.text} text-2xl tracking-widest`}>
+                    ••••••••
+                  </p>
+                </div>
+
+                <div
+                  className={`${theme.card} border rounded-2xl p-6 shadow-sm min-h-48`}
+                >
+                  <div className="flex items-start justify-between">
+                    <h3 className={`${theme.text} text-2xl font-semibold mb-6`}>
+                      Bildirishnoma sozlamalari
+                    </h3>
+                    <button
+                      type="button"
+                      className="text-2xl cursor-pointer"
+                      aria-label="Tahrirlash"
+                    >
+                      ✏️
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`${theme.card} border rounded-2xl p-6 shadow-sm min-h-28`}
+              >
+                <h3 className={`${theme.text} text-2xl`}>Shartnomalarim</h3>
+              </div>
             </div>
           )}
         </main>
       </div>
+
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
+          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-4xl font-bold text-slate-800">
+                  Parolni o'zgartirish
+                </h3>
+                <p className="text-slate-600 mt-4 text-xl">
+                  Quyidagi ma'lumotlarni to'ldiring
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPasswordModal(false)}
+                className="text-slate-500 hover:text-slate-700 text-5xl leading-none cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+
+            {["oldPassword", "newPassword", "confirmPassword"].map(
+              (fieldKey) => {
+                const labels = {
+                  oldPassword: "Amaldagi parol",
+                  newPassword: "Yangi parol",
+                  confirmPassword: "Parolni tasdiqlash",
+                };
+
+                return (
+                  <div key={fieldKey} className="mb-5">
+                    <label className="block text-slate-600 mb-2 text-xl">
+                      {labels[fieldKey]}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword[fieldKey] ? "text" : "password"}
+                        value={passwordForm[fieldKey]}
+                        onChange={(event) =>
+                          updatePasswordField(fieldKey, event.target.value)
+                        }
+                        placeholder="Parolingizni kiriting"
+                        className={`w-full rounded-xl border px-4 py-3 pr-12 text-xl outline-none ${
+                          passwordErrors[fieldKey]
+                            ? "border-red-500 focus:ring-2 focus:ring-red-200"
+                            : "border-slate-300 focus:ring-2 focus:ring-emerald-200"
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowPassword((prev) => ({
+                            ...prev,
+                            [fieldKey]: !prev[fieldKey],
+                          }))
+                        }
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 cursor-pointer"
+                      >
+                        👁️
+                      </button>
+                    </div>
+                    {passwordErrors[fieldKey] ? (
+                      <p className="text-red-500 text-lg mt-2">
+                        {passwordErrors[fieldKey]}
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              },
+            )}
+
+            <button
+              type="button"
+              onClick={handleSavePassword}
+              disabled={savingPassword}
+              className="w-full mt-4 rounded-xl bg-[#BE925D] hover:bg-[#a77f4e] disabled:opacity-70 text-white text-3xl font-semibold py-3 cursor-pointer"
+            >
+              {savingPassword ? "Saqlanmoqda..." : "Saqlash"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

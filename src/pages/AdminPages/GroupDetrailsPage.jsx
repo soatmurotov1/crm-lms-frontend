@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import HomeworkDetailPage from "./HomeworkDetailPage";
+import Attendance from "./group-details/AcademicAttendance";
 import {
   attendanceApi,
   groupsApi,
@@ -93,6 +94,7 @@ export default function GroupDetailsPage({
   const [videosLoading, setVideosLoading] = useState(false);
   const [homeworkSaving, setHomeworkSaving] = useState(false);
   const [deletingHomeworkId, setDeletingHomeworkId] = useState(null);
+  const [deletingVideoId, setDeletingVideoId] = useState(null);
   const [videoUploading, setVideoUploading] = useState(false);
   const [videoLessonId, setVideoLessonId] = useState("");
   const [showVideoUploadModal, setShowVideoUploadModal] = useState(false);
@@ -325,6 +327,7 @@ export default function GroupDetailsPage({
   });
   const [lessonForm, setLessonForm] = useState({
     title: "",
+    description: "",
   });
   const [lessonSaving, setLessonSaving] = useState(false);
 
@@ -379,6 +382,20 @@ export default function GroupDetailsPage({
     if (bytes < 1024 * 1024 * 1024)
       return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+  };
+
+  const truncateFileName = (value, maxLength = 42) => {
+    if (!value) return "Video";
+    const name = String(value);
+    if (name.length <= maxLength) return name;
+    const dotIndex = name.lastIndexOf(".");
+    const extension = dotIndex > 0 ? name.slice(dotIndex) : "";
+    const base = dotIndex > 0 ? name.slice(0, dotIndex) : name;
+    const truncated = base.slice(
+      0,
+      Math.max(10, maxLength - extension.length - 3),
+    );
+    return `${truncated}...${extension}`;
   };
 
   const getVideoSize = async (fileUrl) => {
@@ -467,6 +484,9 @@ export default function GroupDetailsPage({
         list.map(async (item) => ({
           id: item.id,
           name: item.file ? String(item.file).split("/").pop() : "Video",
+          displayName: truncateFileName(
+            item.file ? String(item.file).split("/").pop() : "Video",
+          ),
           lessonName: item.lesson?.title || "-",
           status: "Tayyor",
           lessonDate: formatDate(item.lesson?.created_at),
@@ -781,8 +801,11 @@ export default function GroupDetailsPage({
 
       setLessonForm({
         title: "",
+        description: "",
       });
       alert("Dars muvaffaqiyatli yaratildi");
+      setLessonPage("list");
+      setActiveLessonTab("darsliklar");
     } catch (error) {
       alert(error?.response?.data?.message || "Dars yaratishda xato");
     } finally {
@@ -924,6 +947,21 @@ export default function GroupDetailsPage({
     }
   };
 
+  const deleteVideo = async (id) => {
+    const isOk = window.confirm("Rostan ham videoni o‘chirmoqchimisiz?");
+    if (!isOk) return;
+
+    try {
+      setDeletingVideoId(id);
+      await lessonVideosApi.remove(id);
+      await loadVideos();
+    } catch (error) {
+      alert(error?.response?.data?.message || "Videoni o‘chirishda xato");
+    } finally {
+      setDeletingVideoId(null);
+    }
+  };
+
   const deleteGroup = async () => {
     const isOk = window.confirm("Rostan ham guruhni o‘chirmoqchimisiz?");
     if (!isOk) return;
@@ -1051,7 +1089,7 @@ export default function GroupDetailsPage({
             </button>
           </div>
 
-          {activeMainTab !== "guruh-darsliklari" && (
+          {activeMainTab === "malumotlar" && (
             <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)] gap-3 overflow-hidden">
               <div className="min-h-0 overflow-hidden flex flex-col gap-3">
                 <div className={infoCardClass}>
@@ -1334,140 +1372,19 @@ export default function GroupDetailsPage({
                   </div>
                 </div>
               </div>
+            </div>
+          )}
 
-              {activeMainTab === "akademik-davomat" && (
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-                  {/* Dars yaratish forma */}
-                  <div
-                    className={`${theme.card} border rounded-2xl shadow-sm p-4 lg:col-span-2 h-fit`}
-                  >
-                    <h3
-                      className={`text-base font-semibold ${theme.text} mb-4`}
-                    >
-                      Yangi dars yaratish
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label
-                          className={`block text-sm font-medium mb-2 ${theme.text}`}
-                        >
-                          * Dars mavzusi
-                        </label>
-                        <input
-                          type="text"
-                          className={inputClass}
-                          placeholder="Dars mavzusini kiriting"
-                          value={lessonForm.title}
-                          onChange={(e) =>
-                            setLessonForm((prev) => ({
-                              ...prev,
-                              title: e.target.value,
-                            }))
-                          }
-                        />
-                      </div>
-
-                      <div className="flex gap-2 pt-2">
-                        <button
-                          onClick={() =>
-                            setLessonForm({
-                              title: "",
-                              description: "",
-                              file: null,
-                            })
-                          }
-                          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
-                        >
-                          Bekor qilish
-                        </button>
-                        <button
-                          disabled={lessonSaving}
-                          onClick={addLesson}
-                          className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
-                        >
-                          {lessonSaving ? "Saqlanmoqda..." : "E'lon qilish"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* O'quvchilar ro'yxati */}
-                  <div
-                    className={`${theme.card} border rounded-2xl shadow-sm p-4 lg:col-span-3 overflow-auto max-h-96`}
-                  >
-                    <h3
-                      className={`text-base font-semibold ${theme.text} mb-4`}
-                    >
-                      O'quvchilar ro'yxati
-                    </h3>
-                    <div className="space-y-2">
-                      {students.length === 0 ? (
-                        <p className={`text-sm ${theme.soft}`}>
-                          O'quvchilar topilmadi
-                        </p>
-                      ) : (
-                        students.map((student) => {
-                          const isPresent =
-                            attendance[student.id]?.[dateHeaders[0]?.key] ===
-                            "Bor";
-                          const savingKey = `${student.id}-${dateHeaders[0]?.lessonId}`;
-                          const isSaving = !!attendanceSavingMap[savingKey];
-
-                          return (
-                            <div
-                              key={student.id}
-                              className={`flex items-center justify-between p-3 rounded-xl border ${innerBorderClass} ${
-                                isPresent
-                                  ? "bg-emerald-50 border-emerald-200"
-                                  : ""
-                              }`}
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div
-                                  className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                                    darkMode
-                                      ? "bg-slate-800 text-slate-200"
-                                      : "bg-slate-100 text-slate-600"
-                                  }`}
-                                >
-                                  {getInitial(student.name)}
-                                </div>
-                                <div className="min-w-0">
-                                  <p
-                                    className={`font-medium truncate ${theme.text}`}
-                                  >
-                                    {student.name}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <button
-                                disabled={isSaving || !dateHeaders[0]?.lessonId}
-                                onClick={() =>
-                                  setAttendanceValue(
-                                    student.id,
-                                    dateHeaders[0],
-                                    isPresent ? "Yo'q" : "Bor",
-                                  )
-                                }
-                                className={`px-4 py-2 rounded-xl text-sm font-medium border transition disabled:opacity-60 ${
-                                  isPresent
-                                    ? "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600"
-                                    : darkMode
-                                      ? "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
-                                      : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
-                                }`}
-                              >
-                                {isPresent ? "Yoqilgan ✓" : "O'chilgan"}
-                              </button>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+          {activeMainTab === "akademik-davomat" && (
+            <div
+              className="flex-1 min-h-0 overflow-y-auto"
+              style={{ padding: "0" }}
+            >
+              <Attendance
+                groupId={group?.id}
+                group={group}
+                groupData={groupData}
+              />
             </div>
           )}
 
@@ -1501,28 +1418,21 @@ export default function GroupDetailsPage({
                   </button>
                 </div>
 
-                {activeLessonTab === "darsliklar" ? (
-                  <button
-                    onClick={() => setActiveMainTab("malumotlar")}
-                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
-                  >
-                    Darslik qo‘shish
-                  </button>
-                ) : activeLessonTab === "uyga-vazifa" ? (
+                {activeLessonTab === "uyga-vazifa" ? (
                   <button
                     onClick={() => setLessonPage("create-homework")}
                     className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
                   >
                     Uyga vazifa qo‘shish
                   </button>
-                ) : (
+                ) : activeLessonTab === "videolar" ? (
                   <button
                     onClick={() => setShowVideoUploadModal(true)}
                     className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
                   >
                     Qo‘shish
                   </button>
-                )}
+                ) : null}
               </div>
 
               <div className="flex-1 min-h-0 overflow-auto p-4">
@@ -1795,11 +1705,14 @@ export default function GroupDetailsPage({
                                     target="_blank"
                                     rel="noreferrer"
                                     className="underline cursor-pointer"
+                                    title={video.name}
                                   >
-                                    {video.name}
+                                    {video.displayName || video.name}
                                   </a>
                                 ) : (
-                                  <span>{video.name}</span>
+                                  <span title={video.name}>
+                                    {video.displayName || video.name}
+                                  </span>
                                 )}
                               </div>
                             </td>
@@ -1820,10 +1733,16 @@ export default function GroupDetailsPage({
                             <td className={`px-3 py-3 ${theme.text}`}>
                               {video.uploadedAt}
                             </td>
-                            <td
-                              className={`px-3 py-3 text-center ${theme.soft}`}
-                            >
-                              -
+                            <td className="px-3 py-3 text-center">
+                              <button
+                                disabled={deletingVideoId === video.id}
+                                onClick={() => deleteVideo(video.id)}
+                                className="text-red-500 text-xs disabled:opacity-60"
+                              >
+                                {deletingVideoId === video.id
+                                  ? "O‘chirilmoqda..."
+                                  : "O‘chirish"}
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -1947,6 +1866,84 @@ export default function GroupDetailsPage({
                         className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
                       >
                         {homeworkSaving ? "Saqlanmoqda..." : "E'lon qilish"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          {activeMainTab === "guruh-darsliklari" &&
+            lessonPage === "create-lesson" && (
+              <div
+                className={`${theme.card} border rounded-2xl shadow-sm flex-1 min-h-0 overflow-auto p-4 sm:p-6`}
+              >
+                <div className="max-w-4xl mx-auto">
+                  <button
+                    onClick={() => setLessonPage("list")}
+                    className={`mb-6 ${theme.soft} hover:opacity-80 text-sm`}
+                  >
+                    ← Orqaga
+                  </button>
+
+                  <h2 className={`text-2xl font-bold mb-6 ${theme.text}`}>
+                    Yangi dars yaratish
+                  </h2>
+
+                  <div className="space-y-6">
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${theme.text}`}
+                      >
+                        * Mavzu
+                      </label>
+                      <input
+                        className={inputClass}
+                        placeholder="Mavzuni kiriting"
+                        value={lessonForm.title}
+                        onChange={(e) =>
+                          setLessonForm({
+                            ...lessonForm,
+                            title: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${theme.text}`}
+                      >
+                        * Izoh
+                      </label>
+                      <textarea
+                        className={inputClass}
+                        rows={6}
+                        placeholder="Izoh yozing"
+                        value={lessonForm.description}
+                        onChange={(e) =>
+                          setLessonForm({
+                            ...lessonForm,
+                            description: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                      <button
+                        onClick={() => setLessonPage("list")}
+                        className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+                      >
+                        Bekor qilish
+                      </button>
+
+                      <button
+                        disabled={lessonSaving}
+                        onClick={addLesson}
+                        className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
+                      >
+                        {lessonSaving ? "Saqlanmoqda..." : "Saqlash"}
                       </button>
                     </div>
                   </div>
@@ -2246,3 +2243,225 @@ export default function GroupDetailsPage({
     </>
   );
 }
+
+const attendanceStyles = {
+  wrapper: {
+    fontFamily: "'DM Sans', sans-serif",
+    maxWidth: "100%",
+    padding: "0",
+  },
+  teacherCard: {
+    background: "#ffffff",
+    border: "0.5px solid #e5e7eb",
+    borderRadius: 12,
+    padding: "16px 20px",
+    marginBottom: 12,
+  },
+  teacherRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: "50%",
+    background: "#EFF6FF",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 500,
+    fontSize: 14,
+    color: "#3B82F6",
+    flexShrink: 0,
+  },
+  teacherName: {
+    fontWeight: 500,
+    fontSize: 14,
+    color: "#111827",
+    margin: 0,
+  },
+  teacherRole: {
+    fontSize: 12,
+    color: "#9ca3af",
+    margin: 0,
+  },
+  courseInfoSection: {
+    background: "#ffffff",
+    border: "0.5px solid #e5e7eb",
+    borderRadius: 12,
+    padding: "12px 16px",
+    marginBottom: 12,
+  },
+  courseName: {
+    fontSize: 13,
+    fontWeight: 500,
+    color: "#111827",
+    margin: "0 0 8px 0",
+  },
+  lessonMeta: {
+    display: "flex",
+    gap: 12,
+    alignItems: "center",
+  },
+  metaItem: {
+    fontSize: 12,
+    color: "#9ca3af",
+  },
+  formCard: {
+    background: "#ffffff",
+    border: "0.5px solid #e5e7eb",
+    borderRadius: 12,
+    padding: "16px 20px",
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: 500,
+    color: "#111827",
+    marginBottom: 12,
+    margin: 0,
+    marginBottom: 12,
+  },
+  formGroup: {
+    marginBottom: 0,
+  },
+  formLabel: {
+    fontSize: 12,
+    color: "#6b7280",
+    display: "block",
+    marginBottom: 6,
+  },
+  input: {
+    width: "100%",
+    height: 36,
+    padding: "0 10px",
+    border: "0.5px solid #d1d5db",
+    borderRadius: 8,
+    background: "#ffffff",
+    color: "#111827",
+    fontSize: 13,
+    outline: "none",
+    boxSizing: "border-box",
+  },
+  statsSection: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: 10,
+    marginBottom: 12,
+  },
+  statBox: {
+    background: "#f9fafb",
+    border: "0.5px solid #e5e7eb",
+    borderRadius: 8,
+    padding: "12px 14px",
+    textAlign: "center",
+  },
+  statLabel: {
+    fontSize: 11,
+    color: "#9ca3af",
+    marginBottom: 4,
+  },
+  statVal: {
+    fontSize: 20,
+    fontWeight: 600,
+    color: "#111827",
+  },
+  tableSection: {
+    background: "#ffffff",
+    border: "0.5px solid #e5e7eb",
+    borderRadius: 12,
+    padding: "0",
+    marginBottom: 12,
+    overflow: "visible",
+  },
+  tableSaveButtonRow: {
+    display: "flex",
+    justifyContent: "flex-end",
+    padding: "12px 16px",
+    borderTop: "0.5px solid #e5e7eb",
+    background: "#ffffff",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    fontSize: 13,
+  },
+  theadRow: {
+    borderBottom: "0.5px solid #e5e7eb",
+  },
+  th: {
+    padding: "10px 12px",
+    textAlign: "left",
+    fontSize: 11,
+    fontWeight: 600,
+    color: "#9ca3af",
+    background: "#f9fafb",
+  },
+  tr: {
+    borderBottom: "0.5px solid #f3f4f6",
+  },
+  td: {
+    padding: "10px 12px",
+    color: "#111827",
+    fontSize: 13,
+  },
+  timeInput: {
+    border: "0.5px solid #e5e7eb",
+    borderRadius: 6,
+    padding: "4px 6px",
+    fontSize: 12,
+    background: "#ffffff",
+    color: "#111827",
+    width: "100%",
+    maxWidth: 70,
+    boxSizing: "border-box",
+  },
+  toggleLabel: {
+    cursor: "pointer",
+    display: "inline-block",
+  },
+  toggleTrack: {
+    display: "block",
+    width: 40,
+    height: 22,
+    borderRadius: 11,
+    transition: "background 0.2s",
+    position: "relative",
+  },
+  toggleThumb: {
+    display: "block",
+    position: "absolute",
+    width: 16,
+    height: 16,
+    top: 3,
+    left: 3,
+    background: "white",
+    borderRadius: "50%",
+    transition: "transform 0.2s",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+  },
+  badge: {
+    display: "inline-block",
+    fontSize: 11,
+    padding: "4px 8px",
+    borderRadius: 6,
+    fontWeight: 500,
+  },
+  saveButtonRow: {
+    display: "flex",
+    justifyContent: "flex-end",
+  },
+  saveBtn: {
+    height: 36,
+    padding: "0 20px",
+    background: "#1D9E75",
+    color: "white",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: "pointer",
+    transition: "all 0.2s",
+  },
+};

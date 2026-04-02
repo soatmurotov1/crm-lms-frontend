@@ -101,7 +101,7 @@ export default function GroupsPage({
       setLoading(true);
       const [groupsRes, coursesRes, roomsRes, teachersRes, studentsRes] =
         await Promise.allSettled([
-          groupsApi.getAll(),
+          groupsApi.getAll({ status: "ALL" }),
           coursesApi.getAll(),
           roomsApi.getAll(),
           teachersApi.getAll(),
@@ -575,7 +575,7 @@ export default function GroupsPage({
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border">
+        <div className="overflow-x-auto overflow-y-visible rounded-2xl border">
           <table className="min-w-6xl w-full text-sm">
             <thead className={darkMode ? "bg-slate-800" : "bg-slate-50"}>
               <tr>
@@ -626,6 +626,8 @@ export default function GroupsPage({
                 </tr>
               ) : filteredGroups.length ? (
                 filteredGroups.map((group) => {
+                  const normalizedGroupStatus = normalizeStatus(group.status);
+                  const isGroupLocked = normalizedGroupStatus !== "ACTIVE";
                   const course = coursesById[group.courseId];
                   const roomName = roomsById[group.roomId]?.name || "-";
                   const studentsInGroup = Number(
@@ -641,13 +643,16 @@ export default function GroupsPage({
                   return (
                     <tr
                       key={group.id}
-                      onClick={() =>
-                        handleOpenGroupDetails(group, course, roomName)
-                      }
+                      onClick={() => {
+                        if (isGroupLocked) return;
+                        handleOpenGroupDetails(group, course, roomName);
+                      }}
                       className={`border-t ${theme.rowBorder} ${
-                        darkMode
-                          ? "hover:bg-slate-800/30 cursor-pointer"
-                          : "hover:bg-slate-50 cursor-pointer"
+                        isGroupLocked
+                          ? ""
+                          : darkMode
+                            ? "hover:bg-slate-800/30 cursor-pointer"
+                            : "hover:bg-slate-50 cursor-pointer"
                       }`}
                     >
                       <td className="px-4 py-3">
@@ -662,10 +667,17 @@ export default function GroupsPage({
                       <td className={`px-4 py-3 font-medium ${theme.text}`}>
                         <button
                           type="button"
-                          onClick={() =>
-                            handleOpenGroupDetails(group, course, roomName)
-                          }
-                          className="hover:underline cursor-pointer text-left"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isGroupLocked) return;
+                            handleOpenGroupDetails(group, course, roomName);
+                          }}
+                          disabled={isGroupLocked}
+                          className={`text-left ${
+                            isGroupLocked
+                              ? "opacity-60 cursor-not-allowed"
+                              : "hover:underline cursor-pointer"
+                          }`}
                         >
                           {group.name || "-"}
                         </button>
@@ -696,9 +708,15 @@ export default function GroupsPage({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (isGroupLocked) return;
                             handleOpenGroupDetails(group, course, roomName);
                           }}
-                          className="underline decoration-dotted underline-offset-2 cursor-pointer"
+                          disabled={isGroupLocked}
+                          className={`underline decoration-dotted underline-offset-2 ${
+                            isGroupLocked
+                              ? "opacity-60 cursor-not-allowed"
+                              : "cursor-pointer"
+                          }`}
                           title="Talabalarni ko'rish"
                         >
                           {studentsInGroup}
@@ -712,16 +730,26 @@ export default function GroupsPage({
                           <button
                             type="button"
                             onClick={() => {
+                              if (isGroupLocked) return;
                               handleOpenGroupDetails(group, course, roomName, {
                                 initialMainTab: "akademik-davomat",
                               });
                             }}
-                            className="px-3 h-8 rounded-lg border text-xs font-medium cursor-pointer"
+                            disabled={isGroupLocked}
+                            className={`px-3 h-8 rounded-lg border text-xs font-medium ${
+                              isGroupLocked
+                                ? "opacity-60 cursor-not-allowed"
+                                : "cursor-pointer"
+                            }`}
                           >
                             Davomat
                           </button>
 
-                          <div className="relative">
+                          <div
+                            className={`relative ${
+                              openActionMenuId === group.id ? "z-50" : ""
+                            }`}
+                          >
                             <button
                               type="button"
                               onClick={() =>
@@ -736,7 +764,7 @@ export default function GroupsPage({
 
                             {openActionMenuId === group.id && (
                               <div
-                                className={`absolute right-0 top-9 z-20 min-w-36 rounded-xl border p-1 shadow-lg ${theme.subpanel}`}
+                                className={`absolute right-0 bottom-10 z-50 min-w-36 rounded-xl border p-1 shadow-lg ${theme.subpanel}`}
                               >
                                 <button
                                   type="button"

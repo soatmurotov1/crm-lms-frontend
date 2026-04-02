@@ -328,7 +328,7 @@ export default function DashboardPage({
   };
 
   const managementPathMap = {
-    courses: "/dashboard",
+    courses: "/dashboard/course",
     rooms: "/dashboard/room",
     employees: "/dashboard",
     teachers: "/dashboard/teacher",

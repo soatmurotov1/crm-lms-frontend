@@ -36,6 +36,18 @@ export default function LoginPage() {
     };
   }, []);
 
+  const getLoginErrorMessage = (error) => {
+    if (!navigator.onLine) {
+      return "Internet muammosi: internetga ulanmagansiz";
+    }
+
+    if (!error?.response) {
+      return "Backendga ulanib bo'lmadi. Serverni tekshiring";
+    }
+
+    return error?.response?.data?.message || "Login yoki parol noto'g'ri";
+  };
+
   const handleLogin = async () => {
     if (!login || !password) {
       alert("Login va parolni kiriting");
@@ -77,10 +89,7 @@ export default function LoginPage() {
         navigate(targetPath);
       }, 800);
     } catch (error) {
-      showToast(
-        "error",
-        error?.response?.data?.message || "Login yoki parol noto'g'ri",
-      );
+      showToast("error", getLoginErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -198,7 +207,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white py-2.5 sm:py-4 rounded-xl sm:rounded-2xl text-base sm:text-xl md:text-2xl font-semibold cursor-pointer transition active:scale-95"
           >
-            {loading ? "Kirilmoqda..." : "Kirish"}
+            {loading ? "Tekshirilmoqda..." : "Kirish"}
           </button>
         </div>
       </div>

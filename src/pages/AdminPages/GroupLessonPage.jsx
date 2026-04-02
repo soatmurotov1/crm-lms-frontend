@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
+import Attendance from "./group-details/AcademicAttendance";
 
 const lessonTabs = ["Uyga vazifa", "Videolar", "Imtihonlar", "Jurnal"];
-const topicTypes = ["O‘quv reja bo‘yicha", "Boshqa"];
 
 const defaultLessons = [
   {
@@ -73,7 +73,6 @@ const defaultLessons = [
 ];
 
 function LessonModal({ open, onClose, darkMode, onSave }) {
-  const [topicType, setTopicType] = useState("Boshqa");
   const [topic, setTopic] = useState("");
 
   if (!open) return null;
@@ -98,23 +97,16 @@ function LessonModal({ open, onClose, darkMode, onSave }) {
 
         <div className="p-5 sm:p-7">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
-            {topicTypes.map((item) => (
-              <label
-                key={item}
-                className={`flex items-center gap-3 text-sm sm:text-base cursor-pointer ${
-                  topicType === item ? "text-emerald-500 font-medium" : "text-slate-400"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="topicType"
-                  checked={topicType === item}
-                  onChange={() => setTopicType(item)}
-                  className="w-4 h-4"
-                />
-                {item}
-              </label>
-            ))}
+            <label className="flex items-center gap-3 text-sm sm:text-base cursor-pointer text-emerald-500 font-medium">
+              <input
+                type="radio"
+                name="topicType"
+                checked
+                readOnly
+                className="w-4 h-4"
+              />
+              Boshqa
+            </label>
           </div>
 
           <div className="mt-10 max-w-xl">
@@ -145,7 +137,7 @@ function LessonModal({ open, onClose, darkMode, onSave }) {
               if (!topic.trim()) return;
               onSave(topic.trim());
               setTopic("");
-              setTopicType("Boshqa");
+              onClose();
             }}
             className="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium"
           >
@@ -157,7 +149,7 @@ function LessonModal({ open, onClose, darkMode, onSave }) {
   );
 }
 
-export default function GroupLessonsPage() {
+export default function GroupLessonsPage({ groupId, lessonId }) {
   const [darkMode] = useState(false);
   const [activeTopTab, setActiveTopTab] = useState("Guruh darsliklari");
   const [activeInnerTab, setActiveInnerTab] = useState("Uyga vazifa");
@@ -216,178 +208,224 @@ export default function GroupLessonsPage() {
 
         <div className="px-4 sm:px-6 lg:px-8 pt-4 border-b border-slate-200">
           <div className="flex flex-wrap gap-4 sm:gap-8">
-            {["Ma’lumotlar", "Guruh darsliklari", "Akademik davomat"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTopTab(tab)}
-                className={`pb-4 text-sm sm:text-base border-b-2 transition ${
-                  activeTopTab === tab
-                    ? "border-emerald-500 text-emerald-600 font-semibold"
-                    : "border-transparent text-slate-500"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+            {["Ma’lumotlar", "Guruh darsliklari", "Akademik davomat"].map(
+              (tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTopTab(tab)}
+                  className={`pb-4 text-sm sm:text-base border-b-2 transition ${
+                    activeTopTab === tab
+                      ? "border-emerald-500 text-emerald-600 font-semibold"
+                      : "border-transparent text-slate-500"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ),
+            )}
           </div>
         </div>
 
         <div className="px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8 min-w-0">
-              <h2 className="text-base font-semibold text-slate-900 shrink-0">
-                Guruh darsliklari
-              </h2>
+          {activeTopTab === "Akademik davomat" ? (
+            <Attendance groupId={groupId} lessonId={lessonId} />
+          ) : (
+            <>
+              <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+                <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8 min-w-0">
+                  <h2 className="text-base font-semibold text-slate-900 shrink-0">
+                    Guruh darsliklari
+                  </h2>
 
-              <div className="flex flex-wrap gap-2 sm:gap-3 min-w-0">
-                {lessonTabs.map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveInnerTab(tab)}
-                    className={`px-4 py-2 rounded-full text-sm border transition ${
-                      activeInnerTab === tab
-                        ? "border-pink-300 text-slate-900 shadow-sm"
-                        : "border-transparent text-slate-500 hover:border-slate-200"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowLessonModal(true)}
-              className="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium shrink-0"
-            >
-              Uyga vazifa qo‘shish
-            </button>
-          </div>
-
-          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="rounded-2xl border border-slate-200 p-4">
-              <p className="text-sm text-slate-500">Jami o‘quvchi</p>
-              <p className="text-2xl font-bold text-slate-900 mt-2">
-                {stats.totalStudents}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 p-4">
-              <p className="text-sm text-slate-500">Topshirganlar</p>
-              <p className="text-2xl font-bold text-slate-900 mt-2">
-                {stats.totalSubmitted}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 p-4">
-              <p className="text-sm text-slate-500">Tekshirilgan</p>
-              <p className="text-2xl font-bold text-slate-900 mt-2">
-                {stats.totalChecked}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 hidden xl:block rounded-2xl border border-slate-200 overflow-hidden">
-            <table className="w-full text-sm table-fixed">
-              <thead className="bg-slate-50">
-                <tr className="text-slate-500">
-                  <th className="text-left px-4 py-4 w-[50px]">#</th>
-                  <th className="text-left px-4 py-4">Mavzu</th>
-                  <th className="text-center px-3 py-4 w-[70px]">👤</th>
-                  <th className="text-center px-3 py-4 w-[70px]">⏰</th>
-                  <th className="text-center px-3 py-4 w-[70px]">✔</th>
-                  <th className="text-left px-4 py-4 w-[150px]">Berilgan vaqt</th>
-                  <th className="text-left px-4 py-4 w-[150px]">Tugash vaqti</th>
-                  <th className="text-left px-4 py-4 w-[130px]">Dars sanasi</th>
-                  <th className="text-right px-4 py-4 w-[60px]"></th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {lessons.map((item, index) => (
-                  <tr key={item.id} className="border-t border-slate-100 hover:bg-slate-50/80">
-                    <td className="px-4 py-4 text-slate-700">{index + 1}</td>
-
-                    <td className="px-4 py-4">
-                      <div
-                        className={`w-full rounded-lg px-3 py-1.5 text-white text-sm truncate ${
-                          item.color === "bg-slate-200" ? "bg-slate-200 text-slate-700" : item.color
+                  <div className="flex flex-wrap gap-2 sm:gap-3 min-w-0">
+                    {lessonTabs.map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveInnerTab(tab)}
+                        className={`px-4 py-2 rounded-full text-sm border transition ${
+                          activeInnerTab === tab
+                            ? "border-pink-300 text-slate-900 shadow-sm"
+                            : "border-transparent text-slate-500 hover:border-slate-200"
                         }`}
-                        title={item.topic}
                       >
-                        {item.topic}
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowLessonModal(true)}
+                  className="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium shrink-0"
+                >
+                  Uyga vazifa qo‘shish
+                </button>
+              </div>
+
+              <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-slate-200 p-4">
+                  <p className="text-sm text-slate-500">Jami o‘quvchi</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-2">
+                    {stats.totalStudents}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 p-4">
+                  <p className="text-sm text-slate-500">Topshirganlar</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-2">
+                    {stats.totalSubmitted}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 p-4">
+                  <p className="text-sm text-slate-500">Tekshirilgan</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-2">
+                    {stats.totalChecked}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 hidden xl:block rounded-2xl border border-slate-200 overflow-hidden">
+                <table className="w-full text-sm table-fixed">
+                  <thead className="bg-slate-50">
+                    <tr className="text-slate-500">
+                      <th className="text-left px-4 py-4 w-[50px]">#</th>
+                      <th className="text-left px-4 py-4">Mavzu</th>
+                      <th className="text-center px-3 py-4 w-[70px]">👤</th>
+                      <th className="text-center px-3 py-4 w-[70px]">⏰</th>
+                      <th className="text-center px-3 py-4 w-[70px]">✔</th>
+                      <th className="text-left px-4 py-4 w-[150px]">
+                        Berilgan vaqt
+                      </th>
+                      <th className="text-left px-4 py-4 w-[150px]">
+                        Tugash vaqti
+                      </th>
+                      <th className="text-left px-4 py-4 w-[130px]">
+                        Dars sanasi
+                      </th>
+                      <th className="text-right px-4 py-4 w-[60px]"></th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {lessons.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="border-t border-slate-100 hover:bg-slate-50/80"
+                      >
+                        <td className="px-4 py-4 text-slate-700">
+                          {index + 1}
+                        </td>
+
+                        <td className="px-4 py-4">
+                          <div
+                            className={`w-full rounded-lg px-3 py-1.5 text-white text-sm truncate ${
+                              item.color === "bg-slate-200"
+                                ? "bg-slate-200 text-slate-700"
+                                : item.color
+                            }`}
+                            title={item.topic}
+                          >
+                            {item.topic}
+                          </div>
+                        </td>
+
+                        <td className="px-3 py-4 text-center text-slate-700">
+                          {item.students}
+                        </td>
+                        <td className="px-3 py-4 text-center text-slate-700">
+                          {item.submitted}
+                        </td>
+                        <td className="px-3 py-4 text-center text-slate-700">
+                          {item.checked}
+                        </td>
+                        <td className="px-4 py-4 text-slate-700">
+                          {item.assignedAt}
+                        </td>
+                        <td className="px-4 py-4 text-slate-700">
+                          {item.deadline}
+                        </td>
+                        <td className="px-4 py-4 text-slate-700">
+                          {item.lessonDate}
+                        </td>
+                        <td className="px-4 py-4 text-right text-slate-400">
+                          ⋮
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4 xl:hidden">
+                {lessons.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="rounded-2xl border border-slate-200 p-4 bg-white"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-slate-400 mb-2">
+                          #{index + 1}
+                        </p>
+                        <div
+                          className={`rounded-lg px-3 py-2 text-sm break-words ${
+                            item.color === "bg-slate-200"
+                              ? "bg-slate-200 text-slate-700"
+                              : `${item.color} text-white`
+                          }`}
+                        >
+                          {item.topic}
+                        </div>
                       </div>
-                    </td>
 
-                    <td className="px-3 py-4 text-center text-slate-700">{item.students}</td>
-                    <td className="px-3 py-4 text-center text-slate-700">{item.submitted}</td>
-                    <td className="px-3 py-4 text-center text-slate-700">{item.checked}</td>
-                    <td className="px-4 py-4 text-slate-700">{item.assignedAt}</td>
-                    <td className="px-4 py-4 text-slate-700">{item.deadline}</td>
-                    <td className="px-4 py-4 text-slate-700">{item.lessonDate}</td>
-                    <td className="px-4 py-4 text-right text-slate-400">⋮</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <button className="w-9 h-9 rounded-xl border border-slate-200 text-slate-400 shrink-0">
+                        ⋮
+                      </button>
+                    </div>
 
-          <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4 xl:hidden">
-            {lessons.map((item, index) => (
-              <div
-                key={item.id}
-                className="rounded-2xl border border-slate-200 p-4 bg-white"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs text-slate-400 mb-2">#{index + 1}</p>
-                    <div
-                      className={`rounded-lg px-3 py-2 text-sm break-words ${
-                        item.color === "bg-slate-200"
-                          ? "bg-slate-200 text-slate-700"
-                          : `${item.color} text-white`
-                      }`}
-                    >
-                      {item.topic}
+                    <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+                      <div className="rounded-xl bg-slate-50 p-3">
+                        <p className="text-xs text-slate-400">O‘quvchi</p>
+                        <p className="font-semibold text-slate-800 mt-1">
+                          {item.students}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl bg-slate-50 p-3">
+                        <p className="text-xs text-slate-400">Topshirgan</p>
+                        <p className="font-semibold text-slate-800 mt-1">
+                          {item.submitted}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl bg-slate-50 p-3">
+                        <p className="text-xs text-slate-400">Tekshirildi</p>
+                        <p className="font-semibold text-slate-800 mt-1">
+                          {item.checked}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-2 text-sm text-slate-700">
+                      <div>
+                        <span className="font-medium">Berilgan vaqt:</span>{" "}
+                        {item.assignedAt}
+                      </div>
+                      <div>
+                        <span className="font-medium">Tugash vaqti:</span>{" "}
+                        {item.deadline}
+                      </div>
+                      <div>
+                        <span className="font-medium">Dars sanasi:</span>{" "}
+                        {item.lessonDate}
+                      </div>
                     </div>
                   </div>
-
-                  <button className="w-9 h-9 rounded-xl border border-slate-200 text-slate-400 shrink-0">
-                    ⋮
-                  </button>
-                </div>
-
-                <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-                  <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="text-xs text-slate-400">O‘quvchi</p>
-                    <p className="font-semibold text-slate-800 mt-1">{item.students}</p>
-                  </div>
-
-                  <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="text-xs text-slate-400">Topshirgan</p>
-                    <p className="font-semibold text-slate-800 mt-1">{item.submitted}</p>
-                  </div>
-
-                  <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="text-xs text-slate-400">Tekshirildi</p>
-                    <p className="font-semibold text-slate-800 mt-1">{item.checked}</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-2 text-sm text-slate-700">
-                  <div>
-                    <span className="font-medium">Berilgan vaqt:</span> {item.assignedAt}
-                  </div>
-                  <div>
-                    <span className="font-medium">Tugash vaqti:</span> {item.deadline}
-                  </div>
-                  <div>
-                    <span className="font-medium">Dars sanasi:</span> {item.lessonDate}
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
       </div>
 

@@ -124,6 +124,28 @@ export default function App() {
           </RequireNonStudent>
         }
       />
+      <Route
+        path="/dashboard/course"
+        element={
+          <RequireNonStudent>
+            <DashboardPage
+              initialMenu="management"
+              initialManagement="courses"
+            />
+          </RequireNonStudent>
+        }
+      />
+      <Route
+        path="/dashboard/courses"
+        element={
+          <RequireNonStudent>
+            <DashboardPage
+              initialMenu="management"
+              initialManagement="courses"
+            />
+          </RequireNonStudent>
+        }
+      />
 
       <Route
         path="/dashboard/teachers"

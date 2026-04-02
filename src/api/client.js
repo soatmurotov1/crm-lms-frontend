@@ -4,7 +4,7 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (window.location.protocol === "https:"
     ? "https://abrorbek.me/api"
-    : "http://localhost:4040/api");
+    : "http://localhost:3000/api");
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
