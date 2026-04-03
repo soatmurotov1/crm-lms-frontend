@@ -13,6 +13,11 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("crm_access_token");
+  console.log("API Request:", {
+    url: config.url,
+    method: config.method,
+    hasToken: !!token,
+  });
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

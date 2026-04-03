@@ -874,9 +874,30 @@ export default function DashboardPage({
   };
 
   const openGroupDetails = (group) => {
-    setSelectedGroup(group ? { ...group } : null);
+    const nextGroup = group ? { ...group } : null;
+    const nextTab = nextGroup?.initialMainTab || "guruh-darsliklari";
+    setSelectedGroup(nextGroup);
     setGroupDetailsKey((prev) => prev + 1);
     setActiveMenu("groups");
+    if (nextGroup?.id) {
+      const params = new URLSearchParams();
+      params.set("groupId", String(nextGroup.id));
+      params.set("tab", nextTab);
+      navigate(`/dashboard/group?${params.toString()}`);
+    }
+  };
+
+  const handleGroupBack = () => {
+    setSelectedGroup(null);
+    navigate("/dashboard/group");
+  };
+
+  const handleGroupTabChange = (tabKey) => {
+    if (!selectedGroup?.id) return;
+    const params = new URLSearchParams();
+    params.set("groupId", String(selectedGroup.id));
+    params.set("tab", tabKey);
+    navigate(`/dashboard/group?${params.toString()}`, { replace: true });
   };
 
   const renderContent = () => {
@@ -991,7 +1012,8 @@ export default function DashboardPage({
             theme={theme}
             darkMode={darkMode}
             group={selectedGroup}
-            onBack={() => setSelectedGroup(null)}
+            onBack={handleGroupBack}
+            onTabChange={handleGroupTabChange}
           />
         );
       }

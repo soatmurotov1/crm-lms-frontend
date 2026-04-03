@@ -249,24 +249,58 @@ export const studentGroupApi = {
 export const attendanceApi = {
   getByLesson: async (lessonId) =>
     unwrap(await apiClient.get(`/attendance/${lessonId}`)),
-  create: async (payload) =>
-    withCacheInvalidation(async () =>
-      unwrap(await apiClient.post("/attendance", payload)),
-    ),
-  update: async (payload) =>
-    withCacheInvalidation(async () =>
-      unwrap(await apiClient.put("/attendance", payload)),
-    ),
+  create: async (payload) => {
+    console.log("attendanceApi.create called with payload:", payload);
+    try {
+      const response = await apiClient.post("/attendance", payload);
+      console.log("attendanceApi.create response:", response);
+      const result = unwrap(response);
+      clearApiCache(); // Invalidate cache after successful creation
+      return result;
+    } catch (err) {
+      console.error("attendanceApi.create error:", {
+        message: err.message,
+        url: err.config?.url,
+        method: err.config?.method,
+        data: err.config?.data,
+        status: err.response?.status,
+        response: err.response?.data,
+      });
+      throw err;
+    }
+  },
+  update: async (payload) => {
+    console.log("attendanceApi.update called with payload:", payload);
+    try {
+      const response = await apiClient.put("/attendance", payload);
+      console.log("attendanceApi.update response:", response);
+      const result = unwrap(response);
+      clearApiCache(); // Invalidate cache after successful update
+      return result;
+    } catch (err) {
+      console.error("attendanceApi.update error:", {
+        message: err.message,
+        url: err.config?.url,
+        method: err.config?.method,
+        data: err.config?.data,
+        status: err.response?.status,
+        response: err.response?.data,
+      });
+      throw err;
+    }
+  },
 };
 
 export const lessonsApi = {
   getByGroup: async (groupId) =>
-    cachedGet(`lessons/group/${groupId}`, async () =>
-      unwrap(await apiClient.get(`/lessons/group/${groupId}`)),
-    ),
+    unwrap(await apiClient.get(`/lessons/group/${groupId}`)),
   create: async (payload) =>
     withCacheInvalidation(async () =>
       unwrap(await apiClient.post("/lessons", payload)),
+    ),
+  update: async (groupId, lessonId, payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.put(`/lessons/${groupId}/${lessonId}`, payload)),
     ),
 };
 

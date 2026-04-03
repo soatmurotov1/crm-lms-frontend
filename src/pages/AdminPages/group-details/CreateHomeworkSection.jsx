@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 export default function CreateHomeworkSection({
   theme,
   inputClass,
@@ -10,6 +12,25 @@ export default function CreateHomeworkSection({
   homeworkSaving,
   addHomework,
 }) {
+  const fileInputRef = useRef(null);
+  const sortedLessons = [...lessons].sort((a, b) => {
+    const dateDiff =
+      new Date(b?.created_at || 0).getTime() -
+      new Date(a?.created_at || 0).getTime();
+    if (dateDiff !== 0) return dateDiff;
+    return Number(b?.id || 0) - Number(a?.id || 0);
+  });
+
+  const clearSelectedFile = () => {
+    setHomeworkForm({
+      ...homeworkForm,
+      file: null,
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div
       className={`${theme.card} border rounded-2xl shadow-sm flex-1 min-h-0 overflow-auto p-4 sm:p-6`}
@@ -39,14 +60,14 @@ export default function CreateHomeworkSection({
                   ...homeworkForm,
                   lessonId: e.target.value,
                   title:
-                    lessons.find(
+                    sortedLessons.find(
                       (lesson) => Number(lesson.id) === Number(e.target.value),
                     )?.title || homeworkForm.title,
                 })
               }
             >
               <option value="">Darslardan birini tanlang</option>
-              {lessons.map((lesson) => (
+              {sortedLessons.map((lesson) => (
                 <option key={lesson.id} value={lesson.id}>
                   {lesson.title}
                 </option>
@@ -85,15 +106,26 @@ export default function CreateHomeworkSection({
               }
             />
             <p className={`text-xs mt-2 ${theme.soft}`}>
-              Default qiymat 16 soat. E&apos;lon qilingan vaqtdan shu soat
-              qo&apos;shilib tugash vaqti hisoblanadi.
+              Default qiymat 16 soat. E'lon qilingan vaqtdan shu soat qo'shilib
+              tugash vaqti hisoblanadi.
             </p>
           </div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${theme.text}`}>
-              Fayl yuklash
-            </label>
+            <div className="flex items-center justify-between">
+              <label className={`block text-sm font-medium mb-2 ${theme.text}`}>
+                Fayl yuklash
+              </label>
+              {homeworkForm.file && (
+                <button
+                  type="button"
+                  onClick={clearSelectedFile}
+                  className="text-xs text-red-500 hover:underline"
+                >
+                  Bekor qilish
+                </button>
+              )}
+            </div>
 
             <label
               className={`flex items-center justify-center w-full rounded-xl border border-dashed ${innerBorderClass} px-4 py-6 cursor-pointer ${darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
@@ -101,6 +133,7 @@ export default function CreateHomeworkSection({
               <input
                 type="file"
                 className="hidden"
+                ref={fileInputRef}
                 onChange={(e) =>
                   setHomeworkForm({
                     ...homeworkForm,

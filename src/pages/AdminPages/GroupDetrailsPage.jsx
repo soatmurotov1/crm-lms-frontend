@@ -30,6 +30,7 @@ export default function GroupDetailsPage({
   darkMode = false,
   group,
   onBack,
+  onTabChange,
 }) {
   const normalizeDays = (value) => {
     if (Array.isArray(value)) return value;
@@ -330,6 +331,8 @@ export default function GroupDetailsPage({
     description: "",
   });
   const [lessonSaving, setLessonSaving] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const homeworkFileInputRef = useRef(null);
 
   const actionBtnClass = darkMode
     ? "px-3 py-2 rounded-xl border border-slate-700 text-slate-200 hover:bg-slate-800 transition text-sm"
@@ -347,6 +350,14 @@ export default function GroupDetailsPage({
   const inputClass = darkMode
     ? "w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none"
     : "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none";
+
+  const sortedHomeworkLessons = [...lessons].sort((a, b) => {
+    const dateDiff =
+      new Date(b?.created_at || 0).getTime() -
+      new Date(a?.created_at || 0).getTime();
+    if (dateDiff !== 0) return dateDiff;
+    return Number(b?.id || 0) - Number(a?.id || 0);
+  });
 
   const tabClass = (active) =>
     active
@@ -412,6 +423,16 @@ export default function GroupDetailsPage({
 
   const formatDate = (value) => {
     return formatUzDate(value);
+  };
+
+  const clearHomeworkFile = () => {
+    setHomeworkForm((prev) => ({
+      ...prev,
+      file: null,
+    }));
+    if (homeworkFileInputRef.current) {
+      homeworkFileInputRef.current.value = "";
+    }
   };
 
   const loadHomeworks = async () => {
@@ -501,6 +522,58 @@ export default function GroupDetailsPage({
       setVideos([]);
     } finally {
       setVideosLoading(false);
+    }
+  };
+
+  const refreshLessons = async () => {
+    if (!group?.id) {
+      setLessons([]);
+      return;
+    }
+
+    try {
+      const lessonsResult = await groupsApi.getLessonsByGroup(group.id);
+      const lessonList = Array.isArray(lessonsResult?.data)
+        ? lessonsResult.data
+        : [];
+
+      setLessons(lessonList);
+
+      // Refresh attendance data
+      if (lessonList.length === 0) {
+        setAttendance({});
+        return;
+      }
+
+      const attendanceByStudent = {};
+
+      await Promise.all(
+        lessonList.map(async (lesson) => {
+          try {
+            const attendanceResult = await attendanceApi.getByLesson(lesson.id);
+            const rows = Array.isArray(attendanceResult?.data)
+              ? attendanceResult.data
+              : [];
+
+            rows.forEach((row) => {
+              const studentId = row?.student?.id;
+              if (!studentId) return;
+              if (!attendanceByStudent[studentId]) {
+                attendanceByStudent[studentId] = {};
+              }
+              attendanceByStudent[studentId][`lesson-${lesson.id}`] =
+                row.isPresent ? "Bor" : "Yo'q";
+            });
+          } catch {
+            // Ignore single lesson attendance load failure
+          }
+        }),
+      );
+
+      setAttendance(attendanceByStudent);
+    } catch (err) {
+      console.error("Error refreshing lessons:", err);
+      setLessons([]);
     }
   };
 
@@ -789,10 +862,47 @@ export default function GroupDetailsPage({
 
     try {
       setLessonSaving(true);
-      await lessonsApi.create({
+
+      // Step 1: Create the lesson
+      const lessonResponse = await lessonsApi.create({
         groupId: Number(group.id),
         title: lessonForm.title.trim(),
       });
+
+      const newLessonId = lessonResponse?.data?.id;
+
+      if (!newLessonId) {
+        throw new Error("Dars ID qaytarilmadi");
+      }
+
+      // Step 2: Save attendance data for this lesson
+      const attendancePromises = [];
+      Object.entries(attendance).forEach(([studentId, attendanceByDate]) => {
+        // Get the first date's attendance (bugungi davomat)
+        const todayKey = dateHeaders[0]?.key;
+        if (todayKey && attendanceByDate[todayKey]) {
+          const isPresent = attendanceByDate[todayKey] === "Bor";
+          attendancePromises.push(
+            attendanceApi
+              .create({
+                lessonId: Number(newLessonId),
+                studentId: Number(studentId),
+                isPresent,
+              })
+              .catch((error) => {
+                console.error(
+                  `Student ${studentId} davomati saqlashda xato:`,
+                  error,
+                );
+                // Don't throw, continue with other students
+              }),
+          );
+        }
+      });
+
+      if (attendancePromises.length > 0) {
+        await Promise.all(attendancePromises);
+      }
 
       await loadGroupStudents();
 
@@ -803,11 +913,18 @@ export default function GroupDetailsPage({
         title: "",
         description: "",
       });
-      alert("Dars muvaffaqiyatli yaratildi");
+
+      setAttendance({});
+
+      alert("Dars va davomat muvaffaqiyatli saqland");
       setLessonPage("list");
       setActiveLessonTab("darsliklar");
     } catch (error) {
-      alert(error?.response?.data?.message || "Dars yaratishda xato");
+      alert(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Dars yaratishda xato",
+      );
     } finally {
       setLessonSaving(false);
     }
@@ -1064,6 +1181,7 @@ export default function GroupDetailsPage({
               onClick={() => {
                 setActiveMainTab("malumotlar");
                 setLessonPage("list");
+                onTabChange?.("malumotlar");
               }}
               className={tabClass(activeMainTab === "malumotlar")}
             >
@@ -1073,6 +1191,7 @@ export default function GroupDetailsPage({
               onClick={() => {
                 setActiveMainTab("guruh-darsliklari");
                 setLessonPage("list");
+                onTabChange?.("guruh-darsliklari");
               }}
               className={tabClass(activeMainTab === "guruh-darsliklari")}
             >
@@ -1082,6 +1201,7 @@ export default function GroupDetailsPage({
               onClick={() => {
                 setActiveMainTab("akademik-davomat");
                 setLessonPage("list");
+                onTabChange?.("akademik-davomat");
               }}
               className={tabClass(activeMainTab === "akademik-davomat")}
             >
@@ -1384,6 +1504,7 @@ export default function GroupDetailsPage({
                 groupId={group?.id}
                 group={group}
                 groupData={groupData}
+                onLessonCreated={refreshLessons}
               />
             </div>
           )}
@@ -1797,7 +1918,7 @@ export default function GroupDetailsPage({
                             ...homeworkForm,
                             lessonId: e.target.value,
                             title:
-                              lessons.find(
+                              sortedHomeworkLessons.find(
                                 (lesson) =>
                                   Number(lesson.id) === Number(e.target.value),
                               )?.title || homeworkForm.title,
@@ -1805,7 +1926,7 @@ export default function GroupDetailsPage({
                         }
                       >
                         <option value="">Darslardan birini tanlang</option>
-                        {lessons.map((lesson) => (
+                        {sortedHomeworkLessons.map((lesson) => (
                           <option key={lesson.id} value={lesson.id}>
                             {lesson.title}
                           </option>
@@ -1850,6 +1971,46 @@ export default function GroupDetailsPage({
                           })
                         }
                       />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <label
+                          className={`block text-sm font-medium mb-2 ${theme.text}`}
+                        >
+                          Fayl yuklash
+                        </label>
+                        {homeworkForm.file && (
+                          <button
+                            type="button"
+                            onClick={clearHomeworkFile}
+                            className="text-xs text-red-500 hover:underline"
+                          >
+                            Bekor qilish
+                          </button>
+                        )}
+                      </div>
+                      <label
+                        className={`flex items-center justify-center w-full rounded-xl border border-dashed ${innerBorderClass} px-4 py-6 cursor-pointer ${darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
+                      >
+                        <input
+                          type="file"
+                          className="hidden"
+                          ref={homeworkFileInputRef}
+                          onChange={(e) =>
+                            setHomeworkForm({
+                              ...homeworkForm,
+                              file: e.target.files?.[0] || null,
+                            })
+                          }
+                        />
+                        <span className={theme.soft}>
+                          ⬇ Yuklash{" "}
+                          {homeworkForm.file?.name
+                            ? `- ${homeworkForm.file.name}`
+                            : ""}
+                        </span>
+                      </label>
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-2">

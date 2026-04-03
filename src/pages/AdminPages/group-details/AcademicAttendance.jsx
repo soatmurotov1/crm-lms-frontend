@@ -1,6 +1,198 @@
 import { useEffect, useMemo, useState } from "react";
 import { attendanceApi, groupsApi, lessonsApi } from "../../../api/crmApi";
 
+const WEEKDAY_ENUMS = [
+  "SUNDAY",
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+];
+
+const UZ_WEEKDAY_TO_ENUM = {
+  dushanba: "MONDAY",
+  seshanba: "TUESDAY",
+  chorshanba: "WEDNESDAY",
+  payshanba: "THURSDAY",
+  juma: "FRIDAY",
+  shanba: "SATURDAY",
+  yakshanba: "SUNDAY",
+};
+
+const UZ_WEEKDAY_SHORT_TO_ENUM = {
+  du: "MONDAY",
+  se: "TUESDAY",
+  cho: "WEDNESDAY",
+  pay: "THURSDAY",
+  ju: "FRIDAY",
+  sha: "SATURDAY",
+  yak: "SUNDAY",
+};
+
+const UZ_TIME_ZONE = "Asia/Tashkent";
+
+const normalizeWeekDays = (value) => {
+  const list = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : [];
+
+  return list
+    .map((item) => String(item || "").trim())
+    .map((item) => {
+      if (!item) return null;
+      const upper = item.toUpperCase();
+      if (WEEKDAY_ENUMS.includes(upper)) return upper;
+      const uzMapped = UZ_WEEKDAY_TO_ENUM[item.toLowerCase()];
+      if (uzMapped) return uzMapped;
+      const shortMapped = UZ_WEEKDAY_SHORT_TO_ENUM[item.toLowerCase()];
+      if (shortMapped) return shortMapped;
+      return uzMapped || null;
+    })
+    .filter(Boolean);
+};
+
+const parseLessonDate = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const toTzDateKey = (value) => {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: UZ_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = formatter.formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  if (!year || !month || !day) return null;
+  return `${year}-${month}-${day}`;
+};
+
+const getWeekdayEnumInTz = (value) => {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: UZ_TIME_ZONE,
+    weekday: "short",
+  });
+  const weekday = formatter.format(date);
+  const map = {
+    Sun: "SUNDAY",
+    Mon: "MONDAY",
+    Tue: "TUESDAY",
+    Wed: "WEDNESDAY",
+    Thu: "THURSDAY",
+    Fri: "FRIDAY",
+    Sat: "SATURDAY",
+  };
+  return map[weekday] || null;
+};
+
+const isSameOrAfterDay = (date, startDate) => {
+  if (!startDate) return true;
+  const startKey = toTzDateKey(startDate);
+  const compareKey = toTzDateKey(date);
+  if (!startKey || !compareKey) return true;
+  return compareKey >= startKey;
+};
+
+const filterLessonsBySchedule = (list, startDate, weekDays) => {
+  const weekDaySet = new Set(weekDays || []);
+  return (Array.isArray(list) ? list : []).filter((lesson) => {
+    const date = parseLessonDate(lesson?.created_at);
+    if (!date) return false;
+    if (!isSameOrAfterDay(date, startDate)) return false;
+    if (weekDaySet.size) {
+      const dayEnum = getWeekdayEnumInTz(date);
+      if (!weekDaySet.has(dayEnum)) return false;
+    }
+    return true;
+  });
+};
+
+const buildScheduleDates = (startDate, weekDays) => {
+  if (!startDate || !Array.isArray(weekDays) || weekDays.length === 0) {
+    return [];
+  }
+
+  const startKey = toTzDateKey(startDate);
+  if (!startKey) return [];
+
+  const start = new Date(startDate);
+  if (Number.isNaN(start.getTime())) return [];
+
+  const todayKey = toTzDateKey(new Date());
+  if (!todayKey) return [];
+
+  const weekDaySet = new Set(weekDays);
+  const dates = [];
+  const cursor = new Date(start);
+
+  for (let guard = 0; guard < 730; guard += 1) {
+    const cursorKey = toTzDateKey(cursor);
+    if (!cursorKey) break;
+    if (cursorKey > todayKey) break;
+    const dayEnum = getWeekdayEnumInTz(cursor);
+    if (dayEnum && weekDaySet.has(dayEnum)) {
+      dates.push(cursorKey);
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return dates;
+};
+
+const buildDisplayLessons = (lessonsList, startDate, weekDays) => {
+  const filtered = filterLessonsBySchedule(lessonsList, startDate, weekDays)
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(a?.created_at || 0).getTime() -
+        new Date(b?.created_at || 0).getTime(),
+    );
+
+  const scheduledDates = buildScheduleDates(startDate, weekDays);
+  if (scheduledDates.length === 0) return filtered;
+
+  const lessonByDate = new Map();
+  filtered.forEach((lesson) => {
+    const key = toTzDateKey(lesson?.created_at);
+    if (key) {
+      lessonByDate.set(key, lesson);
+    }
+  });
+
+  return scheduledDates.map((dateKey) => {
+    const existing = lessonByDate.get(dateKey);
+    if (existing) return existing;
+    return {
+      id: `date:${dateKey}`,
+      created_at: dateKey,
+      isVirtual: true,
+    };
+  });
+};
+
+const pickLatestLesson = (list) => {
+  return (Array.isArray(list) ? list : []).reduce((acc, lesson) => {
+    const accDate = parseLessonDate(acc?.created_at);
+    const lessonDate = parseLessonDate(lesson?.created_at);
+    if (!accDate) return lesson;
+    if (!lessonDate) return acc;
+    return lessonDate > accDate ? lesson : acc;
+  }, null);
+};
+
 function Toggle({ checked, onChange }) {
   return (
     <label style={styles.toggleLabel}>
@@ -41,7 +233,12 @@ function StatusBadge({ came }) {
   );
 }
 
-export default function Attendance({ groupId, group, groupData }) {
+export default function Attendance({
+  groupId,
+  group,
+  groupData,
+  onLessonCreated,
+}) {
   const resolvedGroupId = groupId ?? group?.id;
   const [mavzu, setMavzu] = useState("");
   const [students, setStudents] = useState([]);
@@ -58,10 +255,23 @@ export default function Attendance({ groupId, group, groupData }) {
   const total = students.length;
   const came = Object.values(attendance).filter(Boolean).length;
   const absent = total - came;
+  const hasSavedAttendance = Object.keys(existingAttendance).length > 0;
 
   const startTime =
     groupData?.lessonTime || groupData?.time || group?.startTime || "18:30";
   const courseDuration = group?.course?.durationLesson;
+  const courseStartDate = useMemo(
+    () => parseLessonDate(groupData?.startDate || group?.startDate),
+    [groupData?.startDate, group?.startDate],
+  );
+  const normalizedWeekDays = useMemo(
+    () => normalizeWeekDays(groupData?.days ?? group?.weekDays),
+    [groupData?.days, group?.weekDays],
+  );
+  const displayLessons = useMemo(
+    () => buildDisplayLessons(lessons, courseStartDate, normalizedWeekDays),
+    [lessons, courseStartDate, normalizedWeekDays],
+  );
 
   const lessonInfo = useMemo(() => {
     const teacherName =
@@ -116,18 +326,28 @@ export default function Attendance({ groupId, group, groupData }) {
           ? lessonsResult.data
           : [];
 
-        const latestLesson = lessonsList
-          .slice()
-          .sort((a, b) => (b?.id || 0) - (a?.id || 0))[0];
-        const nextSelected = selectedLessonId || latestLesson?.id || null;
+        const displayLessonList = buildDisplayLessons(
+          lessonsList,
+          courseStartDate,
+          normalizedWeekDays,
+        );
+
+        const latestLesson = pickLatestLesson(displayLessonList);
+        const nextSelected =
+          (selectedLessonId &&
+          displayLessonList.some(
+            (item) => String(item.id) === String(selectedLessonId),
+          )
+            ? String(selectedLessonId)
+            : latestLesson?.id) || null;
         const selectedLesson =
-          lessonsList.find((item) => item.id === nextSelected) ||
-          latestLesson ||
-          null;
+          displayLessonList.find(
+            (item) => String(item.id) === String(nextSelected),
+          ) || null;
 
         setStudents(studentsList);
         setLessons(lessonsList);
-        setSelectedLessonId(nextSelected);
+        setSelectedLessonId(nextSelected ? String(nextSelected) : null);
         setLesson(selectedLesson);
 
         setTimes((prev) => {
@@ -165,19 +385,33 @@ export default function Attendance({ groupId, group, groupData }) {
     group?.startTime,
     groupData?.lessonTime,
     groupData?.time,
+    courseStartDate,
+    normalizedWeekDays,
+    selectedLessonId,
   ]);
 
   useEffect(() => {
     if (!selectedLessonId) return;
     let isActive = true;
     const selectedLesson =
-      lessons.find((item) => item.id === selectedLessonId) || null;
+      displayLessons.find(
+        (item) => String(item.id) === String(selectedLessonId),
+      ) || null;
     setLesson(selectedLesson);
+    setMavzu(selectedLesson?.title || "");
+
+    const lessonId = Number(selectedLesson?.id);
+    if (!Number.isFinite(lessonId)) {
+      setAttendance({});
+      setExistingAttendance({});
+      return () => {
+        isActive = false;
+      };
+    }
 
     const loadLessonAttendance = async () => {
       try {
-        const attendanceResult =
-          await attendanceApi.getByLesson(selectedLessonId);
+        const attendanceResult = await attendanceApi.getByLesson(lessonId);
         const rows = Array.isArray(attendanceResult?.data)
           ? attendanceResult.data
           : [];
@@ -213,7 +447,7 @@ export default function Attendance({ groupId, group, groupData }) {
     return () => {
       isActive = false;
     };
-  }, [selectedLessonId, lessons]);
+  }, [selectedLessonId, displayLessons]);
 
   const handleToggle = (studentId, val) => {
     setAttendance((prev) => ({ ...prev, [studentId]: val }));
@@ -275,30 +509,124 @@ export default function Attendance({ groupId, group, groupData }) {
     return match ? Number(match[0]) : 0;
   }
 
-  const handleSave = () => {
-    if (!lesson?.id) {
+  const handleSave = async () => {
+    let lessonId = Number(lesson?.id);
+    let isNewLesson = false;
+    const nextTitle = mavzu.trim();
+    const selectedLessonDate = selectedLessonId
+      ? toTzDateKey(lesson?.created_at || selectedLessonId)
+      : null;
+
+    // If no lesson selected but mavzu is entered, create new lesson
+    if (!Number.isFinite(lessonId) && nextTitle) {
+      try {
+        isNewLesson = true;
+        console.log("Creating lesson with payload:", {
+          groupId: Number(resolvedGroupId),
+          title: nextTitle,
+        });
+        const newLessonResponse = await lessonsApi.create({
+          groupId: Number(resolvedGroupId),
+          title: nextTitle,
+          lessonDate: selectedLessonDate || undefined,
+        });
+        console.log("Lesson creation response:", newLessonResponse);
+        // API returns: { success: true, message: '...', data: { id, title, ... } }
+        lessonId = newLessonResponse?.data?.id;
+        console.log("Extracted lessonId:", lessonId);
+
+        if (!Number.isFinite(lessonId)) {
+          console.error(
+            "Invalid lessonId:",
+            lessonId,
+            "from response:",
+            newLessonResponse,
+          );
+          setError("Dars yaratishda xatolik yuz berdi.");
+          return;
+        }
+
+        // Refresh lessons list after creating new lesson
+        try {
+          const lessonsResult = await lessonsApi.getByGroup(resolvedGroupId);
+          console.log("Lessons refresh result:", lessonsResult);
+          // lessonsApi.getByGroup returns: { success: true, data: [...] }
+          const lessonsList = lessonsResult?.data || lessonsResult || [];
+          if (Array.isArray(lessonsList)) {
+            setLessons(lessonsList);
+          }
+        } catch (err) {
+          console.error("Lessons refresh error:", err);
+        }
+      } catch (err) {
+        console.error("Error creating lesson:", err);
+        setError("Dars yaratishda xatolik yuz berdi.");
+        return;
+      }
+    }
+
+    // Validate we have a lessonId
+    if (!Number.isFinite(lessonId)) {
       setToast(true);
       setTimeout(() => setToast(false), 2500);
       return;
     }
 
+    if (nextTitle && nextTitle !== (lesson?.title || "")) {
+      try {
+        await lessonsApi.update(resolvedGroupId, lessonId, {
+          title: nextTitle,
+        });
+      } catch (err) {
+        console.error("Lesson update error:", err);
+      }
+    }
+
+    // Save attendance
     const saveAttendance = async () => {
       try {
         const updates = students.map((student) => {
           const payload = {
-            lessonId: lesson.id,
-            studentId: student.id,
+            lessonId: Number(lessonId),
+            studentId: Number(student.id),
             isPresent: Boolean(attendance[student.id]),
           };
 
+          console.log(
+            `Attendance payload for student ${student.id}:`,
+            JSON.stringify(payload),
+          );
+
           if (existingAttendance[student.id]) {
+            console.log(
+              `Updating existing attendance for student ${student.id}`,
+            );
             return attendanceApi.update(payload);
           }
 
+          console.log(`Creating new attendance for student ${student.id}`);
           return attendanceApi.create(payload);
         });
 
-        await Promise.all(updates);
+        console.log(
+          `Total attendance updates to save: ${updates.length}, lessonId=${lessonId}`,
+        );
+        const results = await Promise.allSettled(updates);
+        console.log("Attendance save results:", results);
+
+        // Check for failures
+        const failures = results.filter((r) => r.status === "rejected");
+        if (failures.length > 0) {
+          console.error(
+            `${failures.length} attendance records failed to save:`,
+            failures,
+          );
+          setError(
+            `${failures.length} o'quvchi uchun davomat saqlash xatosi. Qayta urinib ko'ring.`,
+          );
+          return;
+        }
+
         setExistingAttendance((prev) => {
           const next = { ...prev };
           students.forEach((student) => {
@@ -307,9 +635,47 @@ export default function Attendance({ groupId, group, groupData }) {
           return next;
         });
 
+        // Clear mavzu after successful save if it was a new lesson
+        if (isNewLesson) {
+          setMavzu("");
+
+          // Refresh lessons list in this component
+          try {
+            const lessonsResult = await lessonsApi.getByGroup(resolvedGroupId);
+            const updatedLessonsList = Array.isArray(lessonsResult?.data)
+              ? lessonsResult.data
+              : [];
+            setLessons(updatedLessonsList);
+
+            // Auto-select the latest (newest) lesson
+            if (updatedLessonsList.length > 0) {
+              const latestLesson = updatedLessonsList.reduce(
+                (latest, current) =>
+                  new Date(current.created_at || 0) >
+                  new Date(latest.created_at || 0)
+                    ? current
+                    : latest,
+              );
+              setSelectedLessonId(String(latestLesson.id));
+            }
+          } catch (err) {
+            console.error("Error reloading lessons:", err);
+          }
+
+          // Also notify parent component to refresh lessons in Darsliklar tab
+          if (typeof onLessonCreated === "function") {
+            try {
+              await onLessonCreated();
+            } catch (err) {
+              console.error("Error calling onLessonCreated:", err);
+            }
+          }
+        }
+
         setToast(true);
         setTimeout(() => setToast(false), 2500);
-      } catch {
+      } catch (err) {
+        console.error("Attendance save error:", err);
         setError("Davomatni saqlashda xatolik yuz berdi.");
       }
     };
@@ -357,19 +723,18 @@ export default function Attendance({ groupId, group, groupData }) {
             <select
               style={styles.metaSelect}
               value={selectedLessonId ?? ""}
-              onChange={(e) =>
-                setSelectedLessonId(
-                  e.target.value ? Number(e.target.value) : null,
-                )
-              }
+              onChange={(e) => setSelectedLessonId(e.target.value || null)}
             >
               <option value="">Tanlang</option>
-              {lessons.map((item) => (
+              {displayLessons.map((item) => (
                 <option key={item.id} value={item.id}>
                   {formatLessonDate(item.created_at)}
                 </option>
               ))}
             </select>
+            {hasSavedAttendance && (
+              <span style={styles.metaStatus}>Davomat qilingan</span>
+            )}
           </div>
           <div>
             <span style={styles.metaLabel}>Dars vaqti</span>
@@ -545,6 +910,12 @@ const styles = {
     fontSize: 13,
     fontWeight: 500,
     color: "#111827",
+  },
+  metaStatus: {
+    display: "block",
+    marginTop: 6,
+    fontSize: 11,
+    color: "#6b7280",
   },
   metaSelect: {
     width: "100%",
