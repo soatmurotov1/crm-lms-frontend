@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { groupsApi, studentsApi } from "../../api/crmApi";
+import { groupsApi, paymentsApi, studentsApi } from "../../api/crmApi";
 import { toInputDate } from "../../utils/date";
 
 export default function StudentsPage({
@@ -19,6 +19,10 @@ export default function StudentsPage({
   const [studentGroups, setStudentGroups] = useState([]);
   const [studentGroupsLoading, setStudentGroupsLoading] = useState(false);
   const [studentGroupsMap, setStudentGroupsMap] = useState({});
+  const [paymentsModalStudent, setPaymentsModalStudent] = useState(null);
+  const [studentPayments, setStudentPayments] = useState([]);
+  const [studentPaymentsLoading, setStudentPaymentsLoading] = useState(false);
+  const [paymentActionLoading, setPaymentActionLoading] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -117,6 +121,9 @@ export default function StudentsPage({
       setToast((prev) => ({ ...prev, show: false }));
     }, 2600);
   };
+
+  const formatAmount = (value) =>
+    new Intl.NumberFormat("uz-UZ").format(Number(value || 0));
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -235,6 +242,86 @@ export default function StudentsPage({
       setStudentGroups([]);
     } finally {
       setStudentGroupsLoading(false);
+    }
+  };
+
+  const openStudentPayments = async (student) => {
+    setPaymentsModalStudent(student);
+    setStudentPaymentsLoading(true);
+    setStudentPayments([]);
+
+    try {
+      const now = new Date();
+      const result = await paymentsApi.getStudentMonthly(student.id, {
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+      });
+      const list = Array.isArray(result)
+        ? result
+        : Array.isArray(result?.data)
+          ? result.data
+          : [];
+      setStudentPayments(list);
+    } catch {
+      setStudentPayments([]);
+    } finally {
+      setStudentPaymentsLoading(false);
+    }
+  };
+
+  const refreshStudentPayments = async () => {
+    if (!paymentsModalStudent?.id) return;
+    try {
+      const now = new Date();
+      const result = await paymentsApi.getStudentMonthly(
+        paymentsModalStudent.id,
+        { year: now.getFullYear(), month: now.getMonth() + 1 },
+      );
+      const list = Array.isArray(result)
+        ? result
+        : Array.isArray(result?.data)
+          ? result.data
+          : [];
+      setStudentPayments(list);
+    } catch {
+      setStudentPayments([]);
+    }
+  };
+
+  const handleStartPayment = async (item) => {
+    if (!paymentsModalStudent?.id) return;
+    setPaymentActionLoading(`start-${item.groupId}`);
+    try {
+      const now = new Date();
+      const result = await paymentsApi.startStudentPayment(
+        paymentsModalStudent.id,
+        {
+          groupId: item.groupId,
+          year: now.getFullYear(),
+          month: now.getMonth() + 1,
+        },
+      );
+      if (result?.paymentUrl) {
+        window.open(result.paymentUrl, "_blank", "noopener,noreferrer");
+      }
+      await refreshStudentPayments();
+    } catch (apiError) {
+      alert(apiError?.response?.data?.message || "To'lovni boshlashda xato");
+    } finally {
+      setPaymentActionLoading(null);
+    }
+  };
+
+  const handleMarkPaid = async (item) => {
+    if (!item?.paymentId) return;
+    setPaymentActionLoading(`paid-${item.paymentId}`);
+    try {
+      await paymentsApi.markPaid(item.paymentId, { method: "MANUAL" });
+      await refreshStudentPayments();
+    } catch (apiError) {
+      alert(apiError?.response?.data?.message || "To'lovni tasdiqlashda xato");
+    } finally {
+      setPaymentActionLoading(null);
     }
   };
 
@@ -389,6 +476,16 @@ export default function StudentsPage({
                       >
                         Guruhlari
                       </button>
+                      <button
+                        onClick={() => openStudentPayments(s)}
+                        className={`px-2 py-1 text-xs rounded-lg border ${
+                          darkMode
+                            ? "border-slate-600 hover:bg-slate-800 text-slate-200"
+                            : "border-slate-200 hover:bg-slate-50 text-slate-700"
+                        }`}
+                      >
+                        To'lovlar
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -457,6 +554,120 @@ export default function StudentsPage({
                   </button>
                 ))}
               </ul>
+            )}
+          </div>
+        </div>
+      )}
+
+      {paymentsModalStudent && (
+        <div
+          className={`fixed inset-0 z-40 flex items-center justify-center p-4 ${
+            darkMode ? "bg-slate-900/70" : "bg-slate-900/40"
+          }`}
+        >
+          <div
+            className={`w-full max-w-2xl rounded-xl border p-5 ${
+              darkMode
+                ? "bg-slate-900 border-slate-700"
+                : "bg-white border-slate-200"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h3 className={`text-lg font-semibold ${theme.text}`}>
+                {paymentsModalStudent.fullName} to'lovlari
+              </h3>
+              <button
+                onClick={() => {
+                  setPaymentsModalStudent(null);
+                  setStudentPayments([]);
+                }}
+                className={`${theme.soft} cursor-pointer`}
+              >
+                Yopish
+              </button>
+            </div>
+
+            {studentPaymentsLoading ? (
+              <p className={theme.soft}>Yuklanmoqda...</p>
+            ) : studentPayments.length === 0 ? (
+              <p className={theme.soft}>To'lovlar topilmadi</p>
+            ) : (
+              <div className="space-y-3">
+                {studentPayments.map((item) => {
+                  const statusLabel =
+                    {
+                      DEBT: "Qarz",
+                      PENDING: "Kutilmoqda",
+                      PAID: "Qabul qilingan",
+                      CANCELED: "Bekor qilingan",
+                    }[item.status] || item.status;
+                  const statusClass =
+                    {
+                      DEBT: "bg-red-100 text-red-700",
+                      PENDING: "bg-amber-100 text-amber-700",
+                      PAID: "bg-emerald-100 text-emerald-700",
+                      CANCELED: "bg-slate-200 text-slate-600",
+                    }[item.status] || "bg-slate-100 text-slate-600";
+                  const isStarting =
+                    paymentActionLoading === `start-${item.groupId}`;
+                  const isMarking =
+                    paymentActionLoading === `paid-${item.paymentId}`;
+
+                  return (
+                    <div
+                      key={item.groupId}
+                      className={`rounded-xl border p-4 ${
+                        darkMode
+                          ? "border-slate-700 text-slate-200"
+                          : "border-slate-200 text-slate-800"
+                      }`}
+                    >
+                      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <p className="font-semibold">
+                            {item.groupName} · {item.courseName}
+                          </p>
+                          <p className={theme.soft}>
+                            {formatAmount(item.amount)} so'm
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${statusClass}`}
+                          >
+                            {statusLabel}
+                          </span>
+
+                          {item.status !== "PAID" && (
+                            <button
+                              onClick={() => handleStartPayment(item)}
+                              disabled={isStarting}
+                              className="px-3 py-2 text-xs rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-60"
+                            >
+                              {isStarting ? "Yuborilmoqda..." : "To'lov qilish"}
+                            </button>
+                          )}
+
+                          {item.status === "PENDING" && item.paymentId && (
+                            <button
+                              onClick={() => handleMarkPaid(item)}
+                              disabled={isMarking}
+                              className={`px-3 py-2 text-xs rounded-lg border ${
+                                darkMode
+                                  ? "border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10"
+                                  : "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                              } disabled:opacity-60`}
+                            >
+                              {isMarking ? "Saqlanmoqda..." : "Tasdiqlash"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>

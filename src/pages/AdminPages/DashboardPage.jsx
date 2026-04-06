@@ -4,9 +4,15 @@ import RoomsPage from "./RoomsPage";
 import EmployeesPage from "./XodimlarPage";
 import TeachersPage from "./TeachersPage";
 import StudentsPage from "./StudentsPage";
+import PaymentsPage from "./PaymentsPage";
 import GroupsPage from "./GroupsPage";
 import GroupDetailsPage from "./GroupDetrailsPage";
-import { coursesApi, groupsApi, studentsApi } from "../../api/crmApi";
+import {
+  coursesApi,
+  groupsApi,
+  paymentsApi,
+  studentsApi,
+} from "../../api/crmApi";
 import { getAuthUserFromStorage } from "../../utils/authToken";
 
 const menuItems = [
@@ -14,7 +20,8 @@ const menuItems = [
   { id: 2, key: "teachers", icon: "👨‍🏫" },
   { id: 3, key: "groups", icon: "📚" },
   { id: 4, key: "students", icon: "🎓" },
-  { id: 5, key: "management", icon: "⚙️" },
+  { id: 5, key: "payments", icon: "💳" },
+  { id: 6, key: "management", icon: "⚙️" },
 ];
 
 const managementItems = [
@@ -58,6 +65,7 @@ const translations = {
     teachers: "O‘qituvchilar",
     groups: "Guruhlar",
     students: "Talabalar",
+    payments: "To'lovlar",
     management: "Boshqarish",
     courses: "Kurslar",
     rooms: "Xonalar",
@@ -106,6 +114,7 @@ const translations = {
     teachers: "Teachers",
     groups: "Groups",
     students: "Students",
+    payments: "Payments",
     management: "Management",
     courses: "Courses",
     rooms: "Rooms",
@@ -156,6 +165,7 @@ const translations = {
     teachers: "Учителя",
     groups: "Группы",
     students: "Студенты",
+    payments: "Платежи",
     management: "Управление",
     courses: "Курсы",
     rooms: "Комнаты",
@@ -272,6 +282,12 @@ export default function DashboardPage({
     frozen: 0,
     archived: 0,
   });
+  const [monthlyPayments, setMonthlyPayments] = useState({
+    paid: 0,
+    pending: 0,
+    debt: 0,
+    loading: true,
+  });
   const [scheduleData, setScheduleData] = useState({
     groups: [],
     coursesById: {},
@@ -309,6 +325,8 @@ export default function DashboardPage({
   const profileInitial =
     String(profileName).trim().charAt(0).toUpperCase() || "F";
   const profileRole = String(authUser?.role || "USER").toUpperCase();
+  const formatUzs = (value) =>
+    `${new Intl.NumberFormat("uz-UZ").format(Number(value || 0))} so'm`;
 
   useEffect(() => {
     setActiveMenu(initialMenu);
@@ -324,6 +342,7 @@ export default function DashboardPage({
     teachers: "/dashboard/teacher",
     groups: "/dashboard/group",
     students: "/dashboard/student",
+    payments: "/dashboard/payments",
     management: "/dashboard",
   };
 
@@ -459,6 +478,30 @@ export default function DashboardPage({
     };
 
     loadDashboardStats();
+  }, []);
+
+  useEffect(() => {
+    const loadMonthlyPayments = async () => {
+      try {
+        setMonthlyPayments((prev) => ({ ...prev, loading: true }));
+        const now = new Date();
+        const result = await paymentsApi.getMonthlySummary({
+          year: now.getFullYear(),
+          month: now.getMonth() + 1,
+        });
+        const payload = result?.data ?? result ?? {};
+        setMonthlyPayments({
+          paid: payload?.paid || 0,
+          pending: payload?.pending || 0,
+          debt: payload?.debt || 0,
+          loading: false,
+        });
+      } catch {
+        setMonthlyPayments((prev) => ({ ...prev, loading: false }));
+      }
+    };
+
+    loadMonthlyPayments();
   }, []);
 
   useEffect(() => {
@@ -936,21 +979,27 @@ export default function DashboardPage({
                 <div className="rounded-2xl bg-emerald-50 p-5">
                   <p className="text-slate-500 mb-2">{t.paid}</p>
                   <h3 className="text-2xl font-bold text-emerald-600">
-                    7 500 000 so‘m
+                    {monthlyPayments.loading
+                      ? "..."
+                      : formatUzs(monthlyPayments.paid)}
                   </h3>
                 </div>
 
                 <div className="rounded-2xl bg-yellow-50 p-5">
                   <p className="text-slate-500 mb-2">{t.pending}</p>
                   <h3 className="text-2xl font-bold text-yellow-600">
-                    2 800 000 so‘m
+                    {monthlyPayments.loading
+                      ? "..."
+                      : formatUzs(monthlyPayments.pending)}
                   </h3>
                 </div>
 
                 <div className="rounded-2xl bg-red-50 p-5">
                   <p className="text-slate-500 mb-2">{t.balance}</p>
                   <h3 className="text-2xl font-bold text-red-500">
-                    2 130 000 so‘m
+                    {monthlyPayments.loading
+                      ? "..."
+                      : formatUzs(monthlyPayments.debt)}
                   </h3>
                 </div>
               </div>
@@ -994,6 +1043,9 @@ export default function DashboardPage({
         </>
       );
     }
+
+    if (activeMenu === "payments")
+      return <PaymentsPage theme={theme} darkMode={darkMode} />;
 
     if (activeMenu === "teachers")
       return (

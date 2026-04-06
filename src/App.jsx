@@ -117,6 +117,14 @@ export default function App() {
         }
       />
       <Route
+        path="/dashboard/payments"
+        element={
+          <RequireNonStudent>
+            <DashboardPage initialMenu="payments" />
+          </RequireNonStudent>
+        }
+      />
+      <Route
         path="/dashboard/room"
         element={
           <RequireNonStudent>

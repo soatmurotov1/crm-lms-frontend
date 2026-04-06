@@ -1376,7 +1376,9 @@ export default function GroupDetailsPage({
                     ))}
                   </div>
                 </div>
+              </div>
 
+              <div className="min-h-0 overflow-hidden flex flex-col">
                 <div className={`${infoCardClass} flex-1 overflow-hidden`}>
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <h3

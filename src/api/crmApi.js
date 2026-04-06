@@ -133,6 +133,23 @@ export const studentsApi = {
       unwrap(await apiClient.get("/students/all")),
     ),
   getMyProfile: async () => unwrap(await apiClient.get("/students/my/profile")),
+  getMyGroups: async () => unwrap(await apiClient.get("/students/my/groups")),
+  getMonthlyList: async (params = {}) =>
+    unwrap(
+      await apiClient.get("/payments/admin/monthly", {
+        params,
+      }),
+    ),
+  getMyLessons: async (groupId) =>
+    unwrap(await apiClient.get(`/students/my/lessons/${groupId}`)),
+  getMyGroupLessonVideo: async (groupId) =>
+    unwrap(await apiClient.get(`/students/my/group/lessonVideo/${groupId}`)),
+  getMyGroupHomework: async (groupId, lessonId) =>
+    unwrap(
+      await apiClient.get(`/students/my/group/homework/${groupId}`, {
+        params: { lessonId },
+      }),
+    ),
   changeMyPassword: async (payload) =>
     withCacheInvalidation(async () =>
       unwrap(await apiClient.put("/students/my/password", payload)),
@@ -229,6 +246,35 @@ export const groupsApi = {
     withCacheInvalidation(async () =>
       unwrap(await apiClient.delete(`/groups/${id}`)),
     ),
+};
+
+export const paymentsApi = {
+  getMonthlySummary: async (params = {}) =>
+    unwrap(
+      await apiClient.get("/payments/summary/monthly", {
+        params,
+      }),
+    ),
+  getMonthlyList: async (params = {}) =>
+    unwrap(
+      await apiClient.get("/payments/admin/monthly", {
+        params,
+      }),
+    ),
+  getStudentMonthly: async (studentId, params = {}) =>
+    unwrap(
+      await apiClient.get(`/payments/students/${studentId}/monthly`, {
+        params,
+      }),
+    ),
+  startStudentPayment: async (studentId, payload) =>
+    unwrap(
+      await apiClient.post(`/payments/students/${studentId}/start`, payload),
+    ),
+  markPaid: async (paymentId, payload = {}) =>
+    unwrap(await apiClient.patch(`/payments/${paymentId}/mark-paid`, payload)),
+  updateStatus: async (paymentId, payload) =>
+    unwrap(await apiClient.patch(`/payments/${paymentId}/status`, payload)),
 };
 
 export const studentGroupApi = {
