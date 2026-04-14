@@ -13,6 +13,7 @@ export default function LessonMaterialsSection({
   deleteHomework,
   videosLoading,
   videos,
+  readOnly = false,
 }) {
   return (
     <div
@@ -37,21 +38,22 @@ export default function LessonMaterialsSection({
           </button>
         </div>
 
-        {activeLessonTab === "uyga-vazifa" ? (
-          <button
-            onClick={() => setLessonPage("create-homework")}
-            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
-          >
-            Uyga vazifa qo‘shish
-          </button>
-        ) : (
-          <button
-            onClick={() => setShowVideoUploadModal(true)}
-            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
-          >
-            Qo‘shish
-          </button>
-        )}
+        {!readOnly &&
+          (activeLessonTab === "uyga-vazifa" ? (
+            <button
+              onClick={() => setLessonPage("create-homework")}
+              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
+            >
+              Uyga vazifa qo‘shish
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowVideoUploadModal(true)}
+              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
+            >
+              Qo‘shish
+            </button>
+          ))}
       </div>
 
       <div className="flex-1 min-h-0 overflow-auto p-4">
@@ -98,18 +100,23 @@ export default function LessonMaterialsSection({
                   <th className={`text-left px-3 py-3 w-[150px] ${theme.text}`}>
                     Dars sanasi
                   </th>
-                  <th
-                    className={`text-center px-3 py-3 w-[110px] ${theme.text}`}
-                  >
-                    Amal
-                  </th>
+                  {!readOnly && (
+                    <th
+                      className={`text-center px-3 py-3 w-[110px] ${theme.text}`}
+                    >
+                      Amal
+                    </th>
+                  )}
                 </tr>
               </thead>
 
               <tbody>
                 {homeworksLoading && (
                   <tr>
-                    <td colSpan={11} className={`px-3 py-6 text-center ${theme.soft}`}>
+                    <td
+                      colSpan={readOnly ? 10 : 11}
+                      className={`px-3 py-6 text-center ${theme.soft}`}
+                    >
                       Uyga vazifalar yuklanmoqda...
                     </td>
                   </tr>
@@ -151,26 +158,37 @@ export default function LessonMaterialsSection({
                     <td className={`px-3 py-3 text-center ${theme.text}`}>
                       {item.pending}
                     </td>
-                    <td className={`px-3 py-3 ${theme.text}`}>{item.assignedAt}</td>
-                    <td className={`px-3 py-3 ${theme.text}`}>{item.deadline}</td>
-                    <td className={`px-3 py-3 ${theme.text}`}>{item.lessonDate}</td>
-                    <td className="px-3 py-3 text-center">
-                      <button
-                        disabled={deletingHomeworkId === item.id}
-                        onClick={() => deleteHomework(item.id)}
-                        className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs disabled:opacity-60"
-                      >
-                        {deletingHomeworkId === item.id
-                          ? "O‘chirilmoqda..."
-                          : "O‘chirish"}
-                      </button>
+                    <td className={`px-3 py-3 ${theme.text}`}>
+                      {item.assignedAt}
                     </td>
+                    <td className={`px-3 py-3 ${theme.text}`}>
+                      {item.deadline}
+                    </td>
+                    <td className={`px-3 py-3 ${theme.text}`}>
+                      {item.lessonDate}
+                    </td>
+                    {!readOnly && (
+                      <td className="px-3 py-3 text-center">
+                        <button
+                          disabled={deletingHomeworkId === item.id}
+                          onClick={() => deleteHomework(item.id)}
+                          className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs disabled:opacity-60"
+                        >
+                          {deletingHomeworkId === item.id
+                            ? "O‘chirilmoqda..."
+                            : "O‘chirish"}
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
 
                 {homeworks.length === 0 && (
                   <tr>
-                    <td colSpan={11} className={`px-3 py-10 text-center ${theme.soft}`}>
+                    <td
+                      colSpan={readOnly ? 10 : 11}
+                      className={`px-3 py-10 text-center ${theme.soft}`}
+                    >
                       Uyga vazifalar hozircha yo‘q
                     </td>
                   </tr>
@@ -191,7 +209,9 @@ export default function LessonMaterialsSection({
                   <th className={`text-left px-3 py-3 ${theme.text}`}>
                     Dars nomi
                   </th>
-                  <th className={`text-left px-3 py-3 ${theme.text}`}>Status</th>
+                  <th className={`text-left px-3 py-3 ${theme.text}`}>
+                    Status
+                  </th>
                   <th className={`text-left px-3 py-3 ${theme.text}`}>
                     Dars sanasi
                   </th>
@@ -204,7 +224,10 @@ export default function LessonMaterialsSection({
               <tbody>
                 {videosLoading && (
                   <tr>
-                    <td colSpan={5} className={`px-3 py-6 text-center ${theme.soft}`}>
+                    <td
+                      colSpan={5}
+                      className={`px-3 py-6 text-center ${theme.soft}`}
+                    >
                       Videolar yuklanmoqda...
                     </td>
                   </tr>
@@ -238,14 +261,21 @@ export default function LessonMaterialsSection({
                         {video.status}
                       </span>
                     </td>
-                    <td className={`px-3 py-3 ${theme.text}`}>{video.lessonDate}</td>
-                    <td className={`px-3 py-3 ${theme.text}`}>{video.uploadedAt}</td>
+                    <td className={`px-3 py-3 ${theme.text}`}>
+                      {video.lessonDate}
+                    </td>
+                    <td className={`px-3 py-3 ${theme.text}`}>
+                      {video.uploadedAt}
+                    </td>
                   </tr>
                 ))}
 
                 {videos.length === 0 && (
                   <tr>
-                    <td colSpan={5} className={`px-3 py-10 text-center ${theme.soft}`}>
+                    <td
+                      colSpan={5}
+                      className={`px-3 py-10 text-center ${theme.soft}`}
+                    >
                       Videolar hozircha yo‘q
                     </td>
                   </tr>

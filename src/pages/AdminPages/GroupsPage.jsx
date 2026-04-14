@@ -47,7 +47,9 @@ export default function GroupsPage({
   darkMode,
   onOpenGroupDetails,
   currentUser,
+  readOnly = false,
 }) {
+  const isReadonlyView = Boolean(readOnly) || currentUser?.role === "TEACHER";
   const [groups, setGroups] = useState([]);
   const [courses, setCourses] = useState([]);
   const [rooms, setRooms] = useState([]);
@@ -100,13 +102,17 @@ export default function GroupsPage({
     try {
       setLoading(true);
       const [groupsRes, coursesRes, roomsRes, teachersRes, studentsRes] =
-        await Promise.allSettled([
-          groupsApi.getAll({ status: "ALL" }),
-          coursesApi.getAll(),
-          roomsApi.getAll(),
-          teachersApi.getAll(),
-          studentsApi.getAll(),
-        ]);
+        await Promise.allSettled(
+          isReadonlyView
+            ? [groupsApi.getAll({ status: "ALL" })]
+            : [
+                groupsApi.getAll({ status: "ALL" }),
+                coursesApi.getAll(),
+                roomsApi.getAll(),
+                teachersApi.getAll(),
+                studentsApi.getAll(),
+              ],
+        );
 
       const groupsList =
         groupsRes.status === "fulfilled" && Array.isArray(groupsRes.value?.data)
@@ -146,24 +152,24 @@ export default function GroupsPage({
           : groupsWithCounts,
       );
       setCourses(
-        coursesRes.status === "fulfilled" &&
+        coursesRes?.status === "fulfilled" &&
           Array.isArray(coursesRes.value?.data)
           ? coursesRes.value.data
           : [],
       );
       setRooms(
-        roomsRes.status === "fulfilled" && Array.isArray(roomsRes.value?.data)
+        roomsRes?.status === "fulfilled" && Array.isArray(roomsRes.value?.data)
           ? roomsRes.value.data
           : [],
       );
       setTeachers(
-        teachersRes.status === "fulfilled" &&
+        teachersRes?.status === "fulfilled" &&
           Array.isArray(teachersRes.value?.data)
           ? teachersRes.value.data
           : [],
       );
       setStudents(
-        studentsRes.status === "fulfilled" &&
+        studentsRes?.status === "fulfilled" &&
           Array.isArray(studentsRes.value?.data)
           ? studentsRes.value.data
           : [],
@@ -204,13 +210,15 @@ export default function GroupsPage({
     if (!q) return tabGroups;
 
     return tabGroups.filter((group) => {
-      const courseName = coursesById[group.courseId]?.name || "";
+      const courseName =
+        coursesById[group.courseId]?.name || group.course?.name || "";
       const teacherName =
         teachersById[group.teacherId]?.fullName ||
+        group.teacher?.fullName ||
         (Number(group.teacherId) === Number(currentUser?.id)
           ? currentUser?.fullName || ""
           : "");
-      const roomName = roomsById[group.roomId]?.name || "";
+      const roomName = roomsById[group.roomId]?.name || group.room?.name || "";
       return (
         String(group.name || "")
           .toLowerCase()
@@ -252,9 +260,17 @@ export default function GroupsPage({
 
   const getTeacherName = (group) =>
     teachersById[group.teacherId]?.fullName ||
+    group.teacher?.fullName ||
     (Number(group.teacherId) === Number(currentUser?.id)
       ? currentUser?.fullName || "-"
       : "O'qituvchi yo'q");
+
+  const columnCount = isReadonlyView ? 9 : 10;
+  const teacherActiveTabClass = darkMode
+    ? "bg-slate-800 text-slate-200 border-slate-700"
+    : "bg-slate-100 text-slate-700 border-slate-200";
+  const isTeacherActiveTab =
+    currentUser?.role === "TEACHER" && activeTab === "ACTIVE";
 
   const getStatusBadgeClass = (status) => {
     const normalized = normalizeStatus(status);
@@ -514,7 +530,11 @@ export default function GroupsPage({
               <button
                 onClick={() => setActiveTab("ACTIVE")}
                 className={`px-3 py-1.5 text-sm rounded-lg border ${
-                  activeTab === "ACTIVE" ? theme.tabActive : theme.tab
+                  activeTab === "ACTIVE"
+                    ? isTeacherActiveTab
+                      ? teacherActiveTabClass
+                      : theme.tabActive
+                    : theme.tab
                 } cursor-pointer`}
               >
                 Asosiy
@@ -545,12 +565,14 @@ export default function GroupsPage({
               placeholder="Qidirish..."
               className={`rounded-xl border px-4 py-2.5 min-w-56 ${theme.input}`}
             />
-            <button
-              onClick={openAddDrawer}
-              className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl"
-            >
-              + Guruh qo'shish
-            </button>
+            {!isReadonlyView && (
+              <button
+                onClick={openAddDrawer}
+                className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl"
+              >
+                + Guruh qo'shish
+              </button>
+            )}
           </div>
         </div>
 
@@ -606,11 +628,13 @@ export default function GroupsPage({
                 <th className={`text-left px-4 py-3 font-medium ${theme.soft}`}>
                   Talabalar
                 </th>
-                <th
-                  className={`text-right px-4 py-3 font-medium ${theme.soft}`}
-                >
-                  Amallar
-                </th>
+                {!isReadonlyView && (
+                  <th
+                    className={`text-right px-4 py-3 font-medium ${theme.soft}`}
+                  >
+                    Amallar
+                  </th>
+                )}
               </tr>
             </thead>
 
@@ -618,7 +642,7 @@ export default function GroupsPage({
               {loading ? (
                 <tr>
                   <td
-                    colSpan={10}
+                    colSpan={columnCount}
                     className={`px-4 py-6 text-center ${theme.soft}`}
                   >
                     Yuklanmoqda...
@@ -628,8 +652,10 @@ export default function GroupsPage({
                 filteredGroups.map((group) => {
                   const normalizedGroupStatus = normalizeStatus(group.status);
                   const isGroupLocked = normalizedGroupStatus !== "ACTIVE";
-                  const course = coursesById[group.courseId];
-                  const roomName = roomsById[group.roomId]?.name || "-";
+                  const course =
+                    coursesById[group.courseId] || group.course || null;
+                  const roomName =
+                    roomsById[group.roomId]?.name || group.room?.name || "-";
                   const studentsInGroup = Number(
                     group.studentsCount ??
                       group.studentCount ??
@@ -722,79 +748,86 @@ export default function GroupsPage({
                           {studentsInGroup}
                         </button>
                       </td>
-                      <td className="px-4 py-3">
-                        <div
-                          className="flex items-center justify-end gap-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (isGroupLocked) return;
-                              handleOpenGroupDetails(group, course, roomName, {
-                                initialMainTab: "akademik-davomat",
-                              });
-                            }}
-                            disabled={isGroupLocked}
-                            className={`px-3 h-8 rounded-lg border text-xs font-medium ${
-                              isGroupLocked
-                                ? "opacity-60 cursor-not-allowed"
-                                : "cursor-pointer"
-                            }`}
-                          >
-                            Davomat
-                          </button>
-
+                      {!isReadonlyView && (
+                        <td className="px-4 py-3">
                           <div
-                            className={`relative ${
-                              openActionMenuId === group.id ? "z-50" : ""
-                            }`}
+                            className="flex items-center justify-end gap-2"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <button
                               type="button"
-                              onClick={() =>
-                                setOpenActionMenuId((prev) =>
-                                  prev === group.id ? null : group.id,
-                                )
-                              }
-                              className={`w-8 h-8 rounded-lg border text-sm leading-none flex items-center justify-center cursor-pointer ${theme.text}`}
+                              onClick={() => {
+                                if (isGroupLocked) return;
+                                handleOpenGroupDetails(
+                                  group,
+                                  course,
+                                  roomName,
+                                  {
+                                    initialMainTab: "akademik-davomat",
+                                  },
+                                );
+                              }}
+                              disabled={isGroupLocked}
+                              className={`px-3 h-8 rounded-lg border text-xs font-medium ${
+                                isGroupLocked
+                                  ? "opacity-60 cursor-not-allowed"
+                                  : "cursor-pointer"
+                              }`}
                             >
-                              ...
+                              Davomat
                             </button>
 
-                            {openActionMenuId === group.id && (
-                              <div
-                                className={`absolute right-0 bottom-10 z-50 min-w-36 rounded-xl border p-1 shadow-lg ${theme.subpanel}`}
+                            <div
+                              className={`relative ${
+                                openActionMenuId === group.id ? "z-50" : ""
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setOpenActionMenuId((prev) =>
+                                    prev === group.id ? null : group.id,
+                                  )
+                                }
+                                className={`w-8 h-8 rounded-lg border text-sm leading-none flex items-center justify-center cursor-pointer ${theme.text}`}
                               >
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    openEditDrawer(group);
-                                    setOpenActionMenuId(null);
-                                  }}
-                                  className={`w-full rounded-lg px-3 py-2 text-left text-xs ${theme.submenuText} hover:bg-slate-100/70 cursor-pointer`}
+                                ...
+                              </button>
+
+                              {openActionMenuId === group.id && (
+                                <div
+                                  className={`absolute right-0 bottom-10 z-50 min-w-36 rounded-xl border p-1 shadow-lg ${theme.subpanel}`}
                                 >
-                                  Tahrirlash
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDelete(group.id)}
-                                  className="w-full rounded-lg px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50 cursor-pointer"
-                                >
-                                  O‘chirish
-                                </button>
-                              </div>
-                            )}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      openEditDrawer(group);
+                                      setOpenActionMenuId(null);
+                                    }}
+                                    className={`w-full rounded-lg px-3 py-2 text-left text-xs ${theme.submenuText} hover:bg-slate-100/70 cursor-pointer`}
+                                  >
+                                    Tahrirlash
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDelete(group.id)}
+                                    className="w-full rounded-lg px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50 cursor-pointer"
+                                  >
+                                    O‘chirish
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </td>
+                        </td>
+                      )}
                     </tr>
                   );
                 })
               ) : (
                 <tr>
                   <td
-                    colSpan={10}
+                    colSpan={columnCount}
                     className={`px-4 py-8 text-center ${theme.soft}`}
                   >
                     {activeTab === "ARCHIVE"
@@ -810,7 +843,7 @@ export default function GroupsPage({
         </div>
       </div>
 
-      {showDrawer && (
+      {showDrawer && !isReadonlyView && (
         <div className={`fixed inset-0 z-50 ${theme.overlay}`}>
           <div className="absolute inset-0" onClick={closeDrawer} />
           <div

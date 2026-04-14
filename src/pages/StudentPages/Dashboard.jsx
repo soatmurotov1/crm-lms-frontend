@@ -697,16 +697,24 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
         const status = homework
           ? normalizeHomeworkStatus(homework.status)
           : "NOT_ASSIGNED";
+        const lessonDate = lesson.created_at || lesson.date || lesson.startDate;
         return {
           lesson,
           status,
           homework,
           videoCount: videoCountMap.get(lesson.id) || 0,
-          lessonDate: lesson.created_at || lesson.date || lesson.startDate,
+          lessonDate,
         };
       });
 
-      setGroupLessons(items);
+      const sortedItems = [...items].sort((a, b) => {
+        const aTime = a.lessonDate ? new Date(a.lessonDate).getTime() : 0;
+        const bTime = b.lessonDate ? new Date(b.lessonDate).getTime() : 0;
+        if (aTime !== bTime) return bTime - aTime;
+        return Number(b.lesson?.id || 0) - Number(a.lesson?.id || 0);
+      });
+
+      setGroupLessons(sortedItems);
     } catch {
       setGroupLessonsError("Darslarni yuklab bo'lmadi");
     } finally {

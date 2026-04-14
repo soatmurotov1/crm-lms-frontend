@@ -109,6 +109,7 @@ export const teachersApi = {
     cachedGet("teachers/all", async () =>
       unwrap(await apiClient.get("/teachers/all")),
     ),
+  getMyProfile: async () => unwrap(await apiClient.get("/teachers/my/profile")),
   create: async (payload) =>
     withCacheInvalidation(async () =>
       unwrap(await apiClient.post("/teachers", toFormData(payload))),
@@ -125,6 +126,8 @@ export const teachersApi = {
     withCacheInvalidation(async () =>
       unwrap(await apiClient.put(`/teachers/${id}/archive`)),
     ),
+  changeMyPassword: async (payload) =>
+    unwrap(await apiClient.put("/teachers/my/password", payload)),
 };
 
 export const studentsApi = {

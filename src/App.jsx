@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import LoginPage from "./pages/AdminPages/LoginPage";
 import DashboardPage from "./pages/AdminPages/DashboardPage";
 import StudentDashboardPage from "./pages/StudentPages/Dashboard";
+import TeacherDashboard from "./pages/TeacherPages/Dashboard";
 import { getAuthUserFromStorage } from "./utils/authToken";
 
 function hasAccessToken() {
@@ -27,7 +28,11 @@ function GuestOnly({ children }) {
     return (
       <Navigate
         to={
-          getCurrentRole() === "STUDENT" ? "/student/dashboard" : "/dashboard"
+          getCurrentRole() === "STUDENT"
+            ? "/student/dashboard"
+            : getCurrentRole() === "TEACHER"
+              ? "/teacher"
+              : "/dashboard"
         }
         replace
       />
@@ -62,6 +67,28 @@ function RequireNonStudent({ children }) {
     return <Navigate to="/student/dashboard" replace />;
   }
 
+  if (getCurrentRole() === "TEACHER") {
+    return <Navigate to="/teacher" replace />;
+  }
+
+  return children;
+}
+
+function RequireTeacher({ children }) {
+  const location = useLocation();
+
+  if (!hasAccessToken()) {
+    return <Navigate to="/" replace state={{ from: location }} />;
+  }
+
+  if (getCurrentRole() === "STUDENT") {
+    return <Navigate to="/student/dashboard" replace />;
+  }
+
+  if (getCurrentRole() !== "TEACHER") {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return children;
 }
 
@@ -82,6 +109,38 @@ export default function App() {
           <RequireNonStudent>
             <DashboardPage />
           </RequireNonStudent>
+        }
+      />
+      <Route
+        path="/teacher"
+        element={
+          <RequireTeacher>
+            <TeacherDashboard initialMenu="home" />
+          </RequireTeacher>
+        }
+      />
+      <Route
+        path="/teacher/groups"
+        element={
+          <RequireTeacher>
+            <TeacherDashboard initialMenu="groups" />
+          </RequireTeacher>
+        }
+      />
+      <Route
+        path="/teacher/home"
+        element={
+          <RequireTeacher>
+            <TeacherDashboard initialMenu="home" />
+          </RequireTeacher>
+        }
+      />
+      <Route
+        path="/teacher/settings"
+        element={
+          <RequireTeacher>
+            <TeacherDashboard initialMenu="settings" />
+          </RequireTeacher>
         }
       />
       <Route

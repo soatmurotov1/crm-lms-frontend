@@ -11,6 +11,7 @@ export default function CreateHomeworkSection({
   lessons,
   homeworkSaving,
   addHomework,
+  readOnly = false,
 }) {
   const fileInputRef = useRef(null);
   const sortedLessons = [...lessons].sort((a, b) => {
@@ -65,6 +66,7 @@ export default function CreateHomeworkSection({
                     )?.title || homeworkForm.title,
                 })
               }
+              disabled={readOnly}
             >
               <option value="">Darslardan birini tanlang</option>
               {sortedLessons.map((lesson) => (
@@ -86,6 +88,7 @@ export default function CreateHomeworkSection({
               onChange={(e) =>
                 setHomeworkForm({ ...homeworkForm, title: e.target.value })
               }
+              disabled={readOnly}
             />
           </div>
 
@@ -104,6 +107,7 @@ export default function CreateHomeworkSection({
                   durationTime: e.target.value,
                 })
               }
+              disabled={readOnly}
             />
             <p className={`text-xs mt-2 ${theme.soft}`}>
               Default qiymat 16 soat. E'lon qilingan vaqtdan shu soat qo'shilib
@@ -140,6 +144,7 @@ export default function CreateHomeworkSection({
                     file: e.target.files?.[0] || null,
                   })
                 }
+                disabled={readOnly}
               />
               <span className={theme.soft}>
                 ⬇ Yuklash{" "}
@@ -157,7 +162,7 @@ export default function CreateHomeworkSection({
             </button>
 
             <button
-              disabled={homeworkSaving}
+              disabled={homeworkSaving || readOnly}
               onClick={addHomework}
               className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
             >

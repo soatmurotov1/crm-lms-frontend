@@ -83,7 +83,11 @@ export default function LoginPage() {
       const authUser = parseAuthToken(result.accessToken);
       const role = String(authUser?.role || "").toUpperCase();
       const targetPath =
-        role === "STUDENT" ? "/student/dashboard" : "/dashboard";
+        role === "STUDENT"
+          ? "/student/dashboard"
+          : role === "TEACHER"
+            ? "/teacher"
+            : "/dashboard";
 
       setTimeout(() => {
         navigate(targetPath);

@@ -31,7 +31,9 @@ export default function GroupDetailsPage({
   group,
   onBack,
   onTabChange,
+  readOnly = false,
 }) {
+  const isReadOnly = Boolean(readOnly);
   const normalizeDays = (value) => {
     if (Array.isArray(value)) return value;
     if (typeof value === "string") {
@@ -293,14 +295,14 @@ export default function GroupDetailsPage({
   const [openPersonMenu, setOpenPersonMenu] = useState(null);
 
   useEffect(() => {
-    if (!showTeacherModal) return;
+    if (!showTeacherModal || isReadOnly) return;
     loadTeacherOptions();
-  }, [showTeacherModal]);
+  }, [showTeacherModal, isReadOnly]);
 
   useEffect(() => {
-    if (!showStudentModal) return;
+    if (!showStudentModal || isReadOnly) return;
     loadStudentOptions();
-  }, [showStudentModal, students]);
+  }, [showStudentModal, students, isReadOnly]);
 
   const [selectedHomework, setSelectedHomework] = useState(null);
 
@@ -633,6 +635,7 @@ export default function GroupDetailsPage({
   };
 
   const openEditModal = () => {
+    if (isReadOnly) return;
     setEditForm({
       name: groupData.name || "",
       course: groupData.course || "",
@@ -647,6 +650,7 @@ export default function GroupDetailsPage({
   };
 
   const saveGroupEdit = async () => {
+    if (isReadOnly) return;
     try {
       if (group?.id) {
         await groupsApi.update(group.id, { status: editForm.status });
@@ -702,6 +706,7 @@ export default function GroupDetailsPage({
   };
 
   const loadTeacherOptions = async () => {
+    if (isReadOnly) return;
     try {
       setTeacherOptionsLoading(true);
       const result = await teachersApi.getAll();
@@ -715,6 +720,7 @@ export default function GroupDetailsPage({
   };
 
   const loadStudentOptions = async () => {
+    if (isReadOnly) return;
     try {
       setStudentOptionsLoading(true);
       const result = await studentsApi.getAll();
@@ -734,6 +740,7 @@ export default function GroupDetailsPage({
   };
 
   const addTeacher = async () => {
+    if (isReadOnly) return;
     if (!group?.id) {
       alert("Guruh tanlanmagan");
       return;
@@ -776,6 +783,7 @@ export default function GroupDetailsPage({
   };
 
   const addStudent = async () => {
+    if (isReadOnly) return;
     if (!group?.id) {
       alert("Guruh tanlanmagan");
       return;
@@ -808,6 +816,7 @@ export default function GroupDetailsPage({
   };
 
   const addHomework = async () => {
+    if (isReadOnly) return;
     if (!group?.id) {
       alert("Guruh tanlanmagan");
       return;
@@ -850,6 +859,7 @@ export default function GroupDetailsPage({
   };
 
   const addLesson = async () => {
+    if (isReadOnly) return;
     if (!group?.id) {
       alert("Guruh tanlanmagan");
       return;
@@ -931,6 +941,7 @@ export default function GroupDetailsPage({
   };
 
   const handleVideoUpload = async (file) => {
+    if (isReadOnly) return;
     if (!group?.id) {
       alert("Guruh tanlanmagan");
       return;
@@ -960,10 +971,12 @@ export default function GroupDetailsPage({
   };
 
   const openHomeworkDetail = (homework) => {
+    if (isReadOnly) return;
     setSelectedHomework(homework);
   };
 
   const deleteTeacher = (id) => {
+    if (isReadOnly) return;
     const isOk = window.confirm("Rostan ham o‘qituvchini o‘chirmoqchimisiz?");
     if (!isOk) return;
     setTeachers((prev) => prev.filter((teacher) => teacher.id !== id));
@@ -971,6 +984,7 @@ export default function GroupDetailsPage({
   };
 
   const deleteStudent = async (id) => {
+    if (isReadOnly) return;
     const isOk = window.confirm("Rostan ham talabani o‘chirmoqchimisiz?");
     if (!isOk) return;
 
@@ -1000,6 +1014,7 @@ export default function GroupDetailsPage({
   };
 
   const editTeacher = (id) => {
+    if (isReadOnly) return;
     const target = teachers.find((teacher) => teacher.id === id);
     if (!target) return;
 
@@ -1023,6 +1038,7 @@ export default function GroupDetailsPage({
   };
 
   const editStudent = (id) => {
+    if (isReadOnly) return;
     const target = students.find((student) => student.id === id);
     if (!target) return;
 
@@ -1050,6 +1066,7 @@ export default function GroupDetailsPage({
   };
 
   const deleteHomework = async (id) => {
+    if (isReadOnly) return;
     const isOk = window.confirm("Rostan ham uyga vazifani o‘chirmoqchimisiz?");
     if (!isOk) return;
 
@@ -1065,6 +1082,7 @@ export default function GroupDetailsPage({
   };
 
   const deleteVideo = async (id) => {
+    if (isReadOnly) return;
     const isOk = window.confirm("Rostan ham videoni o‘chirmoqchimisiz?");
     if (!isOk) return;
 
@@ -1080,6 +1098,7 @@ export default function GroupDetailsPage({
   };
 
   const deleteGroup = async () => {
+    if (isReadOnly) return;
     const isOk = window.confirm("Rostan ham guruhni o‘chirmoqchimisiz?");
     if (!isOk) return;
 
@@ -1141,39 +1160,41 @@ export default function GroupDetailsPage({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <button onClick={openEditModal} className={actionBtnClass}>
-                ✏️ Tahrirlash
-              </button>
+            {!isReadOnly && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <button onClick={openEditModal} className={actionBtnClass}>
+                  ✏️ Tahrirlash
+                </button>
 
-              <button
-                onClick={() => {
-                  setSelectedTeacherId("");
-                  setShowTeacherModal(true);
-                }}
-                className={actionBtnClass}
-              >
-                + O‘qituvchi qo‘shish
-              </button>
+                <button
+                  onClick={() => {
+                    setSelectedTeacherId("");
+                    setShowTeacherModal(true);
+                  }}
+                  className={actionBtnClass}
+                >
+                  + O‘qituvchi qo‘shish
+                </button>
 
-              <button
-                onClick={() => {
-                  setSelectedStudentId("");
-                  setShowStudentModal(true);
-                }}
-                className={actionBtnClass}
-              >
-                + O‘quvchi qo‘shish
-              </button>
+                <button
+                  onClick={() => {
+                    setSelectedStudentId("");
+                    setShowStudentModal(true);
+                  }}
+                  className={actionBtnClass}
+                >
+                  + O‘quvchi qo‘shish
+                </button>
 
-              <button
-                disabled={groupDeleteLoading}
-                onClick={deleteGroup}
-                className="w-10 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white transition shrink-0 disabled:opacity-60"
-              >
-                {groupDeleteLoading ? "..." : "🗑️"}
-              </button>
-            </div>
+                <button
+                  disabled={groupDeleteLoading}
+                  onClick={deleteGroup}
+                  className="w-10 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white transition shrink-0 disabled:opacity-60"
+                >
+                  {groupDeleteLoading ? "..." : "🗑️"}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="shrink-0 flex items-center gap-3 border-b border-slate-200 overflow-x-auto">
@@ -1318,60 +1339,62 @@ export default function GroupDetailsPage({
                           </div>
                         </div>
 
-                        <div className="relative shrink-0">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setOpenPersonMenu((prev) =>
-                                prev?.type === "teacher" &&
-                                prev?.id === teacher.id
-                                  ? null
-                                  : { type: "teacher", id: teacher.id },
-                              )
-                            }
-                            className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
-                              darkMode
-                                ? "border-slate-600 text-slate-200 hover:bg-slate-800"
-                                : "border-slate-200 text-slate-600 hover:bg-slate-100"
-                            }`}
-                          >
-                            ...
-                          </button>
+                        {!isReadOnly && (
+                          <div className="relative shrink-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setOpenPersonMenu((prev) =>
+                                  prev?.type === "teacher" &&
+                                  prev?.id === teacher.id
+                                    ? null
+                                    : { type: "teacher", id: teacher.id },
+                                )
+                              }
+                              className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
+                                darkMode
+                                  ? "border-slate-600 text-slate-200 hover:bg-slate-800"
+                                  : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                              }`}
+                            >
+                              ...
+                            </button>
 
-                          {openPersonMenu?.type === "teacher" &&
-                            openPersonMenu?.id === teacher.id && (
-                              <div
-                                className={`absolute right-0 top-9 z-30 min-w-30 rounded-xl border shadow-lg p-1 ${
-                                  darkMode
-                                    ? "bg-slate-900 border-slate-700"
-                                    : "bg-white border-slate-200"
-                                }`}
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => editTeacher(teacher.id)}
-                                  className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                            {openPersonMenu?.type === "teacher" &&
+                              openPersonMenu?.id === teacher.id && (
+                                <div
+                                  className={`absolute right-0 top-9 z-30 min-w-30 rounded-xl border shadow-lg p-1 ${
                                     darkMode
-                                      ? "text-slate-200 hover:bg-slate-800"
-                                      : "text-slate-700 hover:bg-slate-50"
+                                      ? "bg-slate-900 border-slate-700"
+                                      : "bg-white border-slate-200"
                                   }`}
                                 >
-                                  Tahrirlash
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => deleteTeacher(teacher.id)}
-                                  className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                    darkMode
-                                      ? "text-red-300 hover:bg-red-500/10"
-                                      : "text-red-600 hover:bg-red-50"
-                                  }`}
-                                >
-                                  O‘chirish
-                                </button>
-                              </div>
-                            )}
-                        </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => editTeacher(teacher.id)}
+                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                                      darkMode
+                                        ? "text-slate-200 hover:bg-slate-800"
+                                        : "text-slate-700 hover:bg-slate-50"
+                                    }`}
+                                  >
+                                    Tahrirlash
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteTeacher(teacher.id)}
+                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                                      darkMode
+                                        ? "text-red-300 hover:bg-red-500/10"
+                                        : "text-red-600 hover:bg-red-50"
+                                    }`}
+                                  >
+                                    O‘chirish
+                                  </button>
+                                </div>
+                              )}
+                          </div>
+                        )}
                       </article>
                     ))}
                   </div>
@@ -1433,60 +1456,64 @@ export default function GroupDetailsPage({
                               Faol
                             </span>
 
-                            <div className="relative">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setOpenPersonMenu((prev) =>
-                                    prev?.type === "student" &&
-                                    prev?.id === student.id
-                                      ? null
-                                      : { type: "student", id: student.id },
-                                  )
-                                }
-                                className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
-                                  darkMode
-                                    ? "border-slate-600 text-slate-200 hover:bg-slate-800"
-                                    : "border-slate-200 text-slate-600 hover:bg-slate-100"
-                                }`}
-                              >
-                                ...
-                              </button>
+                            {!isReadOnly && (
+                              <div className="relative">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setOpenPersonMenu((prev) =>
+                                      prev?.type === "student" &&
+                                      prev?.id === student.id
+                                        ? null
+                                        : { type: "student", id: student.id },
+                                    )
+                                  }
+                                  className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
+                                    darkMode
+                                      ? "border-slate-600 text-slate-200 hover:bg-slate-800"
+                                      : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                                  }`}
+                                >
+                                  ...
+                                </button>
 
-                              {openPersonMenu?.type === "student" &&
-                                openPersonMenu?.id === student.id && (
-                                  <div
-                                    className={`absolute right-0 top-9 z-30 min-w-30 rounded-xl border shadow-lg p-1 ${
-                                      darkMode
-                                        ? "bg-slate-900 border-slate-700"
-                                        : "bg-white border-slate-200"
-                                    }`}
-                                  >
-                                    <button
-                                      type="button"
-                                      onClick={() => editStudent(student.id)}
-                                      className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                                {openPersonMenu?.type === "student" &&
+                                  openPersonMenu?.id === student.id && (
+                                    <div
+                                      className={`absolute right-0 top-9 z-30 min-w-30 rounded-xl border shadow-lg p-1 ${
                                         darkMode
-                                          ? "text-slate-200 hover:bg-slate-800"
-                                          : "text-slate-700 hover:bg-slate-50"
+                                          ? "bg-slate-900 border-slate-700"
+                                          : "bg-white border-slate-200"
                                       }`}
                                     >
-                                      Tahrirlash
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => deleteStudent(student.id)}
-                                      className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                        darkMode
-                                          ? "text-red-300 hover:bg-red-500/10"
-                                          : "text-red-600 hover:bg-red-50"
-                                      }`}
-                                    >
-                                      O‘chirish
-                                    </button>
-                                  </div>
-                                )}
-                            </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => editStudent(student.id)}
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                                          darkMode
+                                            ? "text-slate-200 hover:bg-slate-800"
+                                            : "text-slate-700 hover:bg-slate-50"
+                                        }`}
+                                      >
+                                        Tahrirlash
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          deleteStudent(student.id)
+                                        }
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                                          darkMode
+                                            ? "text-red-300 hover:bg-red-500/10"
+                                            : "text-red-600 hover:bg-red-50"
+                                        }`}
+                                      >
+                                        O‘chirish
+                                      </button>
+                                    </div>
+                                  )}
+                              </div>
+                            )}
                           </div>
                         </article>
                       ))
@@ -1507,6 +1534,7 @@ export default function GroupDetailsPage({
                 group={group}
                 groupData={groupData}
                 onLessonCreated={refreshLessons}
+                readOnly={isReadOnly}
               />
             </div>
           )}
@@ -1541,21 +1569,22 @@ export default function GroupDetailsPage({
                   </button>
                 </div>
 
-                {activeLessonTab === "uyga-vazifa" ? (
-                  <button
-                    onClick={() => setLessonPage("create-homework")}
-                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
-                  >
-                    Uyga vazifa qo‘shish
-                  </button>
-                ) : activeLessonTab === "videolar" ? (
-                  <button
-                    onClick={() => setShowVideoUploadModal(true)}
-                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
-                  >
-                    Qo‘shish
-                  </button>
-                ) : null}
+                {!isReadOnly &&
+                  (activeLessonTab === "uyga-vazifa" ? (
+                    <button
+                      onClick={() => setLessonPage("create-homework")}
+                      className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
+                    >
+                      Uyga vazifa qo‘shish
+                    </button>
+                  ) : activeLessonTab === "videolar" ? (
+                    <button
+                      onClick={() => setShowVideoUploadModal(true)}
+                      className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
+                    >
+                      Qo‘shish
+                    </button>
+                  ) : null)}
               </div>
 
               <div className="flex-1 min-h-0 overflow-auto p-4">
@@ -1664,11 +1693,13 @@ export default function GroupDetailsPage({
                           >
                             Dars sanasi
                           </th>
-                          <th
-                            className={`text-center px-3 py-3 w-22.5 ${theme.text}`}
-                          >
-                            Amal
-                          </th>
+                          {!isReadOnly && (
+                            <th
+                              className={`text-center px-3 py-3 w-22.5 ${theme.text}`}
+                            >
+                              Amal
+                            </th>
+                          )}
                         </tr>
                       </thead>
 
@@ -1676,7 +1707,7 @@ export default function GroupDetailsPage({
                         {homeworksLoading && (
                           <tr>
                             <td
-                              colSpan={9}
+                              colSpan={isReadOnly ? 8 : 9}
                               className={`px-3 py-6 text-center ${theme.soft}`}
                             >
                               Uyga vazifalar yuklanmoqda...
@@ -1735,27 +1766,29 @@ export default function GroupDetailsPage({
                             <td className={`px-3 py-3 ${theme.text}`}>
                               {item.lessonDate}
                             </td>
-                            <td className="px-3 py-3 text-center">
-                              <button
-                                disabled={deletingHomeworkId === item.id}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteHomework(item.id);
-                                }}
-                                className="text-red-500 text-xs disabled:opacity-60"
-                              >
-                                {deletingHomeworkId === item.id
-                                  ? "O‘chirilmoqda..."
-                                  : "O‘chirish"}
-                              </button>
-                            </td>
+                            {!isReadOnly && (
+                              <td className="px-3 py-3 text-center">
+                                <button
+                                  disabled={deletingHomeworkId === item.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteHomework(item.id);
+                                  }}
+                                  className="text-red-500 text-xs disabled:opacity-60"
+                                >
+                                  {deletingHomeworkId === item.id
+                                    ? "O‘chirilmoqda..."
+                                    : "O‘chirish"}
+                                </button>
+                              </td>
+                            )}
                           </tr>
                         ))}
 
                         {homeworks.length === 0 && (
                           <tr>
                             <td
-                              colSpan={9}
+                              colSpan={isReadOnly ? 8 : 9}
                               className={`px-3 py-10 text-center ${theme.soft}`}
                             >
                               Uyga vazifalar hozircha yo‘q
@@ -1792,9 +1825,13 @@ export default function GroupDetailsPage({
                           <th className={`text-left px-3 py-3 ${theme.text}`}>
                             Qo‘shilgan vaqti
                           </th>
-                          <th className={`text-center px-3 py-3 ${theme.text}`}>
-                            Harakatlar
-                          </th>
+                          {!isReadOnly && (
+                            <th
+                              className={`text-center px-3 py-3 ${theme.text}`}
+                            >
+                              Harakatlar
+                            </th>
+                          )}
                         </tr>
                       </thead>
 
@@ -1802,7 +1839,7 @@ export default function GroupDetailsPage({
                         {videosLoading && (
                           <tr>
                             <td
-                              colSpan={7}
+                              colSpan={isReadOnly ? 6 : 7}
                               className={`px-3 py-6 text-center ${theme.soft}`}
                             >
                               Videolar yuklanmoqda...
@@ -1856,24 +1893,26 @@ export default function GroupDetailsPage({
                             <td className={`px-3 py-3 ${theme.text}`}>
                               {video.uploadedAt}
                             </td>
-                            <td className="px-3 py-3 text-center">
-                              <button
-                                disabled={deletingVideoId === video.id}
-                                onClick={() => deleteVideo(video.id)}
-                                className="text-red-500 text-xs disabled:opacity-60"
-                              >
-                                {deletingVideoId === video.id
-                                  ? "O‘chirilmoqda..."
-                                  : "O‘chirish"}
-                              </button>
-                            </td>
+                            {!isReadOnly && (
+                              <td className="px-3 py-3 text-center">
+                                <button
+                                  disabled={deletingVideoId === video.id}
+                                  onClick={() => deleteVideo(video.id)}
+                                  className="text-red-500 text-xs disabled:opacity-60"
+                                >
+                                  {deletingVideoId === video.id
+                                    ? "O‘chirilmoqda..."
+                                    : "O‘chirish"}
+                                </button>
+                              </td>
+                            )}
                           </tr>
                         ))}
 
                         {videos.length === 0 && (
                           <tr>
                             <td
-                              colSpan={7}
+                              colSpan={isReadOnly ? 6 : 7}
                               className={`px-3 py-10 text-center ${theme.soft}`}
                             >
                               Videolar hozircha yo‘q
@@ -1889,7 +1928,8 @@ export default function GroupDetailsPage({
           )}
 
           {activeMainTab === "guruh-darsliklari" &&
-            lessonPage === "create-homework" && (
+            lessonPage === "create-homework" &&
+            !isReadOnly && (
               <div
                 className={`${theme.card} border rounded-2xl shadow-sm flex-1 min-h-0 overflow-auto p-4 sm:p-6`}
               >
@@ -2037,7 +2077,8 @@ export default function GroupDetailsPage({
             )}
 
           {activeMainTab === "guruh-darsliklari" &&
-            lessonPage === "create-lesson" && (
+            lessonPage === "create-lesson" &&
+            !isReadOnly && (
               <div
                 className={`${theme.card} border rounded-2xl shadow-sm flex-1 min-h-0 overflow-auto p-4 sm:p-6`}
               >
@@ -2114,7 +2155,7 @@ export default function GroupDetailsPage({
               </div>
             )}
 
-          {showEditModal && (
+          {showEditModal && !isReadOnly && (
             <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
               <div
                 className={`${theme.card} w-full max-w-xl rounded-2xl border p-4 shadow-xl`}
@@ -2217,7 +2258,7 @@ export default function GroupDetailsPage({
             </div>
           )}
 
-          {showTeacherModal && (
+          {showTeacherModal && !isReadOnly && (
             <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
               <div
                 className={`${theme.card} w-full max-w-md rounded-2xl border p-4 shadow-xl`}
@@ -2265,7 +2306,7 @@ export default function GroupDetailsPage({
             </div>
           )}
 
-          {showStudentModal && (
+          {showStudentModal && !isReadOnly && (
             <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
               <div
                 className={`${theme.card} w-full max-w-md rounded-2xl border p-4 shadow-xl`}
@@ -2321,7 +2362,7 @@ export default function GroupDetailsPage({
         </div>
       </div>
 
-      {showVideoUploadModal && (
+      {showVideoUploadModal && !isReadOnly && (
         <div className="fixed inset-0 z-70 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-6xl rounded-2xl shadow-xl border p-5 relative">
             <button

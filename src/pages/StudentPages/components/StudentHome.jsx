@@ -7,9 +7,36 @@ export default function StudentHome({
   lessonTitle,
   selectedLessons,
   isLoading,
+  darkMode = false,
 }) {
+  const homeVars = darkMode
+    ? {
+        "--bg": "#0f172a",
+        "--card-bg": "#111827",
+        "--text": "#f8fafc",
+        "--text-muted": "#94a3b8",
+        "--border": "#334155",
+        "--accent": "#a78bfa",
+        "--accent2": "#8b5cf6",
+        "--green": "#34d399",
+        "--green-light": "#052e2b",
+        "--red": "#f87171",
+      }
+    : {
+        "--bg": "#f4f6f9",
+        "--card-bg": "#ffffff",
+        "--text": "#1a1d23",
+        "--text-muted": "#7a8494",
+        "--border": "#e8ecf2",
+        "--accent": "#e07b2b",
+        "--accent2": "#f5a623",
+        "--green": "#22c55e",
+        "--green-light": "#dcfce7",
+        "--red": "#ef4444",
+      };
+
   return (
-    <div className="page active" id="page-home">
+    <div className="page active" id="page-home" style={homeVars}>
       <div className="calendar-section">
         <div className="card">
           <div className="section-title">Dars jadvali</div>

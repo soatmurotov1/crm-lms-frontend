@@ -193,13 +193,23 @@ const pickLatestLesson = (list) => {
   }, null);
 };
 
-function Toggle({ checked, onChange }) {
+function Toggle({ checked, onChange, disabled }) {
   return (
-    <label style={styles.toggleLabel}>
+    <label
+      style={{
+        ...styles.toggleLabel,
+        cursor: disabled ? "default" : styles.toggleLabel.cursor,
+        opacity: disabled ? 0.6 : 1,
+      }}
+    >
       <input
         type="checkbox"
         checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
+        onChange={(e) => {
+          if (disabled) return;
+          onChange(e.target.checked);
+        }}
+        disabled={disabled}
         style={{ display: "none" }}
       />
       <span
@@ -238,6 +248,7 @@ export default function Attendance({
   group,
   groupData,
   onLessonCreated,
+  readOnly = false,
 }) {
   const resolvedGroupId = groupId ?? group?.id;
   const [mavzu, setMavzu] = useState("");
@@ -450,10 +461,12 @@ export default function Attendance({
   }, [selectedLessonId, displayLessons]);
 
   const handleToggle = (studentId, val) => {
+    if (readOnly) return;
     setAttendance((prev) => ({ ...prev, [studentId]: val }));
   };
 
   const handleTime = (studentId, val) => {
+    if (readOnly) return;
     setTimes((prev) => ({ ...prev, [studentId]: val }));
   };
 
@@ -510,6 +523,7 @@ export default function Attendance({
   }
 
   const handleSave = async () => {
+    if (readOnly) return;
     let lessonId = Number(lesson?.id);
     let isNewLesson = false;
     const nextTitle = mavzu.trim();
@@ -759,6 +773,7 @@ export default function Attendance({
             onChange={(e) => setMavzu(e.target.value)}
             placeholder="Dars mavzusini kiriting..."
             style={styles.input}
+            readOnly={readOnly}
           />
         </div>
       </div>
@@ -815,13 +830,19 @@ export default function Attendance({
                       type="time"
                       value={times[student.id] || ""}
                       onChange={(e) => handleTime(student.id, e.target.value)}
-                      style={styles.timeInput}
+                      style={{
+                        ...styles.timeInput,
+                        opacity: readOnly ? 0.6 : 1,
+                        cursor: readOnly ? "not-allowed" : "text",
+                      }}
+                      disabled={readOnly}
                     />
                   </td>
                   <td style={styles.td}>
                     <Toggle
                       checked={Boolean(attendance[student.id])}
                       onChange={(val) => handleToggle(student.id, val)}
+                      disabled={readOnly}
                     />
                   </td>
                   <td style={styles.td}>
@@ -833,13 +854,19 @@ export default function Attendance({
           </tbody>
         </table>
 
-        <div
-          style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}
-        >
-          <button onClick={handleSave} style={styles.saveBtn}>
-            Saqlash
-          </button>
-        </div>
+        {!readOnly && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: 16,
+            }}
+          >
+            <button onClick={handleSave} style={styles.saveBtn}>
+              Saqlash
+            </button>
+          </div>
+        )}
       </div>
 
       {toast && <div style={styles.toast}>Davomat saqlandi!</div>}
