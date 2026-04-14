@@ -1,103 +1,91 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { formatUzDate } from "../../../utils/date";
-
-export default function StudentSettings({ profile }) {
-  const navigate = useNavigate();
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  const handleLogout = () => {
-    localStorage.removeItem("crm_access_token");
-    navigate("/", { replace: true });
-  };
-
-  if (!profile) {
-    return (
-      <section className="student-page">
-        <h1>Sozlamalar</h1>
-      </section>
-    );
-  }
-
+export default function StudentSettings({
+  profileName,
+  profileEmail,
+  profile,
+  primaryGroupName,
+  firstName,
+  lastName,
+  onOpenPassword,
+  formatDate,
+  getInitials,
+}) {
   return (
-    <section className="student-page">
-      <h1>Sozlamalar</h1>
-      <div className="student-card">
-        <div className="student-card-title">Shaxsiy ma'lumotlar</div>
-        <div className="student-info-grid">
-          {profile.fullName ? (
-            <div className="student-info-item">
-              <div className="student-info-label">To'liq ism</div>
-              <div className="student-info-value">{profile.fullName}</div>
-            </div>
-          ) : null}
-          {profile.email ? (
-            <div className="student-info-item">
-              <div className="student-info-label">Email</div>
-              <div className="student-info-value">{profile.email}</div>
-            </div>
-          ) : null}
-          {profile.birth_date ? (
-            <div className="student-info-item">
-              <div className="student-info-label">Tug'ilgan sana</div>
-              <div className="student-info-value">
-                {formatUzDate(profile.birth_date)}
-              </div>
-            </div>
-          ) : null}
-          {profile.status ? (
-            <div className="student-info-item">
-              <div className="student-info-label">Status</div>
-              <div className="student-info-value">{profile.status}</div>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="student-card student-logout-card">
-        <div className="student-card-title">Xavfsizlik</div>
-        <button
-          type="button"
-          className="student-logout-btn"
-          onClick={() => setShowLogoutModal(true)}
-        >
-          Chiqish
-        </button>
-      </div>
-
-      {showLogoutModal ? (
-        <div className="student-modal-overlay">
-          <div className="student-modal">
-            <button
-              type="button"
-              className="student-modal-close"
-              onClick={() => setShowLogoutModal(false)}
-              aria-label="Yopish"
-            >
-              ×
-            </button>
-            <div className="student-modal-title">
-              Platformadan chiqishni xohlaysizmi?
-            </div>
-            <div className="student-modal-actions">
-              <button
-                type="button"
-                className="student-modal-btn ghost"
-                onClick={() => setShowLogoutModal(false)}
-              >
-                Yo'q
-              </button>
-              <button
-                type="button"
-                className="student-modal-btn primary"
-                onClick={handleLogout}
-              >
-                Ha
-              </button>
+    <div className="page active" id="page-settings">
+      <div className="settings-grid">
+        <div className="card profile-card">
+          <div className="profile-avatar">{getInitials(profileName)}</div>
+          <div className="profile-name">{profileName}</div>
+          <div className="profile-role">Student</div>
+          <div className="profile-info">
+            <div className="info-row">
+              <span className="info-label">Guruh</span>
+              <span className="info-val">{primaryGroupName}</span>
             </div>
           </div>
         </div>
-      ) : null}
-    </section>
+        <div className="card">
+          <div className="section-title">Shaxsiy ma'lumotlar</div>
+          <div className="section-sub">Ma'lumotlaringizni yangilang</div>
+          <div className="settings-profile">
+            <div className="profile-photo">
+              <div className="photo-preview">{getInitials(profileName)}</div>
+              <div className="photo-hint">500x500 o'lcham, JPG yoki PNG</div>
+            </div>
+            <div className="profile-fields">
+              <div className="info-pair">
+                <span className="info-label">Ism</span>
+                <span className="info-val">{firstName || "-"}</span>
+              </div>
+              <div className="info-pair">
+                <span className="info-label">Familiya</span>
+                <span className="info-val">{lastName || "-"}</span>
+              </div>
+              <div className="info-pair">
+                <span className="info-label">Telefon raqam</span>
+                <span className="info-val">{profileEmail || "-"}</span>
+              </div>
+              {profile?.birth_date && (
+                <div className="info-pair">
+                  <span className="info-label">Tug'ilgan sana</span>
+                  <span className="info-val">
+                    {formatDate(profile.birth_date)}
+                  </span>
+                </div>
+              )}
+              <div className="info-pair">
+                <span className="info-label">HH ID</span>
+                <span className="info-val">{profile?.id || "-"}</span>
+              </div>
+            </div>
+          </div>
+          <div className="settings-cards">
+            <div className="settings-mini">
+              <div>
+                <div className="mini-title">Kirish</div>
+                <div className="mini-value">{profile?.id || "-"}</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="settings-mini actionable"
+              onClick={onOpenPassword}
+            >
+              <div>
+                <div className="mini-title">Parol</div>
+                <div className="mini-value">••••••••</div>
+              </div>
+              <span className="mini-edit">✎</span>
+            </button>
+            <div className="settings-mini">
+              <div>
+                <div className="mini-title">Bildirishnoma sozlamalari</div>
+                <div className="mini-value">-</div>
+              </div>
+              <span className="mini-edit">✎</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

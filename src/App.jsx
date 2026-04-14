@@ -203,6 +203,14 @@ export default function App() {
           </RequireStudent>
         }
       />
+      <Route
+        path="/student/payments"
+        element={
+          <RequireStudent>
+            <StudentDashboardPage initialMenu="payments" />
+          </RequireStudent>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

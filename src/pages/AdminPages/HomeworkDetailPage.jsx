@@ -22,6 +22,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
   const [loading, setLoading] = useState(false);
   const [savingStudentId, setSavingStudentId] = useState(null);
   const [scoreByStudent, setScoreByStudent] = useState({});
+  const [commentByStudent, setCommentByStudent] = useState({});
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [responseDetail, setResponseDetail] = useState(null);
   const [responseLoading, setResponseLoading] = useState(false);
@@ -89,6 +90,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
       name: row?.student?.fullName || row?.fullName || "-",
       sentAt: row?.created_at || null,
       score: typeof row?.score === "number" ? row.score : null,
+      comment: typeof row?.comment === "string" ? row.comment : "",
       title: row?.title || homeworkData?.title || "Uyga vazifa",
     }));
   }, [tab, statusRows, homeworkData?.title]);
@@ -146,6 +148,18 @@ export default function HomeworkDetailPage({ homework, onBack }) {
     });
   }, [mappedStudents]);
 
+  useEffect(() => {
+    setCommentByStudent((prev) => {
+      const next = { ...prev };
+      mappedStudents.forEach((student) => {
+        if (next[student.studentId] === undefined) {
+          next[student.studentId] = student.comment || "";
+        }
+      });
+      return next;
+    });
+  }, [mappedStudents]);
+
   const formatDateTime = (value) => {
     return formatUzDateTime(value, {
       month: "short",
@@ -179,6 +193,10 @@ export default function HomeworkDetailPage({ homework, onBack }) {
     setScoreByStudent((prev) => ({ ...prev, [studentId]: value }));
   };
 
+  const handleCommentChange = (studentId, value) => {
+    setCommentByStudent((prev) => ({ ...prev, [studentId]: value }));
+  };
+
   const submitScore = async (student) => {
     const rawScore = scoreByStudent[student.studentId];
     const parsedScore = Number(rawScore);
@@ -205,6 +223,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
       homeworkId: homeworkIdNumber,
       studentId: Number(student.studentId),
       score: parsedScore,
+      comment: (commentByStudent[student.studentId] || "").trim() || null,
     };
 
     try {
@@ -329,12 +348,13 @@ export default function HomeworkDetailPage({ homework, onBack }) {
         <div className="px-4 py-3">
           <div
             className={`grid py-2 border-b text-sm text-slate-500 font-medium ${
-              showGradingActions ? "grid-cols-3" : "grid-cols-2"
+              showGradingActions ? "grid-cols-4" : "grid-cols-2"
             }`}
           >
             <div>O&apos;quvchi ismi</div>
             <div>Uyga vazifa jo&apos;natilgan vaqt</div>
             {showGradingActions && <div>Baholash (0-100)</div>}
+            {showGradingActions && <div>O&apos;qituvchi izohi</div>}
           </div>
 
           {loading && (
@@ -353,22 +373,20 @@ export default function HomeworkDetailPage({ homework, onBack }) {
             <div
               key={student.id}
               className={`grid py-3 border-b text-sm hover:bg-slate-50 ${
-                showGradingActions ? "grid-cols-3" : "grid-cols-2"
+                showGradingActions ? "grid-cols-4" : "grid-cols-2"
               }`}
             >
               <div>
-                <button
-                  type="button"
-                  onClick={() => handleOpenResponse(student)}
-                  disabled={tab === "bajarilmagan"}
-                  className={`text-left font-medium ${
-                    tab === "bajarilmagan"
-                      ? "text-slate-700 cursor-default"
-                      : "text-emerald-700 hover:text-emerald-800 underline"
-                  }`}
-                >
-                  {student.name}
-                </button>
+                <p className="font-medium text-slate-900">{student.name}</p>
+                {tab !== "bajarilmagan" && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenResponse(student)}
+                    className="mt-1 text-xs text-emerald-700 hover:text-emerald-800 underline"
+                  >
+                    Topshiriqni ko&apos;rish
+                  </button>
+                )}
               </div>
               <div className="text-slate-700">
                 {formatDateTime(student.sentAt)}
@@ -397,6 +415,20 @@ export default function HomeworkDetailPage({ homework, onBack }) {
                       ? "Saqlanmoqda..."
                       : "Baholash"}
                   </button>
+                </div>
+              )}
+
+              {showGradingActions && (
+                <div>
+                  <textarea
+                    rows={2}
+                    value={commentByStudent[student.studentId] ?? ""}
+                    onChange={(e) =>
+                      handleCommentChange(student.studentId, e.target.value)
+                    }
+                    className="w-full min-w-[180px] border border-slate-300 rounded-md px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500"
+                    placeholder="Izoh yozing"
+                  />
                 </div>
               )}
             </div>

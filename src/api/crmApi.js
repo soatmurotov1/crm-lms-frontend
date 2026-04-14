@@ -385,6 +385,8 @@ export const homeworkApi = {
 };
 
 export const homeworkResultsApi = {
+  getMine: async (homeworkId) =>
+    unwrap(await apiClient.get(`/homework-results/mine/${homeworkId}`)),
   create: async (payload) =>
     withCacheInvalidation(async () =>
       unwrap(await apiClient.post("/homework-results", payload)),

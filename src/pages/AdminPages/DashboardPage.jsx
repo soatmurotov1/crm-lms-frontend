@@ -55,6 +55,28 @@ const categories = [
   { id: 4, name: "3D grafik dizayn" },
 ];
 
+const STORAGE_KEY = "crm_admin_dashboard_cache_v1";
+
+const readDashboardCache = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const writeDashboardCache = (payload) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch {
+    // Ignore storage errors and keep app usable.
+  }
+};
+
 const translations = {
   uz: {
     brand: "Najot Talim",
@@ -261,37 +283,56 @@ export default function DashboardPage({
   initialManagement = "courses",
 }) {
   const navigate = useNavigate();
+  const cached = useMemo(() => readDashboardCache(), []);
 
-  const [activeMenu, setActiveMenu] = useState(initialMenu);
-  const [activeManagement, setActiveManagement] = useState(initialManagement);
+  const [activeMenu, setActiveMenu] = useState(
+    () => cached?.activeMenu || initialMenu,
+  );
+  const [activeManagement, setActiveManagement] = useState(
+    () => cached?.activeManagement || initialManagement,
+  );
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupDetailsKey, setGroupDetailsKey] = useState(0);
   const [showManagementPanel, setShowManagementPanel] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState("uz");
+  const [darkMode, setDarkMode] = useState(() => Boolean(cached?.darkMode));
+  const [language, setLanguage] = useState(() => cached?.language || "uz");
   const [showCourseDrawer, setShowCourseDrawer] = useState(false);
   const [editingCourseId, setEditingCourseId] = useState(null);
 
-  const [courses, setCourses] = useState([]);
-  const [coursesLoading, setCoursesLoading] = useState(true);
+  const [courses, setCourses] = useState(() =>
+    Array.isArray(cached?.courses) ? cached.courses : [],
+  );
+  const [coursesLoading, setCoursesLoading] = useState(
+    () => !Array.isArray(cached?.courses),
+  );
   const [courseSaving, setCourseSaving] = useState(false);
-  const [dashboardStats, setDashboardStats] = useState({
-    activeStudents: 0,
-    groups: 0,
-    frozen: 0,
-    archived: 0,
-  });
-  const [monthlyPayments, setMonthlyPayments] = useState({
-    paid: 0,
-    pending: 0,
-    debt: 0,
-    loading: true,
-  });
-  const [scheduleData, setScheduleData] = useState({
-    groups: [],
-    coursesById: {},
-  });
+  const [dashboardStats, setDashboardStats] = useState(
+    () =>
+      cached?.dashboardStats || {
+        activeStudents: 0,
+        groups: 0,
+        frozen: 0,
+        archived: 0,
+      },
+  );
+  const [monthlyPayments, setMonthlyPayments] = useState(() =>
+    cached?.monthlyPayments
+      ? { ...cached.monthlyPayments, loading: false }
+      : {
+          paid: 0,
+          pending: 0,
+          debt: 0,
+          loading: true,
+        },
+  );
+  const [scheduleData, setScheduleData] = useState(
+    () =>
+      cached?.scheduleData || {
+        groups: [],
+        coursesById: {},
+      },
+  );
 
   const [formData, setFormData] = useState({
     title: "",
@@ -327,6 +368,28 @@ export default function DashboardPage({
   const profileRole = String(authUser?.role || "USER").toUpperCase();
   const formatUzs = (value) =>
     `${new Intl.NumberFormat("uz-UZ").format(Number(value || 0))} so'm`;
+
+  useEffect(() => {
+    writeDashboardCache({
+      activeMenu,
+      activeManagement,
+      darkMode,
+      language,
+      courses,
+      dashboardStats,
+      monthlyPayments,
+      scheduleData,
+    });
+  }, [
+    activeMenu,
+    activeManagement,
+    darkMode,
+    language,
+    courses,
+    dashboardStats,
+    monthlyPayments,
+    scheduleData,
+  ]);
 
   useEffect(() => {
     setActiveMenu(initialMenu);
@@ -372,6 +435,7 @@ export default function DashboardPage({
 
   const handleLogout = () => {
     localStorage.removeItem("crm_access_token");
+    localStorage.removeItem(STORAGE_KEY);
     setShowProfilePanel(false);
     navigate("/", { replace: true });
   };
