@@ -375,6 +375,11 @@ export default function TeacherDashboard({ initialMenu = "home" }) {
           onBack={handleGroupBack}
           onTabChange={handleGroupTabChange}
           readOnly
+          allowAttendanceEdit
+          allowHomeworkDetailView
+          allowHomeworkUpload
+          allowVideoUpload
+          allowVideoDelete
         />
       );
     }

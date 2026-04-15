@@ -14,6 +14,13 @@ const TAB_TO_STATUS = {
   bajarilmagan: "NOT_REVIEWED",
 };
 
+const EMPTY_STATUS_ROWS = {
+  PENDING: [],
+  REJECTED: [],
+  APPROVED: [],
+  NOT_REVIEWED: [],
+};
+
 export default function HomeworkDetailPage({ homework, onBack }) {
   const navigate = useNavigate();
   const { homeworkId } = useParams();
@@ -27,12 +34,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
   const [responseDetail, setResponseDetail] = useState(null);
   const [responseLoading, setResponseLoading] = useState(false);
   const [responseError, setResponseError] = useState("");
-  const [statusRows, setStatusRows] = useState({
-    PENDING: [],
-    REJECTED: [],
-    APPROVED: [],
-    NOT_REVIEWED: [],
-  });
+  const [statusRows, setStatusRows] = useState(EMPTY_STATUS_ROWS);
 
   const homeworkData = homework || {
     id: homeworkId,
@@ -43,12 +45,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
   useEffect(() => {
     const targetId = Number(homeworkData?.id);
     if (!targetId) {
-      setStatusRows({
-        PENDING: [],
-        REJECTED: [],
-        APPROVED: [],
-        NOT_REVIEWED: [],
-      });
+      setStatusRows(EMPTY_STATUS_ROWS);
       return;
     }
 
@@ -65,12 +62,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
             : [],
         });
       } catch {
-        setStatusRows({
-          PENDING: [],
-          REJECTED: [],
-          APPROVED: [],
-          NOT_REVIEWED: [],
-        });
+        setStatusRows(EMPTY_STATUS_ROWS);
       } finally {
         setLoading(false);
       }
@@ -134,27 +126,21 @@ export default function HomeworkDetailPage({ homework, onBack }) {
   };
 
   useEffect(() => {
-    setScoreByStudent((prev) => {
-      const next = { ...prev };
+    setScoreByStudent(() => {
+      const next = {};
       mappedStudents.forEach((student) => {
-        if (
-          typeof student.score === "number" &&
-          next[student.studentId] === undefined
-        ) {
-          next[student.studentId] = String(student.score);
-        }
+        next[student.studentId] =
+          typeof student.score === "number" ? String(student.score) : "";
       });
       return next;
     });
   }, [mappedStudents]);
 
   useEffect(() => {
-    setCommentByStudent((prev) => {
-      const next = { ...prev };
+    setCommentByStudent(() => {
+      const next = {};
       mappedStudents.forEach((student) => {
-        if (next[student.studentId] === undefined) {
-          next[student.studentId] = student.comment || "";
-        }
+        next[student.studentId] = student.comment || "";
       });
       return next;
     });
@@ -195,6 +181,32 @@ export default function HomeworkDetailPage({ homework, onBack }) {
 
   const handleCommentChange = (studentId, value) => {
     setCommentByStudent((prev) => ({ ...prev, [studentId]: value }));
+  };
+
+  const canSubmitScore = (student) => {
+    if (!student?.studentId) return false;
+
+    const rawScore = scoreByStudent[student.studentId] ?? "";
+    const parsedScore = Number(rawScore);
+    const hasValidScore =
+      rawScore !== "" &&
+      !Number.isNaN(parsedScore) &&
+      parsedScore >= 0 &&
+      parsedScore <= 100;
+
+    if (!hasValidScore) return false;
+
+    const originalScore =
+      typeof student.score === "number" ? String(student.score) : "";
+    const originalComment = String(student.comment || "").trim();
+    const nextComment = String(
+      commentByStudent[student.studentId] || "",
+    ).trim();
+
+    const scoreChanged = String(rawScore) !== originalScore;
+    const commentChanged = nextComment !== originalComment;
+
+    return scoreChanged || commentChanged;
   };
 
   const submitScore = async (student) => {
@@ -408,7 +420,10 @@ export default function HomeworkDetailPage({ homework, onBack }) {
                   <button
                     type="button"
                     onClick={() => submitScore(student)}
-                    disabled={savingStudentId === student.studentId}
+                    disabled={
+                      savingStudentId === student.studentId ||
+                      !canSubmitScore(student)
+                    }
                     className="px-3 py-1.5 rounded-md bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-60"
                   >
                     {savingStudentId === student.studentId
@@ -426,7 +441,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
                     onChange={(e) =>
                       handleCommentChange(student.studentId, e.target.value)
                     }
-                    className="w-full min-w-[180px] border border-slate-300 rounded-md px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500"
+                    className="w-full min-w-45 border border-slate-300 rounded-md px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500"
                     placeholder="Izoh yozing"
                   />
                 </div>

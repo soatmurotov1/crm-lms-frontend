@@ -346,11 +346,9 @@ export default function GroupsPage({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleTeacherMultiChange = (e) => {
-    const ids = Array.from(e.target.selectedOptions || []).map(
-      (option) => option.value,
-    );
-    setSelectedTeacherIds(ids);
+  const handleTeacherSelectChange = (e) => {
+    const selectedId = e.target.value;
+    setSelectedTeacherIds(selectedId ? [selectedId] : []);
   };
 
   const toggleStudentSelection = (studentId) => {
@@ -866,23 +864,20 @@ export default function GroupsPage({
 
               <div>
                 <label className={`block text-sm mb-2 ${theme.soft}`}>
-                  O'qituvchilar (bir nechta tanlash mumkin)
+                  O'qituvchi
                 </label>
                 <select
-                  multiple
-                  value={selectedTeacherIds}
-                  onChange={handleTeacherMultiChange}
-                  className={`w-full rounded-xl border px-4 py-3 min-h-28 ${theme.input}`}
+                  value={selectedTeacherIds[0] || ""}
+                  onChange={handleTeacherSelectChange}
+                  className={`w-full rounded-xl border px-4 py-3 ${theme.input}`}
                 >
+                  <option value="">O'qituvchi tanlang</option>
                   {teachers.map((teacher) => (
                     <option key={teacher.id} value={teacher.id}>
                       {teacher.fullName}
                     </option>
                   ))}
                 </select>
-                <p className={`mt-1 text-xs ${theme.soft}`}>
-                  Kamida bitta o'qituvchi tanlanishi shart.
-                </p>
               </div>
 
               <select
@@ -929,20 +924,31 @@ export default function GroupsPage({
                 </select>
               </div>
 
-              <input
-                type="date"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
-                className={`w-full rounded-xl border px-4 py-3 ${theme.input}`}
-              />
-              <input
-                type="time"
-                name="startTime"
-                value={formData.startTime}
-                onChange={handleChange}
-                className={`w-full rounded-xl border px-4 py-3 ${theme.input}`}
-              />
+              <div>
+                <label className={`block text-sm mb-2 ${theme.soft}`}>
+                  Boshlanish sanasi
+                </label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleChange}
+                  className={`w-full rounded-xl border px-4 py-3 ${theme.input}`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-sm mb-2 ${theme.soft}`}>
+                  Boshlanish vaqti
+                </label>
+                <input
+                  type="time"
+                  name="startTime"
+                  value={formData.startTime}
+                  onChange={handleChange}
+                  className={`w-full rounded-xl border px-4 py-3 ${theme.input}`}
+                />
+              </div>
 
               <div>
                 <label className={`block text-sm mb-2 ${theme.soft}`}>

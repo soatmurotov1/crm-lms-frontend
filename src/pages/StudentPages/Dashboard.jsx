@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./StudentDashboard.css";
 import {
@@ -17,6 +17,7 @@ import StudentPayments from "./components/StudentPayments";
 import StudentSettings from "./components/StudentSettings";
 import LogoutModal from "./components/LogoutModal";
 import PasswordModal from "./components/PasswordModal";
+import StudentNotificationsPanel from "./components/StudentNotificationsPanel";
 import {
   DAY_INDEX_TO_ENUM,
   WEEK_DAYS,
@@ -163,6 +164,56 @@ const isSameDay = (first, second) =>
   first?.getDate() === second?.getDate();
 
 const STORAGE_KEY = "crm_student_dashboard_cache_v1";
+const NOTIFICATION_READ_KEY = "crm_student_notifications_read_v1";
+
+const getNotificationReadStorageKey = (scope = "guest") =>
+  `${NOTIFICATION_READ_KEY}:${scope}`;
+
+const readNotificationReadMap = (scope = "guest") => {
+  try {
+    const raw = localStorage.getItem(getNotificationReadStorageKey(scope));
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return {};
+    return parsed;
+  } catch {
+    return {};
+  }
+};
+
+const writeNotificationReadMap = (scope = "guest", value = {}) => {
+  try {
+    localStorage.setItem(
+      getNotificationReadStorageKey(scope),
+      JSON.stringify(value || {}),
+    );
+  } catch {}
+};
+
+const toTimeValue = (value) => {
+  const parsed = new Date(value).getTime();
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const toArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.data)) return value.data;
+  return [];
+};
+
+const buildStablePaymentNotificationId = (payment) => {
+  if (payment?.id) return `payment:${payment.id}`;
+  if (payment?.paymentId) return `payment:${payment.paymentId}`;
+
+  const groupId = payment?.groupId || payment?.group?.id || "nogroup";
+  const amount = Number(payment?.amount || 0);
+  const createdAt =
+    payment?.created_at || payment?.updated_at || payment?.createdAt || "";
+  const lessonMonth = payment?.month || "";
+  const lessonYear = payment?.year || "";
+
+  return `payment:fallback:${groupId}:${amount}:${createdAt}:${lessonYear}:${lessonMonth}`;
+};
 
 const readDashboardCache = () => {
   try {
@@ -245,6 +296,8 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   const navigate = useNavigate();
   const location = useLocation();
   const cached = useMemo(() => readDashboardCache(), []);
+  const notifButtonRef = useRef(null);
+  const notifPanelRef = useRef(null);
 
   const [activePage, setActivePage] = useState(
     () => cached?.activePage || initialMenu || "home",
@@ -306,6 +359,14 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   const [lessonFile, setLessonFile] = useState(null);
   const [lessonSubmitError, setLessonSubmitError] = useState("");
   const [lessonSubmitting, setLessonSubmitting] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationReadMap, setNotificationReadMap] = useState({});
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const notificationScopeKey = useMemo(
+    () => (profile?.id ? `student:${profile.id}` : "guest"),
+    [profile?.id],
+  );
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -609,6 +670,25 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     [payments],
   );
 
+  const notificationsWithReadState = useMemo(
+    () =>
+      notifications.map((item) => ({
+        ...item,
+        isRead: Boolean(notificationReadMap[item.id]),
+        timeLabel: item.createdAt ? formatDateTime(item.createdAt) : "",
+      })),
+    [notifications, notificationReadMap],
+  );
+
+  const unreadNotificationCount = useMemo(
+    () =>
+      notificationsWithReadState.reduce(
+        (count, item) => count + (item.isRead ? 0 : 1),
+        0,
+      ),
+    [notificationsWithReadState],
+  );
+
   const getHomeworkDeadline = (homework) => {
     if (!homework?.created_at || !homework?.durationTime) return "-";
     const start = new Date(homework.created_at);
@@ -893,10 +973,77 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     }
   };
 
+  const markNotificationAsRead = (notificationId) => {
+    if (!notificationId) return;
+    setNotificationReadMap((prev) => {
+      if (prev[notificationId]) return prev;
+      const next = { ...prev, [notificationId]: true };
+      writeNotificationReadMap(notificationScopeKey, next);
+      return next;
+    });
+  };
+
+  const markAllNotificationsAsRead = () => {
+    if (notificationsWithReadState.length === 0) return;
+    setNotificationReadMap((prev) => {
+      const next = { ...prev };
+      notificationsWithReadState.forEach((item) => {
+        next[item.id] = true;
+      });
+      writeNotificationReadMap(notificationScopeKey, next);
+      return next;
+    });
+  };
+
+  const handleNotificationOpen = (item) => {
+    markNotificationAsRead(item.id);
+    setShowNotifications(false);
+
+    if (item.type === "PAYMENT_ACCEPTED") {
+      setActivePage("payments");
+      navigate("/student/payments");
+      return;
+    }
+
+    if (!item.groupId) return;
+    setActivePage("groups");
+    const params = new URLSearchParams();
+    params.set("groupId", String(item.groupId));
+    if (item.lessonId) {
+      params.set("lessonId", String(item.lessonId));
+    }
+    navigate(`/student/groups?${params.toString()}`);
+  };
+
   const profileName = profile?.fullName || "Talaba";
   const profileEmail = profile?.email || "-";
   const primaryGroupName = groups[0]?.name || "-";
   const { firstName, lastName } = splitFullName(profile?.fullName);
+
+  useEffect(() => {
+    setNotificationReadMap(readNotificationReadMap(notificationScopeKey));
+  }, [notificationScopeKey]);
+
+  useEffect(() => {
+    // Keep only keys relevant to currently loaded notifications to avoid stale leftovers.
+    if (notifications.length === 0) return;
+
+    setNotificationReadMap((prev) => {
+      const next = {};
+      notifications.forEach((item) => {
+        if (!item?.id) return;
+        if (prev[item.id]) next[item.id] = true;
+      });
+
+      const hasSameKeys =
+        Object.keys(prev).length === Object.keys(next).length &&
+        Object.keys(next).every((key) => prev[key] === next[key]);
+
+      if (hasSameKeys) return prev;
+      writeNotificationReadMap(notificationScopeKey, next);
+      return next;
+    });
+  }, [notifications, notificationScopeKey]);
 
   useEffect(() => {
     writeDashboardCache({
@@ -935,6 +1082,163 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     lessonResponse,
     lessonResult,
   ]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const buildNotifications = async () => {
+      if (!profile?.id || groups.length === 0) {
+        if (isMounted) setNotifications([]);
+        return;
+      }
+
+      const items = [];
+
+      for (const group of groups) {
+        const groupId = Number(group?.id || 0);
+        if (!groupId) continue;
+
+        let lessons = [];
+        try {
+          const lessonResult = await studentsApi.getMyLessons(groupId);
+          lessons = toArray(lessonResult);
+        } catch {
+          lessons = [];
+        }
+
+        for (const lesson of lessons) {
+          const lessonId = Number(lesson?.id || lesson?.lessonId || 0);
+          if (!lessonId) continue;
+
+          const lessonTitle = lesson?.title || "Yangi dars";
+          items.push({
+            id: `lesson:${groupId}:${lessonId}`,
+            type: "LESSON_CREATED",
+            title: "Yangi dars qo'shildi",
+            message: `${lessonTitle} mavzusi dars jadvaliga qo'shildi.`,
+            createdAt:
+              lesson?.created_at || lesson?.updated_at || lesson?.date || null,
+            groupId,
+            lessonId,
+          });
+
+          let homework = null;
+          try {
+            const homeworkResult = await studentsApi.getMyGroupHomework(
+              groupId,
+              lessonId,
+            );
+            homework = homeworkResult?.data || homeworkResult || null;
+          } catch {
+            homework = null;
+          }
+
+          if (!homework?.id) continue;
+
+          items.push({
+            id: `homework:${homework.id}`,
+            type: "HOMEWORK_CREATED",
+            title: "Uyga vazifa berildi",
+            message: `${homework.title || "Yangi vazifa"} bo'yicha topshiriq berildi.`,
+            createdAt:
+              homework?.created_at ||
+              homework?.updated_at ||
+              lesson?.date ||
+              null,
+            groupId,
+            lessonId,
+          });
+
+          try {
+            const result = await homeworkResultsApi.getMine(homework.id);
+            const review = result?.data || result || null;
+            if (review?.id || review?.status) {
+              items.push({
+                id: `review:${homework.id}`,
+                type: "HOMEWORK_REVIEWED",
+                title: "Uyga vazifa tekshirildi",
+                message:
+                  "O'qituvchi topshirig'ingizni tekshirdi. Natijani ochib ko'ring.",
+                createdAt:
+                  review?.updated_at ||
+                  review?.created_at ||
+                  homework?.updated_at ||
+                  null,
+                groupId,
+                lessonId,
+              });
+            }
+          } catch {
+            // Keep notifications usable even if a result is missing.
+          }
+        }
+      }
+
+      payments
+        .filter(
+          (payment) => String(payment?.status || "").toUpperCase() === "PAID",
+        )
+        .forEach((payment) => {
+          const paymentId = buildStablePaymentNotificationId(payment);
+          items.push({
+            id: paymentId,
+            type: "PAYMENT_ACCEPTED",
+            title: "To'lov qabul qilindi",
+            message: `${formatMoney(payment?.amount || 0)} so'm to'lovingiz muvaffaqiyatli qabul qilindi.`,
+            createdAt:
+              payment?.updated_at ||
+              payment?.created_at ||
+              new Date().toISOString(),
+          });
+        });
+
+      const uniqueMap = new Map();
+      items.forEach((item) => {
+        if (!item?.id) return;
+        const previous = uniqueMap.get(item.id);
+        if (
+          !previous ||
+          toTimeValue(item.createdAt) > toTimeValue(previous.createdAt)
+        ) {
+          uniqueMap.set(item.id, item);
+        }
+      });
+
+      const sorted = Array.from(uniqueMap.values()).sort((a, b) => {
+        const timeDiff = toTimeValue(b.createdAt) - toTimeValue(a.createdAt);
+        if (timeDiff !== 0) return timeDiff;
+        return String(b.id || "").localeCompare(String(a.id || ""));
+      });
+
+      if (isMounted) {
+        setNotifications(sorted);
+      }
+    };
+
+    buildNotifications();
+    const timerId = setInterval(buildNotifications, 60000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(timerId);
+    };
+  }, [profile?.id, groups, payments]);
+
+  useEffect(() => {
+    if (!showNotifications) return undefined;
+
+    const handleOutsideClick = (event) => {
+      const target = event.target;
+      if (notifPanelRef.current?.contains(target)) return;
+      if (notifButtonRef.current?.contains(target)) return;
+      setShowNotifications(false);
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [showNotifications]);
 
   return (
     <div className="student-dashboard">
@@ -992,20 +1296,38 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
         <div className="topbar">
           <div className="topbar-title">{pageTitles[activePage]}</div>
           <div className="topbar-right">
-            <button type="button" className="notif-btn">
+            <button
+              type="button"
+              className={`notif-btn ${unreadNotificationCount > 0 ? "has-unread" : ""}`}
+              ref={notifButtonRef}
+              onClick={() => setShowNotifications((prev) => !prev)}
+              aria-label="Xabarlarni ochish"
+            >
               <svg
                 width="17"
                 height="17"
                 fill="none"
-                stroke="#555"
+                stroke="currentColor"
                 strokeWidth="2"
                 viewBox="0 0 24 24"
               >
                 <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 01-3.46 0" />
               </svg>
-              <div className="notif-badge">1</div>
+              {unreadNotificationCount > 0 && (
+                <div className="notif-badge">{unreadNotificationCount}</div>
+              )}
             </button>
+            {showNotifications && (
+              <div className="notif-panel-wrap" ref={notifPanelRef}>
+                <StudentNotificationsPanel
+                  notifications={notificationsWithReadState}
+                  unreadCount={unreadNotificationCount}
+                  onOpenNotification={handleNotificationOpen}
+                  onMarkAllRead={markAllNotificationsAsRead}
+                />
+              </div>
+            )}
             <button
               type="button"
               className="avatar"
@@ -1056,6 +1378,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
               isLoading={lessonDetailLoading}
               error={lessonDetailError}
               note={lessonNote}
+              selectedFile={lessonFile}
               submitError={lessonSubmitError}
               submitting={lessonSubmitting}
               onBack={closeLessonDetail}

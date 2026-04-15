@@ -12,6 +12,7 @@ export default function StudentLessonDetail({
   isLoading,
   error,
   note,
+  selectedFile,
   submitError,
   submitting,
   onBack,
@@ -130,8 +131,16 @@ export default function StudentLessonDetail({
                         >
                           📎
                         </button>
-                        <button type="submit" className="send-btn">
+                        <button
+                          type="submit"
+                          className="send-btn"
+                          aria-label="Yuborish"
+                          disabled={submitting}
+                        >
                           ➤
+                          {selectedFile ? (
+                            <span className="send-btn-badge">1</span>
+                          ) : null}
                         </button>
                       </div>
                       <input

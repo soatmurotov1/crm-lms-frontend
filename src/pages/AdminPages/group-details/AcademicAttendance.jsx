@@ -32,7 +32,6 @@ const UZ_WEEKDAY_SHORT_TO_ENUM = {
 };
 
 const UZ_TIME_ZONE = "Asia/Tashkent";
-
 const normalizeWeekDays = (value) => {
   const list = Array.isArray(value)
     ? value
@@ -106,12 +105,20 @@ const isSameOrAfterDay = (date, startDate) => {
   return compareKey >= startKey;
 };
 
+const isSameOrBeforeToday = (date) => {
+  const compareKey = toTzDateKey(date);
+  const todayKey = toTzDateKey(new Date());
+  if (!compareKey || !todayKey) return true;
+  return compareKey <= todayKey;
+};
+
 const filterLessonsBySchedule = (list, startDate, weekDays) => {
   const weekDaySet = new Set(weekDays || []);
   return (Array.isArray(list) ? list : []).filter((lesson) => {
     const date = parseLessonDate(lesson?.created_at);
     if (!date) return false;
     if (!isSameOrAfterDay(date, startDate)) return false;
+    if (!isSameOrBeforeToday(date)) return false;
     if (weekDaySet.size) {
       const dayEnum = getWeekdayEnumInTz(date);
       if (!weekDaySet.has(dayEnum)) return false;
@@ -131,8 +138,8 @@ const buildScheduleDates = (startDate, weekDays) => {
   const start = new Date(startDate);
   if (Number.isNaN(start.getTime())) return [];
 
-  const todayKey = toTzDateKey(new Date());
-  if (!todayKey) return [];
+  const horizonKey = toTzDateKey(new Date());
+  if (!horizonKey) return [];
 
   const weekDaySet = new Set(weekDays);
   const dates = [];
@@ -141,7 +148,7 @@ const buildScheduleDates = (startDate, weekDays) => {
   for (let guard = 0; guard < 730; guard += 1) {
     const cursorKey = toTzDateKey(cursor);
     if (!cursorKey) break;
-    if (cursorKey > todayKey) break;
+    if (cursorKey > horizonKey) break;
     const dayEnum = getWeekdayEnumInTz(cursor);
     if (dayEnum && weekDaySet.has(dayEnum)) {
       dates.push(cursorKey);
@@ -260,13 +267,30 @@ export default function Attendance({
   const [selectedLessonId, setSelectedLessonId] = useState(null);
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState(false);
+  const [initialMavzu, setInitialMavzu] = useState("");
+  const [initialAttendance, setInitialAttendance] = useState({});
 
   const total = students.length;
   const came = Object.values(attendance).filter(Boolean).length;
   const absent = total - came;
   const hasSavedAttendance = Object.keys(existingAttendance).length > 0;
+
+  const hasFormChanges = useMemo(() => {
+    const topicChanged = mavzu.trim() !== initialMavzu.trim();
+    const attendanceChanged = students.some((student) => {
+      const studentId = student?.id;
+      return (
+        Boolean(attendance[studentId]) !== Boolean(initialAttendance[studentId])
+      );
+    });
+
+    return topicChanged || attendanceChanged;
+  }, [mavzu, initialMavzu, students, attendance, initialAttendance]);
+
+  const canSave = !readOnly && !isSaving && hasFormChanges;
 
   const startTime =
     groupData?.lessonTime || groupData?.time || group?.startTime || "18:30";
@@ -410,11 +434,13 @@ export default function Attendance({
       ) || null;
     setLesson(selectedLesson);
     setMavzu(selectedLesson?.title || "");
+    setInitialMavzu(selectedLesson?.title || "");
 
     const lessonId = Number(selectedLesson?.id);
     if (!Number.isFinite(lessonId)) {
       setAttendance({});
       setExistingAttendance({});
+      setInitialAttendance({});
       return () => {
         isActive = false;
       };
@@ -445,6 +471,7 @@ export default function Attendance({
 
         if (isActive) setAttendance(attendanceMap);
         if (isActive) setExistingAttendance(existingMap);
+        if (isActive) setInitialAttendance(attendanceMap);
       } catch {
         if (isActive) {
           setError(
@@ -522,82 +549,84 @@ export default function Attendance({
     return match ? Number(match[0]) : 0;
   }
 
-  const handleSave = async () => {
-    if (readOnly) return;
+  const handleSave = async (event) => {
+    if (event?.preventDefault) {
+      event.preventDefault();
+    }
+    if (readOnly || isSaving || !hasFormChanges) return;
+    setIsSaving(true);
     let lessonId = Number(lesson?.id);
     let isNewLesson = false;
     const nextTitle = mavzu.trim();
     const selectedLessonDate = selectedLessonId
       ? toTzDateKey(lesson?.created_at || selectedLessonId)
       : null;
+    try {
+      // If no lesson selected but mavzu is entered, create new lesson
+      if (!Number.isFinite(lessonId) && nextTitle) {
+        try {
+          isNewLesson = true;
+          console.log("Creating lesson with payload:", {
+            groupId: Number(resolvedGroupId),
+            title: nextTitle,
+          });
+          const newLessonResponse = await lessonsApi.create({
+            groupId: Number(resolvedGroupId),
+            title: nextTitle,
+            lessonDate: selectedLessonDate || undefined,
+          });
+          console.log("Lesson creation response:", newLessonResponse);
+          // API returns: { success: true, message: '...', data: { id, title, ... } }
+          lessonId = newLessonResponse?.data?.id;
+          console.log("Extracted lessonId:", lessonId);
 
-    // If no lesson selected but mavzu is entered, create new lesson
-    if (!Number.isFinite(lessonId) && nextTitle) {
-      try {
-        isNewLesson = true;
-        console.log("Creating lesson with payload:", {
-          groupId: Number(resolvedGroupId),
-          title: nextTitle,
-        });
-        const newLessonResponse = await lessonsApi.create({
-          groupId: Number(resolvedGroupId),
-          title: nextTitle,
-          lessonDate: selectedLessonDate || undefined,
-        });
-        console.log("Lesson creation response:", newLessonResponse);
-        // API returns: { success: true, message: '...', data: { id, title, ... } }
-        lessonId = newLessonResponse?.data?.id;
-        console.log("Extracted lessonId:", lessonId);
+          if (!Number.isFinite(lessonId)) {
+            console.error(
+              "Invalid lessonId:",
+              lessonId,
+              "from response:",
+              newLessonResponse,
+            );
+            setError("Dars yaratishda xatolik yuz berdi.");
+            return;
+          }
 
-        if (!Number.isFinite(lessonId)) {
-          console.error(
-            "Invalid lessonId:",
-            lessonId,
-            "from response:",
-            newLessonResponse,
-          );
+          // Refresh lessons list after creating new lesson
+          try {
+            const lessonsResult = await lessonsApi.getByGroup(resolvedGroupId);
+            console.log("Lessons refresh result:", lessonsResult);
+            // lessonsApi.getByGroup returns: { success: true, data: [...] }
+            const lessonsList = lessonsResult?.data || lessonsResult || [];
+            if (Array.isArray(lessonsList)) {
+              setLessons(lessonsList);
+            }
+          } catch (err) {
+            console.error("Lessons refresh error:", err);
+          }
+        } catch (err) {
+          console.error("Error creating lesson:", err);
           setError("Dars yaratishda xatolik yuz berdi.");
           return;
         }
+      }
 
-        // Refresh lessons list after creating new lesson
-        try {
-          const lessonsResult = await lessonsApi.getByGroup(resolvedGroupId);
-          console.log("Lessons refresh result:", lessonsResult);
-          // lessonsApi.getByGroup returns: { success: true, data: [...] }
-          const lessonsList = lessonsResult?.data || lessonsResult || [];
-          if (Array.isArray(lessonsList)) {
-            setLessons(lessonsList);
-          }
-        } catch (err) {
-          console.error("Lessons refresh error:", err);
-        }
-      } catch (err) {
-        console.error("Error creating lesson:", err);
-        setError("Dars yaratishda xatolik yuz berdi.");
+      // Validate we have a lessonId
+      if (!Number.isFinite(lessonId)) {
+        setToast(true);
+        setTimeout(() => setToast(false), 2500);
         return;
       }
-    }
 
-    // Validate we have a lessonId
-    if (!Number.isFinite(lessonId)) {
-      setToast(true);
-      setTimeout(() => setToast(false), 2500);
-      return;
-    }
-
-    if (nextTitle && nextTitle !== (lesson?.title || "")) {
-      try {
-        await lessonsApi.update(resolvedGroupId, lessonId, {
-          title: nextTitle,
-        });
-      } catch (err) {
-        console.error("Lesson update error:", err);
+      if (nextTitle && nextTitle !== (lesson?.title || "")) {
+        try {
+          await lessonsApi.update(resolvedGroupId, lessonId, {
+            title: nextTitle,
+          });
+        } catch (err) {
+          console.error("Lesson update error:", err);
+        }
       }
-    }
 
-    // Save attendance
-    const saveAttendance = async () => {
       try {
         const updates = students.map((student) => {
           const payload = {
@@ -648,6 +677,8 @@ export default function Attendance({
           });
           return next;
         });
+        setInitialAttendance(attendance);
+        setInitialMavzu(nextTitle || lesson?.title || "");
 
         // Clear mavzu after successful save if it was a new lesson
         if (isNewLesson) {
@@ -692,9 +723,9 @@ export default function Attendance({
         console.error("Attendance save error:", err);
         setError("Davomatni saqlashda xatolik yuz berdi.");
       }
-    };
-
-    saveAttendance();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!resolvedGroupId) {
@@ -862,8 +893,16 @@ export default function Attendance({
               marginTop: 16,
             }}
           >
-            <button onClick={handleSave} style={styles.saveBtn}>
-              Saqlash
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!canSave}
+              style={{
+                ...styles.saveBtn,
+                ...(canSave ? null : styles.saveBtnDisabled),
+              }}
+            >
+              {isSaving ? "Saqlanmoqda..." : "Saqlash"}
             </button>
           </div>
         )}
@@ -1087,6 +1126,10 @@ const styles = {
     fontSize: 14,
     fontWeight: 500,
     cursor: "pointer",
+  },
+  saveBtnDisabled: {
+    opacity: 0.6,
+    cursor: "not-allowed",
   },
   toast: {
     position: "fixed",

@@ -32,8 +32,18 @@ export default function GroupDetailsPage({
   onBack,
   onTabChange,
   readOnly = false,
+  allowAttendanceEdit = false,
+  allowHomeworkDetailView = false,
+  allowHomeworkUpload = false,
+  allowVideoUpload = false,
+  allowVideoDelete = false,
 }) {
   const isReadOnly = Boolean(readOnly);
+  const attendanceReadOnly = isReadOnly && !allowAttendanceEdit;
+  const canOpenHomeworkDetail = !isReadOnly || allowHomeworkDetailView;
+  const canUploadHomework = !isReadOnly || allowHomeworkUpload;
+  const canUploadVideo = !isReadOnly || allowVideoUpload;
+  const canDeleteVideo = !isReadOnly || allowVideoDelete;
   const normalizeDays = (value) => {
     if (Array.isArray(value)) return value;
     if (typeof value === "string") {
@@ -99,6 +109,10 @@ export default function GroupDetailsPage({
   const [deletingHomeworkId, setDeletingHomeworkId] = useState(null);
   const [deletingVideoId, setDeletingVideoId] = useState(null);
   const [videoUploading, setVideoUploading] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+  const [videoUploadLoadedBytes, setVideoUploadLoadedBytes] = useState(0);
+  const [videoUploadTotalBytes, setVideoUploadTotalBytes] = useState(0);
+  const [videoUploadNotice, setVideoUploadNotice] = useState("");
   const [videoLessonId, setVideoLessonId] = useState("");
   const [showVideoUploadModal, setShowVideoUploadModal] = useState(false);
   const [lessons, setLessons] = useState([]);
@@ -256,6 +270,15 @@ export default function GroupDetailsPage({
     if (!Array.isArray(lessons) || lessons.length === 0) return;
     setVideoLessonId(String(lessons[0].id));
   }, [showVideoUploadModal, lessons, videoLessonId]);
+
+  useEffect(() => {
+    if (showVideoUploadModal) {
+      setVideoUploadNotice("");
+      setVideoUploadProgress(0);
+      setVideoUploadLoadedBytes(0);
+      setVideoUploadTotalBytes(0);
+    }
+  }, [showVideoUploadModal]);
 
   useEffect(() => {
     setAttendance((prev) => {
@@ -471,8 +494,8 @@ export default function GroupDetailsPage({
             lessonId: item.lessonId,
             file: item.file || "",
             total,
-            submitted: pending + approved + rejected,
-            checked: approved + rejected,
+            submitted: notReviewed,
+            checked: approved,
             pending,
             approved,
             rejected,
@@ -816,7 +839,7 @@ export default function GroupDetailsPage({
   };
 
   const addHomework = async () => {
-    if (isReadOnly) return;
+    if (!canUploadHomework) return;
     if (!group?.id) {
       alert("Guruh tanlanmagan");
       return;
@@ -941,7 +964,7 @@ export default function GroupDetailsPage({
   };
 
   const handleVideoUpload = async (file) => {
-    if (isReadOnly) return;
+    if (!canUploadVideo) return;
     if (!group?.id) {
       alert("Guruh tanlanmagan");
       return;
@@ -954,24 +977,73 @@ export default function GroupDetailsPage({
 
     if (!file) return;
 
+    setVideoUploading(true);
+    setVideoUploadProgress(0);
+    setVideoUploadLoadedBytes(0);
+    setVideoUploadTotalBytes(file.size || 0);
+    setVideoUploadNotice("Video yuklanmoqda, iltimos kuting...");
+
     try {
-      setVideoUploading(true);
-      await lessonVideosApi.create({
-        groupId: Number(group.id),
-        lessonId: Number(videoLessonId),
-        file,
-      });
-      await loadVideos();
-      setShowVideoUploadModal(false);
+      await lessonVideosApi.create(
+        {
+          groupId: Number(group.id),
+          lessonId: Number(videoLessonId),
+          file,
+        },
+        {
+          onUploadProgress: (event) => {
+            const total = Number(file.size || event?.total || 0);
+            const loaded = Number(event?.loaded || 0);
+            if (!total || total <= 0) return;
+            const safeLoaded = Math.min(Math.max(loaded, 0), total);
+
+            setVideoUploadLoadedBytes(safeLoaded);
+            setVideoUploadTotalBytes(total);
+
+            const percent = Math.max(
+              0,
+              Math.min(99, Math.floor((safeLoaded / total) * 100)),
+            );
+            setVideoUploadProgress(percent);
+          },
+          timeout: 10 * 60 * 1000,
+        },
+      );
     } catch (error) {
-      alert(error?.response?.data?.message || "Video yuklashda xato");
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Video yuklashda xato yuz berdi";
+      setVideoUploadNotice(
+        Array.isArray(message) ? message.join("\n") : String(message),
+      );
+      setVideoUploadProgress(0);
+      setVideoUploadLoadedBytes(0);
+      setVideoUploading(false);
+      return;
+    }
+
+    try {
+      await loadVideos();
+      setVideoUploadLoadedBytes(file.size || videoUploadTotalBytes || 0);
+      setVideoUploadTotalBytes(file.size || videoUploadTotalBytes || 0);
+      setVideoUploadProgress(100);
+      setVideoUploadNotice("Video muvaffaqiyatli yuklandi");
+      setShowVideoUploadModal(false);
+    } catch {
+      setVideoUploadNotice(
+        "Video yuklandi, lekin ro'yxatni yangilashda vaqtinchalik xato bo'ldi",
+      );
     } finally {
       setVideoUploading(false);
+      if (fileRef.current) {
+        fileRef.current.value = "";
+      }
     }
   };
 
   const openHomeworkDetail = (homework) => {
-    if (isReadOnly) return;
+    if (!canOpenHomeworkDetail) return;
     setSelectedHomework(homework);
   };
 
@@ -1082,7 +1154,7 @@ export default function GroupDetailsPage({
   };
 
   const deleteVideo = async (id) => {
-    if (isReadOnly) return;
+    if (!canDeleteVideo) return;
     const isOk = window.confirm("Rostan ham videoni o‘chirmoqchimisiz?");
     if (!isOk) return;
 
@@ -1534,7 +1606,7 @@ export default function GroupDetailsPage({
                 group={group}
                 groupData={groupData}
                 onLessonCreated={refreshLessons}
-                readOnly={isReadOnly}
+                readOnly={attendanceReadOnly}
               />
             </div>
           )}
@@ -1569,22 +1641,23 @@ export default function GroupDetailsPage({
                   </button>
                 </div>
 
-                {!isReadOnly &&
-                  (activeLessonTab === "uyga-vazifa" ? (
-                    <button
-                      onClick={() => setLessonPage("create-homework")}
-                      className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
-                    >
-                      Uyga vazifa qo‘shish
-                    </button>
-                  ) : activeLessonTab === "videolar" ? (
-                    <button
-                      onClick={() => setShowVideoUploadModal(true)}
-                      className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
-                    >
-                      Qo‘shish
-                    </button>
-                  ) : null)}
+                {activeLessonTab === "uyga-vazifa" && canUploadHomework && (
+                  <button
+                    onClick={() => setLessonPage("create-homework")}
+                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
+                  >
+                    Uyga vazifa qo‘shish
+                  </button>
+                )}
+
+                {activeLessonTab === "videolar" && canUploadVideo && (
+                  <button
+                    onClick={() => setShowVideoUploadModal(true)}
+                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
+                  >
+                    Qo‘shish
+                  </button>
+                )}
               </div>
 
               <div className="flex-1 min-h-0 overflow-auto p-4">
@@ -1825,7 +1898,7 @@ export default function GroupDetailsPage({
                           <th className={`text-left px-3 py-3 ${theme.text}`}>
                             Qo‘shilgan vaqti
                           </th>
-                          {!isReadOnly && (
+                          {canDeleteVideo && (
                             <th
                               className={`text-center px-3 py-3 ${theme.text}`}
                             >
@@ -1839,7 +1912,7 @@ export default function GroupDetailsPage({
                         {videosLoading && (
                           <tr>
                             <td
-                              colSpan={isReadOnly ? 6 : 7}
+                              colSpan={canDeleteVideo ? 7 : 6}
                               className={`px-3 py-6 text-center ${theme.soft}`}
                             >
                               Videolar yuklanmoqda...
@@ -1893,7 +1966,7 @@ export default function GroupDetailsPage({
                             <td className={`px-3 py-3 ${theme.text}`}>
                               {video.uploadedAt}
                             </td>
-                            {!isReadOnly && (
+                            {canDeleteVideo && (
                               <td className="px-3 py-3 text-center">
                                 <button
                                   disabled={deletingVideoId === video.id}
@@ -1912,7 +1985,7 @@ export default function GroupDetailsPage({
                         {videos.length === 0 && (
                           <tr>
                             <td
-                              colSpan={isReadOnly ? 6 : 7}
+                              colSpan={canDeleteVideo ? 7 : 6}
                               className={`px-3 py-10 text-center ${theme.soft}`}
                             >
                               Videolar hozircha yo‘q
@@ -1929,7 +2002,7 @@ export default function GroupDetailsPage({
 
           {activeMainTab === "guruh-darsliklari" &&
             lessonPage === "create-homework" &&
-            !isReadOnly && (
+            canUploadHomework && (
               <div
                 className={`${theme.card} border rounded-2xl shadow-sm flex-1 min-h-0 overflow-auto p-4 sm:p-6`}
               >
@@ -2017,11 +2090,17 @@ export default function GroupDetailsPage({
 
                     <div>
                       <div className="flex items-center justify-between">
-                        <label
-                          className={`block text-sm font-medium mb-2 ${theme.text}`}
-                        >
-                          Fayl yuklash
-                        </label>
+                        <div className="flex items-center gap-3 mb-2">
+                          <label
+                            className={`block text-sm font-medium ${theme.text}`}
+                          >
+                            Fayl yuklash
+                          </label>
+                          <span className={`text-xs ${theme.soft}`}>
+                            (PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, JPEG,
+                            PNG)
+                          </span>
+                        </div>
                         {homeworkForm.file && (
                           <button
                             type="button"
@@ -2037,6 +2116,7 @@ export default function GroupDetailsPage({
                       >
                         <input
                           type="file"
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
                           className="hidden"
                           ref={homeworkFileInputRef}
                           onChange={(e) =>
@@ -2362,7 +2442,7 @@ export default function GroupDetailsPage({
         </div>
       </div>
 
-      {showVideoUploadModal && !isReadOnly && (
+      {showVideoUploadModal && canUploadVideo && (
         <div className="fixed inset-0 z-70 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-6xl rounded-2xl shadow-xl border p-5 relative">
             <button
@@ -2415,6 +2495,20 @@ export default function GroupDetailsPage({
                 Videofayl .mp4, .webm, .mpeg, .avi, .mkv, .mov formatlaridan
                 birida bo‘lishi kerak
               </p>
+
+              {videoUploadNotice && (
+                <p
+                  className={`text-sm mt-2 ${
+                    videoUploading ? "text-emerald-600" : "text-slate-500"
+                  }`}
+                >
+                  {videoUploadNotice}
+                </p>
+              )}
+
+              {videoUploading && (
+                <div className="mt-3 w-full max-w-md mx-auto"></div>
+              )}
 
               <input
                 ref={fileRef}

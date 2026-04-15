@@ -33,6 +33,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
   });
   const toastTimerRef = useRef(null);
   const [photoPreview, setPhotoPreview] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [activeTeacher, setActiveTeacher] = useState(null);
   const [teacherGroups, setTeacherGroups] = useState([]);
   const [teacherGroupsLoading, setTeacherGroupsLoading] = useState(false);
@@ -122,6 +123,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
 
   const resetForm = () => {
     setEditingTeacherId(null);
+    setShowPassword(false);
     setFormData({
       fullName: "",
       email: "",
@@ -135,6 +137,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
 
   const openAddDrawer = () => {
     setEditingTeacherId(null);
+    setShowPassword(false);
     setFormData({
       fullName: "",
       email: "",
@@ -149,6 +152,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
 
   const openEditDrawer = (teacher) => {
     setEditingTeacherId(teacher.id);
+    setShowPassword(false);
     setFormData({
       fullName: teacher.fullName,
       email: teacher.email,
@@ -183,6 +187,19 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const preventExperienceAutoChange = (e) => {
+    if (e.type === "wheel") {
+      e.currentTarget.blur();
+      return;
+    }
+
+    if (e.type === "keydown") {
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+      }
+    }
   };
 
   const handleSave = async () => {
@@ -803,14 +820,15 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                 <label
                   className={`block text-sm font-medium mb-2 ${theme.text}`}
                 >
-                  Mail
+                  O‘qituvchi FIO
                 </label>
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
                   onChange={handleChange}
-                  placeholder="example@gmail.com"
+                  autoComplete="name"
+                  placeholder="Ism Familiya Otasining ismi"
                   className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
                 />
               </div>
@@ -819,14 +837,15 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                 <label
                   className={`block text-sm font-medium mb-2 ${theme.text}`}
                 >
-                  O‘qituvchi FIO
+                  Mail
                 </label>
                 <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
+                  type="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
-                  placeholder="Ism Familiya Otasining ismi"
+                  autoComplete="email"
+                  placeholder="example@gmail.com"
                   className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
                 />
               </div>
@@ -837,18 +856,92 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                 >
                   Parol
                 </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder={
-                    editingTeacherId === null
-                      ? "Parol kiriting"
-                      : "Yangi parol (ixtiyoriy)"
-                  }
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder={
+                      editingTeacherId === null
+                        ? "Parol kiriting"
+                        : "Yangi parol (ixtiyoriy)"
+                    }
+                    className={`w-full rounded-xl border px-4 py-3 pr-12 outline-none min-w-0 ${theme.input}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className={`absolute inset-y-0 right-0 px-3 flex items-center ${theme.soft}`}
+                    aria-label={
+                      showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"
+                    }
+                    title={
+                      showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"
+                    }
+                  >
+                    {showPassword ? (
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M3 3L21 21"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M10.58 10.58C10.21 10.95 10 11.46 10 12C10 13.1 10.9 14 12 14C12.54 14 13.05 13.79 13.42 13.42"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M9.88 5.09C10.56 4.86 11.27 4.75 12 4.75C16.5 4.75 20.35 8.09 21.75 12C21.37 13.06 20.82 14.04 20.12 14.91"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M6.11 6.11C4.3 7.4 2.9 9.51 2.25 12C3.65 15.91 7.5 19.25 12 19.25C13.98 19.25 15.83 18.6 17.32 17.49"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M2.25 12C3.65 8.09 7.5 4.75 12 4.75C16.5 4.75 20.35 8.09 21.75 12C20.35 15.91 16.5 19.25 12 19.25C7.5 19.25 3.65 15.91 2.25 12Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="3"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -862,7 +955,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                   name="position"
                   value={formData.position}
                   onChange={handleChange}
-                  placeholder="Masalan: IELTS Instructor"
+                  placeholder="teacher"
                   className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
                 />
               </div>
@@ -880,6 +973,8 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                   name="experience"
                   value={formData.experience}
                   onChange={handleChange}
+                  onWheel={preventExperienceAutoChange}
+                  onKeyDown={preventExperienceAutoChange}
                   placeholder="Masalan: 4"
                   className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
                 />

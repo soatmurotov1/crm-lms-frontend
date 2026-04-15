@@ -405,9 +405,14 @@ export const lessonVideosApi = {
     cachedGet(`lesson-videos/${groupId}`, async () =>
       unwrap(await apiClient.get(`/lesson-videos/${groupId}`)),
     ),
-  create: async (payload) =>
+  create: async (payload, options = {}) =>
     withCacheInvalidation(async () =>
-      unwrap(await apiClient.post("/lesson-videos", toFormData(payload))),
+      unwrap(
+        await apiClient.post("/lesson-videos", toFormData(payload), {
+          onUploadProgress: options?.onUploadProgress,
+          timeout: options?.timeout ?? 10 * 60 * 1000,
+        }),
+      ),
     ),
   remove: async (id) =>
     withCacheInvalidation(async () =>
