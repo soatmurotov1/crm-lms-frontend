@@ -1,4 +1,9 @@
 import { apiClient } from "./client";
+import {
+  getClientIP,
+  getDeviceInfo,
+  getUserLocation,
+} from "../utils/telemetry";
 
 const unwrap = (response) => response?.data;
 const API_CACHE_PREFIX = "crm_api_cache_v1:";
@@ -96,12 +101,45 @@ const toFormData = (payload) => {
 };
 
 export const authApi = {
-  loginAdmin: async (payload) =>
-    unwrap(await apiClient.post("/auth/login/admin", payload)),
-  loginTeacher: async (payload) =>
-    unwrap(await apiClient.post("/auth/login/teacher", payload)),
-  loginStudent: async (payload) =>
-    unwrap(await apiClient.post("/auth/login/student", payload)),
+  loginAdmin: async (payload) => {
+    const telemetry = {
+      ipAddress: await getClientIP(),
+      ...getDeviceInfo(),
+      location: await getUserLocation(),
+    };
+    return unwrap(
+      await apiClient.post("/auth/login/admin", {
+        ...payload,
+        ...telemetry,
+      }),
+    );
+  },
+  loginTeacher: async (payload) => {
+    const telemetry = {
+      ipAddress: await getClientIP(),
+      ...getDeviceInfo(),
+      location: await getUserLocation(),
+    };
+    return unwrap(
+      await apiClient.post("/auth/login/teacher", {
+        ...payload,
+        ...telemetry,
+      }),
+    );
+  },
+  loginStudent: async (payload) => {
+    const telemetry = {
+      ipAddress: await getClientIP(),
+      ...getDeviceInfo(),
+      location: await getUserLocation(),
+    };
+    return unwrap(
+      await apiClient.post("/auth/login/student", {
+        ...payload,
+        ...telemetry,
+      }),
+    );
+  },
 };
 
 export const teachersApi = {

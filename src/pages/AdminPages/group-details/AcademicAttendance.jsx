@@ -256,6 +256,7 @@ export default function Attendance({
   groupData,
   onLessonCreated,
   readOnly = false,
+  darkMode = false,
 }) {
   const resolvedGroupId = groupId ?? group?.id;
   const [mavzu, setMavzu] = useState("");
@@ -307,6 +308,108 @@ export default function Attendance({
     () => buildDisplayLessons(lessons, courseStartDate, normalizedWeekDays),
     [lessons, courseStartDate, normalizedWeekDays],
   );
+
+  const themedStyles = useMemo(() => {
+    if (!darkMode) return styles;
+
+    return {
+      ...styles,
+      page: {
+        ...styles.page,
+        background: "transparent",
+      },
+      card: {
+        ...styles.card,
+        background: "#0f172a",
+        border: "0.5px solid #334155",
+      },
+      avatar: {
+        ...styles.avatar,
+        background: "#1e293b",
+        color: "#93c5fd",
+      },
+      teacherName: {
+        ...styles.teacherName,
+        color: "#e2e8f0",
+      },
+      teacherRole: {
+        ...styles.teacherRole,
+        color: "#94a3b8",
+      },
+      metaLabel: {
+        ...styles.metaLabel,
+        color: "#94a3b8",
+      },
+      metaValue: {
+        ...styles.metaValue,
+        color: "#e2e8f0",
+      },
+      metaStatus: {
+        ...styles.metaStatus,
+        color: "#94a3b8",
+      },
+      metaSelect: {
+        ...styles.metaSelect,
+        border: "0.5px solid #475569",
+        background: "#0b1220",
+        color: "#e2e8f0",
+      },
+      courseBadge: {
+        ...styles.courseBadge,
+        background: "#0f172a",
+        border: "0.5px solid #334155",
+        color: "#cbd5e1",
+      },
+      sectionTitle: {
+        ...styles.sectionTitle,
+        color: "#e2e8f0",
+      },
+      formLabel: {
+        ...styles.formLabel,
+        color: "#94a3b8",
+      },
+      input: {
+        ...styles.input,
+        border: "0.5px solid #475569",
+        background: "#0b1220",
+        color: "#e2e8f0",
+      },
+      statBox: {
+        ...styles.statBox,
+        background: "#111827",
+      },
+      statLabel: {
+        ...styles.statLabel,
+        color: "#94a3b8",
+      },
+      statVal: {
+        ...styles.statVal,
+        color: "#e2e8f0",
+      },
+      theadRow: {
+        ...styles.theadRow,
+        borderBottom: "0.5px solid #334155",
+      },
+      th: {
+        ...styles.th,
+        color: "#94a3b8",
+      },
+      tr: {
+        ...styles.tr,
+        borderBottom: "0.5px solid #1f2937",
+      },
+      td: {
+        ...styles.td,
+        color: "#e2e8f0",
+      },
+      timeInput: {
+        ...styles.timeInput,
+        border: "0.5px solid #475569",
+        background: "#0b1220",
+        color: "#e2e8f0",
+      },
+    };
+  }, [darkMode]);
 
   const lessonInfo = useMemo(() => {
     const teacherName =
@@ -730,43 +833,43 @@ export default function Attendance({
 
   if (!resolvedGroupId) {
     return (
-      <div style={styles.page}>
-        <div style={styles.card}>Guruh tanlanmadi.</div>
+      <div style={themedStyles.page}>
+        <div style={themedStyles.card}>Guruh tanlanmadi.</div>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div style={styles.page}>
-        <div style={styles.card}>Ma'lumotlar yuklanmoqda...</div>
+      <div style={themedStyles.page}>
+        <div style={themedStyles.card}>Ma'lumotlar yuklanmoqda...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={styles.page}>
-        <div style={styles.card}>{error}</div>
+      <div style={themedStyles.page}>
+        <div style={themedStyles.card}>{error}</div>
       </div>
     );
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <div style={styles.teacherRow}>
-          <div style={styles.avatar}>AS</div>
+    <div style={themedStyles.page}>
+      <div style={themedStyles.card}>
+        <div style={themedStyles.teacherRow}>
+          <div style={themedStyles.avatar}>AS</div>
           <div>
-            <p style={styles.teacherName}>{lessonInfo.teacher}</p>
-            <p style={styles.teacherRole}>{lessonInfo.role}</p>
+            <p style={themedStyles.teacherName}>{lessonInfo.teacher}</p>
+            <p style={themedStyles.teacherRole}>{lessonInfo.role}</p>
           </div>
         </div>
-        <div style={styles.metaGrid}>
+        <div style={themedStyles.metaGrid}>
           <div>
-            <span style={styles.metaLabel}>Dars kuni</span>
+            <span style={themedStyles.metaLabel}>Dars kuni</span>
             <select
-              style={styles.metaSelect}
+              style={themedStyles.metaSelect}
               value={selectedLessonId ?? ""}
               onChange={(e) => setSelectedLessonId(e.target.value || null)}
             >
@@ -778,70 +881,74 @@ export default function Attendance({
               ))}
             </select>
             {hasSavedAttendance && (
-              <span style={styles.metaStatus}>Davomat qilingan</span>
+              <span style={themedStyles.metaStatus}>Davomat qilingan</span>
             )}
           </div>
           <div>
-            <span style={styles.metaLabel}>Dars vaqti</span>
-            <span style={styles.metaValue}>{lessonInfo.time}</span>
+            <span style={themedStyles.metaLabel}>Dars vaqti</span>
+            <span style={themedStyles.metaValue}>{lessonInfo.time}</span>
           </div>
           <div>
-            <span style={styles.metaLabel}>Xona</span>
-            <span style={styles.metaValue}>{lessonInfo.room}</span>
+            <span style={themedStyles.metaLabel}>Xona</span>
+            <span style={themedStyles.metaValue}>{lessonInfo.room}</span>
           </div>
         </div>
       </div>
 
-      <div style={styles.courseBadge}>{lessonInfo.course}</div>
+      <div style={themedStyles.courseBadge}>{lessonInfo.course}</div>
 
-      <div style={styles.card}>
-        <p style={styles.sectionTitle}>Yo'qlama va mavzu kiritish</p>
-        <div style={styles.formGroup}>
-          <label style={styles.formLabel}>* Mavzu</label>
+      <div style={themedStyles.card}>
+        <p style={themedStyles.sectionTitle}>Yo'qlama va mavzu kiritish</p>
+        <div style={themedStyles.formGroup}>
+          <label style={themedStyles.formLabel}>* Mavzu</label>
           <input
             type="text"
             value={mavzu}
             onChange={(e) => setMavzu(e.target.value)}
             placeholder="Dars mavzusini kiriting..."
-            style={styles.input}
+            style={themedStyles.input}
             readOnly={readOnly}
           />
         </div>
       </div>
 
-      <div style={styles.card}>
-        <div style={styles.statRow}>
-          <div style={styles.statBox}>
-            <div style={styles.statLabel}>Jami</div>
-            <div style={styles.statVal}>{total}</div>
+      <div style={themedStyles.card}>
+        <div style={themedStyles.statRow}>
+          <div style={themedStyles.statBox}>
+            <div style={themedStyles.statLabel}>Jami</div>
+            <div style={themedStyles.statVal}>{total}</div>
           </div>
-          <div style={styles.statBox}>
-            <div style={styles.statLabel}>Keldi</div>
-            <div style={{ ...styles.statVal, color: "#1D9E75" }}>{came}</div>
+          <div style={themedStyles.statBox}>
+            <div style={themedStyles.statLabel}>Keldi</div>
+            <div style={{ ...themedStyles.statVal, color: "#1D9E75" }}>
+              {came}
+            </div>
           </div>
-          <div style={styles.statBox}>
-            <div style={styles.statLabel}>Kelmadi</div>
-            <div style={{ ...styles.statVal, color: "#9ca3af" }}>{absent}</div>
+          <div style={themedStyles.statBox}>
+            <div style={themedStyles.statLabel}>Kelmadi</div>
+            <div style={{ ...themedStyles.statVal, color: "#9ca3af" }}>
+              {absent}
+            </div>
           </div>
         </div>
 
-        <table style={styles.table}>
+        <table style={themedStyles.table}>
           <thead>
-            <tr style={styles.theadRow}>
-              <th style={{ ...styles.th, width: 40 }}>#</th>
-              <th style={styles.th}>O'quvchi ismi</th>
-              <th style={styles.th}>Vaqti</th>
-              <th style={styles.th}>Keldi</th>
-              <th style={styles.th}>Holat</th>
+            <tr style={themedStyles.theadRow}>
+              <th style={{ ...themedStyles.th, width: 40 }}>#</th>
+              <th style={themedStyles.th}>O'quvchi ismi</th>
+              <th style={themedStyles.th}>Vaqti</th>
+              <th style={themedStyles.th}>Keldi</th>
+              <th style={themedStyles.th}>Holat</th>
             </tr>
           </thead>
           <tbody>
             {students.length === 0 ? (
-              <tr style={styles.tr}>
+              <tr style={themedStyles.tr}>
                 <td
                   colSpan={5}
                   style={{
-                    ...styles.td,
+                    ...themedStyles.td,
                     color: "#9ca3af",
                     textAlign: "center",
                   }}
@@ -851,32 +958,40 @@ export default function Attendance({
               </tr>
             ) : (
               students.map((student, i) => (
-                <tr key={student.id || i} style={styles.tr}>
-                  <td style={{ ...styles.td, color: "#9ca3af", fontSize: 12 }}>
+                <tr key={student.id || i} style={themedStyles.tr}>
+                  <td
+                    style={{
+                      ...themedStyles.td,
+                      color: "#9ca3af",
+                      fontSize: 12,
+                    }}
+                  >
                     {i + 1}
                   </td>
-                  <td style={styles.td}>{student.fullName || student.name}</td>
-                  <td style={styles.td}>
+                  <td style={themedStyles.td}>
+                    {student.fullName || student.name}
+                  </td>
+                  <td style={themedStyles.td}>
                     <input
                       type="time"
                       value={times[student.id] || ""}
                       onChange={(e) => handleTime(student.id, e.target.value)}
                       style={{
-                        ...styles.timeInput,
+                        ...themedStyles.timeInput,
                         opacity: readOnly ? 0.6 : 1,
                         cursor: readOnly ? "not-allowed" : "text",
                       }}
                       disabled={readOnly}
                     />
                   </td>
-                  <td style={styles.td}>
+                  <td style={themedStyles.td}>
                     <Toggle
                       checked={Boolean(attendance[student.id])}
                       onChange={(val) => handleToggle(student.id, val)}
                       disabled={readOnly}
                     />
                   </td>
-                  <td style={styles.td}>
+                  <td style={themedStyles.td}>
                     <StatusBadge came={Boolean(attendance[student.id])} />
                   </td>
                 </tr>

@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 export default function CreateHomework() {
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -14,16 +13,10 @@ export default function CreateHomework() {
 
   return (
     <div className="p-10 bg-gray-50 min-h-screen">
-
-      <h1 className="text-xl font-semibold mb-6">
-        Yo'qlama va mavzu kiritish
-      </h1>
+      <h1 className="text-xl font-semibold mb-6">Yo'qlama va mavzu kiritish</h1>
 
       <div className="max-w-xl">
-
-        <label className="block mb-2 font-medium">
-          Mavzu
-        </label>
+        <label className="block mb-2 font-medium">Mavzu</label>
 
         <input
           type="text"
@@ -33,9 +26,7 @@ export default function CreateHomework() {
           onChange={(e) => setTitle(e.target.value)}
         />
 
-        <label className="block mb-2 font-medium">
-          Izoh
-        </label>
+        <label className="block mb-2 font-medium">Izoh</label>
 
         <textarea
           className="border w-full p-2 rounded mb-6"

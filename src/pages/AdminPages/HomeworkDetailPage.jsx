@@ -21,7 +21,11 @@ const EMPTY_STATUS_ROWS = {
   NOT_REVIEWED: [],
 };
 
-export default function HomeworkDetailPage({ homework, onBack }) {
+export default function HomeworkDetailPage({
+  homework,
+  onBack,
+  darkMode = false,
+}) {
   const navigate = useNavigate();
   const { homeworkId } = useParams();
 
@@ -267,44 +271,69 @@ export default function HomeworkDetailPage({ homework, onBack }) {
 
   const showGradingActions = tab !== "bajarilmagan";
 
+  const pageClass = darkMode
+    ? "p-3 sm:p-5 bg-transparent min-h-screen"
+    : "p-3 sm:p-5 bg-slate-50 min-h-screen";
+  const titleClass = darkMode
+    ? "text-xl sm:text-2xl font-bold text-slate-100 mb-3"
+    : "text-xl sm:text-2xl font-bold text-slate-900 mb-3";
+  const backClass = darkMode
+    ? "mb-3 text-slate-400 hover:text-slate-200 text-sm"
+    : "mb-3 text-slate-500 hover:text-slate-700 text-sm";
+  const cardClass = darkMode
+    ? "bg-slate-900 border border-slate-700 rounded-xl overflow-hidden"
+    : "bg-white border border-slate-200 rounded-xl overflow-hidden";
+  const mutedClass = darkMode ? "text-slate-400" : "text-slate-500";
+  const textClass = darkMode ? "text-slate-100" : "text-slate-900";
+  const rowHoverClass = darkMode
+    ? "hover:bg-slate-800/50"
+    : "hover:bg-slate-50";
+  const inputClass = darkMode
+    ? "w-24 border border-slate-600 bg-slate-800 text-slate-100 rounded-md px-2 py-1 outline-none focus:ring-2 focus:ring-emerald-900/40 focus:border-emerald-500"
+    : "w-24 border border-slate-300 rounded-md px-2 py-1 outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500";
+  const textareaClass = darkMode
+    ? "w-full min-w-45 border border-slate-600 bg-slate-800 text-slate-100 rounded-md px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-900/40 focus:border-emerald-500"
+    : "w-full min-w-45 border border-slate-300 rounded-md px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500";
+
   return (
-    <div className="p-3 sm:p-5 bg-slate-50 min-h-screen">
-      <button
-        onClick={handleBack}
-        className="mb-3 text-slate-500 hover:text-slate-700 text-sm"
-      >
+    <div className={pageClass}>
+      <button onClick={handleBack} className={backClass}>
         ←
       </button>
 
-      <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
-        {homeworkData.title}
-      </h2>
+      <h2 className={titleClass}>{homeworkData.title}</h2>
 
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 py-3 border-b border-slate-200">
+      <div className={cardClass}>
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 py-3 border-b ${darkMode ? "border-slate-700" : "border-slate-200"}`}
+        >
           <div>
-            <p className="text-xs text-slate-500">Mavzu</p>
-            <p className="font-semibold text-slate-900 mt-1">
+            <p className={`text-xs ${mutedClass}`}>Mavzu</p>
+            <p className={`font-semibold mt-1 ${textClass}`}>
               {homeworkData.title}
             </p>
           </div>
 
           <div>
-            <p className="text-xs text-slate-500">Tugash vaqti</p>
-            <p className="font-semibold text-slate-900 mt-1">
+            <p className={`text-xs ${mutedClass}`}>Tugash vaqti</p>
+            <p className={`font-semibold mt-1 ${textClass}`}>
               {homeworkData.deadline}
             </p>
           </div>
         </div>
 
-        <div className="px-4 pt-3 border-b border-slate-200 overflow-x-auto">
+        <div
+          className={`px-4 pt-3 border-b overflow-x-auto ${darkMode ? "border-slate-700" : "border-slate-200"}`}
+        >
           <div className="flex items-center gap-6 min-w-max text-sm">
             <button
               onClick={() => setTab("kutayotgan")}
               className={`pb-3 border-b-2 ${
                 tab === "kutayotgan"
                   ? "border-emerald-500 text-emerald-600"
-                  : "border-transparent text-slate-600"
+                  : darkMode
+                    ? "border-transparent text-slate-400"
+                    : "border-transparent text-slate-600"
               }`}
             >
               Kutayotganlar
@@ -318,7 +347,9 @@ export default function HomeworkDetailPage({ homework, onBack }) {
               className={`pb-3 border-b-2 ${
                 tab === "qaytarilgan"
                   ? "border-emerald-500 text-emerald-600"
-                  : "border-transparent text-slate-600"
+                  : darkMode
+                    ? "border-transparent text-slate-400"
+                    : "border-transparent text-slate-600"
               }`}
             >
               Qaytarilganlar
@@ -332,7 +363,9 @@ export default function HomeworkDetailPage({ homework, onBack }) {
               className={`pb-3 border-b-2 ${
                 tab === "qabul"
                   ? "border-emerald-500 text-emerald-600"
-                  : "border-transparent text-slate-600"
+                  : darkMode
+                    ? "border-transparent text-slate-400"
+                    : "border-transparent text-slate-600"
               }`}
             >
               Qabul qilinganlar
@@ -346,7 +379,9 @@ export default function HomeworkDetailPage({ homework, onBack }) {
               className={`pb-3 border-b-2 ${
                 tab === "bajarilmagan"
                   ? "border-emerald-500 text-emerald-600"
-                  : "border-transparent text-slate-600"
+                  : darkMode
+                    ? "border-transparent text-slate-400"
+                    : "border-transparent text-slate-600"
               }`}
             >
               Bajarilmagan
@@ -359,9 +394,9 @@ export default function HomeworkDetailPage({ homework, onBack }) {
 
         <div className="px-4 py-3">
           <div
-            className={`grid py-2 border-b text-sm text-slate-500 font-medium ${
+            className={`grid py-2 border-b text-sm ${mutedClass} font-medium ${
               showGradingActions ? "grid-cols-4" : "grid-cols-2"
-            }`}
+            } ${darkMode ? "border-slate-700" : "border-slate-200"}`}
           >
             <div>O&apos;quvchi ismi</div>
             <div>Uyga vazifa jo&apos;natilgan vaqt</div>
@@ -370,13 +405,17 @@ export default function HomeworkDetailPage({ homework, onBack }) {
           </div>
 
           {loading && (
-            <div className="py-3 border-b text-sm text-slate-500">
+            <div
+              className={`py-3 border-b text-sm ${mutedClass} ${darkMode ? "border-slate-700" : "border-slate-200"}`}
+            >
               Yuklanmoqda...
             </div>
           )}
 
           {!loading && mappedStudents.length === 0 && (
-            <div className="py-3 border-b text-sm text-slate-500">
+            <div
+              className={`py-3 border-b text-sm ${mutedClass} ${darkMode ? "border-slate-700" : "border-slate-200"}`}
+            >
               Ma&apos;lumot topilmadi
             </div>
           )}
@@ -384,12 +423,12 @@ export default function HomeworkDetailPage({ homework, onBack }) {
           {mappedStudents.map((student) => (
             <div
               key={student.id}
-              className={`grid py-3 border-b text-sm hover:bg-slate-50 ${
+              className={`grid py-3 border-b text-sm ${rowHoverClass} ${darkMode ? "border-slate-700" : "border-slate-200"} ${
                 showGradingActions ? "grid-cols-4" : "grid-cols-2"
               }`}
             >
               <div>
-                <p className="font-medium text-slate-900">{student.name}</p>
+                <p className={`font-medium ${textClass}`}>{student.name}</p>
                 {tab !== "bajarilmagan" && (
                   <button
                     type="button"
@@ -400,7 +439,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
                   </button>
                 )}
               </div>
-              <div className="text-slate-700">
+              <div className={darkMode ? "text-slate-300" : "text-slate-700"}>
                 {formatDateTime(student.sentAt)}
               </div>
 
@@ -414,7 +453,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
                     onChange={(e) =>
                       handleScoreChange(student.studentId, e.target.value)
                     }
-                    className="w-24 border border-slate-300 rounded-md px-2 py-1 outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500"
+                    className={inputClass}
                     placeholder="0-100"
                   />
                   <button
@@ -441,7 +480,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
                     onChange={(e) =>
                       handleCommentChange(student.studentId, e.target.value)
                     }
-                    className="w-full min-w-45 border border-slate-300 rounded-md px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500"
+                    className={textareaClass}
                     placeholder="Izoh yozing"
                   />
                 </div>
@@ -453,15 +492,19 @@ export default function HomeworkDetailPage({ homework, onBack }) {
 
       {selectedStudent && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900">
+          <div
+            className={`w-full max-w-2xl rounded-2xl shadow-2xl border ${darkMode ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"}`}
+          >
+            <div
+              className={`flex items-center justify-between px-5 py-4 border-b ${darkMode ? "border-slate-700" : "border-slate-200"}`}
+            >
+              <h3 className={`text-lg font-semibold ${textClass}`}>
                 Student yuborgan vazifa
               </h3>
               <button
                 type="button"
                 onClick={closeResponseModal}
-                className="text-slate-500 hover:text-slate-700 text-xl leading-none"
+                className={`${mutedClass} ${darkMode ? "hover:text-slate-200" : "hover:text-slate-700"} text-xl leading-none`}
               >
                 ×
               </button>
@@ -470,21 +513,21 @@ export default function HomeworkDetailPage({ homework, onBack }) {
             <div className="px-5 py-4 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-slate-500">O'quvchi</p>
-                  <p className="text-slate-900 font-medium mt-1">
+                  <p className={mutedClass}>O'quvchi</p>
+                  <p className={`${textClass} font-medium mt-1`}>
                     {selectedStudent.name}
                   </p>
                 </div>
                 <div>
-                  <p className="text-slate-500">Yuborilgan vaqt</p>
-                  <p className="text-slate-900 font-medium mt-1">
+                  <p className={mutedClass}>Yuborilgan vaqt</p>
+                  <p className={`${textClass} font-medium mt-1`}>
                     {formatDateTime(selectedStudent.sentAt)}
                   </p>
                 </div>
               </div>
 
               {responseLoading && (
-                <div className="text-sm text-slate-500">Yuklanmoqda...</div>
+                <div className={`text-sm ${mutedClass}`}>Yuklanmoqda...</div>
               )}
 
               {!responseLoading && responseError && (
@@ -496,16 +539,18 @@ export default function HomeworkDetailPage({ homework, onBack }) {
               {!responseLoading && !responseError && responseDetail && (
                 <>
                   <div>
-                    <p className="text-sm text-slate-500 mb-1">
+                    <p className={`text-sm ${mutedClass} mb-1`}>
                       Student yuborgan matn
                     </p>
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 whitespace-pre-wrap">
+                    <div
+                      className={`rounded-xl border px-3 py-2 whitespace-pre-wrap ${darkMode ? "border-slate-700 bg-slate-800 text-slate-100" : "border-slate-200 bg-slate-50 text-slate-900"}`}
+                    >
                       {responseDetail.title || "Matn kiritilmagan"}
                     </div>
                   </div>
 
                   <div>
-                    <p className="text-sm text-slate-500 mb-1">
+                    <p className={`text-sm ${mutedClass} mb-1`}>
                       Biriktirilgan fayl
                     </p>
                     {responseDetail.file ? (
@@ -518,7 +563,7 @@ export default function HomeworkDetailPage({ homework, onBack }) {
                         Faylni ochish
                       </a>
                     ) : (
-                      <p className="text-sm text-slate-500">
+                      <p className={`text-sm ${mutedClass}`}>
                         Fayl biriktirilmagan
                       </p>
                     )}

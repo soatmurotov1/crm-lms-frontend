@@ -345,6 +345,17 @@ export default function GroupDetailsPage({
     setLessonPage("list");
   }, [group?.id, group?.initialMainTab]);
 
+  useEffect(() => {
+    const isHomeworkListContext =
+      activeMainTab === "guruh-darsliklari" &&
+      activeLessonTab === "uyga-vazifa" &&
+      lessonPage === "list";
+
+    if (!isHomeworkListContext) {
+      setSelectedHomework(null);
+    }
+  }, [activeMainTab, activeLessonTab, lessonPage]);
+
   const [homeworkForm, setHomeworkForm] = useState({
     lessonId: "",
     title: "",
@@ -1607,6 +1618,7 @@ export default function GroupDetailsPage({
                 groupData={groupData}
                 onLessonCreated={refreshLessons}
                 readOnly={attendanceReadOnly}
+                darkMode={darkMode}
               />
             </div>
           )}
@@ -1805,11 +1817,9 @@ export default function GroupDetailsPage({
                               <button
                                 onClick={() => openHomeworkDetail(item)}
                                 className={`w-full text-left rounded-md px-3 py-2 text-sm ${
-                                  index < 3
-                                    ? "bg-[#ff7b57] text-white"
-                                    : darkMode
-                                      ? "bg-slate-800 text-slate-200"
-                                      : "bg-slate-100 text-slate-800"
+                                  darkMode
+                                    ? "bg-slate-800 text-slate-200"
+                                    : "bg-slate-100 text-slate-800"
                                 }`}
                               >
                                 {item.title}
@@ -2532,12 +2542,16 @@ export default function GroupDetailsPage({
         </div>
       )}
 
-      {selectedHomework && (
-        <HomeworkDetailPage
-          homework={selectedHomework}
-          onBack={() => setSelectedHomework(null)}
-        />
-      )}
+      {activeMainTab === "guruh-darsliklari" &&
+        activeLessonTab === "uyga-vazifa" &&
+        lessonPage === "list" &&
+        selectedHomework && (
+          <HomeworkDetailPage
+            homework={selectedHomework}
+            onBack={() => setSelectedHomework(null)}
+            darkMode={darkMode}
+          />
+        )}
     </>
   );
 }
