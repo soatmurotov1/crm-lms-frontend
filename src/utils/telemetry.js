@@ -64,33 +64,41 @@ const getOSVersion = (userAgent) => {
   return "";
 };
 
-// Get user location
+// Get user location using Geolocation API
 export const getUserLocation = async () => {
+  // First try browser geolocation API for precise coordinates
+  if ("geolocation" in navigator) {
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          const location = `${latitude.toFixed(4)}, ${longitude.toFixed(4)} (${accuracy?.toFixed(0) || "Unknown"}m)`;
+          resolve(location);
+        },
+        (error) => {
+          console.error("Geolocation xatosi:", error.message);
+          // Fallback to IP geolocation if browser geolocation fails
+          getIPLocation(resolve);
+        },
+      );
+    });
+  } else {
+    // Browser doesn't support geolocation, use IP geolocation
+    return new Promise((resolve) => {
+      getIPLocation(resolve);
+    });
+  }
+};
+
+// Helper function to get location from IP
+const getIPLocation = async (resolve) => {
   try {
-    // Use IP Geolocation API
     const ipResponse = await fetch("https://ipapi.co/json/");
     const locationData = await ipResponse.json();
-
     const location = `${locationData.city || "Unknown"}, ${locationData.country_name || "Unknown"}`;
-    return location;
+    resolve(location);
   } catch (error) {
-    console.error("Joylashuvni olishda xato:", error);
-
-    // Try browser geolocation API
-    return new Promise((resolve) => {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            resolve(`${latitude}, ${longitude}`);
-          },
-          () => {
-            resolve("Unknown");
-          },
-        );
-      } else {
-        resolve("Unknown");
-      }
-    });
+    console.error("IP joylashuvni olishda xato:", error);
+    resolve("Unknown");
   }
 };

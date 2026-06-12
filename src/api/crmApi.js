@@ -103,7 +103,6 @@ const toFormData = (payload) => {
 export const authApi = {
   loginAdmin: async (payload) => {
     const telemetry = {
-      ipAddress: await getClientIP(),
       ...getDeviceInfo(),
       location: await getUserLocation(),
     };
@@ -116,7 +115,6 @@ export const authApi = {
   },
   loginTeacher: async (payload) => {
     const telemetry = {
-      ipAddress: await getClientIP(),
       ...getDeviceInfo(),
       location: await getUserLocation(),
     };
@@ -129,7 +127,6 @@ export const authApi = {
   },
   loginStudent: async (payload) => {
     const telemetry = {
-      ipAddress: await getClientIP(),
       ...getDeviceInfo(),
       location: await getUserLocation(),
     };
