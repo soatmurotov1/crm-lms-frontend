@@ -86,7 +86,7 @@ export default function GroupDetailsPage({
       id: student?.id,
       name:
         student?.name || student?.fullName || student?.student?.fullName || "-",
-      phone: student?.phone || student?.email || student?.student?.email || "-",
+      phone: student?.phone || student?.student?.phone || "-",
       active: true,
     }));
   };
@@ -189,7 +189,7 @@ export default function GroupDetailsPage({
             .map((student) => ({
               id: student.id,
               name: student.fullName,
-              phone: student.email || "-",
+              phone: student.phone || "-",
               active: true,
             }))
             .sort((a, b) =>
@@ -727,7 +727,7 @@ export default function GroupDetailsPage({
           .map((student) => ({
             id: student.id,
             name: student.fullName,
-            phone: student.email || "-",
+            phone: student.phone || "-",
             active: true,
           }))
           .sort((a, b) =>
@@ -800,7 +800,7 @@ export default function GroupDetailsPage({
           {
             id: selectedTeacher.id,
             name: selectedTeacher.fullName,
-            phone: selectedTeacher.phone || selectedTeacher.email || "-",
+            phone: selectedTeacher.phone || "-",
           },
         ]);
       }

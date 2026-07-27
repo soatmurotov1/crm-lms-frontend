@@ -105,19 +105,19 @@ export default function TeacherSettings({ darkMode = false }) {
   };
 
   const profileName = profile?.fullName || authUser?.fullName || "O'qituvchi";
-  const profileEmail = profile?.email || authUser?.email || "-";
+  const profilePhone = profile?.phone || authUser?.phone || "-";
 
   return (
     <>
       <StudentSettings
         profileName={profileName}
-        profileEmail={profileEmail}
+        profilePhone={profilePhone}
         profile={profile}
         primaryGroupName={primaryGroupName}
         identityMode="full"
         fullNameLabel="Full name"
-        contactLabel="Email"
-        contactValue={profileEmail}
+        contactLabel="Telefon"
+        contactValue={profilePhone}
         darkMode={darkMode}
         onOpenPassword={() => setShowPasswordModal(true)}
         formatDate={formatUzDate}

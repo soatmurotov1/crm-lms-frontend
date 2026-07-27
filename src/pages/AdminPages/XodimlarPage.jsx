@@ -39,7 +39,7 @@ export default function EmployeesPage({ theme, darkMode }) {
 
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
+    phone: "",
     hireDate: "",
     password: "",
     role: "",
@@ -59,7 +59,7 @@ export default function EmployeesPage({ theme, darkMode }) {
           id: user.id,
           fullName: user.fullName,
           role: user.role,
-          email: user.email,
+          phone: user.phone,
           hireDate: toInputDate(user.hire_date),
           createdAt: toInputDate(user.created_at),
           coin: 0,
@@ -86,7 +86,7 @@ export default function EmployeesPage({ theme, darkMode }) {
       const matchesSearch =
         !query ||
         employee.fullName.toLowerCase().includes(query) ||
-        employee.email.toLowerCase().includes(query) ||
+        employee.phone.toLowerCase().includes(query) ||
         employee.position.toLowerCase().includes(query) ||
         employee.role.toLowerCase().includes(query);
 
@@ -99,7 +99,7 @@ export default function EmployeesPage({ theme, darkMode }) {
     setShowPassword(false);
     setFormData({
       fullName: "",
-      email: "",
+      phone: "",
       hireDate: "",
       password: "",
       role: "",
@@ -115,7 +115,7 @@ export default function EmployeesPage({ theme, darkMode }) {
     setShowPassword(false);
     setFormData({
       fullName: "",
-      email: "",
+      phone: "",
       hireDate: "",
       password: "",
       role: "",
@@ -132,7 +132,7 @@ export default function EmployeesPage({ theme, darkMode }) {
     setShowPassword(false);
     setFormData({
       fullName: employee.fullName,
-      email: employee.email,
+      phone: employee.phone,
       hireDate: employee.hireDate,
       password: "",
       role: employee.role,
@@ -171,7 +171,7 @@ export default function EmployeesPage({ theme, darkMode }) {
   const handleSave = async () => {
     if (
       !formData.fullName.trim() ||
-      !formData.email.trim() ||
+      !formData.phone.trim() ||
       !formData.position.trim()
     ) {
       alert("Majburiy maydonlarni to‘ldiring");
@@ -184,7 +184,7 @@ export default function EmployeesPage({ theme, darkMode }) {
       if (editingEmployeeId !== null) {
         await usersApi.update(editingEmployeeId, {
           fullName: formData.fullName.trim(),
-          email: formData.email.trim(),
+          phone: formData.phone.trim(),
           role: formData.role || undefined,
           position: formData.position.trim(),
           address: formData.address.trim() || undefined,
@@ -202,7 +202,7 @@ export default function EmployeesPage({ theme, darkMode }) {
 
         const createdResult = await usersApi.create({
           fullName: formData.fullName.trim(),
-          email: formData.email.trim(),
+          phone: formData.phone.trim(),
           password: formData.password.trim(),
           role: formData.role,
           position: formData.position.trim(),
@@ -211,9 +211,9 @@ export default function EmployeesPage({ theme, darkMode }) {
           ...(formData.photo instanceof File ? { photo: formData.photo } : {}),
         });
 
-        if (createdResult?.emailSent === false) {
+        if (createdResult?.smsSent === false) {
           alert(
-            "Xodim yaratildi, lekin login ma'lumotlari emailga yuborilmadi",
+            "Xodim yaratildi, lekin SMS yuborilmadi",
           );
         }
       }
@@ -314,7 +314,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                   Rol
                 </th>
                 <th className="text-left font-medium px-3 py-4 w-[160px]">
-                  Email
+                  Telefon
                 </th>
                 <th className="text-left font-medium px-3 py-4 w-[120px]">
                   Ishga kirgan sana
@@ -395,9 +395,9 @@ export default function EmployeesPage({ theme, darkMode }) {
                     <td className="px-3 py-4">
                       <p
                         className={`truncate ${theme.text}`}
-                        title={employee.email}
+                        title={employee.phone}
                       >
-                        {employee.email}
+                        {employee.phone}
                       </p>
                     </td>
 
@@ -532,7 +532,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                   </div>
 
                   <div className={`break-words ${theme.text}`}>
-                    <span className="font-medium">Email:</span> {employee.email}
+                    <span className="font-medium">Telefon:</span> {employee.phone}
                   </div>
 
                   <div className={theme.text}>
@@ -613,12 +613,12 @@ export default function EmployeesPage({ theme, darkMode }) {
                 <label
                   className={`block text-sm font-medium mb-2 ${theme.text}`}
                 >
-                  Email
+                  Telefon
                 </label>
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleChange}
                   placeholder="admin@gmail.com"
                   className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}

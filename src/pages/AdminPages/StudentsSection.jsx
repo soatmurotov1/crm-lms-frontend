@@ -80,7 +80,7 @@ export default function StudentsPage({ theme, darkMode }) {
 
   const [formData, setFormData] = useState({
     phone: "",
-    email: "",
+    phone: "",
     fullName: "",
     birthDate: "",
     group: "",
@@ -108,7 +108,7 @@ export default function StudentsPage({ theme, darkMode }) {
     setEditingStudentId(null);
     setFormData({
       phone: "",
-      email: "",
+      phone: "",
       fullName: "",
       birthDate: "",
       group: "",
@@ -126,7 +126,7 @@ export default function StudentsPage({ theme, darkMode }) {
     setEditingStudentId(student.id);
     setFormData({
       phone: student.phone || "",
-      email: student.email || "",
+      phone: student.phone || "",
       fullName: student.fullName || "",
       birthDate:
         student.birthDate && student.birthDate.includes(".")
@@ -162,7 +162,7 @@ export default function StudentsPage({ theme, darkMode }) {
               ...student,
               fullName: formData.fullName,
               phone: formData.phone,
-              email: formData.email,
+              phone: formData.phone,
               birthDate: formData.birthDate || student.birthDate || "-",
               group: formData.group || "Guruh yo'q",
               gender: formData.gender,
@@ -177,7 +177,7 @@ export default function StudentsPage({ theme, darkMode }) {
         id: Date.now(),
         fullName: formData.fullName,
         phone: formData.phone,
-        email: formData.email,
+        phone: formData.phone,
         birthDate: formData.birthDate || "-",
         group: formData.group || "Guruh yo'q",
         gender: formData.gender,
@@ -431,14 +431,14 @@ export default function StudentsPage({ theme, darkMode }) {
 
               <div>
                 <label className={`block text-sm font-medium mb-2 ${theme.text}`}>
-                  Mail
+                  Telefon raqami
                 </label>
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleChange}
-                  placeholder="Elektron pochtani kiriting"
+                  placeholder="+998901234567"
                   className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
                 />
               </div>

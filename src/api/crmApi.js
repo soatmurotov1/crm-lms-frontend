@@ -105,6 +105,9 @@ export const authApi = {
   loginStudent: async (payload) => {
     return unwrap(await apiClient.post("/auth/login/student", payload));
   },
+  register: async (payload) => {
+    return unwrap(await apiClient.post("/auth/register", payload));
+  },
 };
 
 export const teachersApi = {

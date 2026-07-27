@@ -1099,7 +1099,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   };
 
   const profileName = profile?.fullName || "Talaba";
-  const profileEmail = profile?.email || "-";
+  const profilePhone = profile?.phone || "-";
   const primaryGroupName = groups[0]?.name || "-";
   const { firstName, lastName } = splitFullName(profile?.fullName);
 
@@ -1526,7 +1526,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
           {activePage === "settings" && (
             <StudentSettings
               profileName={profileName}
-              profileEmail={profileEmail}
+              profilePhone={profilePhone}
               profile={profile}
               primaryGroupName={primaryGroupName}
               firstName={firstName}

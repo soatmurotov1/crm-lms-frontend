@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { groupsApi, paymentsApi, studentsApi } from "../../api/crmApi";
+import PhoneInput from "../../components/ui/PhoneInput";
 import { toInputDate } from "../../utils/date";
+import {
+  PHONE_ERROR_MESSAGE,
+  isValidPhone,
+  normalizePhone,
+} from "../../utils/phone";
 
 export default function StudentsPage({
   theme = {
@@ -36,7 +42,7 @@ export default function StudentsPage({
   const toastTimerRef = useRef(null);
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
+    phone: "",
     password: "",
     birth_date: "",
     status: "ACTIVE",
@@ -148,7 +154,7 @@ export default function StudentsPage({
     setShowPassword(false);
     setFormData({
       fullName: student.fullName || "",
-      email: student.email || "",
+      phone: student.phone || "",
       password: "",
       birth_date: toInputDate(student.birth_date),
       status: student.status || "ACTIVE",
@@ -160,7 +166,7 @@ export default function StudentsPage({
   const handleSaveStudent = async () => {
     if (
       !formData.fullName.trim() ||
-      !formData.email.trim() ||
+      !formData.phone.trim() ||
       !formData.birth_date ||
       (!editingStudent && !formData.password.trim())
     ) {
@@ -168,12 +174,17 @@ export default function StudentsPage({
       return;
     }
 
+    if (!isValidPhone(formData.phone)) {
+      alert(PHONE_ERROR_MESSAGE);
+      return;
+    }
+
     try {
       setSaving(true);
-      let createdEmailSent = true;
+      let createdSmsSent = true;
       const payload = {
         fullName: formData.fullName.trim(),
-        email: formData.email.trim(),
+        phone: normalizePhone(formData.phone),
         birth_date: formData.birth_date,
         status: formData.status,
         ...(formData.password.trim()
@@ -186,14 +197,14 @@ export default function StudentsPage({
         await studentsApi.update(editingStudent.id, payload);
       } else {
         const createdResult = await studentsApi.create(payload);
-        createdEmailSent = createdResult?.emailSent !== false;
+        createdSmsSent = createdResult?.smsSent !== false;
       }
 
       setOpenModal(false);
       setEditingStudent(null);
       setFormData({
         fullName: "",
-        email: "",
+        phone: "",
         password: "",
         birth_date: "",
         status: "ACTIVE",
@@ -202,10 +213,10 @@ export default function StudentsPage({
       await loadStudents();
       if (!editingStudent) {
         showToast(
-          createdEmailSent ? "success" : "warning",
-          createdEmailSent
-            ? "Talaba yaratildi va login ma'lumotlari emailga yuborildi"
-            : "Talaba yaratildi, lekin email yuborilmadi",
+          createdSmsSent ? "success" : "warning",
+          createdSmsSent
+            ? "Talaba yaratildi va tasdiqlash kodi SMS orqali yuborildi"
+            : "Talaba yaratildi, lekin SMS yuborilmadi",
         );
       }
     } catch (apiError) {
@@ -383,7 +394,7 @@ export default function StudentsPage({
             setShowPassword(false);
             setFormData({
               fullName: "",
-              email: "",
+              phone: "",
               password: "",
               birth_date: "",
               status: "ACTIVE",
@@ -408,7 +419,7 @@ export default function StudentsPage({
               <th className="p-4">Rasm</th>
               <th className="p-4">Ism</th>
               <th className="p-4">Guruh</th>
-              <th className="p-4">Email</th>
+              <th className="p-4">Telefon</th>
               <th className="p-4">Amallar</th>
             </tr>
           </thead>
@@ -449,7 +460,7 @@ export default function StudentsPage({
                       ? studentGroupsMap[s.id].join(", ")
                       : "-"}
                   </td>
-                  <td className={`p-4 ${theme.text}`}>{s.email}</td>
+                  <td className={`p-4 ${theme.text}`}>{s.phone}</td>
                   <td className="p-4">
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
@@ -705,19 +716,18 @@ export default function StudentsPage({
             className={`border w-full p-3 rounded-lg mb-4 ${theme.input}`}
           />
 
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
+          <PhoneInput
+            name="phone"
+            value={formData.phone}
             onChange={handleChange}
-            placeholder="Mail"
+            autoComplete="tel"
             className={`border w-full p-3 rounded-lg mb-4 ${theme.input}`}
           />
 
           <input
             type="hidden"
             autoComplete="username"
-            value={formData.email}
+            value={normalizePhone(formData.phone)}
             readOnly
           />
 

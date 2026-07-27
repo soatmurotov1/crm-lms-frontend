@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { groupsApi, teachersApi } from "../../api/crmApi";
+import PhoneInput from "../../components/ui/PhoneInput";
 import { formatUzTime, toInputDate } from "../../utils/date";
+import {
+  PHONE_ERROR_MESSAGE,
+  isValidPhone,
+  normalizePhone,
+} from "../../utils/phone";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -40,7 +46,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
 
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
+    phone: "",
     password: "",
     position: "",
     experience: "",
@@ -65,7 +71,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
           experience: Number.isFinite(Number(teacher.experience))
             ? Number(teacher.experience)
             : 0,
-          email: teacher.email || "-",
+          phone: teacher.phone || "-",
           createdAt,
           createdTime,
           photo: teacher.photo || "",
@@ -114,7 +120,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
       const matchesSearch =
         !query ||
         teacher.fullName.toLowerCase().includes(query) ||
-        teacher.email.toLowerCase().includes(query) ||
+        teacher.phone.toLowerCase().includes(query) ||
         teacher.position.toLowerCase().includes(query);
 
       return matchesBranch && matchesArchive && matchesSearch;
@@ -126,7 +132,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
     setShowPassword(false);
     setFormData({
       fullName: "",
-      email: "",
+      phone: "",
       password: "",
       position: "",
       experience: "",
@@ -140,7 +146,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
     setShowPassword(false);
     setFormData({
       fullName: "",
-      email: "",
+      phone: "",
       password: "",
       position: "",
       experience: "",
@@ -155,7 +161,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
     setShowPassword(false);
     setFormData({
       fullName: teacher.fullName,
-      email: teacher.email,
+      phone: teacher.phone,
       password: "",
       position: teacher.position,
       experience: String(teacher.experience ?? ""),
@@ -206,7 +212,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
     const normalizedExperience = Number(formData.experience);
 
     if (
-      !formData.email.trim() ||
+      !formData.phone.trim() ||
       !formData.fullName.trim() ||
       !formData.position.trim() ||
       !Number.isFinite(normalizedExperience) ||
@@ -217,12 +223,17 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
       return;
     }
 
+    if (!isValidPhone(formData.phone)) {
+      alert(PHONE_ERROR_MESSAGE);
+      return;
+    }
+
     try {
       setSaving(true);
-      let createdEmailSent = true;
+      let createdSmsSent = true;
       const payload = {
         fullName: formData.fullName.trim(),
-        email: formData.email.trim(),
+        phone: normalizePhone(formData.phone),
         position: formData.position.trim(),
         experience: normalizedExperience,
         ...(formData.photo instanceof File ? { photo: formData.photo } : {}),
@@ -235,17 +246,17 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
         await teachersApi.update(editingTeacherId, payload);
       } else {
         const createdResult = await teachersApi.create(payload);
-        createdEmailSent = createdResult?.emailSent !== false;
+        createdSmsSent = createdResult?.smsSent !== false;
       }
 
       await loadTeachers();
       closeDrawer();
       if (editingTeacherId === null) {
         showToast(
-          createdEmailSent ? "success" : "warning",
-          createdEmailSent
-            ? "O'qituvchi yaratildi va login ma'lumotlari emailga yuborildi"
-            : "O'qituvchi yaratildi, lekin email yuborilmadi",
+          createdSmsSent ? "success" : "warning",
+          createdSmsSent
+            ? "O'qituvchi yaratildi va tasdiqlash kodi SMS orqali yuborildi"
+            : "O'qituvchi yaratildi, lekin SMS yuborilmadi",
         );
       }
     } catch (error) {
@@ -427,7 +438,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                       Tajriba
                     </th>
                     <th className="text-left font-medium px-3 py-4 w-[120px]">
-                      Email
+                      Telefon
                     </th>
                     <th className="text-left font-medium px-3 py-4 w-[130px]">
                       Yaratilgan sana
@@ -502,7 +513,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                         </td>
 
                         <td className={`px-3 py-4 ${theme.text} truncate`}>
-                          {teacher.email}
+                          {teacher.phone}
                         </td>
 
                         <td className={`px-3 py-4 ${theme.text}`}>
@@ -635,7 +646,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                     {teacher.position}
                   </div>
                   <div className={`break-words ${theme.text}`}>
-                    <span className="font-medium">Email:</span> {teacher.email}
+                    <span className="font-medium">Telefon:</span> {teacher.phone}
                   </div>
                   <div className={`break-words ${theme.text}`}>
                     <span className="font-medium">Tajriba:</span>{" "}
@@ -837,15 +848,13 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                 <label
                   className={`block text-sm font-medium mb-2 ${theme.text}`}
                 >
-                  Mail
+                  Telefon raqami
                 </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                <PhoneInput
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleChange}
-                  autoComplete="email"
-                  placeholder="example@gmail.com"
+                  autoComplete="tel"
                   className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
                 />
               </div>

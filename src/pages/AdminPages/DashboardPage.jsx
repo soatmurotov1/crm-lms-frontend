@@ -385,7 +385,7 @@ export default function DashboardPage({
   const authUser = useMemo(() => getAuthUserFromStorage(), []);
   const greetingName = useMemo(() => {
     const baseName =
-      authUser?.fullName || authUser?.email?.split("@")[0] || "Foydalanuvchi";
+      authUser?.fullName || authUser?.phone || "Foydalanuvchi";
     const parts = String(baseName).trim().split(/\s+/).filter(Boolean);
 
     if (parts.length >= 2) {
@@ -396,7 +396,7 @@ export default function DashboardPage({
   }, [authUser]);
   const greetingText = `${t.greeting}, ${greetingName}!`;
   const profileName =
-    authUser?.fullName || authUser?.email?.split("@")[0] || "Foydalanuvchi";
+    authUser?.fullName || authUser?.phone || "Foydalanuvchi";
   const profileInitial =
     String(profileName).trim().charAt(0).toUpperCase() || "F";
   const profileRole = String(authUser?.role || "USER").toUpperCase();
@@ -1361,7 +1361,7 @@ export default function DashboardPage({
                     {profileName}
                   </h3>
                   <p className={`text-sm mt-1 ${theme.soft}`}>
-                    {authUser?.email || "Email yo'q"}
+                    {authUser?.phone || "Telefon yo'q"}
                   </p>
                   <p className={`text-xs mt-2 ${theme.soft}`}>
                     Rol: {profileRole}

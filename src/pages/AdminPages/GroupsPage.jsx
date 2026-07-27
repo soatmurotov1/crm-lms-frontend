@@ -491,7 +491,7 @@ export default function GroupsPage({
         ? studentsRes.data.map((student) => ({
             id: student.id,
             fullName: student.fullName,
-            email: student.email || "-",
+            phone: student.phone || "-",
           }))
         : [];
     } catch {

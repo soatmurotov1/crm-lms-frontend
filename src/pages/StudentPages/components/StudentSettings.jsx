@@ -1,6 +1,6 @@
 export default function StudentSettings({
   profileName,
-  profileEmail,
+  profilePhone,
   profile,
   primaryGroupName,
   firstName,
@@ -16,7 +16,7 @@ export default function StudentSettings({
   roleLabel = "Student",
 }) {
   const resolvedContactValue =
-    contactValue || profile?.phone || profileEmail || "-";
+    contactValue || profile?.phone || profilePhone || "-";
 
   const settingsVars = darkMode
     ? {

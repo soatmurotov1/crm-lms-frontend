@@ -151,7 +151,7 @@ export default function TeacherDashboard({ initialMenu = "home" }) {
   const t = translations[language] || translations.uz;
   const authUser = useMemo(() => getAuthUserFromStorage(), []);
   const greetingName =
-    authUser?.fullName || authUser?.email?.split("@")[0] || "Foydalanuvchi";
+    authUser?.fullName || authUser?.phone || "Foydalanuvchi";
   const greetingText = `${t.greeting}, ${greetingName}!`;
   const profileName = greetingName;
   const profileInitial = String(profileName).trim().charAt(0).toUpperCase();
@@ -459,7 +459,7 @@ export default function TeacherDashboard({ initialMenu = "home" }) {
                     {profileName}
                   </h3>
                   <p className={`text-sm mt-1 ${theme.soft}`}>
-                    {authUser?.email || "Email yo'q"}
+                    {authUser?.phone || "Telefon yo'q"}
                   </p>
 
                   <button
