@@ -200,7 +200,7 @@ export default function EmployeesPage({ theme, darkMode }) {
           return;
         }
 
-        await usersApi.create({
+        const createdResult = await usersApi.create({
           fullName: formData.fullName.trim(),
           email: formData.email.trim(),
           password: formData.password.trim(),
@@ -210,6 +210,12 @@ export default function EmployeesPage({ theme, darkMode }) {
           address: formData.address.trim() || undefined,
           ...(formData.photo instanceof File ? { photo: formData.photo } : {}),
         });
+
+        if (createdResult?.emailSent === false) {
+          alert(
+            "Xodim yaratildi, lekin login ma'lumotlari emailga yuborilmadi",
+          );
+        }
       }
 
       await loadEmployees();

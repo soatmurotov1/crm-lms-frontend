@@ -28,6 +28,28 @@
   overflow: hidden;
 }
 
+/* Dark rejim — faqat o'zgaruvchilar qayta e'lon qilinadi, qolgan qoidalar
+   var() orqali avtomatik moslashadi. Qiymatlar StudentHome ichidagi
+   inline dark palitra bilan bir xil. */
+.student-dashboard.dark {
+  --bg: #0f172a;
+  --sidebar-bg: #111827;
+  --accent: #a78bfa;
+  --accent2: #8b5cf6;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --card-bg: #111827;
+  --green: #34d399;
+  --green-light: #052e2b;
+  --red: #f87171;
+  --red-light: #3f1d1d;
+  --blue: #60a5fa;
+  --blue-light: #1e293b;
+  --orange-light: #2a1f14;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+
 .student-dashboard,
 .student-dashboard * {
   box-sizing: border-box;
@@ -165,6 +187,23 @@
   align-items: center;
   gap: 14px;
   position: relative;
+}
+
+.theme-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.theme-btn:hover {
+  background: var(--bg);
 }
 
 .notif-btn {

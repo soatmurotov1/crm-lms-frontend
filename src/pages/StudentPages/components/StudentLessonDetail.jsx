@@ -15,10 +15,20 @@ export default function StudentLessonDetail({
   selectedFile,
   submitError,
   submitting,
+  exam,
+  examResponse,
+  isExamSubmissionExpired,
+  examNote,
+  examFile,
+  examSubmitError,
+  examSubmitting,
   onBack,
   onNoteChange,
   onFileChange,
   onSubmit,
+  onExamNoteChange,
+  onExamFileChange,
+  onExamSubmit,
   getStatusLabel,
   getStatusTone,
   formatDate,
@@ -29,12 +39,18 @@ export default function StudentLessonDetail({
   const lessonTitle = lessonItem?.lesson?.title || "-";
   const lessonDate = lessonItem?.lessonDate;
   const canSubmit = Boolean(homework) && !response && !isSubmissionExpired;
+  const canSubmitExam = Boolean(exam) && !isExamSubmissionExpired;
   const statusTone = getStatusTone(status);
   const statusLabel = getStatusLabel(status);
   const fileInputRef = useRef(null);
+  const examFileInputRef = useRef(null);
 
   const handleAttachClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleExamAttachClick = () => {
+    examFileInputRef.current?.click();
   };
 
   return (
@@ -168,6 +184,92 @@ export default function StudentLessonDetail({
                 </div>
               )}
             </div>
+
+            <div className="card lesson-detail-card">
+              <div className="section-title">Exam</div>
+              {!exam ? (
+                <div className="no-lesson">Exam topilmadi</div>
+              ) : (
+                <div className="homework-details">
+                  <div className="homework-title">{exam.title}</div>
+                  {exam.file && (
+                    <a
+                      className="homework-file"
+                      href={exam.file}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Exam faylini yuklab olish
+                    </a>
+                  )}
+                  <div className="homework-meta">
+                    <span>Boshlanish: {formatDateTime(exam.startAt)}</span>
+                    <span>Tugash: {formatDateTime(exam.endAt)}</span>
+                  </div>
+                  {canSubmitExam ? (
+                    <form
+                      className="submission-form"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        onExamSubmit();
+                      }}
+                    >
+                      <div className="submission-bar">
+                        <input
+                          id="exam-note"
+                          type="text"
+                          className="submission-input"
+                          placeholder="Comment yozing yoki fayl biriktiring"
+                          value={examNote}
+                          onChange={(event) =>
+                            onExamNoteChange(event.target.value)
+                          }
+                        />
+                        <button
+                          type="button"
+                          className="attach-btn"
+                          onClick={handleExamAttachClick}
+                          aria-label="Exam faylini biriktirish"
+                        >
+                          📎
+                        </button>
+                        <button
+                          type="submit"
+                          className="send-btn"
+                          aria-label="Yuborish"
+                          disabled={examSubmitting}
+                        >
+                          ➤
+                          {examFile ? (
+                            <span className="send-btn-badge">1</span>
+                          ) : null}
+                        </button>
+                      </div>
+                      <input
+                        ref={examFileInputRef}
+                        id="exam-file"
+                        type="file"
+                        className="modal-file is-hidden"
+                        onChange={(event) =>
+                          onExamFileChange(event.target.files?.[0])
+                        }
+                      />
+                      {examSubmitError && (
+                        <div className="modal-error">{examSubmitError}</div>
+                      )}
+                    </form>
+                  ) : examResponse ? (
+                    <div className="no-lesson">
+                      Exam topshirilgan. Vaqt ichida tahrirlash mumkin.
+                    </div>
+                  ) : isExamSubmissionExpired ? (
+                    <div className="no-lesson">
+                      Exam vaqti tugagan yoki hali boshlanmagan.
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="lesson-detail-aside">
@@ -221,6 +323,38 @@ export default function StudentLessonDetail({
                     </span>
                   </div>
                 </div>
+              )}
+            </div>
+
+            <div className="card lesson-detail-card">
+              <div className="section-title">Exam holati</div>
+              {examResponse ? (
+                <div className="submission-info">
+                  <div className="submission-row">
+                    <span className="info-label">Topshirildi</span>
+                    <span className="info-val">
+                      {formatDateTime(examResponse.created_at)}
+                    </span>
+                  </div>
+                  <div className="submission-row">
+                    <span className="info-label">Comment</span>
+                    <span className="info-val">
+                      {examResponse.comment || "-"}
+                    </span>
+                  </div>
+                  {examResponse.file && (
+                    <a
+                      className="homework-file"
+                      href={examResponse.file}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Yuborilgan fayl
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="no-lesson">Exam hali topshirilmagan</div>
               )}
             </div>
           </div>

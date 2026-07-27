@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "./StudentDashboard.css";
 import {
   groupsApi,
+  examsApi,
   homeworkResponseApi,
   homeworkResultsApi,
   lessonVideosApi,
@@ -18,6 +19,7 @@ import StudentSettings from "./components/StudentSettings";
 import LogoutModal from "./components/LogoutModal";
 import PasswordModal from "./components/PasswordModal";
 import StudentNotificationsPanel from "./components/StudentNotificationsPanel";
+import { useTheme } from "../../theme/themeContext";
 import {
   DAY_INDEX_TO_ENUM,
   WEEK_DAYS,
@@ -295,6 +297,7 @@ const validatePassword = (form) => {
 export default function StudentDashboardPage({ initialMenu = "home" }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { darkMode, toggleDarkMode } = useTheme();
   const cached = useMemo(() => readDashboardCache(), []);
   const notifButtonRef = useRef(null);
   const notifPanelRef = useRef(null);
@@ -353,12 +356,22 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   const [lessonResult, setLessonResult] = useState(
     () => cached?.lessonResult || null,
   );
+  const [lessonExam, setLessonExam] = useState(
+    () => cached?.lessonExam || null,
+  );
+  const [lessonExamResponse, setLessonExamResponse] = useState(
+    () => cached?.lessonExamResponse || null,
+  );
   const [lessonDetailLoading, setLessonDetailLoading] = useState(false);
   const [lessonDetailError, setLessonDetailError] = useState("");
   const [lessonNote, setLessonNote] = useState("");
   const [lessonFile, setLessonFile] = useState(null);
   const [lessonSubmitError, setLessonSubmitError] = useState("");
   const [lessonSubmitting, setLessonSubmitting] = useState(false);
+  const [lessonExamNote, setLessonExamNote] = useState("");
+  const [lessonExamFile, setLessonExamFile] = useState(null);
+  const [lessonExamSubmitError, setLessonExamSubmitError] = useState("");
+  const [lessonExamSubmitting, setLessonExamSubmitting] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notificationReadMap, setNotificationReadMap] = useState({});
   const [showNotifications, setShowNotifications] = useState(false);
@@ -382,6 +395,15 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     confirm: false,
   });
   const [passwordSaving, setPasswordSaving] = useState(false);
+
+  const isExamSubmissionExpired = useMemo(() => {
+    if (!lessonExam?.startAt || !lessonExam?.endAt) return false;
+    const now = Date.now();
+    const startAt = new Date(lessonExam.startAt).getTime();
+    const endAt = new Date(lessonExam.endAt).getTime();
+    if (Number.isNaN(startAt) || Number.isNaN(endAt)) return false;
+    return now < startAt || now > endAt;
+  }, [lessonExam]);
 
   const pagePathMap = {
     home: "/student/dashboard",
@@ -809,9 +831,14 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     setLessonHomework(null);
     setLessonResponse(null);
     setLessonResult(null);
+    setLessonExam(null);
+    setLessonExamResponse(null);
     setLessonNote("");
     setLessonFile(null);
     setLessonSubmitError("");
+    setLessonExamNote("");
+    setLessonExamFile(null);
+    setLessonExamSubmitError("");
     setLessonDetailError("");
     setLessonDetailLoading(true);
 
@@ -823,9 +850,10 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     }
 
     try {
-      const [videosResult, homeworkResult] = await Promise.all([
+      const [videosResult, homeworkResult, examsResult] = await Promise.all([
         lessonVideosApi.getByGroup(selectedGroup.id),
         studentsApi.getMyGroupHomework(selectedGroup.id, item.lesson.id),
+        examsApi.getByGroup(selectedGroup.id),
       ]);
 
       const videos = Array.isArray(videosResult?.data) ? videosResult.data : [];
@@ -837,6 +865,12 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
 
       const homework = homeworkResult?.data || homeworkResult || null;
       setLessonHomework(homework);
+
+      const examList = Array.isArray(examsResult?.data) ? examsResult.data : [];
+      const exam = examList.find(
+        (record) => Number(record.lessonId) === Number(item.lesson.id),
+      );
+      setLessonExam(exam || null);
 
       if (homework?.id) {
         try {
@@ -859,6 +893,15 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
           setLessonResult(null);
         }
       }
+
+      if (exam?.id) {
+        try {
+          const responseResult = await examsApi.getMyResponse(exam.id);
+          setLessonExamResponse(responseResult?.data ?? null);
+        } catch {
+          setLessonExamResponse(null);
+        }
+      }
     } catch {
       setLessonDetailError("Dars ma'lumotlarini yuklab bo'lmadi");
     } finally {
@@ -872,9 +915,14 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     setLessonHomework(null);
     setLessonResponse(null);
     setLessonResult(null);
+    setLessonExam(null);
+    setLessonExamResponse(null);
     setLessonNote("");
     setLessonFile(null);
     setLessonSubmitError("");
+    setLessonExamNote("");
+    setLessonExamFile(null);
+    setLessonExamSubmitError("");
     setLessonDetailError("");
 
     if (!options.skipUrl && selectedGroup?.id) {
@@ -924,6 +972,41 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
       setLessonSubmitError("Uyga vazifa yuborilmadi");
     } finally {
       setLessonSubmitting(false);
+    }
+  };
+
+  const handleExamSubmit = async () => {
+    if (!lessonExam) return;
+    if (isExamSubmissionExpired) {
+      setLessonExamSubmitError("Exam vaqti tugagan yoki hali boshlanmagan");
+      return;
+    }
+    if (!lessonExamNote.trim() && !lessonExamFile) {
+      setLessonExamSubmitError("Izoh yoki fayl kiritish kerak");
+      return;
+    }
+
+    setLessonExamSubmitting(true);
+    setLessonExamSubmitError("");
+    try {
+      const payload = {
+        examId: lessonExam.id,
+        comment: lessonExamNote.trim() || undefined,
+        file: lessonExamFile || undefined,
+      };
+
+      if (lessonExamResponse?.id) {
+        await examsApi.updateResponse(payload);
+      } else {
+        await examsApi.submitResponse(payload);
+      }
+
+      const responseResult = await examsApi.getMyResponse(lessonExam.id);
+      setLessonExamResponse(responseResult?.data || responseResult || null);
+    } catch {
+      setLessonExamSubmitError("Exam yuborilmadi");
+    } finally {
+      setLessonExamSubmitting(false);
     }
   };
 
@@ -1241,12 +1324,12 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   }, [showNotifications]);
 
   return (
-    <div className="student-dashboard">
+    <div className={`student-dashboard${darkMode ? " dark" : ""}`}>
       <aside className="sidebar">
         <div className="logo">
           <div className="logo-icon">🎓</div>
           <div className="logo-text">
-            <span className="brand">NAJOT TA'LIM</span>
+            <span className="brand">EduCenter</span>
             <span className="beta">Beta</span>
           </div>
         </div>
@@ -1296,6 +1379,14 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
         <div className="topbar">
           <div className="topbar-title">{pageTitles[activePage]}</div>
           <div className="topbar-right">
+            <button
+              type="button"
+              className="theme-btn"
+              onClick={toggleDarkMode}
+              aria-label={darkMode ? "Yorug' rejim" : "Tungi rejim"}
+            >
+              {darkMode ? "☀️" : "🌙"}
+            </button>
             <button
               type="button"
               className={`notif-btn ${unreadNotificationCount > 0 ? "has-unread" : ""}`}
@@ -1351,6 +1442,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
               lessonTitle={lessonTitle}
               selectedLessons={selectedLessons}
               isLoading={isLoading}
+              darkMode={darkMode}
             />
           )}
 
@@ -1375,6 +1467,13 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
               result={lessonResult}
               status={lessonDetailStatus}
               isSubmissionExpired={isSubmissionExpired}
+              exam={lessonExam}
+              examResponse={lessonExamResponse}
+              isExamSubmissionExpired={isExamSubmissionExpired}
+              examNote={lessonExamNote}
+              examFile={lessonExamFile}
+              examSubmitError={lessonExamSubmitError}
+              examSubmitting={lessonExamSubmitting}
               isLoading={lessonDetailLoading}
               error={lessonDetailError}
               note={lessonNote}
@@ -1385,6 +1484,9 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
               onNoteChange={setLessonNote}
               onFileChange={setLessonFile}
               onSubmit={handleHomeworkSubmit}
+              onExamNoteChange={setLessonExamNote}
+              onExamFileChange={setLessonExamFile}
+              onExamSubmit={handleExamSubmit}
               getStatusLabel={getHomeworkStatusLabel}
               getStatusTone={getHomeworkStatusTone}
               formatDate={formatShortDate}
@@ -1432,6 +1534,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
               onOpenPassword={() => setShowPasswordModal(true)}
               formatDate={formatShortDate}
               getInitials={getInitials}
+              darkMode={darkMode}
             />
           )}
         </div>

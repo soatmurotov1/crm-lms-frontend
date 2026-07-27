@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GroupsPage from "../AdminPages/GroupsPage";
 import GroupDetailsPage from "../AdminPages/GroupDetrailsPage";
+import ExamsPage from "../AdminPages/ExamsPage";
 import TeacherSettings from "./TeacherSettings";
 import { getAuthUserFromStorage } from "../../utils/authToken";
+import { useTheme } from "../../theme/themeContext";
 import { groupsApi } from "../../api/crmApi";
 import StudentHome from "../StudentPages/components/StudentHome";
 import "../StudentPages/StudentDashboard.css";
@@ -17,32 +19,36 @@ import {
 const menuItems = [
   { id: 1, key: "home", icon: "🏠" },
   { id: 2, key: "groups", icon: "📚" },
-  { id: 3, key: "settings", icon: "⚙️" },
+  { id: 3, key: "exams", icon: "📝" },
+  { id: 4, key: "settings", icon: "⚙️" },
 ];
 
 const translations = {
   uz: {
-    brand: "Najot Talim",
+    brand: "EduCenter",
     greeting: "Salom",
     logout: "Chiqish",
     home: "Bosh sahifa",
     groups: "Guruhlar",
+    exams: "Examlar",
     settings: "Sozlamalar",
   },
   en: {
-    brand: "Najot Talim",
+    brand: "EduCenter",
     greeting: "Hello",
     logout: "Logout",
     home: "Home",
     groups: "Groups",
+    exams: "Exams",
     settings: "Settings",
   },
   ru: {
-    brand: "Najot Talim",
+    brand: "EduCenter",
     greeting: "Здравствуйте",
     logout: "Выйти",
     home: "Главная",
     groups: "Группы",
+    exams: "Экзамены",
     settings: "Настройки",
   },
 };
@@ -127,7 +133,7 @@ export default function TeacherDashboard({ initialMenu = "home" }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupDetailsKey, setGroupDetailsKey] = useState(0);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, setDarkMode, theme } = useTheme();
   const [language, setLanguage] = useState("uz");
   const [groups, setGroups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -149,40 +155,6 @@ export default function TeacherDashboard({ initialMenu = "home" }) {
   const greetingText = `${t.greeting}, ${greetingName}!`;
   const profileName = greetingName;
   const profileInitial = String(profileName).trim().charAt(0).toUpperCase();
-
-  const theme = darkMode
-    ? {
-        app: "bg-slate-950",
-        sidebar: "bg-slate-900 border-slate-800",
-        main: "bg-slate-950",
-        card: "bg-slate-900 border-slate-800",
-        text: "text-white",
-        soft: "text-slate-400",
-        menu: "text-slate-200",
-        hover: "hover:bg-slate-800",
-        topBtn: "bg-slate-900 border-slate-700 text-white",
-        active: "bg-violet-600 text-white",
-        select: "bg-slate-900 border-slate-700 text-white",
-        rowBorder: "border-slate-700",
-        tab: "bg-slate-900 text-slate-300 border-slate-700",
-        tabActive: "bg-violet-600 text-white border-violet-600",
-      }
-    : {
-        app: "bg-slate-100",
-        sidebar: "bg-white border-slate-200",
-        main: "bg-slate-100",
-        card: "bg-white border-slate-200",
-        text: "text-slate-900",
-        soft: "text-slate-500",
-        menu: "text-slate-700",
-        hover: "hover:bg-slate-100",
-        topBtn: "bg-white border-slate-200 text-slate-700",
-        active: "bg-violet-500 text-white",
-        select: "bg-white border-slate-200 text-slate-700",
-        rowBorder: "border-slate-200",
-        tab: "bg-white text-slate-600 border-slate-200",
-        tabActive: "bg-violet-100 text-violet-700 border-violet-200",
-      };
 
   useEffect(() => {
     let isMounted = true;
@@ -298,6 +270,7 @@ export default function TeacherDashboard({ initialMenu = "home" }) {
   const menuPathMap = {
     home: "/teacher/home",
     groups: "/teacher/groups",
+    exams: "/teacher/exams",
     settings: "/teacher/settings",
   };
 
@@ -363,6 +336,10 @@ export default function TeacherDashboard({ initialMenu = "home" }) {
 
     if (activeMenu === "settings") {
       return <TeacherSettings darkMode={darkMode} />;
+    }
+
+    if (activeMenu === "exams") {
+      return <ExamsPage />;
     }
 
     if (selectedGroup) {

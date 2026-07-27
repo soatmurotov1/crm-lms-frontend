@@ -4,6 +4,7 @@ import DashboardPage from "./pages/AdminPages/DashboardPage";
 import StudentDashboardPage from "./pages/StudentPages/Dashboard";
 import TeacherDashboard from "./pages/TeacherPages/Dashboard";
 import { getAuthUserFromStorage } from "./utils/authToken";
+import { ThemeProvider } from "./theme/ThemeProvider";
 
 function hasAccessToken() {
   return Boolean(localStorage.getItem("crm_access_token"));
@@ -94,7 +95,8 @@ function RequireTeacher({ children }) {
 
 export default function App() {
   return (
-    <Routes>
+    <ThemeProvider>
+      <Routes>
       <Route
         path="/"
         element={
@@ -144,6 +146,14 @@ export default function App() {
         }
       />
       <Route
+        path="/teacher/exams"
+        element={
+          <RequireTeacher>
+            <TeacherDashboard initialMenu="exams" />
+          </RequireTeacher>
+        }
+      />
+      <Route
         path="/dashboard/teacher"
         element={
           <RequireNonStudent>
@@ -180,6 +190,14 @@ export default function App() {
         element={
           <RequireNonStudent>
             <DashboardPage initialMenu="payments" />
+          </RequireNonStudent>
+        }
+      />
+      <Route
+        path="/dashboard/exams"
+        element={
+          <RequireNonStudent>
+            <DashboardPage initialMenu="exams" />
           </RequireNonStudent>
         }
       />
@@ -270,7 +288,8 @@ export default function App() {
           </RequireStudent>
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ThemeProvider>
   );
 }

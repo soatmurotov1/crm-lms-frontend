@@ -119,15 +119,15 @@ export default function LoginPage() {
 
       <div className="hidden md:block">
         <img
-          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1600&auto=format&fit=crop"
-          alt="office"
+          src="/login-bg.jpg"
+          alt="EduCenter o'quv xonasi"
           className="w-full h-full object-cover"
         />
       </div>
 
       <div className="flex flex-col items-center justify-center bg-[#f5f5fa] px-4 sm:px-6 py-8 sm:py-0 min-h-screen">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-500 mb-8 sm:mb-12">
-          Najot Talim
+          EduCenter
         </h1>
 
         <div className="w-full max-w-sm sm:max-w-md lg:max-w-115 bg-white rounded-2xl sm:rounded-3xl shadow-lg p-6 sm:p-8 md:p-10">

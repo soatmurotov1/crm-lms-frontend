@@ -1,9 +1,4 @@
 import { apiClient } from "./client";
-import {
-  getClientIP,
-  getDeviceInfo,
-  getUserLocation,
-} from "../utils/telemetry";
 
 const unwrap = (response) => response?.data;
 const API_CACHE_PREFIX = "crm_api_cache_v1:";
@@ -102,40 +97,13 @@ const toFormData = (payload) => {
 
 export const authApi = {
   loginAdmin: async (payload) => {
-    const telemetry = {
-      ...getDeviceInfo(),
-      location: await getUserLocation(),
-    };
-    return unwrap(
-      await apiClient.post("/auth/login/admin", {
-        ...payload,
-        ...telemetry,
-      }),
-    );
+    return unwrap(await apiClient.post("/auth/login/admin", payload));
   },
   loginTeacher: async (payload) => {
-    const telemetry = {
-      ...getDeviceInfo(),
-      location: await getUserLocation(),
-    };
-    return unwrap(
-      await apiClient.post("/auth/login/teacher", {
-        ...payload,
-        ...telemetry,
-      }),
-    );
+    return unwrap(await apiClient.post("/auth/login/teacher", payload));
   },
   loginStudent: async (payload) => {
-    const telemetry = {
-      ...getDeviceInfo(),
-      location: await getUserLocation(),
-    };
-    return unwrap(
-      await apiClient.post("/auth/login/student", {
-        ...payload,
-        ...telemetry,
-      }),
-    );
+    return unwrap(await apiClient.post("/auth/login/student", payload));
   },
 };
 
@@ -293,6 +261,12 @@ export const paymentsApi = {
         params,
       }),
     ),
+  getYearlySummary: async (params = {}) =>
+    unwrap(
+      await apiClient.get("/payments/summary/yearly", {
+        params,
+      }),
+    ),
   getMonthlyList: async (params = {}) =>
     unwrap(
       await apiClient.get("/payments/admin/monthly", {
@@ -333,6 +307,8 @@ export const studentGroupApi = {
 export const attendanceApi = {
   getByLesson: async (lessonId) =>
     unwrap(await apiClient.get(`/attendance/${lessonId}`)),
+  getWeeklyStats: async (params = {}) =>
+    unwrap(await apiClient.get("/attendance/stats/weekly", { params })),
   create: async (payload) => {
     console.log("attendanceApi.create called with payload:", payload);
     try {
@@ -435,26 +411,6 @@ export const homeworkResultsApi = {
     ),
 };
 
-export const lessonVideosApi = {
-  getByGroup: async (groupId) =>
-    cachedGet(`lesson-videos/${groupId}`, async () =>
-      unwrap(await apiClient.get(`/lesson-videos/${groupId}`)),
-    ),
-  create: async (payload, options = {}) =>
-    withCacheInvalidation(async () =>
-      unwrap(
-        await apiClient.post("/lesson-videos", toFormData(payload), {
-          onUploadProgress: options?.onUploadProgress,
-          timeout: options?.timeout ?? 10 * 60 * 1000,
-        }),
-      ),
-    ),
-  remove: async (id) =>
-    withCacheInvalidation(async () =>
-      unwrap(await apiClient.delete(`/lesson-videos/${id}`)),
-    ),
-};
-
 export const homeworkResponseApi = {
   getMine: async (homeworkId) =>
     unwrap(await apiClient.get(`/homework-response/mine/${homeworkId}`)),
@@ -471,6 +427,53 @@ export const homeworkResponseApi = {
   update: async (payload) =>
     withCacheInvalidation(async () =>
       unwrap(await apiClient.put("/homework-response", toFormData(payload))),
+    ),
+};
+
+export const examsApi = {
+  getByGroup: async (groupId) =>
+    cachedGet(`exams/group/${groupId}`, async () =>
+      unwrap(await apiClient.get(`/exams/group/${groupId}`)),
+    ),
+  getById: async (examId) => unwrap(await apiClient.get(`/exams/${examId}`)),
+  create: async (payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.post("/exams", toFormData(payload))),
+    ),
+  update: async (examId, payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.patch(`/exams/${examId}`, toFormData(payload))),
+    ),
+  remove: async (examId) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.delete(`/exams/${examId}`)),
+    ),
+  submitResponse: async (payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.post("/exams/response", toFormData(payload))),
+    ),
+  updateResponse: async (payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.put("/exams/response", toFormData(payload))),
+    ),
+  getMyResponse: async (examId) =>
+    unwrap(await apiClient.get(`/exams/response/mine/${examId}`)),
+  getStudentResponse: async (examId, studentId) =>
+    unwrap(
+      await apiClient.get(`/exams/response/${examId}/student/${studentId}`),
+    ),
+};
+
+export const lessonVideosApi = {
+  getByGroup: async (groupId) =>
+    unwrap(await apiClient.get(`/lesson-videos/${groupId}`)),
+  create: async (payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.post("/lesson-videos", toFormData(payload))),
+    ),
+  remove: async (id) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.delete(`/lesson-videos/${id}`)),
     ),
 };
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RoomsPage from "./RoomsPage";
 import EmployeesPage from "./XodimlarPage";
@@ -7,13 +7,32 @@ import StudentsPage from "./StudentsPage";
 import PaymentsPage from "./PaymentsPage";
 import GroupsPage from "./GroupsPage";
 import GroupDetailsPage from "./GroupDetrailsPage";
+import ExamsPage from "./ExamsPage";
 import {
+  attendanceApi,
   coursesApi,
   groupsApi,
   paymentsApi,
   studentsApi,
 } from "../../api/crmApi";
+import StatCard from "../../components/ui/StatCard";
+import Card from "../../components/ui/Card";
+import SectionHeader from "../../components/ui/SectionHeader";
+import ChartFallback from "../../components/ui/ChartFallback";
+
+// Recharts og'ir kutubxona — faqat dashboard ochilganda yuklanadi,
+// login sahifasining bundle'iga tushmasligi uchun lazy import qilinadi.
+const RevenueLineChart = lazy(
+  () => import("../../components/charts/RevenueLineChart"),
+);
+const PaymentsDonut = lazy(
+  () => import("../../components/charts/PaymentsDonut"),
+);
+const AttendanceBars = lazy(
+  () => import("../../components/charts/AttendanceBars"),
+);
 import { getAuthUserFromStorage } from "../../utils/authToken";
+import { useTheme } from "../../theme/themeContext";
 
 const menuItems = [
   { id: 1, key: "home", icon: "🏠" },
@@ -21,7 +40,8 @@ const menuItems = [
   { id: 3, key: "groups", icon: "📚" },
   { id: 4, key: "students", icon: "🎓" },
   { id: 5, key: "payments", icon: "💳" },
-  { id: 6, key: "management", icon: "⚙️" },
+  { id: 6, key: "exams", icon: "📝" },
+  { id: 7, key: "management", icon: "⚙️" },
 ];
 
 const managementItems = [
@@ -37,6 +57,15 @@ const statsData = [
   { id: 3, key: "frozen", icon: "❄️" },
   { id: 4, key: "archived", icon: "🗂️" },
 ];
+
+const STAT_TONES = {
+  activeStudents: "violet",
+  groups: "blue",
+  frozen: "amber",
+  archived: "rose",
+};
+
+const CLICKABLE_STATS = ["activeStudents", "groups"];
 
 const WEEKDAY_ENUMS = [
   "SUNDAY",
@@ -79,15 +108,16 @@ const writeDashboardCache = (payload) => {
 
 const translations = {
   uz: {
-    brand: "Najot Talim",
+    brand: "EduCenter",
     greeting: "Salom",
-    welcome: "Najot Talim platformasiga xush kelibsiz",
+    welcome: "EduCenter platformasiga xush kelibsiz",
     logout: "Chiqish",
     home: "Asosiy",
     teachers: "O‘qituvchilar",
     groups: "Guruhlar",
     students: "Talabalar",
     payments: "To'lovlar",
+    exams: "Examlar",
     management: "Boshqarish",
     courses: "Kurslar",
     rooms: "Xonalar",
@@ -128,15 +158,16 @@ const translations = {
     menu: "Menu",
   },
   en: {
-    brand: "Najot Talim",
+    brand: "EduCenter",
     greeting: "Hello",
-    welcome: "Welcome to Najot Talim platform",
+    welcome: "Welcome to EduCenter platform",
     logout: "Logout",
     home: "Home",
     teachers: "Teachers",
     groups: "Groups",
     students: "Students",
     payments: "Payments",
+    exams: "Exams",
     management: "Management",
     courses: "Courses",
     rooms: "Rooms",
@@ -179,15 +210,16 @@ const translations = {
     menu: "Menu",
   },
   ru: {
-    brand: "Najot Talim",
+    brand: "EduCenter",
     greeting: "Здравствуйте",
-    welcome: "Добро пожаловать на платформу Najot Talim",
+    welcome: "Добро пожаловать на платформу EduCenter",
     logout: "Выйти",
     home: "Главная",
     teachers: "Учителя",
     groups: "Группы",
     students: "Студенты",
     payments: "Платежи",
+    exams: "Экзамены",
     management: "Управление",
     courses: "Курсы",
     rooms: "Комнаты",
@@ -295,7 +327,7 @@ export default function DashboardPage({
   const [groupDetailsKey, setGroupDetailsKey] = useState(0);
   const [showManagementPanel, setShowManagementPanel] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => Boolean(cached?.darkMode));
+  const { darkMode, setDarkMode, theme } = useTheme();
   const [language, setLanguage] = useState(() => cached?.language || "uz");
   const [showCourseDrawer, setShowCourseDrawer] = useState(false);
   const [editingCourseId, setEditingCourseId] = useState(null);
@@ -316,6 +348,8 @@ export default function DashboardPage({
         archived: 0,
       },
   );
+  const [revenueMonths, setRevenueMonths] = useState([]);
+  const [attendanceDays, setAttendanceDays] = useState([]);
   const [monthlyPayments, setMonthlyPayments] = useState(() =>
     cached?.monthlyPayments
       ? { ...cached.monthlyPayments, loading: false }
@@ -373,7 +407,6 @@ export default function DashboardPage({
     writeDashboardCache({
       activeMenu,
       activeManagement,
-      darkMode,
       language,
       courses,
       dashboardStats,
@@ -383,7 +416,6 @@ export default function DashboardPage({
   }, [
     activeMenu,
     activeManagement,
-    darkMode,
     language,
     courses,
     dashboardStats,
@@ -406,6 +438,7 @@ export default function DashboardPage({
     groups: "/dashboard/group",
     students: "/dashboard/student",
     payments: "/dashboard/payments",
+    exams: "/dashboard/exams",
     management: "/dashboard",
   };
 
@@ -569,6 +602,27 @@ export default function DashboardPage({
   }, []);
 
   useEffect(() => {
+    const loadCharts = async () => {
+      const [yearly, weekly] = await Promise.allSettled([
+        paymentsApi.getYearlySummary({ year: new Date().getFullYear() }),
+        attendanceApi.getWeeklyStats(),
+      ]);
+
+      if (yearly.status === "fulfilled") {
+        const payload = yearly.value?.data ?? yearly.value ?? {};
+        setRevenueMonths(Array.isArray(payload?.months) ? payload.months : []);
+      }
+
+      if (weekly.status === "fulfilled") {
+        const payload = weekly.value?.data ?? weekly.value ?? [];
+        setAttendanceDays(Array.isArray(payload) ? payload : []);
+      }
+    };
+
+    loadCharts();
+  }, []);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         showManagementPanel &&
@@ -602,54 +656,6 @@ export default function DashboardPage({
     return () =>
       document.removeEventListener("mousedown", handleProfileOutside);
   }, [showProfilePanel]);
-
-  const theme = darkMode
-    ? {
-        app: "bg-slate-950",
-        sidebar: "bg-slate-900 border-slate-800",
-        main: "bg-slate-950",
-        card: "bg-slate-900 border-slate-800",
-        text: "text-white",
-        soft: "text-slate-400",
-        menu: "text-slate-200",
-        hover: "hover:bg-slate-800",
-        topBtn: "bg-slate-900 border-slate-700 text-white",
-        active: "bg-violet-600 text-white",
-        select: "bg-slate-900 border-slate-700 text-white",
-        subpanel: "bg-slate-900 border-slate-800",
-        submenuActive: "bg-violet-600 text-white",
-        submenuText: "text-slate-200",
-        rowBorder: "border-slate-700",
-        input:
-          "bg-slate-900 border-slate-700 text-white placeholder:text-slate-500",
-        overlay: "bg-black/50",
-        tab: "bg-slate-900 text-slate-300 border-slate-700",
-        tabActive: "bg-violet-600 text-white border-violet-600",
-        chip: "bg-slate-800 text-slate-300 border-slate-700",
-      }
-    : {
-        app: "bg-slate-100",
-        sidebar: "bg-white border-slate-200",
-        main: "bg-slate-100",
-        card: "bg-white border-slate-200",
-        text: "text-slate-900",
-        soft: "text-slate-500",
-        menu: "text-slate-700",
-        hover: "hover:bg-slate-100",
-        topBtn: "bg-white border-slate-200 text-slate-700",
-        active: "bg-violet-500 text-white",
-        select: "bg-white border-slate-200 text-slate-700",
-        subpanel: "bg-white border-slate-200",
-        submenuActive: "bg-violet-100 text-violet-700",
-        submenuText: "text-slate-700",
-        rowBorder: "border-slate-200",
-        input:
-          "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400",
-        overlay: "bg-black/30",
-        tab: "bg-white text-slate-600 border-slate-200",
-        tabActive: "bg-violet-100 text-violet-700 border-violet-200",
-        chip: "bg-slate-50 text-slate-600 border-slate-200",
-      };
 
   const resetForm = () => {
     setEditingCourseId(null);
@@ -1013,61 +1019,106 @@ export default function DashboardPage({
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
             {statsData.map((item) => (
-              <button
+              <StatCard
                 key={item.id}
-                type="button"
-                onClick={() => handleStatCardClick(item.key)}
-                className={`${theme.card} border rounded-2xl p-5 shadow-sm text-left ${
-                  {
-                    activeStudents: "cursor-pointer hover:shadow-md",
-                    groups: "cursor-pointer hover:shadow-md",
-                  }[item.key] || "cursor-default"
-                }`}
-              >
-                <div className="text-3xl mb-3">{item.icon}</div>
-                <p className={`mb-2 text-sm ${theme.soft}`}>{t[item.key]}</p>
-                <h3 className={`text-3xl font-bold ${theme.text}`}>
-                  {dashboardStats[item.key] ?? 0}
-                </h3>
-              </button>
+                icon={item.icon}
+                tone={STAT_TONES[item.key]}
+                label={t[item.key]}
+                value={dashboardStats[item.key] ?? 0}
+                onClick={
+                  CLICKABLE_STATS.includes(item.key)
+                    ? () => handleStatCardClick(item.key)
+                    : undefined
+                }
+              />
             ))}
           </div>
 
           <div className="space-y-5">
-            <div className={`${theme.card} border rounded-2xl p-6 shadow-sm`}>
-              <h2 className={`text-2xl font-semibold mb-4 ${theme.text}`}>
-                {t.monthlyPayments}
-              </h2>
+            <div className="grid gap-5 xl:grid-cols-3">
+              <Card className="xl:col-span-2">
+                <SectionHeader
+                  title="Daromad statistikasi"
+                  subtitle={`${new Date().getFullYear()}-yil, oylar kesimida`}
+                />
+                <Suspense fallback={<ChartFallback height={260} />}>
+                  <RevenueLineChart months={revenueMonths} />
+                </Suspense>
+              </Card>
+
+              <Card>
+                <SectionHeader
+                  title="To'lovlar statistikasi"
+                  subtitle={t.monthlyPayments}
+                />
+                {monthlyPayments.loading ? (
+                  <p className={`text-sm ${theme.soft}`}>Yuklanmoqda...</p>
+                ) : (
+                  <Suspense fallback={<ChartFallback height={240} />}>
+                    <PaymentsDonut
+                      paid={monthlyPayments.paid}
+                      debt={monthlyPayments.debt}
+                      pending={monthlyPayments.pending}
+                    />
+                  </Suspense>
+                )}
+              </Card>
+            </div>
+
+            <Card>
+              <SectionHeader
+                title="Davomat statistikasi"
+                subtitle="Oxirgi 7 kun"
+              />
+              <Suspense fallback={<ChartFallback height={260} />}>
+                <AttendanceBars days={attendanceDays} />
+              </Suspense>
+            </Card>
+
+            <Card>
+              <SectionHeader title={t.monthlyPayments} />
 
               <div className="grid md:grid-cols-3 gap-4">
-                <div className="rounded-2xl bg-emerald-50 p-5">
-                  <p className="text-slate-500 mb-2">{t.paid}</p>
-                  <h3 className="text-2xl font-bold text-emerald-600">
+                <div
+                  className={`rounded-2xl border p-5 ${theme.rowBorder} ${darkMode ? "bg-emerald-500/10" : "bg-emerald-50"}`}
+                >
+                  <p className={`mb-2 text-sm ${theme.soft}`}>{t.paid}</p>
+                  <h3
+                    className={`text-2xl font-bold ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}
+                  >
                     {monthlyPayments.loading
                       ? "..."
                       : formatUzs(monthlyPayments.paid)}
                   </h3>
                 </div>
 
-                <div className="rounded-2xl bg-yellow-50 p-5">
-                  <p className="text-slate-500 mb-2">{t.pending}</p>
-                  <h3 className="text-2xl font-bold text-yellow-600">
+                <div
+                  className={`rounded-2xl border p-5 ${theme.rowBorder} ${darkMode ? "bg-amber-500/10" : "bg-yellow-50"}`}
+                >
+                  <p className={`mb-2 text-sm ${theme.soft}`}>{t.pending}</p>
+                  <h3
+                    className={`text-2xl font-bold ${darkMode ? "text-amber-400" : "text-yellow-600"}`}
+                  >
                     {monthlyPayments.loading
                       ? "..."
                       : formatUzs(monthlyPayments.pending)}
                   </h3>
                 </div>
 
-                <div className="rounded-2xl bg-red-50 p-5">
-                  <p className="text-slate-500 mb-2">{t.balance}</p>
-                  <h3 className="text-2xl font-bold text-red-500">
+                <div
+                  className={`rounded-2xl border p-5 ${theme.rowBorder} ${darkMode ? "bg-rose-500/10" : "bg-red-50"}`}
+                >
+                  <p className={`mb-2 text-sm ${theme.soft}`}>{t.balance}</p>
+                  <h3
+                    className={`text-2xl font-bold ${darkMode ? "text-rose-400" : "text-red-500"}`}
+                  >
                     {monthlyPayments.loading
                       ? "..."
                       : formatUzs(monthlyPayments.debt)}
                   </h3>
                 </div>
               </div>
-            </div>
+            </Card>
 
             <div className={`${theme.card} border rounded-2xl p-6 shadow-sm`}>
               <h2 className={`text-2xl font-semibold mb-4 ${theme.text}`}>
@@ -1152,6 +1203,9 @@ export default function DashboardPage({
           onOpenGroupDetails={openGroupDetails}
         />
       );
+
+    if (activeMenu === "exams") return <ExamsPage />;
+
     if (activeMenu === "management") return renderManagementContent();
 
     return null;
