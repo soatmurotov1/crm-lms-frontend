@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import LoginPage from "./pages/AdminPages/LoginPage";
 import DashboardPage from "./pages/AdminPages/DashboardPage";
+import SuperAdminDashboard from "./pages/SuperAdminPages/Dashboard";
 import StudentDashboardPage from "./pages/StudentPages/Dashboard";
 import TeacherDashboard from "./pages/TeacherPages/Dashboard";
 import { getAuthUserFromStorage } from "./utils/authToken";
@@ -14,280 +15,185 @@ function getCurrentRole() {
   return String(getAuthUserFromStorage()?.role || "").toUpperCase();
 }
 
-function RequireAuth({ children }) {
-  const location = useLocation();
-
-  if (!hasAccessToken()) {
-    return <Navigate to="/" replace state={{ from: location }} />;
-  }
-
-  return children;
+function getHomePathForRole(role) {
+  if (role === "STUDENT") return "/student/dashboard";
+  if (role === "TEACHER") return "/teacher";
+  if (role === "SUPERADMIN") return "/superadmin";
+  return "/dashboard";
 }
 
 function GuestOnly({ children }) {
   if (hasAccessToken()) {
-    return (
-      <Navigate
-        to={
-          getCurrentRole() === "STUDENT"
-            ? "/student/dashboard"
-            : getCurrentRole() === "TEACHER"
-              ? "/teacher"
-              : "/dashboard"
-        }
-        replace
-      />
-    );
+    return <Navigate to={getHomePathForRole(getCurrentRole())} replace />;
   }
 
   return children;
 }
 
-function RequireStudent({ children }) {
+/**
+ * Bitta umumiy qorovul: token bor-yo'qligini tekshiradi va roli mos
+ * kelmasa, foydalanuvchini o'z paneliga qaytaradi.
+ */
+function RequireRole({ allow, children }) {
   const location = useLocation();
 
   if (!hasAccessToken()) {
     return <Navigate to="/" replace state={{ from: location }} />;
   }
 
-  if (getCurrentRole() !== "STUDENT") {
-    return <Navigate to="/dashboard" replace />;
+  const role = getCurrentRole();
+
+  if (!allow.includes(role)) {
+    return <Navigate to={getHomePathForRole(role)} replace />;
   }
 
   return children;
 }
 
-function RequireNonStudent({ children }) {
-  const location = useLocation();
+const ADMIN_ROLES = ["ADMIN", "SUPERADMIN", "MANAGEMENT", "ADMINSTRATOR"];
 
-  if (!hasAccessToken()) {
-    return <Navigate to="/" replace state={{ from: location }} />;
-  }
+function RequireAdmin({ children }) {
+  return <RequireRole allow={ADMIN_ROLES}>{children}</RequireRole>;
+}
 
-  if (getCurrentRole() === "STUDENT") {
-    return <Navigate to="/student/dashboard" replace />;
-  }
-
-  if (getCurrentRole() === "TEACHER") {
-    return <Navigate to="/teacher" replace />;
-  }
-
-  return children;
+function RequireSuperAdmin({ children }) {
+  return <RequireRole allow={["SUPERADMIN"]}>{children}</RequireRole>;
 }
 
 function RequireTeacher({ children }) {
-  const location = useLocation();
-
-  if (!hasAccessToken()) {
-    return <Navigate to="/" replace state={{ from: location }} />;
-  }
-
-  if (getCurrentRole() === "STUDENT") {
-    return <Navigate to="/student/dashboard" replace />;
-  }
-
-  if (getCurrentRole() !== "TEACHER") {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return children;
+  return <RequireRole allow={["TEACHER"]}>{children}</RequireRole>;
 }
+
+function RequireStudent({ children }) {
+  return <RequireRole allow={["STUDENT"]}>{children}</RequireRole>;
+}
+
+const ADMIN_ROUTES = [
+  { path: "/dashboard", menu: "dashboard" },
+  { path: "/dashboard/student", menu: "students" },
+  { path: "/dashboard/students", menu: "students" },
+  { path: "/dashboard/group", menu: "groups" },
+  { path: "/dashboard/groups", menu: "groups" },
+  { path: "/dashboard/teacher", menu: "teachers" },
+  { path: "/dashboard/teachers", menu: "teachers" },
+  { path: "/dashboard/taecher", menu: "teachers" },
+  { path: "/dashboard/attendance", menu: "attendance" },
+  { path: "/dashboard/payments", menu: "payments" },
+  { path: "/dashboard/reports", menu: "reports" },
+  { path: "/dashboard/notifications", menu: "notifications" },
+  { path: "/dashboard/settings", menu: "settings" },
+  { path: "/dashboard/exams", menu: "exams" },
+  { path: "/dashboard/course", menu: "settings", management: "courses" },
+  { path: "/dashboard/courses", menu: "settings", management: "courses" },
+  { path: "/dashboard/room", menu: "settings", management: "rooms" },
+];
+
+const SUPERADMIN_ROUTES = [
+  { path: "/superadmin", menu: "dashboard" },
+  { path: "/superadmin/organizations", menu: "organizations" },
+  { path: "/superadmin/users", menu: "users" },
+  { path: "/superadmin/plans", menu: "plans" },
+  { path: "/superadmin/payments", menu: "payments" },
+  { path: "/superadmin/reports", menu: "reports" },
+  { path: "/superadmin/settings", menu: "settings" },
+  { path: "/superadmin/notifications", menu: "notifications" },
+  { path: "/superadmin/support", menu: "support" },
+];
+
+const TEACHER_ROUTES = [
+  { path: "/teacher", menu: "dashboard" },
+  { path: "/teacher/home", menu: "dashboard" },
+  { path: "/teacher/groups", menu: "groups" },
+  { path: "/teacher/schedule", menu: "schedule" },
+  { path: "/teacher/attendance", menu: "attendance" },
+  { path: "/teacher/grades", menu: "grades" },
+  { path: "/teacher/homework", menu: "homework" },
+  { path: "/teacher/exams", menu: "exams" },
+  { path: "/teacher/students", menu: "students" },
+  { path: "/teacher/notifications", menu: "notifications" },
+  { path: "/teacher/settings", menu: "settings" },
+];
+
+const STUDENT_ROUTES = [
+  { path: "/student/dashboard", menu: "dashboard" },
+  { path: "/student/schedule", menu: "schedule" },
+  { path: "/student/lessons", menu: "lessons" },
+  { path: "/student/groups", menu: "groups" },
+  { path: "/student/homework", menu: "homework" },
+  { path: "/student/exams", menu: "exams" },
+  { path: "/student/grades", menu: "grades" },
+  { path: "/student/attendance", menu: "attendance" },
+  { path: "/student/notifications", menu: "notifications" },
+  { path: "/student/settings", menu: "profile" },
+  { path: "/student/payments", menu: "payments" },
+];
 
 export default function App() {
   return (
     <ThemeProvider>
       <Routes>
-      <Route
-        path="/"
-        element={
-          <GuestOnly>
-            <LoginPage />
-          </GuestOnly>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <RequireNonStudent>
-            <DashboardPage />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/teacher"
-        element={
-          <RequireTeacher>
-            <TeacherDashboard initialMenu="home" />
-          </RequireTeacher>
-        }
-      />
-      <Route
-        path="/teacher/groups"
-        element={
-          <RequireTeacher>
-            <TeacherDashboard initialMenu="groups" />
-          </RequireTeacher>
-        }
-      />
-      <Route
-        path="/teacher/home"
-        element={
-          <RequireTeacher>
-            <TeacherDashboard initialMenu="home" />
-          </RequireTeacher>
-        }
-      />
-      <Route
-        path="/teacher/settings"
-        element={
-          <RequireTeacher>
-            <TeacherDashboard initialMenu="settings" />
-          </RequireTeacher>
-        }
-      />
-      <Route
-        path="/teacher/exams"
-        element={
-          <RequireTeacher>
-            <TeacherDashboard initialMenu="exams" />
-          </RequireTeacher>
-        }
-      />
-      <Route
-        path="/dashboard/teacher"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="teachers" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/taecher"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="teachers" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/group"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="groups" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/student"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="students" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/payments"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="payments" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/exams"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="exams" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/room"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="management" initialManagement="rooms" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/course"
-        element={
-          <RequireNonStudent>
-            <DashboardPage
-              initialMenu="management"
-              initialManagement="courses"
-            />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/courses"
-        element={
-          <RequireNonStudent>
-            <DashboardPage
-              initialMenu="management"
-              initialManagement="courses"
-            />
-          </RequireNonStudent>
-        }
-      />
+        <Route
+          path="/"
+          element={
+            <GuestOnly>
+              <LoginPage />
+            </GuestOnly>
+          }
+        />
 
-      <Route
-        path="/dashboard/teachers"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="teachers" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/groups"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="groups" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/dashboard/students"
-        element={
-          <RequireNonStudent>
-            <DashboardPage initialMenu="students" />
-          </RequireNonStudent>
-        }
-      />
-      <Route
-        path="/student/dashboard"
-        element={
-          <RequireStudent>
-            <StudentDashboardPage initialMenu="home" />
-          </RequireStudent>
-        }
-      />
-      <Route
-        path="/student/groups"
-        element={
-          <RequireStudent>
-            <StudentDashboardPage initialMenu="groups" />
-          </RequireStudent>
-        }
-      />
-      <Route
-        path="/student/settings"
-        element={
-          <RequireStudent>
-            <StudentDashboardPage initialMenu="settings" />
-          </RequireStudent>
-        }
-      />
-      <Route
-        path="/student/payments"
-        element={
-          <RequireStudent>
-            <StudentDashboardPage initialMenu="payments" />
-          </RequireStudent>
-        }
-      />
+        {ADMIN_ROUTES.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <RequireAdmin>
+                <DashboardPage
+                  initialMenu={route.menu}
+                  {...(route.management
+                    ? { initialManagement: route.management }
+                    : {})}
+                />
+              </RequireAdmin>
+            }
+          />
+        ))}
+
+        {SUPERADMIN_ROUTES.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <RequireSuperAdmin>
+                <SuperAdminDashboard initialMenu={route.menu} />
+              </RequireSuperAdmin>
+            }
+          />
+        ))}
+
+        {TEACHER_ROUTES.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <RequireTeacher>
+                <TeacherDashboard initialMenu={route.menu} />
+              </RequireTeacher>
+            }
+          />
+        ))}
+
+        {STUDENT_ROUTES.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <RequireStudent>
+                <StudentDashboardPage initialMenu={route.menu} />
+              </RequireStudent>
+            }
+          />
+        ))}
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ThemeProvider>

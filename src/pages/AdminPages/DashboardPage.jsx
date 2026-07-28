@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RoomsPage from "./RoomsPage";
 import EmployeesPage from "./XodimlarPage";
@@ -19,6 +19,10 @@ import StatCard from "../../components/ui/StatCard";
 import Card from "../../components/ui/Card";
 import SectionHeader from "../../components/ui/SectionHeader";
 import ChartFallback from "../../components/ui/ChartFallback";
+import ListCard from "../../components/ui/ListCard";
+import PlaceholderSection from "../../components/ui/PlaceholderSection";
+import NotificationsSection from "../../components/notifications/NotificationsSection";
+import PanelLayout from "../../components/layout/PanelLayout";
 
 // Recharts og'ir kutubxona — faqat dashboard ochilganda yuklanadi,
 // login sahifasining bundle'iga tushmasligi uchun lazy import qilinadi.
@@ -35,37 +39,47 @@ import { getAuthUserFromStorage } from "../../utils/authToken";
 import { useTheme } from "../../theme/themeContext";
 
 const menuItems = [
-  { id: 1, key: "home", icon: "🏠" },
-  { id: 2, key: "teachers", icon: "👨‍🏫" },
+  { id: 1, key: "dashboard", icon: "🏠" },
+  { id: 2, key: "students", icon: "🎓" },
   { id: 3, key: "groups", icon: "📚" },
-  { id: 4, key: "students", icon: "🎓" },
-  { id: 5, key: "payments", icon: "💳" },
-  { id: 6, key: "exams", icon: "📝" },
-  { id: 7, key: "management", icon: "⚙️" },
+  { id: 4, key: "teachers", icon: "👨‍🏫" },
+  { id: 5, key: "attendance", icon: "✅" },
+  { id: 6, key: "payments", icon: "💳" },
+  { id: 7, key: "reports", icon: "📊" },
+  { id: 8, key: "notifications", icon: "🔔" },
+  { id: 9, key: "settings", icon: "⚙️" },
 ];
 
+// Eski "Boshqarish" bo'limi endi "Sozlamalar" ichidagi tablar sifatida yashaydi.
 const managementItems = [
   { id: 1, key: "courses", icon: "📘" },
   { id: 2, key: "rooms", icon: "🚪" },
   { id: 3, key: "employees", icon: "👤" },
-  { id: 4, key: "teachers", icon: "👨‍🏫" },
+  { id: 4, key: "exams", icon: "📝" },
 ];
 
 const statsData = [
-  { id: 1, key: "activeStudents", icon: "🎓" },
-  { id: 2, key: "groups", icon: "👥" },
-  { id: 3, key: "frozen", icon: "❄️" },
-  { id: 4, key: "archived", icon: "🗂️" },
+  { id: 1, key: "totalStudents", icon: "🎓" },
+  { id: 2, key: "activeGroups", icon: "📚" },
+  { id: 3, key: "todayAttendance", icon: "✅" },
+  { id: 4, key: "debtors", icon: "⚠️" },
 ];
 
 const STAT_TONES = {
-  activeStudents: "violet",
-  groups: "blue",
-  frozen: "amber",
-  archived: "rose",
+  totalStudents: "violet",
+  activeGroups: "blue",
+  todayAttendance: "emerald",
+  debtors: "rose",
 };
 
-const CLICKABLE_STATS = ["activeStudents", "groups"];
+const CLICKABLE_STATS = ["totalStudents", "activeGroups", "debtors"];
+
+// Eski route'lardagi menyu kalitlari yangi menyuga moslashtiriladi.
+const LEGACY_MENU_MAP = {
+  home: "dashboard",
+  management: "settings",
+  exams: "settings",
+};
 
 const WEEKDAY_ENUMS = [
   "SUNDAY",
@@ -110,15 +124,25 @@ const translations = {
   uz: {
     brand: "EduCenter",
     greeting: "Salom",
+    welcomeTitle: "Xush kelibsiz",
     welcome: "EduCenter platformasiga xush kelibsiz",
     logout: "Chiqish",
     home: "Asosiy",
     teachers: "O‘qituvchilar",
     groups: "Guruhlar",
-    students: "Talabalar",
+    students: "O'quvchilar",
     payments: "To'lovlar",
     exams: "Examlar",
     management: "Boshqarish",
+    dashboard: "Boshqaruv paneli",
+    attendance: "Davomat",
+    reports: "Hisobotlar",
+    notifications: "Xabarnomalar",
+    settings: "Sozlamalar",
+    totalStudents: "Jami o'quvchilar",
+    activeGroups: "Faol guruhlar",
+    todayAttendance: "Bugungi davomat",
+    debtors: "Qarzdorlar",
     courses: "Kurslar",
     rooms: "Xonalar",
     employees: "Hodimlar",
@@ -160,6 +184,7 @@ const translations = {
   en: {
     brand: "EduCenter",
     greeting: "Hello",
+    welcomeTitle: "Welcome",
     welcome: "Welcome to EduCenter platform",
     logout: "Logout",
     home: "Home",
@@ -169,6 +194,15 @@ const translations = {
     payments: "Payments",
     exams: "Exams",
     management: "Management",
+    dashboard: "Dashboard",
+    attendance: "Attendance",
+    reports: "Reports",
+    notifications: "Notifications",
+    settings: "Settings",
+    totalStudents: "Total students",
+    activeGroups: "Active groups",
+    todayAttendance: "Today's attendance",
+    debtors: "Debtors",
     courses: "Courses",
     rooms: "Rooms",
     employees: "Employees",
@@ -212,6 +246,7 @@ const translations = {
   ru: {
     brand: "EduCenter",
     greeting: "Здравствуйте",
+    welcomeTitle: "Добро пожаловать",
     welcome: "Добро пожаловать на платформу EduCenter",
     logout: "Выйти",
     home: "Главная",
@@ -221,6 +256,15 @@ const translations = {
     payments: "Платежи",
     exams: "Экзамены",
     management: "Управление",
+    dashboard: "Панель управления",
+    attendance: "Посещаемость",
+    reports: "Отчёты",
+    notifications: "Уведомления",
+    settings: "Настройки",
+    totalStudents: "Всего учеников",
+    activeGroups: "Активные группы",
+    todayAttendance: "Посещаемость сегодня",
+    debtors: "Должники",
     courses: "Курсы",
     rooms: "Комнаты",
     employees: "Сотрудники",
@@ -318,16 +362,18 @@ export default function DashboardPage({
   const cached = useMemo(() => readDashboardCache(), []);
 
   const [activeMenu, setActiveMenu] = useState(
-    () => cached?.activeMenu || initialMenu,
+    () => LEGACY_MENU_MAP[cached?.activeMenu || initialMenu] ||
+      cached?.activeMenu ||
+      initialMenu,
   );
-  const [activeManagement, setActiveManagement] = useState(
-    () => cached?.activeManagement || initialManagement,
+  const [activeManagement, setActiveManagement] = useState(() =>
+    initialMenu === "exams"
+      ? "exams"
+      : cached?.activeManagement || initialManagement,
   );
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupDetailsKey, setGroupDetailsKey] = useState(0);
-  const [showManagementPanel, setShowManagementPanel] = useState(false);
-  const [showProfilePanel, setShowProfilePanel] = useState(false);
-  const { darkMode, setDarkMode, theme } = useTheme();
+  const { darkMode, theme } = useTheme();
   const [language, setLanguage] = useState(() => cached?.language || "uz");
   const [showCourseDrawer, setShowCourseDrawer] = useState(false);
   const [editingCourseId, setEditingCourseId] = useState(null);
@@ -342,14 +388,15 @@ export default function DashboardPage({
   const [dashboardStats, setDashboardStats] = useState(
     () =>
       cached?.dashboardStats || {
-        activeStudents: 0,
-        groups: 0,
+        totalStudents: 0,
+        activeGroups: 0,
         frozen: 0,
         archived: 0,
       },
   );
   const [revenueMonths, setRevenueMonths] = useState([]);
   const [attendanceDays, setAttendanceDays] = useState([]);
+  const [paymentRows, setPaymentRows] = useState([]);
   const [monthlyPayments, setMonthlyPayments] = useState(() =>
     cached?.monthlyPayments
       ? { ...cached.monthlyPayments, loading: false }
@@ -376,11 +423,6 @@ export default function DashboardPage({
     description: "",
   });
 
-  const managementButtonRef = useRef(null);
-  const managementPanelRef = useRef(null);
-  const profileButtonRef = useRef(null);
-  const profilePanelRef = useRef(null);
-
   const t = useMemo(() => translations[language], [language]);
   const authUser = useMemo(() => getAuthUserFromStorage(), []);
   const greetingName = useMemo(() => {
@@ -394,14 +436,48 @@ export default function DashboardPage({
 
     return baseName;
   }, [authUser]);
-  const greetingText = `${t.greeting}, ${greetingName}!`;
-  const profileName =
-    authUser?.fullName || authUser?.phone || "Foydalanuvchi";
-  const profileInitial =
-    String(profileName).trim().charAt(0).toUpperCase() || "F";
   const profileRole = String(authUser?.role || "USER").toUpperCase();
   const formatUzs = (value) =>
     `${new Intl.NumberFormat("uz-UZ").format(Number(value || 0))} so'm`;
+
+  // Bugungi davomat foizi — haftalik statistikadagi shu kunga tegishli yozuv.
+  const todayAttendance = useMemo(() => {
+    const todayWeekday = new Date().getDay();
+    const entry = attendanceDays.find(
+      (day) => Number(day?.weekday) === todayWeekday,
+    );
+
+    return {
+      percent: Number(entry?.percent || 0),
+      present: Number(entry?.present || 0),
+      total: Number(entry?.total || 0),
+    };
+  }, [attendanceDays]);
+
+  // Qarzdorlar — joriy oyda to'lovi "DEBT" holatida turgan noyob o'quvchilar.
+  const debtorRows = useMemo(
+    () => paymentRows.filter((row) => row.status === "DEBT"),
+    [paymentRows],
+  );
+
+  const debtorsCount = useMemo(
+    () => new Set(debtorRows.map((row) => row.studentId)).size,
+    [debtorRows],
+  );
+
+  const statValues = {
+    totalStudents: dashboardStats.totalStudents ?? 0,
+    activeGroups: dashboardStats.activeGroups ?? 0,
+    todayAttendance: `${todayAttendance.percent}%`,
+    debtors: debtorsCount,
+  };
+
+  const statHints = {
+    todayAttendance: todayAttendance.total
+      ? `${todayAttendance.present} / ${todayAttendance.total} belgilangan`
+      : "Bugun davomat belgilanmagan",
+    debtors: debtorsCount ? "Joriy oy uchun to'lanmagan" : "Qarzdor yo'q",
+  };
 
   useEffect(() => {
     writeDashboardCache({
@@ -424,8 +500,10 @@ export default function DashboardPage({
   ]);
 
   useEffect(() => {
-    setActiveMenu(initialMenu);
-    setActiveManagement(initialManagement);
+    setActiveMenu(LEGACY_MENU_MAP[initialMenu] || initialMenu);
+    setActiveManagement(
+      initialMenu === "exams" ? "exams" : initialManagement,
+    );
 
     if (initialMenu !== "groups") {
       setSelectedGroup(null);
@@ -433,43 +511,40 @@ export default function DashboardPage({
   }, [initialMenu, initialManagement]);
 
   const menuPathMap = {
-    home: "/dashboard",
+    dashboard: "/dashboard",
     teachers: "/dashboard/teacher",
     groups: "/dashboard/group",
     students: "/dashboard/student",
+    attendance: "/dashboard/attendance",
     payments: "/dashboard/payments",
-    exams: "/dashboard/exams",
-    management: "/dashboard",
+    reports: "/dashboard/reports",
+    notifications: "/dashboard/notifications",
+    settings: "/dashboard/settings",
   };
 
   const managementPathMap = {
     courses: "/dashboard/course",
     rooms: "/dashboard/room",
-    employees: "/dashboard",
-    teachers: "/dashboard/teacher",
-    faq: "/dashboard",
-    inspection: "/dashboard",
+    employees: "/dashboard/settings",
+    exams: "/dashboard/exams",
   };
 
   const openMenu = (menuKey) => {
     setSelectedGroup(null);
     setActiveMenu(menuKey);
-    setShowManagementPanel(false);
     navigate(menuPathMap[menuKey] || "/dashboard");
   };
 
   const openManagementMenu = (managementKey) => {
     setSelectedGroup(null);
-    setActiveMenu("management");
+    setActiveMenu("settings");
     setActiveManagement(managementKey);
-    setShowManagementPanel(false);
-    navigate(managementPathMap[managementKey] || "/dashboard");
+    navigate(managementPathMap[managementKey] || "/dashboard/settings");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("crm_access_token");
     localStorage.removeItem(STORAGE_KEY);
-    setShowProfilePanel(false);
     navigate("/", { replace: true });
   };
 
@@ -565,10 +640,9 @@ export default function DashboardPage({
       });
 
       setDashboardStats({
-        activeStudents: students.filter(
-          (student) => student.status === "ACTIVE",
-        ).length,
-        groups: groups.length,
+        totalStudents: students.length,
+        activeGroups: groups.filter((group) => group.status === "ACTIVE")
+          .length,
         frozen: groups.filter((group) => group.status === "FREEZE").length,
         archived: groups.filter((group) => group.status === "INACTIVE").length,
       });
@@ -603,10 +677,26 @@ export default function DashboardPage({
 
   useEffect(() => {
     const loadCharts = async () => {
-      const [yearly, weekly] = await Promise.allSettled([
-        paymentsApi.getYearlySummary({ year: new Date().getFullYear() }),
+      const now = new Date();
+      const [yearly, weekly, monthlyList] = await Promise.allSettled([
+        paymentsApi.getYearlySummary({ year: now.getFullYear() }),
         attendanceApi.getWeeklyStats(),
+        paymentsApi.getMonthlyList({
+          year: now.getFullYear(),
+          month: now.getMonth() + 1,
+        }),
       ]);
+
+      if (monthlyList.status === "fulfilled") {
+        const payload = monthlyList.value;
+        setPaymentRows(
+          Array.isArray(payload)
+            ? payload
+            : Array.isArray(payload?.data)
+              ? payload.data
+              : [],
+        );
+      }
 
       if (yearly.status === "fulfilled") {
         const payload = yearly.value?.data ?? yearly.value ?? {};
@@ -621,41 +711,6 @@ export default function DashboardPage({
 
     loadCharts();
   }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        showManagementPanel &&
-        managementPanelRef.current &&
-        !managementPanelRef.current.contains(event.target) &&
-        managementButtonRef.current &&
-        !managementButtonRef.current.contains(event.target)
-      ) {
-        setShowManagementPanel(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showManagementPanel]);
-
-  useEffect(() => {
-    const handleProfileOutside = (event) => {
-      if (
-        showProfilePanel &&
-        profilePanelRef.current &&
-        !profilePanelRef.current.contains(event.target) &&
-        profileButtonRef.current &&
-        !profileButtonRef.current.contains(event.target)
-      ) {
-        setShowProfilePanel(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleProfileOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleProfileOutside);
-  }, [showProfilePanel]);
 
   const resetForm = () => {
     setEditingCourseId(null);
@@ -741,13 +796,6 @@ export default function DashboardPage({
       alert(error?.response?.data?.message || "Kursni o'chirishda xato");
     }
   };
-
-  const renderBox = (title, text) => (
-    <div className={`${theme.card} border rounded-2xl p-8 shadow-sm`}>
-      <h2 className={`text-3xl font-bold mb-4 ${theme.text}`}>{title}</h2>
-      <p className={theme.soft}>{text}</p>
-    </div>
-  );
 
   const renderCoursesSection = () => {
     return (
@@ -961,48 +1009,68 @@ export default function DashboardPage({
       return <RoomsPage theme={theme} darkMode={darkMode} />;
     if (activeManagement === "employees")
       return <EmployeesPage theme={theme} darkMode={darkMode} />;
-    if (activeManagement === "teachers")
-      return (
-        <TeachersPage
-          theme={theme}
-          darkMode={darkMode}
-          currentUser={authUser}
-        />
-      );
-    if (activeManagement === "faq") return renderBox(t.faq, t.faqText);
-    if (activeManagement === "inspection")
-      return renderBox(t.inspection, t.inspectionText);
+    if (activeManagement === "exams") return <ExamsPage />;
     return null;
   };
 
+  // "Sozlamalar" bo'limi eski "Boshqarish" ostidagi sahifalarni tab ko'rinishida
+  // saqlab qoladi — shu bilan kurslar/xonalar/hodimlar/examlar yo'qolmaydi.
+  const renderSettingsSection = () => (
+    <div className="space-y-5">
+      <div className="flex flex-wrap gap-2">
+        {managementItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => openManagementMenu(item.key)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition cursor-pointer ${
+              activeManagement === item.key ? theme.tabActive : theme.tab
+            }`}
+          >
+            <span>{item.icon}</span>
+            <span>{t[item.key]}</span>
+          </button>
+        ))}
+      </div>
+
+      {renderManagementContent()}
+    </div>
+  );
+
   const handleStatCardClick = (key) => {
-    if (key === "activeStudents") {
+    if (key === "totalStudents") {
       openMenu("students");
       return;
     }
 
-    if (key === "groups") {
+    if (key === "activeGroups") {
       openMenu("groups");
+      return;
+    }
+
+    if (key === "debtors") {
+      openMenu("payments");
     }
   };
 
-  const openGroupDetails = (group) => {
+  const openGroupDetails = (group, menuKey = "groups") => {
     const nextGroup = group ? { ...group } : null;
     const nextTab = nextGroup?.initialMainTab || "guruh-darsliklari";
     setSelectedGroup(nextGroup);
     setGroupDetailsKey((prev) => prev + 1);
-    setActiveMenu("groups");
+    setActiveMenu(menuKey);
     if (nextGroup?.id) {
       const params = new URLSearchParams();
       params.set("groupId", String(nextGroup.id));
       params.set("tab", nextTab);
-      navigate(`/dashboard/group?${params.toString()}`);
+      navigate(
+        `${menuPathMap[menuKey] || "/dashboard/group"}?${params.toString()}`,
+      );
     }
   };
 
   const handleGroupBack = () => {
     setSelectedGroup(null);
-    navigate("/dashboard/group");
+    navigate(menuPathMap[activeMenu] || "/dashboard/group");
   };
 
   const handleGroupTabChange = (tabKey) => {
@@ -1010,11 +1078,14 @@ export default function DashboardPage({
     const params = new URLSearchParams();
     params.set("groupId", String(selectedGroup.id));
     params.set("tab", tabKey);
-    navigate(`/dashboard/group?${params.toString()}`, { replace: true });
+    navigate(
+      `${menuPathMap[activeMenu] || "/dashboard/group"}?${params.toString()}`,
+      { replace: true },
+    );
   };
 
   const renderContent = () => {
-    if (activeMenu === "home") {
+    if (activeMenu === "dashboard") {
       return (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
@@ -1024,7 +1095,8 @@ export default function DashboardPage({
                 icon={item.icon}
                 tone={STAT_TONES[item.key]}
                 label={t[item.key]}
-                value={dashboardStats[item.key] ?? 0}
+                value={statValues[item.key] ?? 0}
+                deltaLabel={statHints[item.key]}
                 onClick={
                   CLICKABLE_STATS.includes(item.key)
                     ? () => handleStatCardClick(item.key)
@@ -1038,18 +1110,18 @@ export default function DashboardPage({
             <div className="grid gap-5 xl:grid-cols-3">
               <Card className="xl:col-span-2">
                 <SectionHeader
-                  title="Daromad statistikasi"
-                  subtitle={`${new Date().getFullYear()}-yil, oylar kesimida`}
+                  title="Davomat statistikasi"
+                  subtitle="Oxirgi 7 kun"
                 />
                 <Suspense fallback={<ChartFallback height={260} />}>
-                  <RevenueLineChart months={revenueMonths} />
+                  <AttendanceBars days={attendanceDays} />
                 </Suspense>
               </Card>
 
               <Card>
                 <SectionHeader
                   title="To'lovlar statistikasi"
-                  subtitle={t.monthlyPayments}
+                  subtitle="To'langan · Qarzdorlik · Kutilmoqda"
                 />
                 {monthlyPayments.loading ? (
                   <p className={`text-sm ${theme.soft}`}>Yuklanmoqda...</p>
@@ -1067,11 +1139,11 @@ export default function DashboardPage({
 
             <Card>
               <SectionHeader
-                title="Davomat statistikasi"
-                subtitle="Oxirgi 7 kun"
+                title="Daromad statistikasi"
+                subtitle={`${new Date().getFullYear()}-yil, oylar kesimida`}
               />
               <Suspense fallback={<ChartFallback height={260} />}>
-                <AttendanceBars days={attendanceDays} />
+                <RevenueLineChart months={revenueMonths} />
               </Suspense>
             </Card>
 
@@ -1204,183 +1276,206 @@ export default function DashboardPage({
         />
       );
 
-    if (activeMenu === "exams") return <ExamsPage />;
+    if (activeMenu === "attendance") {
+      if (selectedGroup) {
+        return (
+          <GroupDetailsPage
+            key={groupDetailsKey}
+            theme={theme}
+            darkMode={darkMode}
+            group={selectedGroup}
+            onBack={handleGroupBack}
+            onTabChange={handleGroupTabChange}
+          />
+        );
+      }
 
-    if (activeMenu === "management") return renderManagementContent();
+      return (
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <StatCard
+              icon="✅"
+              tone="emerald"
+              label={t.todayAttendance}
+              value={`${todayAttendance.percent}%`}
+              deltaLabel={statHints.todayAttendance}
+            />
+            <StatCard
+              icon="🎓"
+              tone="violet"
+              label="Bugun kelganlar"
+              value={todayAttendance.present}
+            />
+            <StatCard
+              icon="📋"
+              tone="blue"
+              label="Bugun belgilanganlar"
+              value={todayAttendance.total}
+            />
+          </div>
+
+          <Card>
+            <SectionHeader
+              title="Davomat statistikasi"
+              subtitle="Oxirgi 7 kun"
+            />
+            <Suspense fallback={<ChartFallback height={260} />}>
+              <AttendanceBars days={attendanceDays} />
+            </Suspense>
+          </Card>
+
+          <Card>
+            <SectionHeader
+              title="Guruh bo'yicha davomat"
+              subtitle="Guruhni tanlang — akademik davomat jadvali ochiladi"
+            />
+            <GroupsPage
+              theme={theme}
+              darkMode={darkMode}
+              currentUser={authUser}
+              onOpenGroupDetails={(group) =>
+                openGroupDetails(
+                  { ...group, initialMainTab: "akademik-davomat" },
+                  "attendance",
+                )
+              }
+            />
+          </Card>
+        </div>
+      );
+    }
+
+    if (activeMenu === "reports") {
+      return (
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+            <StatCard
+              icon="🎓"
+              tone="violet"
+              label={t.totalStudents}
+              value={statValues.totalStudents}
+            />
+            <StatCard
+              icon="📚"
+              tone="blue"
+              label={t.activeGroups}
+              value={statValues.activeGroups}
+            />
+            <StatCard
+              icon="💰"
+              tone="emerald"
+              label={t.paid}
+              value={formatUzs(monthlyPayments.paid)}
+            />
+            <StatCard
+              icon="⚠️"
+              tone="rose"
+              label={t.debtors}
+              value={debtorsCount}
+            />
+          </div>
+
+          <Card>
+            <SectionHeader
+              title="Daromad statistikasi"
+              subtitle={`${new Date().getFullYear()}-yil, oylar kesimida`}
+            />
+            <Suspense fallback={<ChartFallback height={260} />}>
+              <RevenueLineChart months={revenueMonths} />
+            </Suspense>
+          </Card>
+
+          <div className="grid gap-5 xl:grid-cols-2">
+            <Card>
+              <SectionHeader
+                title="Davomat statistikasi"
+                subtitle="Oxirgi 7 kun"
+              />
+              <Suspense fallback={<ChartFallback height={260} />}>
+                <AttendanceBars days={attendanceDays} />
+              </Suspense>
+            </Card>
+
+            <Card>
+              <SectionHeader
+                title="To'lovlar statistikasi"
+                subtitle="To'langan · Qarzdorlik · Kutilmoqda"
+              />
+              <Suspense fallback={<ChartFallback height={240} />}>
+                <PaymentsDonut
+                  paid={monthlyPayments.paid}
+                  debt={monthlyPayments.debt}
+                  pending={monthlyPayments.pending}
+                />
+              </Suspense>
+            </Card>
+          </div>
+
+          <ListCard
+            title="Qarzdorlar ro'yxati"
+            subtitle="Joriy oy uchun to'lov qilinmagan o'quvchilar"
+            items={debtorRows.map((row, index) => ({
+              id: `${row.studentId}-${row.groupId}-${index}`,
+              title: row.studentName,
+              meta: `${row.groupName} · ${formatUzs(row.amount)}`,
+              badge: "Qarz",
+              tone: "rose",
+              icon: "⚠️",
+            }))}
+            emptyText="Qarzdor o'quvchi yo'q"
+            maxHeight={360}
+          />
+        </div>
+      );
+    }
+
+    if (activeMenu === "notifications") {
+      return (
+        <NotificationsSection
+          canSend
+          canViewAll
+          canDelete
+          groups={scheduleData.groups}
+          title={t.notifications}
+          subtitle="O'quvchilar va o'qituvchilarga xabar yuborish"
+        />
+      );
+    }
+
+    if (activeMenu === "settings") return renderSettingsSection();
 
     return null;
   };
 
   return (
-    <div className={`min-h-screen flex ${theme.app}`}>
-      <aside
-        className={`relative w-60 border-r p-4 flex flex-col ${theme.sidebar}`}
-      >
-        <h1 className="text-2xl font-bold text-violet-600 mb-8">{t.brand}</h1>
-
-        <nav className="space-y-2">
-          {menuItems.map((item) => {
-            if (item.key === "management") {
-              return (
-                <button
-                  key={item.id}
-                  ref={managementButtonRef}
-                  onClick={() => {
-                    setActiveMenu("management");
-                    setShowManagementPanel((prev) => !prev);
-                  }}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-left transition cursor-pointer ${
-                    activeMenu === "management"
-                      ? theme.active
-                      : `${theme.menu} ${theme.hover}`
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span>{item.icon}</span>
-                    <span className="font-medium">{t[item.key]}</span>
-                  </div>
-                  <span>{showManagementPanel ? "◂" : "▸"}</span>
-                </button>
-              );
-            }
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => openMenu(item.key)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition cursor-pointer ${
-                  activeMenu === item.key
-                    ? theme.active
-                    : `${theme.menu} ${theme.hover}`
-                }`}
-              >
-                <span>{item.icon}</span>
-                <span className="font-medium">{t[item.key]}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        {showManagementPanel && (
-          <div
-            ref={managementPanelRef}
-            className={`absolute top-18 left-55 w-52.5 rounded-r-2xl rounded-bl-2xl border p-4 shadow-2xl z-30 ${theme.subpanel}`}
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <button
-                onClick={() => setShowManagementPanel(false)}
-                className="w-7 h-7 rounded-md bg-violet-500 text-white flex items-center justify-center text-sm"
-              >
-                ‹
-              </button>
-              <h3 className={`text-lg font-semibold ${theme.text}`}>
-                {t.menu}
-              </h3>
-            </div>
-
-            <div className="space-y-2">
-              {managementItems.map((sub) => (
-                <button
-                  key={sub.id}
-                  onClick={() => openManagementMenu(sub.key)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition cursor-pointer ${
-                    activeManagement === sub.key && activeMenu === "management"
-                      ? theme.submenuActive
-                      : `${theme.submenuText} hover:bg-slate-100/70`
-                  }`}
-                >
-                  <span>{sub.icon}</span>
-                  <span className="text-sm font-medium">{t[sub.key]}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <button
-          onClick={handleLogout}
-          className="mt-auto bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl cursor-pointer transition"
+    <PanelLayout
+      brand={t.brand}
+      menuItems={menuItems.map((item) => ({
+        key: item.key,
+        label: t[item.key],
+        icon: item.icon,
+      }))}
+      activeKey={activeMenu}
+      onSelect={openMenu}
+      greeting={`${t.welcomeTitle}, Admin`}
+      subtitle={`${greetingName} · ${t[activeMenu] || ""}`}
+      user={authUser}
+      roleLabel={profileRole}
+      logoutLabel={t.logout}
+      onLogout={handleLogout}
+      headerExtra={
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          className={`border rounded-xl px-3 py-2 outline-none text-sm ${theme.select}`}
         >
-          {t.logout}
-        </button>
-      </aside>
-
-      <main className={`flex-1 p-8 ${theme.main}`}>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-          <h1 className="text-2xl font-bold text-violet-600">{t.brand}</h1>
-
-          <h2 className={`text-xl md:text-2xl font-semibold ${theme.text}`}>
-            {greetingText}
-          </h2>
-
-          <div className="flex items-center gap-3">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className={`border rounded-xl px-4 py-2 outline-none ${theme.select}`}
-            >
-              <option value="uz">O'zbekcha</option>
-              <option value="en">English</option>
-              <option value="ru">Русский</option>
-            </select>
-
-            <button
-              className={`w-10 h-10 flex items-center justify-center rounded-xl border cursor-pointer ${theme.topBtn}`}
-            >
-              🔔
-            </button>
-
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`w-10 h-10 flex items-center justify-center rounded-xl border cursor-pointer ${theme.topBtn}`}
-            >
-              {darkMode ? "☀️" : "🌙"}
-            </button>
-
-            <div className="relative">
-              <button
-                ref={profileButtonRef}
-                onClick={() => setShowProfilePanel((prev) => !prev)}
-                className="w-10 h-10 rounded-full bg-amber-900 text-white flex items-center justify-center font-bold cursor-pointer"
-                title="Profil"
-              >
-                {profileInitial}
-              </button>
-
-              {showProfilePanel && (
-                <div
-                  ref={profilePanelRef}
-                  className={`absolute right-0 top-12 z-40 w-72 rounded-2xl border p-4 shadow-2xl ${theme.card} ${theme.rowBorder}`}
-                >
-                  <p
-                    className={`text-xs uppercase tracking-wide ${theme.soft}`}
-                  >
-                    Profil
-                  </p>
-                  <h3 className={`text-base font-semibold mt-1 ${theme.text}`}>
-                    {profileName}
-                  </h3>
-                  <p className={`text-sm mt-1 ${theme.soft}`}>
-                    {authUser?.phone || "Telefon yo'q"}
-                  </p>
-                  <p className={`text-xs mt-2 ${theme.soft}`}>
-                    Rol: {profileRole}
-                  </p>
-
-                  <button
-                    onClick={() => setShowProfilePanel(false)}
-                    className="mt-4 w-full rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 py-2.5 text-sm"
-                  >
-                    Yopish
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {renderContent()}
-      </main>
-    </div>
+          <option value="uz">O'zbekcha</option>
+          <option value="en">English</option>
+          <option value="ru">Русский</option>
+        </select>
+      }
+    >
+      {renderContent()}
+    </PanelLayout>
   );
 }

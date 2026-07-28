@@ -32,6 +32,32 @@ const UZ_WEEKDAY_SHORT_TO_ENUM = {
 };
 
 const UZ_TIME_ZONE = "Asia/Tashkent";
+
+/** Backend'dagi AttendanceStatus enum'iga mos holatlar. */
+const ATTENDANCE_STATUSES = [
+  { value: "PRESENT", label: "Keldi", color: "#0F6E56", bg: "#E1F5EE" },
+  { value: "LATE", label: "Kechikdi", color: "#B45309", bg: "#FEF3C7" },
+  { value: "EXCUSED", label: "Sababli", color: "#1D4ED8", bg: "#DBEAFE" },
+  { value: "ABSENT", label: "Kelmadi", color: "#9ca3af", bg: "#f3f4f6" },
+];
+
+const DEFAULT_ATTENDANCE_STATUS = "ABSENT";
+
+const getStatusMeta = (status) =>
+  ATTENDANCE_STATUSES.find((item) => item.value === status) ||
+  ATTENDANCE_STATUSES[ATTENDANCE_STATUSES.length - 1];
+
+/**
+ * Eski yozuvlarda faqat `isPresent` bo'lishi mumkin — o'shalarni ham
+ * yangi status qiymatiga keltiramiz.
+ */
+const resolveRowStatus = (row) => {
+  const status = String(row?.status || "").toUpperCase();
+  if (ATTENDANCE_STATUSES.some((item) => item.value === status)) {
+    return status;
+  }
+  return row?.isPresent ? "PRESENT" : DEFAULT_ATTENDANCE_STATUS;
+};
 const normalizeWeekDays = (value) => {
   const list = Array.isArray(value)
     ? value
@@ -200,52 +226,52 @@ const pickLatestLesson = (list) => {
   }, null);
 };
 
-function Toggle({ checked, onChange, disabled }) {
+function StatusPicker({ value, onChange, disabled, darkMode }) {
+  const idleBorder = darkMode ? "#334155" : "#e5e7eb";
+
   return (
-    <label
-      style={{
-        ...styles.toggleLabel,
-        cursor: disabled ? "default" : styles.toggleLabel.cursor,
-        opacity: disabled ? 0.6 : 1,
-      }}
-    >
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => {
-          if (disabled) return;
-          onChange(e.target.checked);
-        }}
-        disabled={disabled}
-        style={{ display: "none" }}
-      />
-      <span
-        style={{
-          ...styles.toggleTrack,
-          background: checked ? "#1D9E75" : "#d1d5db",
-        }}
-      >
-        <span
-          style={{
-            ...styles.toggleThumb,
-            transform: checked ? "translateX(18px)" : "translateX(0)",
-          }}
-        />
-      </span>
-    </label>
+    <div style={styles.statusPicker}>
+      {ATTENDANCE_STATUSES.map((status) => {
+        const isActive = status.value === value;
+
+        return (
+          <button
+            key={status.value}
+            type="button"
+            onClick={() => {
+              if (disabled || isActive) return;
+              onChange(status.value);
+            }}
+            disabled={disabled}
+            style={{
+              ...styles.statusButton,
+              background: isActive ? status.bg : "transparent",
+              color: isActive ? status.color : "#9ca3af",
+              borderColor: isActive ? status.color : idleBorder,
+              cursor: disabled ? "not-allowed" : "pointer",
+              opacity: disabled && !isActive ? 0.6 : 1,
+            }}
+          >
+            {status.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
-function StatusBadge({ came }) {
+function StatusBadge({ status }) {
+  const meta = getStatusMeta(status);
+
   return (
     <span
       style={{
         ...styles.badge,
-        background: came ? "#E1F5EE" : "#f3f4f6",
-        color: came ? "#0F6E56" : "#9ca3af",
+        background: meta.bg,
+        color: meta.color,
       }}
     >
-      {came ? "Keldi" : "Kelmadi"}
+      {meta.label}
     </span>
   );
 }
@@ -275,8 +301,15 @@ export default function Attendance({
   const [initialAttendance, setInitialAttendance] = useState({});
 
   const total = students.length;
-  const came = Object.values(attendance).filter(Boolean).length;
-  const absent = total - came;
+  const statusCounts = useMemo(() => {
+    const counts = { PRESENT: 0, LATE: 0, EXCUSED: 0, ABSENT: 0 };
+    students.forEach((student) => {
+      const status =
+        attendance[student?.id] || DEFAULT_ATTENDANCE_STATUS;
+      if (counts[status] !== undefined) counts[status] += 1;
+    });
+    return counts;
+  }, [students, attendance]);
   const hasSavedAttendance = Object.keys(existingAttendance).length > 0;
 
   const hasFormChanges = useMemo(() => {
@@ -284,7 +317,8 @@ export default function Attendance({
     const attendanceChanged = students.some((student) => {
       const studentId = student?.id;
       return (
-        Boolean(attendance[studentId]) !== Boolean(initialAttendance[studentId])
+        (attendance[studentId] || DEFAULT_ATTENDANCE_STATUS) !==
+        (initialAttendance[studentId] || DEFAULT_ATTENDANCE_STATUS)
       );
     });
 
@@ -559,7 +593,7 @@ export default function Attendance({
         const attendanceMap = rows.reduce((acc, row) => {
           const studentId = row?.student?.id;
           if (studentId) {
-            acc[studentId] = Boolean(row?.isPresent);
+            acc[studentId] = resolveRowStatus(row);
           }
           return acc;
         }, {});
@@ -590,9 +624,9 @@ export default function Attendance({
     };
   }, [selectedLessonId, displayLessons]);
 
-  const handleToggle = (studentId, val) => {
+  const handleStatusChange = (studentId, status) => {
     if (readOnly) return;
-    setAttendance((prev) => ({ ...prev, [studentId]: val }));
+    setAttendance((prev) => ({ ...prev, [studentId]: status }));
   };
 
   const handleTime = (studentId, val) => {
@@ -732,10 +766,14 @@ export default function Attendance({
 
       try {
         const updates = students.map((student) => {
+          const status =
+            attendance[student.id] || DEFAULT_ATTENDANCE_STATUS;
           const payload = {
             lessonId: Number(lessonId),
             studentId: Number(student.id),
-            isPresent: Boolean(attendance[student.id]),
+            status,
+            // Eski mijozlar bilan mos bo'lishi uchun isPresent ham yuboriladi.
+            isPresent: status !== "ABSENT",
           };
 
           console.log(
@@ -918,18 +956,14 @@ export default function Attendance({
             <div style={themedStyles.statLabel}>Jami</div>
             <div style={themedStyles.statVal}>{total}</div>
           </div>
-          <div style={themedStyles.statBox}>
-            <div style={themedStyles.statLabel}>Keldi</div>
-            <div style={{ ...themedStyles.statVal, color: "#1D9E75" }}>
-              {came}
+          {ATTENDANCE_STATUSES.map((status) => (
+            <div key={status.value} style={themedStyles.statBox}>
+              <div style={themedStyles.statLabel}>{status.label}</div>
+              <div style={{ ...themedStyles.statVal, color: status.color }}>
+                {statusCounts[status.value]}
+              </div>
             </div>
-          </div>
-          <div style={themedStyles.statBox}>
-            <div style={themedStyles.statLabel}>Kelmadi</div>
-            <div style={{ ...themedStyles.statVal, color: "#9ca3af" }}>
-              {absent}
-            </div>
-          </div>
+          ))}
         </div>
 
         <table style={themedStyles.table}>
@@ -938,7 +972,7 @@ export default function Attendance({
               <th style={{ ...themedStyles.th, width: 40 }}>#</th>
               <th style={themedStyles.th}>O'quvchi ismi</th>
               <th style={themedStyles.th}>Vaqti</th>
-              <th style={themedStyles.th}>Keldi</th>
+              <th style={themedStyles.th}>Belgilash</th>
               <th style={themedStyles.th}>Holat</th>
             </tr>
           </thead>
@@ -985,14 +1019,23 @@ export default function Attendance({
                     />
                   </td>
                   <td style={themedStyles.td}>
-                    <Toggle
-                      checked={Boolean(attendance[student.id])}
-                      onChange={(val) => handleToggle(student.id, val)}
+                    <StatusPicker
+                      value={
+                        attendance[student.id] || DEFAULT_ATTENDANCE_STATUS
+                      }
+                      onChange={(status) =>
+                        handleStatusChange(student.id, status)
+                      }
                       disabled={readOnly}
+                      darkMode={darkMode}
                     />
                   </td>
                   <td style={themedStyles.td}>
-                    <StatusBadge came={Boolean(attendance[student.id])} />
+                    <StatusBadge
+                      status={
+                        attendance[student.id] || DEFAULT_ATTENDANCE_STATUS
+                      }
+                    />
                   </td>
                 </tr>
               ))
@@ -1151,7 +1194,7 @@ const styles = {
   },
   statRow: {
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(96px, 1fr))",
     gap: 10,
     marginBottom: 16,
   },
@@ -1201,28 +1244,20 @@ const styles = {
     color: "#111827",
     width: 90,
   },
-  toggleLabel: {
-    cursor: "pointer",
-    display: "inline-block",
+  statusPicker: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 4,
   },
-  toggleTrack: {
-    display: "block",
-    width: 40,
-    height: 22,
-    borderRadius: 11,
-    transition: "background 0.2s",
-    position: "relative",
-  },
-  toggleThumb: {
-    display: "block",
-    position: "absolute",
-    width: 16,
-    height: 16,
-    top: 3,
-    left: 3,
-    background: "white",
-    borderRadius: "50%",
-    transition: "transform 0.2s",
+  statusButton: {
+    padding: "3px 8px",
+    borderRadius: 8,
+    border: "0.5px solid #e5e7eb",
+    fontSize: 11,
+    fontWeight: 500,
+    fontFamily: "inherit",
+    whiteSpace: "nowrap",
+    transition: "background 0.15s, color 0.15s, border-color 0.15s",
   },
   badge: {
     display: "inline-block",

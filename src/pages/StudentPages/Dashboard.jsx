@@ -4,9 +4,11 @@ import "./StudentDashboard.css";
 import {
   groupsApi,
   examsApi,
+  gradesApi,
   homeworkResponseApi,
   homeworkResultsApi,
   lessonVideosApi,
+  notificationsApi,
   paymentsApi,
   studentsApi,
 } from "../../api/crmApi";
@@ -19,7 +21,12 @@ import StudentSettings from "./components/StudentSettings";
 import LogoutModal from "./components/LogoutModal";
 import PasswordModal from "./components/PasswordModal";
 import StudentNotificationsPanel from "./components/StudentNotificationsPanel";
+import PanelLayout from "../../components/layout/PanelLayout";
+import StatCard from "../../components/ui/StatCard";
+import ListCard from "../../components/ui/ListCard";
+import PlaceholderSection from "../../components/ui/PlaceholderSection";
 import { useTheme } from "../../theme/themeContext";
+import { getAuthUserFromStorage } from "../../utils/authToken";
 import {
   DAY_INDEX_TO_ENUM,
   WEEK_DAYS,
@@ -34,82 +41,45 @@ import {
 
 const NAV_ITEMS = [
   {
-    key: "home",
-    label: "Bosh sahifa",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-      >
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-        <polyline points="9 22 9 12 15 12 15 22" />
-      </svg>
-    ),
+    key: "dashboard",
+    label: "Boshqaruv paneli",
+    shortLabel: "Asosiy",
+    icon: "🏠",
+  },
+  { key: "schedule", label: "Dars jadvali", shortLabel: "Jadval", icon: "🗓️" },
+  {
+    key: "lessons",
+    label: "Mening darslarim",
+    shortLabel: "Darslar",
+    icon: "📖",
   },
   {
     key: "groups",
-    label: "Guruhlarim",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-      >
-        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-      </svg>
-    ),
+    label: "Mening guruhlarim",
+    shortLabel: "Guruhlar",
+    icon: "📚",
   },
-  {
-    key: "payments",
-    label: "To'lovlarim",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-      >
-        <rect x="2" y="5" width="20" height="14" rx="2" />
-        <line x1="2" y1="10" x2="22" y2="10" />
-      </svg>
-    ),
-  },
-  {
-    key: "settings",
-    label: "Sozlamalar",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-      >
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c0 .64.38 1.22 1 1.51.44.2.93.23 1.4.09" />
-      </svg>
-    ),
-  },
+  { key: "homework", label: "Uy vazifalar", icon: "📝" },
+  { key: "exams", label: "Testlar", icon: "🧪" },
+  { key: "grades", label: "Baholarim", icon: "⭐" },
+  { key: "attendance", label: "Davomat", icon: "✅" },
+  { key: "notifications", label: "Xabarnomalar", icon: "🔔" },
+  { key: "profile", label: "Profilim", icon: "👤" },
+  { key: "payments", label: "To'lovlarim", icon: "💳" },
 ];
 
-const pageTitles = {
-  home: "Bosh sahifa",
-  groups: "Guruhlarim",
-  payments: "To'lovlarim",
-  settings: "Sozlamalar",
+const pageTitles = Object.fromEntries(
+  NAV_ITEMS.map((item) => [item.key, item.label]),
+);
+
+// Eski route'lardagi kalitlar yangi menyuga moslashtiriladi.
+const LEGACY_PAGE_MAP = {
+  home: "dashboard",
+  settings: "profile",
 };
+
+// Guruh tanlab, dars ro'yxatini ochadigan bo'limlar.
+const GROUP_BASED_PAGES = ["groups", "lessons", "homework", "exams", "grades"];
 
 const normalizeWeekDays = (value) => {
   if (Array.isArray(value)) return value;
@@ -136,6 +106,23 @@ const splitFullName = (value) => {
 const formatMoney = (value) => {
   const amount = Number(value || 0);
   return new Intl.NumberFormat("uz-UZ").format(amount);
+};
+
+const GRADE_TYPE_LABELS = {
+  LESSON: "Dars",
+  HOMEWORK: "Uy vazifa",
+  EXAM: "Imtihon",
+  BEHAVIOR: "Xulq",
+  OTHER: "Baho",
+};
+
+const getGradeTypeLabel = (type) => GRADE_TYPE_LABELS[type] || "Baho";
+
+const getGradeTone = (grade) => {
+  const percent = (Number(grade?.score || 0) / (grade?.maxScore || 100)) * 100;
+  if (percent >= 85) return "emerald";
+  if (percent >= 60) return "amber";
+  return "rose";
 };
 
 const getVideoName = (video) => {
@@ -297,14 +284,15 @@ const validatePassword = (form) => {
 export default function StudentDashboardPage({ initialMenu = "home" }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { darkMode, toggleDarkMode } = useTheme();
+  const { darkMode, theme } = useTheme();
   const cached = useMemo(() => readDashboardCache(), []);
   const notifButtonRef = useRef(null);
   const notifPanelRef = useRef(null);
 
-  const [activePage, setActivePage] = useState(
-    () => cached?.activePage || initialMenu || "home",
-  );
+  const [activePage, setActivePage] = useState(() => {
+    const key = cached?.activePage || initialMenu || "dashboard";
+    return LEGACY_PAGE_MAP[key] || key;
+  });
   const [activeGroupTab, setActiveGroupTab] = useState(
     () => cached?.activeGroupTab || "active",
   );
@@ -372,7 +360,14 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   const [lessonExamFile, setLessonExamFile] = useState(null);
   const [lessonExamSubmitError, setLessonExamSubmitError] = useState("");
   const [lessonExamSubmitting, setLessonExamSubmitting] = useState(false);
+  const [myGrades, setMyGrades] = useState([]);
+  const [myGradesStats, setMyGradesStats] = useState({
+    average: 0,
+    averagePercent: 0,
+  });
+  const [myGradesLoading, setMyGradesLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
+  const [serverNotifications, setServerNotifications] = useState([]);
   const [notificationReadMap, setNotificationReadMap] = useState({});
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -406,17 +401,27 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   }, [lessonExam]);
 
   const pagePathMap = {
-    home: "/student/dashboard",
+    dashboard: "/student/dashboard",
+    schedule: "/student/schedule",
+    lessons: "/student/lessons",
     groups: "/student/groups",
+    homework: "/student/homework",
+    exams: "/student/exams",
+    grades: "/student/grades",
+    attendance: "/student/attendance",
+    notifications: "/student/notifications",
+    profile: "/student/settings",
     payments: "/student/payments",
-    settings: "/student/settings",
   };
 
   const routePage = useMemo(() => {
-    if (location.pathname.startsWith("/student/groups")) return "groups";
-    if (location.pathname.startsWith("/student/payments")) return "payments";
-    if (location.pathname.startsWith("/student/settings")) return "settings";
-    return "home";
+    const path = location.pathname;
+    const match = Object.entries(pagePathMap).find(
+      ([key, value]) => key !== "dashboard" && path.startsWith(value),
+    );
+
+    return match ? match[0] : "dashboard";
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   const searchParams = useMemo(
@@ -692,14 +697,37 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     [payments],
   );
 
+  // Serverdagi xabarnomalar (admin/o'qituvchi yuborganlari) va darslardan
+  // hisoblanadigan mahalliy xabarlar bitta ro'yxatga birlashtiriladi.
+  const mergedNotifications = useMemo(() => {
+    const serverItems = serverNotifications.map((item) => ({
+      id: `server:${item.id}`,
+      serverId: item.id,
+      serverIsRead: Boolean(item.isRead),
+      type: item.type || "INFO",
+      title: item.title,
+      message: item.message,
+      createdAt: item.created_at,
+      groupId: item.groupId || null,
+    }));
+
+    return [...serverItems, ...notifications].sort((a, b) => {
+      const timeDiff = toTimeValue(b.createdAt) - toTimeValue(a.createdAt);
+      if (timeDiff !== 0) return timeDiff;
+      return String(b.id || "").localeCompare(String(a.id || ""));
+    });
+  }, [serverNotifications, notifications]);
+
   const notificationsWithReadState = useMemo(
     () =>
-      notifications.map((item) => ({
+      mergedNotifications.map((item) => ({
         ...item,
-        isRead: Boolean(notificationReadMap[item.id]),
+        isRead: item.serverId
+          ? item.serverIsRead
+          : Boolean(notificationReadMap[item.id]),
         timeLabel: item.createdAt ? formatDateTime(item.createdAt) : "",
       })),
-    [notifications, notificationReadMap],
+    [mergedNotifications, notificationReadMap],
   );
 
   const unreadNotificationCount = useMemo(
@@ -1056,8 +1084,26 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     }
   };
 
-  const markNotificationAsRead = (notificationId) => {
+  const markNotificationAsRead = (notification) => {
+    const notificationId =
+      typeof notification === "object" ? notification?.id : notification;
     if (!notificationId) return;
+
+    const serverId =
+      typeof notification === "object" ? notification?.serverId : null;
+
+    if (serverId) {
+      setServerNotifications((prev) =>
+        prev.map((item) =>
+          item.id === serverId ? { ...item, isRead: true } : item,
+        ),
+      );
+      notificationsApi.markAsRead(serverId).catch(() => {
+        // Belgilash muvaffaqiyatsiz bo'lsa keyingi yangilanishda tiklanadi.
+      });
+      return;
+    }
+
     setNotificationReadMap((prev) => {
       if (prev[notificationId]) return prev;
       const next = { ...prev, [notificationId]: true };
@@ -1068,18 +1114,30 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
 
   const markAllNotificationsAsRead = () => {
     if (notificationsWithReadState.length === 0) return;
+
+    if (serverNotifications.some((item) => !item.isRead)) {
+      setServerNotifications((prev) =>
+        prev.map((item) => ({ ...item, isRead: true })),
+      );
+      notificationsApi.markAllAsRead().catch(() => {
+        // Xatoda keyingi so'rovda haqiqiy holat qaytadi.
+      });
+    }
+
     setNotificationReadMap((prev) => {
       const next = { ...prev };
-      notificationsWithReadState.forEach((item) => {
-        next[item.id] = true;
-      });
+      notificationsWithReadState
+        .filter((item) => !item.serverId)
+        .forEach((item) => {
+          next[item.id] = true;
+        });
       writeNotificationReadMap(notificationScopeKey, next);
       return next;
     });
   };
 
   const handleNotificationOpen = (item) => {
-    markNotificationAsRead(item.id);
+    markNotificationAsRead(item);
     setShowNotifications(false);
 
     if (item.type === "PAYMENT_ACCEPTED") {
@@ -1098,10 +1156,102 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     navigate(`/student/groups?${params.toString()}`);
   };
 
-  const profileName = profile?.fullName || "Talaba";
+  const tokenUser = getAuthUserFromStorage();
+  const profileName = profile?.fullName || tokenUser?.fullName || "Talaba";
   const profilePhone = profile?.phone || "-";
   const primaryGroupName = groups[0]?.name || "-";
   const { firstName, lastName } = splitFullName(profile?.fullName);
+
+  const goToPage = (pageKey) => {
+    setActivePage(pageKey);
+    if (!GROUP_BASED_PAGES.includes(pageKey)) {
+      closeGroupDetails({ skipUrl: true });
+    }
+    navigate(pagePathMap[pageKey] || "/student/dashboard");
+  };
+
+  const todayLessons = useMemo(
+    () => lessonsByDate[toDateKey(new Date())] || [],
+    [lessonsByDate],
+  );
+
+  // "Yutuqlarim" — mavjud ma'lumotlardan hisoblanadigan belgilar.
+  const achievements = useMemo(() => {
+    const items = [
+      {
+        id: "active",
+        icon: "🎯",
+        title: "Faol o'quvchi",
+        meta: `${activeGroups.length} ta faol guruhdasiz`,
+        earned: activeGroups.length > 0,
+      },
+      {
+        id: "payments",
+        icon: "💳",
+        title: "Intizomli to'lovchi",
+        meta:
+          paymentTotals.due > 0
+            ? `${formatMoney(paymentTotals.due)} so'm qoldiq bor`
+            : "Joriy oy to'lovi yopilgan",
+        earned: paymentTotals.due === 0 && paymentTotals.paid > 0,
+      },
+      {
+        id: "schedule",
+        icon: "🗓️",
+        title: "Darsga tayyor",
+        meta: todayLessons.length
+          ? `Bugun ${todayLessons.length} ta dars`
+          : "Bugun dars yo'q",
+        earned: todayLessons.length > 0,
+      },
+      {
+        id: "finished",
+        icon: "🏁",
+        title: "Kursni tamomlagan",
+        meta: `${completedGroups.length} ta guruh yakunlangan`,
+        earned: completedGroups.length > 0,
+      },
+    ];
+
+    return items.map((item) => ({
+      id: item.id,
+      icon: item.icon,
+      title: item.title,
+      meta: item.meta,
+      badge: item.earned ? "Olindi" : "Hali yo'q",
+      tone: item.earned ? "emerald" : "slate",
+    }));
+  }, [
+    activeGroups.length,
+    completedGroups.length,
+    paymentTotals.due,
+    paymentTotals.paid,
+    todayLessons.length,
+  ]);
+
+  // O'quvchi boshqa o'quvchilarning ma'lumotini ko'ra olmaydi, shuning uchun
+  // bu yerda o'zining ko'rsatkichlari chiqadi.
+  const myRanking = useMemo(
+    () => [
+      {
+        id: "me",
+        icon: "🎓",
+        title: profileName,
+        meta: `${activeGroups.length} faol guruh · ${completedGroups.length} yakunlangan`,
+        badge: "Men",
+        tone: "violet",
+      },
+      {
+        id: "note",
+        icon: "ℹ️",
+        title: "Umumiy reyting",
+        meta: "Guruhdoshlar reytingi hozircha yopiq",
+        badge: "Tez orada",
+        tone: "slate",
+      },
+    ],
+    [profileName, activeGroups.length, completedGroups.length],
+  );
 
   useEffect(() => {
     setNotificationReadMap(readNotificationReadMap(notificationScopeKey));
@@ -1165,6 +1315,60 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     lessonResponse,
     lessonResult,
   ]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadMyGrades = async () => {
+      try {
+        setMyGradesLoading(true);
+        const result = await gradesApi.getMine();
+        if (!isMounted) return;
+
+        setMyGrades(Array.isArray(result?.data) ? result.data : []);
+        setMyGradesStats({
+          average: result?.average || 0,
+          averagePercent: result?.averagePercent || 0,
+        });
+      } catch {
+        if (isMounted) {
+          setMyGrades([]);
+          setMyGradesStats({ average: 0, averagePercent: 0 });
+        }
+      } finally {
+        if (isMounted) setMyGradesLoading(false);
+      }
+    };
+
+    loadMyGrades();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadServerNotifications = async () => {
+      try {
+        const result = await notificationsApi.getMine(50);
+        if (!isMounted) return;
+        setServerNotifications(
+          Array.isArray(result?.data) ? result.data : [],
+        );
+      } catch {
+        if (isMounted) setServerNotifications([]);
+      }
+    };
+
+    loadServerNotifications();
+    const timerId = setInterval(loadServerNotifications, 60000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(timerId);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -1323,221 +1527,341 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     };
   }, [showNotifications]);
 
-  return (
-    <div className={`student-dashboard${darkMode ? " dark" : ""}`}>
-      <aside className="sidebar">
-        <div className="logo">
-          <div className="logo-icon">🎓</div>
-          <div className="logo-text">
-            <span className="brand">EduCenter</span>
-            <span className="beta">Beta</span>
-          </div>
-        </div>
-        <nav>
-          {NAV_ITEMS.map((item) => (
+  const openGroupFromList = (group) =>
+    openGroupDetails(group, { skipUrl: activePage !== "groups" });
+
+  const renderGroupsView = (hint) => {
+    if (selectedGroup && selectedLesson) {
+      return (
+        <StudentLessonDetail
+          groupName={selectedGroup.name}
+          lessonItem={selectedLesson}
+          videos={lessonVideos}
+          homework={lessonHomework}
+          response={lessonResponse}
+          result={lessonResult}
+          status={lessonDetailStatus}
+          isSubmissionExpired={isSubmissionExpired}
+          exam={lessonExam}
+          examResponse={lessonExamResponse}
+          isExamSubmissionExpired={isExamSubmissionExpired}
+          examNote={lessonExamNote}
+          examFile={lessonExamFile}
+          examSubmitError={lessonExamSubmitError}
+          examSubmitting={lessonExamSubmitting}
+          isLoading={lessonDetailLoading}
+          error={lessonDetailError}
+          note={lessonNote}
+          selectedFile={lessonFile}
+          submitError={lessonSubmitError}
+          submitting={lessonSubmitting}
+          onBack={closeLessonDetail}
+          onNoteChange={setLessonNote}
+          onFileChange={setLessonFile}
+          onSubmit={handleHomeworkSubmit}
+          onExamNoteChange={setLessonExamNote}
+          onExamFileChange={setLessonExamFile}
+          onExamSubmit={handleExamSubmit}
+          getStatusLabel={getHomeworkStatusLabel}
+          getStatusTone={getHomeworkStatusTone}
+          formatDate={formatShortDate}
+          formatDateTime={formatDateTime}
+          getDeadline={getHomeworkDeadline}
+          getVideoName={getVideoName}
+        />
+      );
+    }
+
+    if (selectedGroup) {
+      return (
+        <StudentGroupDetails
+          groupName={selectedGroup.name}
+          lessons={filteredGroupLessons}
+          isLoading={groupLessonsLoading}
+          error={groupLessonsError}
+          homeworkFilter={homeworkFilter}
+          onFilterChange={setHomeworkFilter}
+          onBack={closeGroupDetails}
+          onSelectLesson={openLessonDetail}
+          getStatusLabel={getHomeworkStatusLabel}
+          getStatusTone={getHomeworkStatusTone}
+          formatDate={formatShortDate}
+          getDeadline={getHomeworkDeadline}
+        />
+      );
+    }
+
+    return (
+      <>
+        {hint && <p className={`text-sm mb-4 ${theme.soft}`}>{hint}</p>}
+        <StudentGroups
+          activeTab={activeGroupTab}
+          onTabChange={setActiveGroupTab}
+          activeGroups={formattedActiveGroups}
+          completedGroups={formattedCompletedGroups}
+          isLoading={isLoading}
+          onSelectGroup={openGroupFromList}
+        />
+      </>
+    );
+  };
+
+  const renderOverview = () => (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+        <StatCard
+          icon="📚"
+          tone="violet"
+          label="Faol guruhlarim"
+          value={activeGroups.length}
+        />
+        <StatCard
+          icon="🗓️"
+          tone="blue"
+          label="Bugungi darslar"
+          value={todayLessons.length}
+        />
+        <StatCard
+          icon="🏁"
+          tone="emerald"
+          label="Tugatilgan guruhlar"
+          value={completedGroups.length}
+        />
+        <StatCard
+          icon="💳"
+          tone={paymentTotals.due > 0 ? "rose" : "emerald"}
+          label="To'lov qoldig'i"
+          value={formatMoney(paymentTotals.due)}
+        />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-3">
+        <ListCard
+          title="Dars jadvali"
+          subtitle={formatShortDate(new Date())}
+          items={todayLessons.map((lesson) => ({
+            id: lesson.id,
+            title: lesson.title,
+            meta: `${lesson.time} · ${lesson.room}`,
+            badge: "Bugun",
+            tone: "emerald",
+            icon: "🕘",
+          }))}
+          loading={isLoading}
+          emptyText="Bugun dars yo'q"
+          action={
             <button
-              key={item.key}
               type="button"
-              className={`nav-item ${activePage === item.key ? "active" : ""}`}
-              onClick={() => {
-                setActivePage(item.key);
-                if (item.key !== "groups") {
-                  closeGroupDetails({ skipUrl: true });
-                }
-                navigate(pagePathMap[item.key] || "/student/dashboard");
-              }}
+              onClick={() => goToPage("schedule")}
+              className="text-sm font-medium text-violet-500"
             >
-              {item.icon}
-              {item.label}
+              To'liq jadval
             </button>
-          ))}
-        </nav>
-        <div className="sidebar-footer">
+          }
+          maxHeight={300}
+        />
+
+        <ListCard
+          title="Yutuqlarim"
+          subtitle="Joriy ma'lumotlar asosida hisoblanadi"
+          items={achievements}
+          maxHeight={300}
+        />
+
+        <ListCard
+          title="Top o'quvchilar"
+          subtitle="Mening ko'rsatkichlarim"
+          items={myRanking}
+          emptyText="Ma'lumot yo'q"
+          maxHeight={300}
+        />
+      </div>
+    </>
+  );
+
+  const renderContent = () => {
+    if (activePage === "dashboard") return renderOverview();
+
+    if (activePage === "schedule") {
+      return (
+        <StudentHome
+          monthLabel={monthLabel}
+          weekDays={WEEK_DAYS}
+          calendarCells={calendarCells}
+          onSelectDate={setSelectedDate}
+          onChangeMonth={changeMonth}
+          lessonTitle={lessonTitle}
+          selectedLessons={selectedLessons}
+          isLoading={isLoading}
+          darkMode={darkMode}
+        />
+      );
+    }
+
+    if (activePage === "groups") return renderGroupsView();
+
+    if (activePage === "lessons") {
+      return renderGroupsView(
+        "Darslarni ko'rish uchun guruhni tanlang — har bir guruh darslari, video va materiallari ochiladi.",
+      );
+    }
+
+    if (activePage === "homework") {
+      return renderGroupsView(
+        "Uy vazifalarni ko'rish uchun guruhni tanlang — dars ro'yxatida vazifa holati bo'yicha filtr bor.",
+      );
+    }
+
+    if (activePage === "exams") {
+      return renderGroupsView(
+        "Testlar dars ichida joylashadi: guruhni, so'ng darsni oching — test mavjud bo'lsa shu yerda topshiriladi.",
+      );
+    }
+
+    if (activePage === "grades") {
+      return (
+        <div className="space-y-5">
+          <ListCard
+            title="Baholarim"
+            subtitle={
+              myGrades.length > 0
+                ? `O'rtacha ${myGradesStats.average} ball · ${myGradesStats.averagePercent}%`
+                : "O'qituvchi qo'ygan baholar"
+            }
+            items={myGrades.map((grade) => ({
+              id: grade.id,
+              title: `${grade.score}/${grade.maxScore || 100} — ${
+                grade.group?.name || "Guruh"
+              }`,
+              meta: `${grade.lesson?.title || getGradeTypeLabel(grade.type)} · ${formatDateTime(
+                grade.date,
+              )}${grade.comment ? ` · ${grade.comment}` : ""}`,
+              badge: `${Math.round(
+                (grade.score / (grade.maxScore || 100)) * 100,
+              )}%`,
+              tone: getGradeTone(grade),
+              icon: "⭐",
+            }))}
+            loading={myGradesLoading}
+            emptyText="Hozircha baho qo'yilmagan"
+            maxHeight={400}
+          />
+
+          {renderGroupsView(
+            "Uy vazifa natijalari: guruhni tanlang va dars ro'yxatidagi holatlarni ko'ring.",
+          )}
+        </div>
+      );
+    }
+
+    if (activePage === "attendance") {
+      return (
+        <PlaceholderSection
+          icon="✅"
+          title="Davomat"
+          description="Bu yerda darslarga qatnashuv tarixingiz chiqadi."
+          points={[
+            "Har bir dars uchun keldi / kelmadi belgisi",
+            "Guruh bo'yicha davomat foizi",
+            "Oylik davomat hisoboti",
+          ]}
+          note="Hozircha davomat ma'lumotini faqat o'qituvchi va admin ko'ra oladi — o'quvchi uchun backend'da endpoint yo'q."
+        />
+      );
+    }
+
+    if (activePage === "notifications") {
+      return (
+        <div className="max-w-2xl">
+          <StudentNotificationsPanel
+            notifications={notificationsWithReadState}
+            unreadCount={unreadNotificationCount}
+            onOpenNotification={handleNotificationOpen}
+            onMarkAllRead={markAllNotificationsAsRead}
+          />
+        </div>
+      );
+    }
+
+    if (activePage === "payments") {
+      return (
+        <StudentPayments
+          stats={paymentStats}
+          payments={paymentRows}
+          isLoading={isLoading}
+          dateLabel={paymentDateLabel}
+          getStatusLabel={getPaymentStatusLabel}
+        />
+      );
+    }
+
+    if (activePage === "profile") {
+      return (
+        <StudentSettings
+          profileName={profileName}
+          profilePhone={profilePhone}
+          profile={profile}
+          primaryGroupName={primaryGroupName}
+          firstName={firstName}
+          lastName={lastName}
+          onOpenPassword={() => setShowPasswordModal(true)}
+          formatDate={formatShortDate}
+          getInitials={getInitials}
+          darkMode={darkMode}
+        />
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <PanelLayout
+      brand="EduCenter"
+      menuItems={NAV_ITEMS}
+      activeKey={activePage}
+      onSelect={goToPage}
+      greeting={`Xush kelibsiz, ${profileName}`}
+      subtitle={pageTitles[activePage]}
+      user={profile}
+      roleLabel="STUDENT"
+      onLogout={() => setShowLogoutModal(true)}
+      headerActions={
+        <div className="relative">
           <button
             type="button"
-            className="nav-item logout"
-            onClick={() => setShowLogoutModal(true)}
+            ref={notifButtonRef}
+            onClick={() => setShowNotifications((prev) => !prev)}
+            className={`relative w-10 h-10 flex items-center justify-center rounded-xl border cursor-pointer ${theme.topBtn}`}
+            aria-label="Xabarlarni ochish"
           >
-            <svg
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            Chiqish
-          </button>
-        </div>
-      </aside>
-
-      <div className="main">
-        <div className="topbar">
-          <div className="topbar-title">{pageTitles[activePage]}</div>
-          <div className="topbar-right">
-            <button
-              type="button"
-              className="theme-btn"
-              onClick={toggleDarkMode}
-              aria-label={darkMode ? "Yorug' rejim" : "Tungi rejim"}
-            >
-              {darkMode ? "☀️" : "🌙"}
-            </button>
-            <button
-              type="button"
-              className={`notif-btn ${unreadNotificationCount > 0 ? "has-unread" : ""}`}
-              ref={notifButtonRef}
-              onClick={() => setShowNotifications((prev) => !prev)}
-              aria-label="Xabarlarni ochish"
-            >
-              <svg
-                width="17"
-                height="17"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 01-3.46 0" />
-              </svg>
-              {unreadNotificationCount > 0 && (
-                <div className="notif-badge">{unreadNotificationCount}</div>
-              )}
-            </button>
-            {showNotifications && (
-              <div className="notif-panel-wrap" ref={notifPanelRef}>
-                <StudentNotificationsPanel
-                  notifications={notificationsWithReadState}
-                  unreadCount={unreadNotificationCount}
-                  onOpenNotification={handleNotificationOpen}
-                  onMarkAllRead={markAllNotificationsAsRead}
-                />
-              </div>
+            🔔
+            {unreadNotificationCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                {unreadNotificationCount}
+              </span>
             )}
-            <button
-              type="button"
-              className="avatar"
-              onClick={() => setActivePage("settings")}
+          </button>
+
+          {showNotifications && (
+            <div
+              ref={notifPanelRef}
+              className="absolute right-0 top-12 z-50 w-80"
             >
-              {getInitials(profileName)}
-            </button>
-          </div>
-        </div>
-
-        <div className="content">
-          {dataError && <div className="no-lesson">{dataError}</div>}
-
-          {activePage === "home" && (
-            <StudentHome
-              monthLabel={monthLabel}
-              weekDays={WEEK_DAYS}
-              calendarCells={calendarCells}
-              onSelectDate={setSelectedDate}
-              onChangeMonth={changeMonth}
-              lessonTitle={lessonTitle}
-              selectedLessons={selectedLessons}
-              isLoading={isLoading}
-              darkMode={darkMode}
-            />
-          )}
-
-          {activePage === "groups" && !selectedGroup && (
-            <StudentGroups
-              activeTab={activeGroupTab}
-              onTabChange={setActiveGroupTab}
-              activeGroups={formattedActiveGroups}
-              completedGroups={formattedCompletedGroups}
-              isLoading={isLoading}
-              onSelectGroup={openGroupDetails}
-            />
-          )}
-
-          {activePage === "groups" && selectedGroup && selectedLesson && (
-            <StudentLessonDetail
-              groupName={selectedGroup.name}
-              lessonItem={selectedLesson}
-              videos={lessonVideos}
-              homework={lessonHomework}
-              response={lessonResponse}
-              result={lessonResult}
-              status={lessonDetailStatus}
-              isSubmissionExpired={isSubmissionExpired}
-              exam={lessonExam}
-              examResponse={lessonExamResponse}
-              isExamSubmissionExpired={isExamSubmissionExpired}
-              examNote={lessonExamNote}
-              examFile={lessonExamFile}
-              examSubmitError={lessonExamSubmitError}
-              examSubmitting={lessonExamSubmitting}
-              isLoading={lessonDetailLoading}
-              error={lessonDetailError}
-              note={lessonNote}
-              selectedFile={lessonFile}
-              submitError={lessonSubmitError}
-              submitting={lessonSubmitting}
-              onBack={closeLessonDetail}
-              onNoteChange={setLessonNote}
-              onFileChange={setLessonFile}
-              onSubmit={handleHomeworkSubmit}
-              onExamNoteChange={setLessonExamNote}
-              onExamFileChange={setLessonExamFile}
-              onExamSubmit={handleExamSubmit}
-              getStatusLabel={getHomeworkStatusLabel}
-              getStatusTone={getHomeworkStatusTone}
-              formatDate={formatShortDate}
-              formatDateTime={formatDateTime}
-              getDeadline={getHomeworkDeadline}
-              getVideoName={getVideoName}
-            />
-          )}
-
-          {activePage === "groups" && selectedGroup && !selectedLesson && (
-            <StudentGroupDetails
-              groupName={selectedGroup.name}
-              lessons={filteredGroupLessons}
-              isLoading={groupLessonsLoading}
-              error={groupLessonsError}
-              homeworkFilter={homeworkFilter}
-              onFilterChange={setHomeworkFilter}
-              onBack={closeGroupDetails}
-              onSelectLesson={openLessonDetail}
-              getStatusLabel={getHomeworkStatusLabel}
-              getStatusTone={getHomeworkStatusTone}
-              formatDate={formatShortDate}
-              getDeadline={getHomeworkDeadline}
-            />
-          )}
-
-          {activePage === "payments" && (
-            <StudentPayments
-              stats={paymentStats}
-              payments={paymentRows}
-              isLoading={isLoading}
-              dateLabel={paymentDateLabel}
-              getStatusLabel={getPaymentStatusLabel}
-            />
-          )}
-
-          {activePage === "settings" && (
-            <StudentSettings
-              profileName={profileName}
-              profilePhone={profilePhone}
-              profile={profile}
-              primaryGroupName={primaryGroupName}
-              firstName={firstName}
-              lastName={lastName}
-              onOpenPassword={() => setShowPasswordModal(true)}
-              formatDate={formatShortDate}
-              getInitials={getInitials}
-              darkMode={darkMode}
-            />
+              <StudentNotificationsPanel
+                notifications={notificationsWithReadState}
+                unreadCount={unreadNotificationCount}
+                onOpenNotification={handleNotificationOpen}
+                onMarkAllRead={markAllNotificationsAsRead}
+              />
+            </div>
           )}
         </div>
+      }
+    >
+      <div className={`student-scope${darkMode ? " dark" : ""}`}>
+        {dataError && <div className="no-lesson">{dataError}</div>}
+        {renderContent()}
       </div>
 
       {showLogoutModal && (
@@ -1561,6 +1885,6 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
           saving={passwordSaving}
         />
       )}
-    </div>
+    </PanelLayout>
   );
 }

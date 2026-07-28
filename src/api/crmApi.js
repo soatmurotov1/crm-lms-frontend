@@ -108,6 +108,16 @@ export const authApi = {
   register: async (payload) => {
     return unwrap(await apiClient.post("/auth/register", payload));
   },
+  /** Telefon raqamiga 6 xonali SMS kod yuboradi. */
+  sendCode: async (phone, purpose = "REGISTER") => {
+    return unwrap(await apiClient.post("/auth/send-code", { phone, purpose }));
+  },
+  /** Kodni tekshiradi (tasdiqlangan kod 15 daqiqa amal qiladi). */
+  verifyCode: async (phone, code, purpose = "REGISTER") => {
+    return unwrap(
+      await apiClient.post("/auth/verify-code", { phone, code, purpose }),
+    );
+  },
 };
 
 export const teachersApi = {
@@ -477,6 +487,132 @@ export const lessonVideosApi = {
   remove: async (id) =>
     withCacheInvalidation(async () =>
       unwrap(await apiClient.delete(`/lesson-videos/${id}`)),
+    ),
+};
+
+export const organizationsApi = {
+  getAll: async (status) =>
+    cachedGet(`organizations/all:${status || "ALL"}`, async () =>
+      unwrap(
+        await apiClient.get("/organizations/all", {
+          params: status ? { status } : undefined,
+        }),
+      ),
+    ),
+  getOne: async (id) => unwrap(await apiClient.get(`/organizations/${id}`)),
+  create: async (payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.post("/organizations", payload)),
+    ),
+  update: async (id, payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.put(`/organizations/${id}`, payload)),
+    ),
+  remove: async (id) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.delete(`/organizations/${id}`)),
+    ),
+};
+
+export const plansApi = {
+  getAll: async (status) =>
+    cachedGet(`plans/all:${status || "ALL"}`, async () =>
+      unwrap(
+        await apiClient.get("/plans/all", {
+          params: status ? { status } : undefined,
+        }),
+      ),
+    ),
+  getOne: async (id) => unwrap(await apiClient.get(`/plans/${id}`)),
+  create: async (payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.post("/plans", payload)),
+    ),
+  update: async (id, payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.put(`/plans/${id}`, payload)),
+    ),
+  remove: async (id) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.delete(`/plans/${id}`)),
+    ),
+};
+
+export const subscriptionsApi = {
+  getAll: async (params = {}) =>
+    unwrap(await apiClient.get("/subscriptions/all", { params })),
+  getSummary: async () => unwrap(await apiClient.get("/subscriptions/summary")),
+  create: async (payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.post("/subscriptions", payload)),
+    ),
+  update: async (id, payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.put(`/subscriptions/${id}`, payload)),
+    ),
+  remove: async (id) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.delete(`/subscriptions/${id}`)),
+    ),
+};
+
+export const supportApi = {
+  getAll: async (status) =>
+    unwrap(
+      await apiClient.get("/support/all", {
+        params: status ? { status } : undefined,
+      }),
+    ),
+  getSummary: async () => unwrap(await apiClient.get("/support/summary")),
+  getOne: async (id) => unwrap(await apiClient.get(`/support/${id}`)),
+  create: async (payload) =>
+    unwrap(await apiClient.post("/support", payload)),
+  reply: async (id, payload) =>
+    unwrap(await apiClient.post(`/support/${id}/reply`, payload)),
+  update: async (id, payload) =>
+    unwrap(await apiClient.patch(`/support/${id}`, payload)),
+  remove: async (id) => unwrap(await apiClient.delete(`/support/${id}`)),
+};
+
+export const notificationsApi = {
+  getMine: async (limit) =>
+    unwrap(
+      await apiClient.get("/notifications/mine", {
+        params: limit ? { limit } : undefined,
+      }),
+    ),
+  getAll: async (limit) =>
+    unwrap(
+      await apiClient.get("/notifications/all", {
+        params: limit ? { limit } : undefined,
+      }),
+    ),
+  create: async (payload) =>
+    unwrap(await apiClient.post("/notifications", payload)),
+  markAsRead: async (id) =>
+    unwrap(await apiClient.patch(`/notifications/${id}/read`)),
+  markAllAsRead: async () =>
+    unwrap(await apiClient.patch("/notifications/read/all")),
+  remove: async (id) => unwrap(await apiClient.delete(`/notifications/${id}`)),
+};
+
+export const gradesApi = {
+  getMine: async () => unwrap(await apiClient.get("/grades/mine")),
+  getByGroup: async (groupId) =>
+    unwrap(await apiClient.get(`/grades/group/${groupId}`)),
+  getByStudent: async (studentId) =>
+    unwrap(await apiClient.get(`/grades/student/${studentId}`)),
+  create: async (payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.post("/grades", payload)),
+    ),
+  update: async (id, payload) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.put(`/grades/${id}`, payload)),
+    ),
+  remove: async (id) =>
+    withCacheInvalidation(async () =>
+      unwrap(await apiClient.delete(`/grades/${id}`)),
     ),
 };
 

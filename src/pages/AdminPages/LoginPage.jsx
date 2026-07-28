@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../../api/crmApi";
+import { API_BASE_URL } from "../../api/client";
 import PhoneInput from "../../components/ui/PhoneInput";
 import { parseAuthToken } from "../../utils/authToken";
 import { PHONE_ERROR_MESSAGE, isValidPhone, normalizePhone } from "../../utils/phone";
@@ -72,6 +73,9 @@ const emptyRegisterForm = {
   confirmPassword: "",
 };
 
+/** Backenddagi qayta yuborish cooldown'i bilan bir xil (60 soniya). */
+const RESEND_COOLDOWN_SECONDS = 60;
+
 export default function LoginPage() {
   const navigate = useNavigate();
 
@@ -79,6 +83,10 @@ export default function LoginPage() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [registerForm, setRegisterForm] = useState(emptyRegisterForm);
+  // Ro'yxatdan o'tish 2 bosqichli: "form" -> SMS kod -> "code" -> hisob ochiladi.
+  const [registerStep, setRegisterStep] = useState("form");
+  const [smsCode, setSmsCode] = useState("");
+  const [resendIn, setResendIn] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -108,13 +116,26 @@ export default function LoginPage() {
     };
   }, []);
 
+  // "Qayta yuborish" tugmasi uchun sanoq.
+  useEffect(() => {
+    if (resendIn <= 0) return undefined;
+
+    const timer = setTimeout(() => setResendIn((prev) => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendIn]);
+
   const getRequestErrorMessage = (error, fallback) => {
     if (!navigator.onLine) {
       return "Internet muammosi: internetga ulanmagansiz";
     }
 
     if (!error?.response) {
-      return "Backendga ulanib bo'lmadi. Serverni tekshiring";
+      return `Backendga ulanib bo'lmadi (${API_BASE_URL}). Serverni tekshiring`;
+    }
+
+    // 404 = so'ralgan endpoint serverda umuman yo'q (odatda eski deploy).
+    if (error.response.status === 404) {
+      return `Endpoint topilmadi: ${error.config?.url}. Server eski versiyada ishlayapti`;
     }
 
     const message = error?.response?.data?.message;
@@ -132,7 +153,9 @@ export default function LoginPage() {
         ? "/student/dashboard"
         : role === "TEACHER"
           ? "/teacher"
-          : "/dashboard";
+          : role === "SUPERADMIN"
+            ? "/superadmin"
+            : "/dashboard";
 
     setTimeout(() => {
       navigate(targetPath);
@@ -145,6 +168,9 @@ export default function LoginPage() {
     setShowPassword(false);
     setShowConfirmPassword(false);
     setRegisterForm(emptyRegisterForm);
+    setRegisterStep("form");
+    setSmsCode("");
+    setResendIn(0);
   };
 
   const handleRegisterChange = (e) => {
@@ -203,41 +229,73 @@ export default function LoginPage() {
     }
   };
 
-  const handleRegister = async () => {
-    const fullName = registerForm.fullName.trim();
-
+  /** Ro'yxatdan o'tish formasi to'g'ri to'ldirilganini tekshiradi. */
+  const isRegisterFormValid = () => {
     if (
-      !fullName ||
+      !registerForm.fullName.trim() ||
       !login ||
       !registerForm.birth_date ||
       !registerForm.password
     ) {
       showToast("error", "Barcha maydonlarni to'ldiring");
-      return;
+      return false;
     }
 
     if (!isValidPhone(login)) {
       showToast("error", PHONE_ERROR_MESSAGE);
-      return;
+      return false;
     }
 
     if (registerForm.password.length < 6) {
       showToast("error", "Parol kamida 6 ta belgidan iborat bo'lsin");
-      return;
+      return false;
     }
 
     if (registerForm.password !== registerForm.confirmPassword) {
       showToast("error", "Parollar mos kelmadi");
+      return false;
+    }
+
+    return true;
+  };
+
+  /** 1-bosqich: raqamga SMS kod yuborish. */
+  const handleSendCode = async ({ resend = false } = {}) => {
+    if (!resend && !isRegisterFormValid()) return;
+    if (resendIn > 0) return;
+
+    try {
+      setLoading(true);
+      await authApi.sendCode(normalizePhone(login));
+      setRegisterStep("code");
+      setSmsCode("");
+      setResendIn(RESEND_COOLDOWN_SECONDS);
+      showToast("success", "Tasdiqlash kodi SMS orqali yuborildi");
+    } catch (error) {
+      showToast("error", getRequestErrorMessage(error, "Kod yuborilmadi"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** 2-bosqich: kodni yuborib hisobni ochish. */
+  const handleRegister = async () => {
+    if (!isRegisterFormValid()) return;
+
+    const code = smsCode.trim();
+    if (code.length !== 6) {
+      showToast("error", "Tasdiqlash kodi 6 xonali bo'lishi kerak");
       return;
     }
 
     try {
       setLoading(true);
       const result = await authApi.register({
-        fullName,
+        fullName: registerForm.fullName.trim(),
         phone: normalizePhone(login),
         birth_date: registerForm.birth_date,
         password: registerForm.password,
+        code,
       });
 
       if (!result?.accessToken) {
@@ -256,16 +314,27 @@ export default function LoginPage() {
   };
 
   const isRegister = mode === "register";
+  const isCodeStep = isRegister && registerStep === "code";
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (loading) return;
-    if (isRegister) {
+    if (!isRegister) {
+      handleLogin();
+    } else if (isCodeStep) {
       handleRegister();
     } else {
-      handleLogin();
+      handleSendCode();
     }
   };
+
+  const submitLabel = loading
+    ? "Tekshirilmoqda..."
+    : isCodeStep
+      ? "Tasdiqlash va ro'yxatdan o'tish"
+      : isRegister
+        ? "Kod olish"
+        : "Kirish";
 
   return (
     <div className="min-h-screen grid md:grid-cols-2">
@@ -316,6 +385,7 @@ export default function LoginPage() {
                 value={registerForm.fullName}
                 onChange={handleRegisterChange}
                 placeholder="Ism Familiya"
+                disabled={isCodeStep}
                 className={inputClass}
               />
             </div>
@@ -330,6 +400,7 @@ export default function LoginPage() {
               autoComplete="tel"
               value={login}
               onChange={(e) => setLogin(e.target.value)}
+              disabled={isCodeStep}
               className={inputClass}
             />
           </div>
@@ -343,6 +414,7 @@ export default function LoginPage() {
                 value={registerForm.birth_date}
                 onChange={handleRegisterChange}
                 max={new Date().toISOString().slice(0, 10)}
+                disabled={isCodeStep}
                 className={inputClass}
               />
             </div>
@@ -364,6 +436,7 @@ export default function LoginPage() {
                 placeholder={
                   isRegister ? "Kamida 6 ta belgi" : "Parolni kiriting"
                 }
+                disabled={isCodeStep}
                 className={`${inputClass} pr-12`}
               />
               <PasswordToggle
@@ -384,6 +457,7 @@ export default function LoginPage() {
                   value={registerForm.confirmPassword}
                   onChange={handleRegisterChange}
                   placeholder="Parolni qayta kiriting"
+                  disabled={isCodeStep}
                   className={`${inputClass} pr-12`}
                 />
                 <PasswordToggle
@@ -394,9 +468,56 @@ export default function LoginPage() {
             </div>
           )}
 
+          {isCodeStep && (
+            <div className="mb-4 sm:mb-5">
+              <label className={labelClass}>SMS kod</label>
+              <input
+                type="text"
+                name="code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={smsCode}
+                onChange={(e) =>
+                  setSmsCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
+                placeholder="6 xonali kod"
+                maxLength={6}
+                autoFocus
+                className={`${inputClass} tracking-[0.4em] text-center`}
+              />
+              <div className="mt-2 flex items-center justify-between text-xs sm:text-sm text-gray-600">
+                <span>{normalizePhone(login)} raqamiga yuborildi</span>
+                <button
+                  type="button"
+                  onClick={() => handleSendCode({ resend: true })}
+                  disabled={resendIn > 0 || loading}
+                  className="text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-2 disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {resendIn > 0
+                    ? `Qayta yuborish (${resendIn})`
+                    : "Qayta yuborish"}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Parol maydonining tagida - ro'yxatdan o'tish / kirishga qaytish */}
           <div className="mb-6 text-sm sm:text-base text-gray-600">
-            {isRegister ? (
+            {isCodeStep ? (
+              <span>
+                Ma'lumotlarni tuzatmoqchimisiz?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegisterStep("form");
+                    setSmsCode("");
+                  }}
+                  className="text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-2 cursor-pointer"
+                >
+                  Orqaga
+                </button>
+              </span>
+            ) : isRegister ? (
               <span>
                 Hisobingiz bormi?{" "}
                 <button
@@ -426,17 +547,14 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white py-2.5 sm:py-4 rounded-xl sm:rounded-2xl text-base sm:text-xl md:text-2xl font-semibold cursor-pointer transition active:scale-95"
           >
-            {loading
-              ? "Tekshirilmoqda..."
-              : isRegister
-                ? "Ro'yxatdan o'tish"
-                : "Kirish"}
+            {submitLabel}
           </button>
 
           {isRegister && (
             <p className="mt-4 text-xs sm:text-sm text-gray-500 text-center">
-              Ro'yxatdan o'tgan foydalanuvchi avtomatik ravishda{" "}
-              <span className="font-medium">talaba</span> hisobiga ega bo'ladi.
+              {isCodeStep
+                ? "Kod 3 daqiqa amal qiladi."
+                : "Raqamingizga SMS kod yuboriladi. Ro'yxatdan o'tgan foydalanuvchi talaba hisobiga ega bo'ladi."}
             </p>
           )}
         </form>
