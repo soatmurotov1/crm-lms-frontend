@@ -387,6 +387,14 @@ export default function GroupDetailsPage({
     ? "w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none"
     : "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none";
 
+  // Tungi rejimda oq qolib ketmasligi kerak bo'lgan umumiy elementlar.
+  const cancelBtnClass = darkMode
+    ? "px-5 py-2.5 rounded-xl border border-slate-700 text-slate-300 bg-slate-900 hover:bg-slate-800"
+    : "px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50";
+  const modalCardClass = darkMode
+    ? "bg-slate-900 border-slate-700 text-slate-100"
+    : "bg-white border-slate-200 text-slate-900";
+
   const sortedHomeworkLessons = [...lessons].sort((a, b) => {
     const dateDiff =
       new Date(b?.created_at || 0).getTime() -
@@ -404,7 +412,9 @@ export default function GroupDetailsPage({
 
   const subTabClass = (active) =>
     active
-      ? "px-4 py-2 rounded-xl bg-white border border-emerald-300 text-slate-900 text-sm font-medium shadow-sm"
+      ? darkMode
+        ? "px-4 py-2 rounded-xl bg-slate-800 border border-emerald-500/60 text-emerald-300 text-sm font-medium shadow-sm"
+        : "px-4 py-2 rounded-xl bg-white border border-emerald-300 text-slate-900 text-sm font-medium shadow-sm"
       : darkMode
         ? "px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-medium"
         : "px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-sm font-medium";
@@ -2148,7 +2158,7 @@ export default function GroupDetailsPage({
                     <div className="flex items-center justify-end gap-3 pt-2">
                       <button
                         onClick={() => setLessonPage("list")}
-                        className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+                        className={cancelBtnClass}
                       >
                         Bekor qilish
                       </button>
@@ -2227,7 +2237,7 @@ export default function GroupDetailsPage({
                     <div className="flex items-center justify-end gap-3 pt-2">
                       <button
                         onClick={() => setLessonPage("list")}
-                        className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+                        className={cancelBtnClass}
                       >
                         Bekor qilish
                       </button>
@@ -2454,26 +2464,28 @@ export default function GroupDetailsPage({
 
       {showVideoUploadModal && canUploadVideo && (
         <div className="fixed inset-0 z-70 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-6xl rounded-2xl shadow-xl border p-5 relative">
+          <div
+            className={`w-full max-w-6xl rounded-2xl shadow-xl border p-5 relative ${modalCardClass}`}
+          >
             <button
               onClick={() => setShowVideoUploadModal(false)}
-              className="absolute right-5 top-5 text-slate-400 hover:text-slate-700 text-2xl"
+              className={`absolute right-5 top-5 text-2xl ${theme.soft}`}
             >
               ×
             </button>
 
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">
+            <h3 className={`text-lg font-semibold mb-4 ${theme.text}`}>
               Qo'shish
             </h3>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className={`block text-sm font-medium mb-2 ${theme.text}`}>
                 Darsni tanlang
               </label>
               <select
                 value={videoLessonId}
                 onChange={(e) => setVideoLessonId(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                className={`w-full rounded-xl border px-3 py-2 text-sm ${theme.select}`}
               >
                 <option value="">Darslardan birini tanlang</option>
                 {lessons.map((lesson) => (
@@ -2489,10 +2501,10 @@ export default function GroupDetailsPage({
                 if (!videoLessonId || videoUploading) return;
                 fileRef.current?.click();
               }}
-              className="border-2 border-dashed border-emerald-300 rounded-2xl p-10 sm:p-16 text-center cursor-pointer hover:bg-slate-50"
+              className={`border-2 border-dashed border-emerald-400/60 rounded-2xl p-10 sm:p-16 text-center cursor-pointer ${theme.hover}`}
             >
               <div className="text-emerald-500 text-4xl mb-4">🧰</div>
-              <p className="text-slate-700 text-base font-medium">
+              <p className={`text-base font-medium ${theme.text}`}>
                 Videofaylni yuklash uchun ushbu hudud ustiga bosing yoki faylni
                 shu yerga olib keling
               </p>
@@ -2501,7 +2513,7 @@ export default function GroupDetailsPage({
                   Avval darsni tanlang
                 </p>
               )}
-              <p className="text-slate-400 text-sm mt-2">
+              <p className={`text-sm mt-2 ${theme.soft}`}>
                 Videofayl .mp4, .webm, .mpeg, .avi, .mkv, .mov formatlaridan
                 birida bo‘lishi kerak
               </p>
@@ -2533,7 +2545,7 @@ export default function GroupDetailsPage({
               <button
                 disabled={videoUploading}
                 onClick={() => setShowVideoUploadModal(false)}
-                className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-60"
+                className={`${cancelBtnClass} disabled:opacity-60`}
               >
                 Bekor qilish
               </button>

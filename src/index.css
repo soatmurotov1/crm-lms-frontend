@@ -9,3 +9,36 @@ button:disabled,
 [role="button"][aria-disabled="true"] {
   cursor: not-allowed;
 }
+
+/*
+  Brauzer saqlangan login/parolni to'ldirganda maydon foniga o'z rangini
+  (oq/och ko'k) majburan qo'yadi va uni `background-color` bilan bekor qilib
+  bo'lmaydi — shuning uchun tungi rejimda maydon oq bo'lib qolardi. Yagona
+  ishlaydigan yo'l — ichki `box-shadow` bilan ustidan bo'yash.
+
+  Rejim <html data-theme="..."> orqali keladi (ThemeProvider yozadi).
+*/
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #0f172a; /* slate-900 */
+  box-shadow: inset 0 0 0 1000px #ffffff;
+  caret-color: #0f172a;
+  /* Chrome fonni animatsiya bilan qaytaradi; uzoq kechikish buni to'xtatadi. */
+  transition: background-color 100000s ease-in-out 0s;
+}
+
+/*
+  Qorong'i variant faqat tungi rejim tokeni bergan maydonlarga tegishli
+  (`theme.input` dark = "bg-slate-900 ..."). Login sahifasi tokenlarni
+  ishlatmaydi va doim yorug' ko'rinishda qoladi — u shu tufayli chetda qoladi.
+*/
+:root[data-theme="dark"] input.bg-slate-900:-webkit-autofill,
+:root[data-theme="dark"] input.bg-slate-900:-webkit-autofill:hover,
+:root[data-theme="dark"] input.bg-slate-900:-webkit-autofill:focus,
+:root[data-theme="dark"] input.bg-slate-900:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff;
+  box-shadow: inset 0 0 0 1000px #0f172a; /* slate-900 */
+  caret-color: #ffffff;
+}

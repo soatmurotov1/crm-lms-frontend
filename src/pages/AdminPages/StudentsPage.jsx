@@ -867,7 +867,9 @@ export default function StudentsPage({
               htmlFor="student-photo-input"
               className={`border w-full p-3 rounded-lg flex items-center justify-between cursor-pointer ${theme.input}`}
             >
-              <span>{formData.photo?.name || "Image"}</span>
+              <span className={formData.photo?.name ? theme.text : theme.soft}>
+                {formData.photo?.name || "Rasm tanlanmagan"}
+              </span>
               <span className={`${theme.soft}`}>Yuklash</span>
             </label>
           </div>

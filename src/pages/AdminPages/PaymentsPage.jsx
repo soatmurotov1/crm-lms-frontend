@@ -15,6 +15,34 @@ const STATUS_STYLES = {
   CANCELED: "bg-slate-200 text-slate-600",
 };
 
+/** Joriy oy xulosasi uchun kartalar — yorug' va tungi rejim ranglari. */
+const SUMMARY_TILES = [
+  {
+    key: "paid",
+    label: "To'langan",
+    lightTile: "bg-emerald-50",
+    darkTile: "bg-emerald-500/10 border border-emerald-500/20",
+    lightValue: "text-emerald-600",
+    darkValue: "text-emerald-400",
+  },
+  {
+    key: "pending",
+    label: "Kutilmoqda",
+    lightTile: "bg-yellow-50",
+    darkTile: "bg-amber-500/10 border border-amber-500/20",
+    lightValue: "text-yellow-600",
+    darkValue: "text-amber-400",
+  },
+  {
+    key: "debt",
+    label: "Qoldiq",
+    lightTile: "bg-red-50",
+    darkTile: "bg-rose-500/10 border border-rose-500/20",
+    lightValue: "text-red-500",
+    darkValue: "text-rose-400",
+  },
+];
+
 export default function PaymentsPage({ theme, darkMode }) {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -175,27 +203,28 @@ export default function PaymentsPage({ theme, darkMode }) {
           Joriy oy uchun to'lovlar
         </h2>
 
+        {/*
+          Tungi rejimda och (50) fonlar deyarli oq bo'lib ko'rinadi, shuning
+          uchun qorong'i variantlari alohida beriladi.
+        */}
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="rounded-2xl bg-emerald-50 p-5">
-            <p className="text-slate-500 mb-2">To'langan</p>
-            <h3 className="text-2xl font-bold text-emerald-600">
-              {formatAmount(summary.paid)}
-            </h3>
-          </div>
-
-          <div className="rounded-2xl bg-yellow-50 p-5">
-            <p className="text-slate-500 mb-2">Kutilmoqda</p>
-            <h3 className="text-2xl font-bold text-yellow-600">
-              {formatAmount(summary.pending)}
-            </h3>
-          </div>
-
-          <div className="rounded-2xl bg-red-50 p-5">
-            <p className="text-slate-500 mb-2">Qoldiq</p>
-            <h3 className="text-2xl font-bold text-red-500">
-              {formatAmount(summary.debt)}
-            </h3>
-          </div>
+          {SUMMARY_TILES.map((tile) => (
+            <div
+              key={tile.key}
+              className={`rounded-2xl p-5 ${
+                darkMode ? tile.darkTile : tile.lightTile
+              }`}
+            >
+              <p className={`mb-2 ${theme.soft}`}>{tile.label}</p>
+              <h3
+                className={`text-2xl font-bold ${
+                  darkMode ? tile.darkValue : tile.lightValue
+                }`}
+              >
+                {formatAmount(summary[tile.key])}
+              </h3>
+            </div>
+          ))}
         </div>
       </div>
 

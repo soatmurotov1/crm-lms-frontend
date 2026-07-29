@@ -118,6 +118,16 @@ export const authApi = {
       await apiClient.post("/auth/verify-code", { phone, code, purpose }),
     );
   },
+  /** Parolni unutgan foydalanuvchining raqamiga tiklash kodini yuboradi. */
+  forgotPassword: async (phone) => {
+    return unwrap(await apiClient.post("/auth/forgot-password", { phone }));
+  },
+  /** SMS kod bilan yangi parol o'rnatadi. */
+  resetPassword: async ({ phone, code, password }) => {
+    return unwrap(
+      await apiClient.post("/auth/reset-password", { phone, code, password }),
+    );
+  },
 };
 
 export const teachersApi = {

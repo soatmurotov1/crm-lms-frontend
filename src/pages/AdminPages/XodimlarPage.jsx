@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import PasswordInput from "../../components/ui/PasswordInput";
 import { usersApi } from "../../api/crmApi";
 import { toInputDate } from "../../utils/date";
 
@@ -28,7 +29,6 @@ const getInitials = (name = "") => {
 
 export default function EmployeesPage({ theme, darkMode }) {
   const [showDrawer, setShowDrawer] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [editingEmployeeId, setEditingEmployeeId] = useState(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -96,7 +96,6 @@ export default function EmployeesPage({ theme, darkMode }) {
 
   const resetForm = () => {
     setEditingEmployeeId(null);
-    setShowPassword(false);
     setFormData({
       fullName: "",
       phone: "",
@@ -112,7 +111,6 @@ export default function EmployeesPage({ theme, darkMode }) {
 
   const openAddDrawer = () => {
     setEditingEmployeeId(null);
-    setShowPassword(false);
     setFormData({
       fullName: "",
       phone: "",
@@ -129,7 +127,6 @@ export default function EmployeesPage({ theme, darkMode }) {
 
   const openEditDrawer = (employee) => {
     setEditingEmployeeId(employee.id);
-    setShowPassword(false);
     setFormData({
       fullName: employee.fullName,
       phone: employee.phone,
@@ -620,7 +617,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="admin@gmail.com"
+                  placeholder="+998901234567"
                   className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
                 />
               </div>
@@ -645,94 +642,17 @@ export default function EmployeesPage({ theme, darkMode }) {
                 <label
                   className={`block text-sm font-medium mb-2 ${theme.text}`}
                 >
-                  Parol
+                  Parol {editingEmployeeId === null ? "*" : ""}
                 </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder={
-                      editingEmployeeId !== null
-                        ? "Yangi parol (ixtiyoriy)"
-                        : "Parol"
-                    }
-                    className={`w-full rounded-xl border px-4 py-3 pr-12 outline-none min-w-0 ${theme.input}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className={`absolute inset-y-0 right-0 px-3 flex items-center ${theme.soft}`}
-                    aria-label={
-                      showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"
-                    }
-                    title={
-                      showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"
-                    }
-                  >
-                    {showPassword ? (
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M3 3L21 21"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                        <path
-                          d="M10.58 10.58C10.21 10.95 10 11.46 10 12C10 13.1 10.9 14 12 14C12.54 14 13.05 13.79 13.42 13.42"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M9.88 5.09C10.56 4.86 11.27 4.75 12 4.75C16.5 4.75 20.35 8.09 21.75 12C21.37 13.06 20.82 14.04 20.12 14.91"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M6.11 6.11C4.3 7.4 2.9 9.51 2.25 12C3.65 15.91 7.5 19.25 12 19.25C13.98 19.25 15.83 18.6 17.32 17.49"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M2.25 12C3.65 8.09 7.5 4.75 12 4.75C16.5 4.75 20.35 8.09 21.75 12C20.35 15.91 16.5 19.25 12 19.25C7.5 19.25 3.65 15.91 2.25 12Z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="3"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                </div>
+                <PasswordInput
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder={
+                    editingEmployeeId !== null
+                      ? "Yangi parol (ixtiyoriy)"
+                      : "Parol"
+                  }
+                />
               </div>
 
               <div>
@@ -821,7 +741,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                   )}
 
                   <p className={`text-sm font-medium ${theme.text}`}>
-                    Click to upload yoki yuklang
+                    Rasm yuklash uchun bosing
                   </p>
                   <p className={`text-xs mt-1 ${theme.soft}`}>PNG, JPG, JPEG</p>
                 </label>

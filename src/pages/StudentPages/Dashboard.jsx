@@ -26,7 +26,10 @@ import StatCard from "../../components/ui/StatCard";
 import ListCard from "../../components/ui/ListCard";
 import PlaceholderSection from "../../components/ui/PlaceholderSection";
 import { useTheme } from "../../theme/themeContext";
-import { getAuthUserFromStorage } from "../../utils/authToken";
+import {
+  clearAuthSession,
+  getAuthUserFromStorage,
+} from "../../utils/authToken";
 import {
   DAY_INDEX_TO_ENUM,
   WEEK_DAYS,
@@ -1047,8 +1050,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("crm_access_token");
-    localStorage.removeItem(STORAGE_KEY);
+    clearAuthSession();
     navigate("/", { replace: true });
   };
 
@@ -1864,27 +1866,34 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
         {renderContent()}
       </div>
 
-      {showLogoutModal && (
-        <LogoutModal
-          onClose={() => setShowLogoutModal(false)}
-          onConfirm={handleLogout}
-        />
-      )}
+      {/*
+        Modal ranglari `student-scope` dagi CSS o'zgaruvchilaridan keladi.
+        Shu o'ram tashqarisida qolsa, `--card-bg` sukut bo'yicha oq bo'lib,
+        tungi rejimda modal oq fonli chiqadi.
+      */}
+      <div className={`student-scope${darkMode ? " dark" : ""}`}>
+        {showLogoutModal && (
+          <LogoutModal
+            onClose={() => setShowLogoutModal(false)}
+            onConfirm={handleLogout}
+          />
+        )}
 
-      {showPasswordModal && (
-        <PasswordModal
-          form={passwordForm}
-          errors={passwordErrors}
-          showPassword={showPassword}
-          onClose={() => setShowPasswordModal(false)}
-          onChange={handlePasswordChange}
-          onToggle={(field) =>
-            setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }))
-          }
-          onSubmit={handlePasswordSave}
-          saving={passwordSaving}
-        />
-      )}
+        {showPasswordModal && (
+          <PasswordModal
+            form={passwordForm}
+            errors={passwordErrors}
+            showPassword={showPassword}
+            onClose={() => setShowPasswordModal(false)}
+            onChange={handlePasswordChange}
+            onToggle={(field) =>
+              setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }))
+            }
+            onSubmit={handlePasswordSave}
+            saving={passwordSaving}
+          />
+        )}
+      </div>
     </PanelLayout>
   );
 }

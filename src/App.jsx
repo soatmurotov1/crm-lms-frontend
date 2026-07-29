@@ -4,12 +4,8 @@ import DashboardPage from "./pages/AdminPages/DashboardPage";
 import SuperAdminDashboard from "./pages/SuperAdminPages/Dashboard";
 import StudentDashboardPage from "./pages/StudentPages/Dashboard";
 import TeacherDashboard from "./pages/TeacherPages/Dashboard";
-import { getAuthUserFromStorage } from "./utils/authToken";
+import { getAuthUserFromStorage, hasValidSession } from "./utils/authToken";
 import { ThemeProvider } from "./theme/ThemeProvider";
-
-function hasAccessToken() {
-  return Boolean(localStorage.getItem("crm_access_token"));
-}
 
 function getCurrentRole() {
   return String(getAuthUserFromStorage()?.role || "").toUpperCase();
@@ -23,7 +19,7 @@ function getHomePathForRole(role) {
 }
 
 function GuestOnly({ children }) {
-  if (hasAccessToken()) {
+  if (hasValidSession()) {
     return <Navigate to={getHomePathForRole(getCurrentRole())} replace />;
   }
 
@@ -31,17 +27,22 @@ function GuestOnly({ children }) {
 }
 
 /**
- * Bitta umumiy qorovul: token bor-yo'qligini tekshiradi va roli mos
- * kelmasa, foydalanuvchini o'z paneliga qaytaradi.
+ * Bitta umumiy qorovul: token bor-yo'qligini VA muddati o'tmaganini
+ * tekshiradi, roli mos kelmasa foydalanuvchini o'z paneliga qaytaradi.
+ *
+ * Muddati tekshirilmasa, eskirgan token bilan ham panel ochilib ketadi:
+ * ma'lumot kelmaydi, lekin login sahifasi o'rniga bo'sh dashboard ko'rinadi.
  */
 function RequireRole({ allow, children }) {
   const location = useLocation();
 
-  if (!hasAccessToken()) {
+  const authUser = getAuthUserFromStorage();
+
+  if (!authUser) {
     return <Navigate to="/" replace state={{ from: location }} />;
   }
 
-  const role = getCurrentRole();
+  const role = String(authUser.role || "").toUpperCase();
 
   if (!allow.includes(role)) {
     return <Navigate to={getHomePathForRole(role)} replace />;
@@ -86,6 +87,8 @@ const ADMIN_ROUTES = [
   { path: "/dashboard/course", menu: "settings", management: "courses" },
   { path: "/dashboard/courses", menu: "settings", management: "courses" },
   { path: "/dashboard/room", menu: "settings", management: "rooms" },
+  { path: "/dashboard/rooms", menu: "settings", management: "rooms" },
+  { path: "/dashboard/employees", menu: "settings", management: "employees" },
 ];
 
 const SUPERADMIN_ROUTES = [

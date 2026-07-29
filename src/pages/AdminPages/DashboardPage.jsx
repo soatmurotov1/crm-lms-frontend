@@ -35,7 +35,10 @@ const PaymentsDonut = lazy(
 const AttendanceBars = lazy(
   () => import("../../components/charts/AttendanceBars"),
 );
-import { getAuthUserFromStorage } from "../../utils/authToken";
+import {
+  clearAuthSession,
+  getAuthUserFromStorage,
+} from "../../utils/authToken";
 import { useTheme } from "../../theme/themeContext";
 
 const menuItems = [
@@ -522,10 +525,16 @@ export default function DashboardPage({
     settings: "/dashboard/settings",
   };
 
+  /*
+    Har bir "Sozlamalar" tabining o'z manzili bo'lishi shart. Aks holda
+    manzil `/dashboard/settings` ga ketadi, u yerdan `initialManagement`
+    sukut bo'yicha "courses" bo'lib qaytadi va quyidagi useEffect tanlangan
+    tabni yana "Kurslar" ga almashtirib yuboradi.
+  */
   const managementPathMap = {
     courses: "/dashboard/course",
     rooms: "/dashboard/room",
-    employees: "/dashboard/settings",
+    employees: "/dashboard/employees",
     exams: "/dashboard/exams",
   };
 
@@ -543,8 +552,7 @@ export default function DashboardPage({
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("crm_access_token");
-    localStorage.removeItem(STORAGE_KEY);
+    clearAuthSession();
     navigate("/", { replace: true });
   };
 
@@ -839,13 +847,15 @@ export default function DashboardPage({
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleDeleteCourse(course.id)}
-                        className="w-8 h-8 rounded-lg border border-slate-200 hover:bg-red-50"
+                        className={`w-8 h-8 rounded-lg border ${theme.rowBorder} ${
+                          darkMode ? "hover:bg-red-900/30" : "hover:bg-red-50"
+                        }`}
                       >
                         🗑️
                       </button>
                       <button
                         onClick={() => openEditDrawer(course)}
-                        className="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50"
+                        className={`w-8 h-8 rounded-lg border ${theme.rowBorder} ${theme.hover}`}
                       >
                         ✏️
                       </button>
@@ -879,7 +889,7 @@ export default function DashboardPage({
             {t.courseCategoriesTable}
           </h3>
 
-          <div className="overflow-hidden rounded-xl border border-slate-200">
+          <div className={`overflow-hidden rounded-xl border ${theme.rowBorder}`}>
             <table className="w-full text-sm">
               <thead className={darkMode ? "bg-slate-800" : "bg-slate-50"}>
                 <tr>
@@ -901,15 +911,21 @@ export default function DashboardPage({
 
         {showCourseDrawer && (
           <div className={`fixed inset-0 z-50 ${theme.overlay}`}>
-            <div className="absolute inset-y-0 right-0 w-full max-w-107.5 bg-white shadow-2xl overflow-y-auto">
-              <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-900">
+            <div
+              className={`absolute inset-y-0 right-0 w-full max-w-107.5 shadow-2xl overflow-y-auto ${
+                darkMode ? "bg-slate-900" : "bg-white"
+              }`}
+            >
+              <div
+                className={`p-6 border-b flex items-center justify-between ${theme.rowBorder}`}
+              >
+                <h2 className={`text-xl font-bold ${theme.text}`}>
                   {editingCourseId ? t.editCourse : t.addCourse}
                 </h2>
 
                 <button
                   onClick={closeDrawer}
-                  className="text-slate-500 text-xl"
+                  className={`text-xl ${theme.soft}`}
                 >
                   ×
                 </button>
@@ -980,10 +996,12 @@ export default function DashboardPage({
                 </div>
               </div>
 
-              <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
+              <div
+                className={`p-6 border-t flex justify-end gap-3 ${theme.rowBorder}`}
+              >
                 <button
                   onClick={closeDrawer}
-                  className="px-5 py-3 rounded-xl border border-slate-200 text-slate-600"
+                  className={`px-5 py-3 rounded-xl border ${theme.rowBorder} ${theme.text}`}
                 >
                   {t.cancel}
                 </button>

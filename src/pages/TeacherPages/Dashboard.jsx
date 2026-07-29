@@ -13,7 +13,10 @@ import NotificationsSection from "../../components/notifications/NotificationsSe
 import GradesSection from "../../components/grades/GradesSection";
 import SectionHeader from "../../components/ui/SectionHeader";
 import StatCard from "../../components/ui/StatCard";
-import { getAuthUserFromStorage } from "../../utils/authToken";
+import {
+  clearAuthSession,
+  getAuthUserFromStorage,
+} from "../../utils/authToken";
 import { useTheme } from "../../theme/themeContext";
 import { attendanceApi, groupsApi, homeworkApi } from "../../api/crmApi";
 import StudentHome from "../StudentPages/components/StudentHome";
@@ -543,7 +546,7 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("crm_access_token");
+    clearAuthSession();
     navigate("/", { replace: true });
   };
 
@@ -747,18 +750,26 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
     if (activeMenu === "dashboard") return renderOverview();
 
     if (activeMenu === "schedule") {
+      /*
+        StudentHome StudentDashboard.css ga tayanadi, u yerdagi ranglar esa
+        `student-scope` da e'lon qilingan CSS o'zgaruvchilaridan keladi.
+        O'ramsiz `--text` aniqlanmay qoladi va kalendardagi sanalar
+        ko'rinmas bo'lib qoladi.
+      */
       return (
-        <StudentHome
-          monthLabel={monthLabel}
-          weekDays={WEEK_DAYS}
-          calendarCells={calendarCells}
-          onSelectDate={setSelectedDate}
-          onChangeMonth={changeMonth}
-          lessonTitle={lessonTitle}
-          selectedLessons={selectedLessons}
-          isLoading={isLoading}
-          darkMode={darkMode}
-        />
+        <div className={`student-scope${darkMode ? " dark" : ""}`}>
+          <StudentHome
+            monthLabel={monthLabel}
+            weekDays={WEEK_DAYS}
+            calendarCells={calendarCells}
+            onSelectDate={setSelectedDate}
+            onChangeMonth={changeMonth}
+            lessonTitle={lessonTitle}
+            selectedLessons={selectedLessons}
+            isLoading={isLoading}
+            darkMode={darkMode}
+          />
+        </div>
       );
     }
 

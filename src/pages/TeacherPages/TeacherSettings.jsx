@@ -124,20 +124,23 @@ export default function TeacherSettings({ darkMode = false }) {
         getInitials={getInitials}
         roleLabel="Teacher"
       />
-      {showPasswordModal && (
-        <PasswordModal
-          form={passwordForm}
-          errors={passwordErrors}
-          showPassword={showPassword}
-          onClose={() => setShowPasswordModal(false)}
-          onChange={handlePasswordChange}
-          onToggle={(field) =>
-            setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }))
-          }
-          onSubmit={handlePasswordSave}
-          saving={passwordSaving}
-        />
-      )}
+      {/* Modal ranglari `student-scope` o'zgaruvchilaridan keladi. */}
+      <div className={`student-scope${darkMode ? " dark" : ""}`}>
+        {showPasswordModal && (
+          <PasswordModal
+            form={passwordForm}
+            errors={passwordErrors}
+            showPassword={showPassword}
+            onClose={() => setShowPasswordModal(false)}
+            onChange={handlePasswordChange}
+            onToggle={(field) =>
+              setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }))
+            }
+            onSubmit={handlePasswordSave}
+            saving={passwordSaving}
+          />
+        )}
+      </div>
     </>
   );
 }

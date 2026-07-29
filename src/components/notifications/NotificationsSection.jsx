@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Card from "../ui/Card";
 import SectionHeader from "../ui/SectionHeader";
-import { notificationsApi } from "../../api/crmApi";
+import {
+  groupsApi,
+  notificationsApi,
+  organizationsApi,
+  studentsApi,
+  teachersApi,
+  usersApi,
+} from "../../api/crmApi";
 import { formatUzDateTime } from "../../utils/date";
 import { useTheme } from "../../theme/themeContext";
 
@@ -40,7 +47,20 @@ const AUDIENCE_LABELS = {
   TEACHERS: "O'qituvchilarga",
   STUDENTS: "O'quvchilarga",
   GROUP: "Guruhga",
+  ORGANIZATION: "Aniq tashkilotga",
+  USER: "Aniq shaxsga",
 };
+
+/**
+ * "Aniq shaxsga" rejimi: hisoblar uch xil jadvalda saqlanadi, shuning uchun
+ * avval jadval (kind), so'ng shu jadvaldan shaxs tanlanadi. Backendga esa
+ * tanlangan shaxsning haqiqiy roli (`recipientRole`) yuboriladi.
+ */
+const RECIPIENT_KINDS = [
+  { value: "USER", label: "Admin / xodim" },
+  { value: "TEACHER", label: "O'qituvchi" },
+  { value: "STUDENT", label: "O'quvchi" },
+];
 
 const EMPTY_FORM = {
   title: "",
@@ -48,7 +68,12 @@ const EMPTY_FORM = {
   type: "INFO",
   audience: "ALL",
   groupId: "",
+  organizationId: "",
+  recipientKind: "USER",
+  recipientId: "",
 };
+
+const toList = (result) => (Array.isArray(result?.data) ? result.data : []);
 
 /**
  * Barcha panellar uchun umumiy xabarnomalar bo'limi.
@@ -58,12 +83,14 @@ const EMPTY_FORM = {
  * canDelete  — xabarnomani o'chirish tugmasi
  * groupOnly  — o'qituvchi rejimi: faqat o'z guruhiga yuborish
  * groups     — [{ id, name }] GROUP auditoriyasi uchun
+ * canTargetOrganization — "Aniq tashkilotga" varianti (superadmin uchun)
  */
 export default function NotificationsSection({
   canSend = false,
   canViewAll = false,
   canDelete = false,
   groupOnly = false,
+  canTargetOrganization = false,
   groups = [],
   title = "Xabarnomalar",
   subtitle = "Sizga tegishli xabarnomalar",
@@ -83,16 +110,100 @@ export default function NotificationsSection({
     audience: groupOnly ? "GROUP" : "ALL",
   }));
 
-  const audienceOptions = useMemo(
-    () =>
-      groupOnly
-        ? [{ value: "GROUP", label: AUDIENCE_LABELS.GROUP }]
-        : Object.entries(AUDIENCE_LABELS).map(([value, label]) => ({
-            value,
-            label,
-          })),
-    [groupOnly],
-  );
+  const audienceOptions = useMemo(() => {
+    if (groupOnly) {
+      return [
+        { value: "GROUP", label: AUDIENCE_LABELS.GROUP },
+        { value: "USER", label: "Aniq o'quvchiga" },
+      ];
+    }
+
+    return Object.entries(AUDIENCE_LABELS)
+      .filter(([value]) => value !== "ORGANIZATION" || canTargetOrganization)
+      .map(([value, label]) => ({ value, label }));
+  }, [groupOnly, canTargetOrganization]);
+
+  // Qabul qiluvchilar ro'yxati faqat forma ochilganda yuklanadi — bu ro'yxatlar
+  // xabarnomalar bo'limining asosiy yuklanishini sekinlashtirmasligi kerak.
+  const [directory, setDirectory] = useState({
+    organizations: [],
+    USER: [],
+    TEACHER: [],
+    STUDENT: [],
+  });
+  const [directoryLoaded, setDirectoryLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!canSend || !showForm || directoryLoaded) return;
+
+    let cancelled = false;
+
+    (async () => {
+      const pick = (result) =>
+        result.status === "fulfilled" ? toList(result.value) : [];
+
+      /*
+        O'qituvchida `/students/all` ga ruxsat yo'q — u o'quvchilarni faqat
+        o'z guruhlari orqali ko'ra oladi. Shuning uchun ro'yxat guruhlardan
+        yig'iladi va takrorlanganlari olib tashlanadi.
+      */
+      if (groupOnly) {
+        const results = await Promise.allSettled(
+          groups.map((group) => groupsApi.getStudentsByGroup(group.id)),
+        );
+
+        if (cancelled) return;
+
+        const byId = new Map();
+        results.forEach((result) =>
+          pick(result).forEach((student) => byId.set(student.id, student)),
+        );
+
+        setDirectory((prev) => ({
+          ...prev,
+          STUDENT: [...byId.values()].sort((a, b) =>
+            String(a.fullName || "").localeCompare(String(b.fullName || "")),
+          ),
+        }));
+        setDirectoryLoaded(true);
+        return;
+      }
+
+      const [usersRes, teachersRes, studentsRes, organizationsRes] =
+        await Promise.allSettled([
+          usersApi.getAll(),
+          teachersApi.getAll(),
+          studentsApi.getAll(),
+          canTargetOrganization ? organizationsApi.getAll("ALL") : null,
+        ]);
+
+      if (cancelled) return;
+
+      // Ruxsat yetmasa ro'yxat bo'sh qoladi, forma esa ishlashda davom etadi.
+      setDirectory({
+        USER: pick(usersRes),
+        TEACHER: pick(teachersRes),
+        STUDENT: pick(studentsRes),
+        organizations: pick(organizationsRes),
+      });
+      setDirectoryLoaded(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    canSend,
+    groupOnly,
+    groups,
+    showForm,
+    directoryLoaded,
+    canTargetOrganization,
+  ]);
+
+  // O'qituvchi rejimida qabul qiluvchi doim o'quvchi bo'ladi.
+  const recipientKind = groupOnly ? "STUDENT" : form.recipientKind;
+  const recipientOptions = directory[recipientKind] || [];
 
   const load = useCallback(async () => {
     try {
@@ -140,7 +251,13 @@ export default function NotificationsSection({
 
   const handleFormChange = (event) => {
     const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      // Jadval almashsa, oldingi jadvaldan tanlangan shaxs kuchini yo'qotadi.
+      ...(name === "recipientKind" ? { recipientId: "" } : {}),
+    }));
   };
 
   const handleSend = async () => {
@@ -154,6 +271,33 @@ export default function NotificationsSection({
       return;
     }
 
+    if (form.audience === "ORGANIZATION" && !form.organizationId) {
+      alert("Tashkilot tanlanishi kerak");
+      return;
+    }
+
+    if (form.audience === "USER" && !form.recipientId) {
+      alert("Qabul qiluvchi tanlanishi kerak");
+      return;
+    }
+
+    let recipientRole;
+    if (form.audience === "USER") {
+      const recipient = recipientOptions.find(
+        (item) => String(item.id) === String(form.recipientId),
+      );
+
+      // Xodimlar jadvalida rol har xil (ADMIN, MANAGEMENT, ...), o'qituvchi va
+      // o'quvchi jadvallarida esa doim bitta.
+      recipientRole =
+        recipientKind === "USER" ? recipient?.role : recipientKind;
+
+      if (!recipientRole) {
+        alert("Qabul qiluvchi roli aniqlanmadi");
+        return;
+      }
+    }
+
     try {
       setSending(true);
       await notificationsApi.create({
@@ -162,6 +306,13 @@ export default function NotificationsSection({
         type: form.type,
         audience: form.audience,
         groupId: form.audience === "GROUP" ? Number(form.groupId) : undefined,
+        organizationId:
+          form.audience === "ORGANIZATION"
+            ? Number(form.organizationId)
+            : undefined,
+        recipientRole,
+        recipientId:
+          form.audience === "USER" ? Number(form.recipientId) : undefined,
       });
 
       setForm({ ...EMPTY_FORM, audience: groupOnly ? "GROUP" : "ALL" });
@@ -248,6 +399,12 @@ export default function NotificationsSection({
             <p className={`text-xs mt-2 ${theme.soft}`}>
               {AUDIENCE_LABELS[notification.audience] || notification.audience}
               {notification.group?.name ? ` · ${notification.group.name}` : ""}
+              {notification.organization?.name
+                ? ` · ${notification.organization.name}`
+                : ""}
+              {notification.recipientName
+                ? ` · ${notification.recipientName}`
+                : ""}
               {notification.createdByName
                 ? ` · ${notification.createdByName}`
                 : ""}{" "}
@@ -320,7 +477,16 @@ export default function NotificationsSection({
         }
       />
 
-      {canSend && showForm && (
+      {canSend && showForm && groupOnly && groups.length === 0 && (
+        <div className={`rounded-2xl border p-4 mb-5 ${theme.rowBorder}`}>
+          <p className={`text-sm ${theme.soft}`}>
+            Sizga hali guruh biriktirilmagan, shuning uchun xabar yubora
+            olmaysiz. Guruh biriktirilgach bu bo'lim ochiladi.
+          </p>
+        </div>
+      )}
+
+      {canSend && showForm && !(groupOnly && groups.length === 0) && (
         <div className={`rounded-2xl border p-4 mb-5 ${theme.rowBorder}`}>
           <div className="grid gap-3 sm:grid-cols-2">
             <input
@@ -372,6 +538,63 @@ export default function NotificationsSection({
                   </option>
                 ))}
               </select>
+            )}
+
+            {form.audience === "ORGANIZATION" && (
+              <select
+                name="organizationId"
+                value={form.organizationId}
+                onChange={handleFormChange}
+                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+              >
+                <option value="">
+                  {directoryLoaded
+                    ? "Tashkilotni tanlang"
+                    : "Yuklanmoqda..."}
+                </option>
+                {directory.organizations.map((organization) => (
+                  <option key={organization.id} value={organization.id}>
+                    {organization.name}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {form.audience === "USER" && (
+              <>
+                {/* O'qituvchida tanlov yo'q — u faqat o'quvchiga yozadi. */}
+                {!groupOnly && (
+                  <select
+                    name="recipientKind"
+                    value={form.recipientKind}
+                    onChange={handleFormChange}
+                    className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                  >
+                    {RECIPIENT_KINDS.map((kind) => (
+                      <option key={kind.value} value={kind.value}>
+                        {kind.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                <select
+                  name="recipientId"
+                  value={form.recipientId}
+                  onChange={handleFormChange}
+                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                >
+                  <option value="">
+                    {directoryLoaded ? "Shaxsni tanlang" : "Yuklanmoqda..."}
+                  </option>
+                  {recipientOptions.map((person) => (
+                    <option key={person.id} value={person.id}>
+                      {person.fullName}
+                      {person.phone ? ` · ${person.phone}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </>
             )}
           </div>
 

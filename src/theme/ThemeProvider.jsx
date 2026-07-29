@@ -34,6 +34,16 @@ export function ThemeProvider({ children }) {
     }
   }, [darkMode]);
 
+  /*
+    Rejim Tailwind klasslari bilan beriladi, ya'ni CSS uni bilmaydi. Brauzer
+    saqlangan parolni to'ldirganda maydon fonini o'zi bo'yaydi va buni faqat
+    CSS orqali bekor qilish mumkin — shuning uchun rejimni <html> ga ham
+    yozib qo'yamiz. `index.css` shu belgiga tayanadi.
+  */
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? "dark" : "light";
+  }, [darkMode]);
+
   const toggleDarkMode = useCallback(() => setDarkMode((prev) => !prev), []);
 
   const value = useMemo(

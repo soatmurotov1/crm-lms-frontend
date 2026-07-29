@@ -106,11 +106,17 @@ export default function PanelLayout({
       </aside>
 
       <main className={`flex-1 min-w-0 p-4 pb-28 md:p-8 md:pb-8 ${theme.main}`}>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-          <div className="min-w-0">
-            <h1 className="text-xl md:hidden font-bold text-violet-600 mb-1">
-              {brandIcon} {brand}
-            </h1>
+        {/*
+          Telefonda: birinchi qatorda chapda brend, o'ngda tungi rejim va
+          profil tugmalari turadi; salomlashuv va boshqa tugmalar pastga
+          tushadi. Kattaroq ekranda esa hammasi bitta qatorga qaytadi.
+        */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-4 mb-8 lg:flex-nowrap lg:gap-4">
+          <h1 className="order-1 md:hidden min-w-0 flex-1 text-xl font-bold text-violet-600">
+            {brandIcon} {brand}
+          </h1>
+
+          <div className="order-3 w-full min-w-0 lg:order-1 lg:w-auto lg:flex-1">
             <h2
               className={`text-xl md:text-2xl font-semibold truncate ${theme.text}`}
             >
@@ -121,11 +127,15 @@ export default function PanelLayout({
             )}
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            {headerExtra}
+          {(headerExtra || headerActions) && (
+            <div className="order-4 flex w-full flex-wrap items-center gap-3 lg:order-2 lg:w-auto lg:shrink-0 lg:justify-end">
+              {headerExtra}
 
-            {headerActions}
+              {headerActions}
+            </div>
+          )}
 
+          <div className="order-2 ml-auto flex items-center gap-3 shrink-0 lg:order-3 lg:ml-0">
             <button
               onClick={() => setDarkMode(!darkMode)}
               className={`w-10 h-10 flex items-center justify-center rounded-xl border cursor-pointer ${theme.topBtn}`}

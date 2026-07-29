@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import FileInput from "../../components/ui/FileInput";
 import { examsApi, groupsApi } from "../../api/crmApi";
 import { getAuthUserFromStorage } from "../../utils/authToken";
 import { useTheme } from "../../theme/themeContext";
@@ -472,17 +473,17 @@ export default function ExamsPage() {
               <label
                 className={`mb-2 block text-sm font-medium ${theme.muted}`}
               >
-                File
+                Fayl
               </label>
-              <input
-                type="file"
+              <FileInput
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
                 onChange={(e) =>
                   setForm((prev) => ({
                     ...prev,
                     file: e.target.files?.[0] || null,
                   }))
                 }
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                hint="PDF, Word, Excel, PowerPoint yoki rasm"
               />
             </div>
           </div>

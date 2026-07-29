@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Card from "../../components/ui/Card";
+import PasswordInput from "../../components/ui/PasswordInput";
 import SectionHeader from "../../components/ui/SectionHeader";
 import StatCard from "../../components/ui/StatCard";
 import { organizationsApi } from "../../api/crmApi";
@@ -37,11 +38,15 @@ const STATUS_TONES = {
 const EMPTY_FORM = {
   name: "",
   phone: "",
+  password: "",
+  adminName: "",
   address: "",
   directorName: "",
   description: "",
   status: "ACTIVE",
 };
+
+const MIN_PASSWORD_LENGTH = 6;
 
 const formatUzs = (value) =>
   `${new Intl.NumberFormat("uz-UZ").format(Number(value || 0))} so'm`;
@@ -106,6 +111,8 @@ export default function OrganizationsPage() {
     setFormData({
       name: organization.name || "",
       phone: organization.phone || "",
+      password: "",
+      adminName: organization.admin?.fullName || "",
       address: organization.address || "",
       directorName: organization.directorName || "",
       description: organization.description || "",
@@ -126,8 +133,29 @@ export default function OrganizationsPage() {
   };
 
   const handleSave = async () => {
+    const isEditing = editingId !== null;
+
     if (!formData.name.trim()) {
       alert("Tashkilot nomi kiritilishi kerak");
+      return;
+    }
+
+    if (!formData.phone.trim()) {
+      alert("Telefon raqami kiritilishi kerak — u admin uchun login bo'ladi");
+      return;
+    }
+
+    // Yaratishda parol majburiy, tahrirlashda esa bo'sh qoldirilsa o'zgarmaydi.
+    if (!isEditing && !formData.password.trim()) {
+      alert("Parol kiritilishi kerak");
+      return;
+    }
+
+    if (
+      formData.password.trim() &&
+      formData.password.trim().length < MIN_PASSWORD_LENGTH
+    ) {
+      alert(`Parol kamida ${MIN_PASSWORD_LENGTH} ta belgidan iborat bo'lishi kerak`);
       return;
     }
 
@@ -141,6 +169,14 @@ export default function OrganizationsPage() {
         description: formData.description.trim(),
         status: formData.status,
       };
+
+      if (formData.password.trim()) {
+        payload.password = formData.password.trim();
+      }
+
+      if (formData.adminName.trim()) {
+        payload.adminName = formData.adminName.trim();
+      }
 
       if (editingId !== null) {
         await organizationsApi.update(editingId, payload);
@@ -159,7 +195,7 @@ export default function OrganizationsPage() {
 
   const handleDelete = async (organization) => {
     const confirmed = window.confirm(
-      `"${organization.name}" tashkiloti o'chirilsinmi? Uning obunalari ham o'chadi.`,
+      `"${organization.name}" tashkiloti o'chirilsinmi? Uning obunalari o'chadi va admin hisobi bloklanadi.`,
     );
     if (!confirmed) return;
 
@@ -267,6 +303,12 @@ export default function OrganizationsPage() {
 
                 <div className={`mt-4 space-y-1 text-sm ${theme.soft}`}>
                   <p>📞 {organization.phone || "Telefon yo'q"}</p>
+                  <p>
+                    🔐{" "}
+                    {organization.admin
+                      ? `${organization.admin.fullName} · ${organization.admin.phone}`
+                      : "Admin hisobi yo'q"}
+                  </p>
                   <p>📍 {organization.address || "Manzil ko'rsatilmagan"}</p>
                   <p>
                     🛟 {organization._count?.supportTickets || 0} murojaat ·{" "}
@@ -366,20 +408,64 @@ export default function OrganizationsPage() {
                 />
               </div>
 
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-2 ${theme.text}`}
-                >
-                  Telefon
-                </label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="+998901234567"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
-                />
+              <div
+                className={`rounded-2xl border p-4 space-y-4 ${theme.rowBorder}`}
+              >
+                <p className={`text-xs ${theme.soft}`}>
+                  🔐 Admin hisobi — tashkilot shu telefon va parol bilan tizimga
+                  kiradi.
+                </p>
+
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${theme.text}`}
+                  >
+                    Telefon (login) *
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    autoComplete="off"
+                    placeholder="+998901234567"
+                    className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${theme.text}`}
+                  >
+                    Parol {editingId === null ? "*" : ""}
+                  </label>
+                  <PasswordInput
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder={
+                      editingId === null
+                        ? `Kamida ${MIN_PASSWORD_LENGTH} ta belgi`
+                        : "Bo'sh qoldirilsa o'zgarmaydi"
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${theme.text}`}
+                  >
+                    Admin F.I.O.
+                  </label>
+                  <input
+                    type="text"
+                    name="adminName"
+                    value={formData.adminName}
+                    onChange={handleChange}
+                    placeholder="Bo'sh bo'lsa rahbar ismi olinadi"
+                    className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                  />
+                </div>
               </div>
 
               <div>

@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { authApi } from "../../api/crmApi";
 import { API_BASE_URL } from "../../api/client";
 import PhoneInput from "../../components/ui/PhoneInput";
-import { parseAuthToken } from "../../utils/authToken";
+import {
+  ACCESS_TOKEN_KEY,
+  clearAuthSession,
+  parseAuthToken,
+} from "../../utils/authToken";
 import { PHONE_ERROR_MESSAGE, isValidPhone, normalizePhone } from "../../utils/phone";
 
 /** `.env` dagi admin raqami: shu raqam bilan kirilsa admin panel ochiladi. */
@@ -16,6 +20,9 @@ const inputClass =
   "w-full border border-gray-300 rounded-xl sm:rounded-2xl px-3 sm:px-5 py-2.5 sm:py-4 text-sm sm:text-base outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition";
 
 const labelClass = "block mb-2 text-sm sm:text-base md:text-lg font-medium";
+
+const linkClass =
+  "text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-2 cursor-pointer";
 
 /** Parol maydonining ichidagi "ko'z" tugmasi. */
 function PasswordToggle({ visible, onToggle }) {
@@ -87,6 +94,8 @@ export default function LoginPage() {
   const [registerStep, setRegisterStep] = useState("form");
   const [smsCode, setSmsCode] = useState("");
   const [resendIn, setResendIn] = useState(0);
+  // Ro'yxatdan o'tishda raqam band chiqsa, foydalanuvchiga yo'l ko'rsatamiz.
+  const [accountExists, setAccountExists] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -144,7 +153,9 @@ export default function LoginPage() {
 
   /** Token olingandan keyingi umumiy qadam: saqlash va rolga qarab yo'naltirish. */
   const applyAccessToken = (accessToken, successMessage) => {
-    localStorage.setItem("crm_access_token", accessToken);
+    // Oldingi foydalanuvchining keshi yangi sessiyaga o'tib ketmasligi kerak.
+    clearAuthSession();
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     showToast("success", successMessage);
 
     const role = String(parseAuthToken(accessToken)?.role || "").toUpperCase();
@@ -162,8 +173,10 @@ export default function LoginPage() {
     }, 800);
   };
 
-  const switchMode = (nextMode) => {
+  const switchMode = (nextMode, { keepPhone = false } = {}) => {
     setMode(nextMode);
+    setAccountExists(false);
+    if (!keepPhone) setLogin("");
     setPassword("");
     setShowPassword(false);
     setShowConfirmPassword(false);
@@ -259,19 +272,42 @@ export default function LoginPage() {
     return true;
   };
 
+  /** Parolni tiklashda faqat raqam kerak. */
+  const isForgotFormValid = () => {
+    if (!isValidPhone(login)) {
+      showToast("error", PHONE_ERROR_MESSAGE);
+      return false;
+    }
+    return true;
+  };
+
   /** 1-bosqich: raqamga SMS kod yuborish. */
   const handleSendCode = async ({ resend = false } = {}) => {
-    if (!resend && !isRegisterFormValid()) return;
+    const forgot = mode === "forgot";
+
+    if (!resend && !(forgot ? isForgotFormValid() : isRegisterFormValid())) {
+      return;
+    }
     if (resendIn > 0) return;
 
     try {
       setLoading(true);
-      await authApi.sendCode(normalizePhone(login));
+      // Parolni tiklashda backend avval hisob borligini tekshiradi va
+      // kodni RESET_PASSWORD maqsadi bilan yuboradi.
+      if (forgot) {
+        await authApi.forgotPassword(normalizePhone(login));
+      } else {
+        await authApi.sendCode(normalizePhone(login));
+      }
       setRegisterStep("code");
       setSmsCode("");
       setResendIn(RESEND_COOLDOWN_SECONDS);
       showToast("success", "Tasdiqlash kodi SMS orqali yuborildi");
     } catch (error) {
+      // 409 = raqam allaqachon band. Foydalanuvchiga aniq yo'l ko'rsatamiz.
+      if (!forgot && error?.response?.status === 409) {
+        setAccountExists(true);
+      }
       showToast("error", getRequestErrorMessage(error, "Kod yuborilmadi"));
     } finally {
       setLoading(false);
@@ -304,6 +340,9 @@ export default function LoginPage() {
 
       applyAccessToken(result.accessToken, "Ro'yxatdan o'tdingiz");
     } catch (error) {
+      if (error?.response?.status === 409) {
+        setAccountExists(true);
+      }
       showToast(
         "error",
         getRequestErrorMessage(error, "Ro'yxatdan o'tishda xato"),
@@ -313,26 +352,70 @@ export default function LoginPage() {
     }
   };
 
+  /** 2-bosqich (parolni tiklash): kod + yangi parol. */
+  const handleResetPassword = async () => {
+    const code = smsCode.trim();
+
+    if (code.length !== 6) {
+      showToast("error", "Tasdiqlash kodi 6 xonali bo'lishi kerak");
+      return;
+    }
+
+    if (registerForm.password.length < 6) {
+      showToast("error", "Parol kamida 6 ta belgidan iborat bo'lsin");
+      return;
+    }
+
+    if (registerForm.password !== registerForm.confirmPassword) {
+      showToast("error", "Parollar mos kelmadi");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await authApi.resetPassword({
+        phone: normalizePhone(login),
+        code,
+        password: registerForm.password,
+      });
+
+      const phone = login;
+      switchMode("login", { keepPhone: true });
+      setLogin(phone);
+      showToast("success", "Parol yangilandi. Endi tizimga kiring");
+    } catch (error) {
+      showToast("error", getRequestErrorMessage(error, "Parol yangilanmadi"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const isRegister = mode === "register";
-  const isCodeStep = isRegister && registerStep === "code";
+  const isForgot = mode === "forgot";
+  // Ikkala ko'p bosqichli oqim ham bir xil qadamlardan iborat: forma -> kod.
+  const isCodeStep = (isRegister || isForgot) && registerStep === "code";
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (loading) return;
-    if (!isRegister) {
+    if (mode === "login") {
       handleLogin();
-    } else if (isCodeStep) {
-      handleRegister();
-    } else {
+    } else if (!isCodeStep) {
       handleSendCode();
+    } else if (isForgot) {
+      handleResetPassword();
+    } else {
+      handleRegister();
     }
   };
 
   const submitLabel = loading
     ? "Tekshirilmoqda..."
     : isCodeStep
-      ? "Tasdiqlash va ro'yxatdan o'tish"
-      : isRegister
+      ? isForgot
+        ? "Parolni yangilash"
+        : "Tasdiqlash va ro'yxatdan o'tish"
+      : isRegister || isForgot
         ? "Kod olish"
         : "Kirish";
 
@@ -372,7 +455,11 @@ export default function LoginPage() {
           className="w-full max-w-sm sm:max-w-md lg:max-w-115 bg-white rounded-2xl sm:rounded-3xl shadow-lg p-6 sm:p-8 md:p-10"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
-            {isRegister ? "Ro'yxatdan o'tish" : "Tizimga kirish"}
+            {isRegister
+              ? "Ro'yxatdan o'tish"
+              : isForgot
+                ? "Parolni tiklash"
+                : "Tizimga kirish"}
           </h2>
 
           {isRegister && (
@@ -393,13 +480,18 @@ export default function LoginPage() {
 
           <div className="mb-4 sm:mb-5">
             <label className={labelClass}>
-              {isRegister ? "Telefon raqamingiz" : "Telefon raqami"}
+              {isRegister || isForgot
+                ? "Telefon raqamingiz"
+                : "Telefon raqami"}
             </label>
             <PhoneInput
               name="phone"
               autoComplete="tel"
               value={login}
-              onChange={(e) => setLogin(e.target.value)}
+              onChange={(e) => {
+                setLogin(e.target.value);
+                setAccountExists(false);
+              }}
               disabled={isCodeStep}
               className={inputClass}
             />
@@ -420,33 +512,44 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div className={isRegister ? "mb-4 sm:mb-5" : "mb-4"}>
-            <label className={labelClass}>Parol</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                autoComplete={isRegister ? "new-password" : "current-password"}
-                value={isRegister ? registerForm.password : password}
-                onChange={(e) =>
-                  isRegister
-                    ? handleRegisterChange(e)
-                    : setPassword(e.target.value)
-                }
-                placeholder={
-                  isRegister ? "Kamida 6 ta belgi" : "Parolni kiriting"
-                }
-                disabled={isCodeStep}
-                className={`${inputClass} pr-12`}
-              />
-              <PasswordToggle
-                visible={showPassword}
-                onToggle={() => setShowPassword((prev) => !prev)}
-              />
+          {/* Parolni tiklashda yangi parol faqat kod tasdiqlangach so'raladi. */}
+          {(!isForgot || isCodeStep) && (
+            <div className={isRegister || isForgot ? "mb-4 sm:mb-5" : "mb-4"}>
+              <label className={labelClass}>
+                {isForgot ? "Yangi parol" : "Parol"}
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  autoComplete={
+                    isRegister || isForgot ? "new-password" : "current-password"
+                  }
+                  value={
+                    isRegister || isForgot ? registerForm.password : password
+                  }
+                  onChange={(e) =>
+                    isRegister || isForgot
+                      ? handleRegisterChange(e)
+                      : setPassword(e.target.value)
+                  }
+                  placeholder={
+                    isRegister || isForgot
+                      ? "Kamida 6 ta belgi"
+                      : "Parolni kiriting"
+                  }
+                  disabled={isRegister && isCodeStep}
+                  className={`${inputClass} pr-12`}
+                />
+                <PasswordToggle
+                  visible={showPassword}
+                  onToggle={() => setShowPassword((prev) => !prev)}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
-          {isRegister && (
+          {(isRegister || (isForgot && isCodeStep)) && (
             <div className="mb-4 sm:mb-5">
               <label className={labelClass}>Parolni tasdiqlang</label>
               <div className="relative">
@@ -457,7 +560,7 @@ export default function LoginPage() {
                   value={registerForm.confirmPassword}
                   onChange={handleRegisterChange}
                   placeholder="Parolni qayta kiriting"
-                  disabled={isCodeStep}
+                  disabled={isRegister && isCodeStep}
                   className={`${inputClass} pr-12`}
                 />
                 <PasswordToggle
@@ -501,7 +604,33 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Parol maydonining tagida - ro'yxatdan o'tish / kirishga qaytish */}
+          {/* Raqam band bo'lsa, foydalanuvchini boshi berk ko'chada qoldirmaymiz */}
+          {accountExists && (
+            <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              <p className="mb-3">
+                Bu raqam allaqachon ro'yxatdan o'tgan. Tizimga kiring yoki
+                parolni tiklang.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => switchMode("login", { keepPhone: true })}
+                  className="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white hover:bg-emerald-600 cursor-pointer"
+                >
+                  Tizimga kirish
+                </button>
+                <button
+                  type="button"
+                  onClick={() => switchMode("forgot", { keepPhone: true })}
+                  className="rounded-lg border border-amber-300 px-4 py-2 font-semibold hover:bg-amber-100 cursor-pointer"
+                >
+                  Parolni tiklash
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Parol maydonining tagida - rejimlar orasida o'tish havolalari */}
           <div className="mb-6 text-sm sm:text-base text-gray-600">
             {isCodeStep ? (
               <span>
@@ -512,9 +641,20 @@ export default function LoginPage() {
                     setRegisterStep("form");
                     setSmsCode("");
                   }}
-                  className="text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-2 cursor-pointer"
+                  className={linkClass}
                 >
                   Orqaga
+                </button>
+              </span>
+            ) : isForgot ? (
+              <span>
+                Parolingiz esingizdami?{" "}
+                <button
+                  type="button"
+                  onClick={() => switchMode("login", { keepPhone: true })}
+                  className={linkClass}
+                >
+                  Tizimga kirish
                 </button>
               </span>
             ) : isRegister ? (
@@ -523,22 +663,39 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => switchMode("login")}
-                  className="text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-2 cursor-pointer"
+                  className={linkClass}
                 >
                   Tizimga kirish
                 </button>
-              </span>
-            ) : (
-              <span>
-                Ro'yxatdan o'tmaganmisiz?{" "}
+                {" · "}
                 <button
                   type="button"
-                  onClick={() => switchMode("register")}
-                  className="text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-2 cursor-pointer"
+                  onClick={() => switchMode("forgot", { keepPhone: true })}
+                  className={linkClass}
                 >
-                  Ro'yxatdan o'tish
+                  Parolni tiklash
                 </button>
               </span>
+            ) : (
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  Ro'yxatdan o'tmaganmisiz?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("register")}
+                    className={linkClass}
+                  >
+                    Ro'yxatdan o'tish
+                  </button>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => switchMode("forgot", { keepPhone: true })}
+                  className={linkClass}
+                >
+                  Parolni unutdingizmi?
+                </button>
+              </div>
             )}
           </div>
 
@@ -550,11 +707,13 @@ export default function LoginPage() {
             {submitLabel}
           </button>
 
-          {isRegister && (
+          {(isRegister || isForgot) && (
             <p className="mt-4 text-xs sm:text-sm text-gray-500 text-center">
               {isCodeStep
                 ? "Kod 3 daqiqa amal qiladi."
-                : "Raqamingizga SMS kod yuboriladi. Ro'yxatdan o'tgan foydalanuvchi talaba hisobiga ega bo'ladi."}
+                : isForgot
+                  ? "Ro'yxatdan o'tgan raqamingizga tiklash kodi yuboriladi."
+                  : "Raqamingizga SMS kod yuboriladi. Ro'yxatdan o'tgan foydalanuvchi talaba hisobiga ega bo'ladi."}
             </p>
           )}
         </form>

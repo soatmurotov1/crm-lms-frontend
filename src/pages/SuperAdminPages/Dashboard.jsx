@@ -24,7 +24,10 @@ import {
   usersApi,
 } from "../../api/crmApi";
 import { formatUzDate } from "../../utils/date";
-import { getAuthUserFromStorage } from "../../utils/authToken";
+import {
+  clearAuthSession,
+  getAuthUserFromStorage,
+} from "../../utils/authToken";
 import { useTheme } from "../../theme/themeContext";
 
 const RevenueLineChart = lazy(
@@ -58,6 +61,19 @@ const MENU_ITEMS = [
   { key: "notifications", label: "Xabarnomalar", icon: "🔔" },
   { key: "support", label: "Qo'llab-quvvatlash", icon: "🛟" },
 ];
+
+/** Menyu kaliti -> URL. App.jsx dagi SUPERADMIN_ROUTES bilan mos bo'lishi kerak. */
+const MENU_PATHS = {
+  dashboard: "/superadmin",
+  organizations: "/superadmin/organizations",
+  users: "/superadmin/users",
+  plans: "/superadmin/plans",
+  payments: "/superadmin/payments",
+  reports: "/superadmin/reports",
+  settings: "/superadmin/settings",
+  notifications: "/superadmin/notifications",
+  support: "/superadmin/support",
+};
 
 const formatUzs = (value) =>
   `${new Intl.NumberFormat("uz-UZ").format(Number(value || 0))} so'm`;
@@ -250,8 +266,18 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
   );
 
   const handleLogout = () => {
-    localStorage.removeItem("crm_access_token");
+    clearAuthSession();
     navigate("/", { replace: true });
+  };
+
+  /**
+   * Statistika kartasidan tegishli bo'limga o'tish. URL ham yangilanadi,
+   * shuning uchun brauzerning "orqaga" tugmasi ishlaydi.
+   */
+  const goToMenu = (menuKey) => {
+    const path = MENU_PATHS[menuKey];
+    if (path) navigate(path);
+    else setActiveMenu(menuKey);
   };
 
   const renderOverview = () => (
@@ -261,6 +287,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           icon="🏢"
           tone="violet"
           label="Jami tashkilotlar"
+          onClick={() => goToMenu("organizations")}
           value={
             loading
               ? "..."
@@ -273,6 +300,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           icon="💎"
           tone="blue"
           label="Faol obunalar"
+          onClick={() => goToMenu("plans")}
           value={
             loading
               ? "..."
@@ -290,6 +318,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           icon="🛟"
           tone="amber"
           label="Ochiq murojaatlar"
+          onClick={() => goToMenu("support")}
           value={loading ? "..." : formatNumber(supportSummary?.OPEN ?? 0)}
           deltaLabel={
             supportSummary?.total
@@ -301,6 +330,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           icon="💰"
           tone="emerald"
           label="Jami daromad"
+          onClick={() => goToMenu("payments")}
           value={loading ? "..." : formatUzs(totalRevenue)}
           deltaLabel={`${new Date().getFullYear()}-yil`}
         />
@@ -311,6 +341,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           icon="👥"
           tone="blue"
           label="Jami foydalanuvchilar"
+          onClick={() => goToMenu("users")}
           value={loading ? "..." : formatNumber(totalUsers)}
         />
         <StatCard
@@ -502,6 +533,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           canSend
           canViewAll
           canDelete
+          canTargetOrganization
           groups={groups}
           subtitle="Tizim bo'ylab xabarnomalarni yuborish va tarixi"
         />

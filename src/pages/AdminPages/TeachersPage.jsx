@@ -422,22 +422,22 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
         <div className="mt-5 hidden lg:block w-full min-w-0">
           <div className="rounded-2xl border overflow-hidden">
             <div className="overflow-x-auto w-full">
-              <table className="w-full text-sm table-fixed">
+              <table className="w-full min-w-[980px] text-sm table-fixed">
                 <thead className={darkMode ? "bg-slate-900/60" : "bg-slate-50"}>
                   <tr className={theme.soft}>
                     <th className="text-left font-medium px-3 py-4 w-[50px]">
                       #
                     </th>
-                    <th className="text-left font-medium px-3 py-4 w-[200px]">
+                    <th className="text-left font-medium px-3 py-4 w-[240px]">
                       Nomi
                     </th>
                     <th className="text-left font-medium px-3 py-4 w-[150px]">
                       Lavozim
                     </th>
-                    <th className="text-left font-medium px-3 py-4 w-[130px]">
+                    <th className="text-left font-medium px-3 py-4 w-[100px]">
                       Tajriba
                     </th>
-                    <th className="text-left font-medium px-3 py-4 w-[120px]">
+                    <th className="text-left font-medium px-3 py-4 w-[170px]">
                       Telefon
                     </th>
                     <th className="text-left font-medium px-3 py-4 w-[130px]">
@@ -512,7 +512,9 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                           {teacher.experience} yil
                         </td>
 
-                        <td className={`px-3 py-4 ${theme.text} truncate`}>
+                        <td
+                          className={`px-3 py-4 whitespace-nowrap ${theme.text}`}
+                        >
                           {teacher.phone}
                         </td>
 
@@ -1022,7 +1024,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                   )}
 
                   <p className={`text-sm font-medium ${theme.text}`}>
-                    Click to upload yoki yuklang
+                    Rasm yuklash uchun bosing
                   </p>
                   <p className={`text-xs mt-1 ${theme.soft}`}>JPG yoki PNG</p>
                 </label>
