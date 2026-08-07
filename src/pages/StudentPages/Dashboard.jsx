@@ -1148,14 +1148,21 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
       return;
     }
 
-    if (!item.groupId) return;
-    setActivePage("groups");
-    const params = new URLSearchParams();
-    params.set("groupId", String(item.groupId));
-    if (item.lessonId) {
-      params.set("lessonId", String(item.lessonId));
+    if (item.groupId) {
+      setActivePage("groups");
+      const params = new URLSearchParams();
+      params.set("groupId", String(item.groupId));
+      if (item.lessonId) {
+        params.set("lessonId", String(item.lessonId));
+      }
+      navigate(`/student/groups?${params.toString()}`);
+      return;
     }
-    navigate(`/student/groups?${params.toString()}`);
+
+    // Guruhga bog'lanmagan xabar (admin yuborgani) — bosilganda hech narsa
+    // ochilmay qolmasligi uchun to'liq matni bilan Xabarnomalar sahifasi ochiladi.
+    setActivePage("notifications");
+    navigate("/student/notifications");
   };
 
   const tokenUser = getAuthUserFromStorage();

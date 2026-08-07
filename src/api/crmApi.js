@@ -15,7 +15,8 @@ const getAuthScope = () => {
 
 const getCacheKey = (key) => `${API_CACHE_PREFIX}${getAuthScope()}:${key}`;
 
-const readCache = (key, ttl = API_CACHE_TTL) => {
+// Muddat yozishda saqlangani uchun o'qishda `ttl` kerak emas.
+const readCache = (key) => {
   try {
     const raw = localStorage.getItem(getCacheKey(key));
     if (!raw) return null;
@@ -60,7 +61,7 @@ const clearApiCache = () => {
 };
 
 const cachedGet = async (key, request, ttl = API_CACHE_TTL) => {
-  const cached = readCache(key, ttl);
+  const cached = readCache(key);
   if (cached !== null) {
     return cached;
   }
@@ -95,6 +96,41 @@ const toFormData = (payload) => {
   return formData;
 };
 
+/**
+ * 404 ikki xil bo'ladi va ularni farqlash shart:
+ *
+ *  - Nest marshrutni topmasa: `Cannot POST /auth/forgot-password` (eski deploy);
+ *  - Servis "topilmadi" desa: masalan "Bu telefon raqami ro'yxatdan o'tmagan".
+ *
+ * Ikkinchisi — foydalanuvchiga aytilishi kerak bo'lgan haqiqiy javob. Uni
+ * "endpoint yo'q" deb tushunsak, xabar yo'qoladi va foydalanuvchi sababini
+ * bilmay qoladi.
+ */
+export const isMissingEndpointError = (error) => {
+  if (error?.response?.status !== 404) return false;
+
+  const message = error.response.data?.message;
+  const text = Array.isArray(message) ? message[0] : message;
+
+  // Xabar bo'lmasa ham marshrut yo'q deb hisoblaymiz (proxy 404 qaytargan).
+  if (!text) return true;
+
+  return /^Cannot\s+(GET|POST|PUT|PATCH|DELETE)\b/i.test(String(text));
+};
+
+/**
+ * Yangi endpoint serverda hali yo'q bo'lsa (eski deploy), eskisiga qaytadi.
+ * Servisning o'z "topilmadi" xatosi esa o'z holicha yuqoriga o'tadi.
+ */
+const withLegacyFallback = async (request, legacyRequest) => {
+  try {
+    return unwrap(await request());
+  } catch (error) {
+    if (!isMissingEndpointError(error)) throw error;
+    return unwrap(await legacyRequest());
+  }
+};
+
 export const authApi = {
   loginAdmin: async (payload) => {
     return unwrap(await apiClient.post("/auth/login/admin", payload));
@@ -118,14 +154,27 @@ export const authApi = {
       await apiClient.post("/auth/verify-code", { phone, code, purpose }),
     );
   },
-  /** Parolni unutgan foydalanuvchining raqamiga tiklash kodini yuboradi. */
+  /**
+   * Parolni unutgan foydalanuvchining raqamiga tiklash kodini yuboradi.
+   *
+   * Serverda `forgot-password` bo'lmasa (eski deploy 404 qaytaradi), o'sha
+   * ishni bajaradigan eski yo'l — `send-code` + `RESET_PASSWORD` — ishlatiladi.
+   */
   forgotPassword: async (phone) => {
-    return unwrap(await apiClient.post("/auth/forgot-password", { phone }));
+    return withLegacyFallback(
+      () => apiClient.post("/auth/forgot-password", { phone }),
+      () =>
+        apiClient.post("/auth/send-code", {
+          phone,
+          purpose: "RESET_PASSWORD",
+        }),
+    );
   },
   /** SMS kod bilan yangi parol o'rnatadi. */
   resetPassword: async ({ phone, code, password }) => {
-    return unwrap(
-      await apiClient.post("/auth/reset-password", { phone, code, password }),
+    return withLegacyFallback(
+      () => apiClient.post("/auth/reset-password", { phone, code, password }),
+      () => apiClient.post("/auth/set-password", { phone, code, password }),
     );
   },
 };

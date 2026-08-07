@@ -17,8 +17,14 @@ export default function PasswordInput({
   className = "",
   ...rest
 }) {
-  const { theme } = useTheme();
+  const { theme, darkMode } = useTheme();
   const [visible, setVisible] = useState(false);
+
+  // "Ko'z" tugmasi maydon foniga singib ketmasligi uchun aylana fon beriladi —
+  // login sahifasidagi tugma bilan bir xil ko'rinish.
+  const toggleTone = darkMode
+    ? "text-slate-200 bg-white/10 hover:bg-white/20"
+    : "text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200";
 
   return (
     <div className="relative">
@@ -36,7 +42,7 @@ export default function PasswordInput({
       <button
         type="button"
         onClick={() => setVisible((prev) => !prev)}
-        className={`absolute inset-y-0 right-0 px-3 flex items-center ${theme.soft}`}
+        className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full flex items-center justify-center transition-colors cursor-pointer ${toggleTone}`}
         aria-label={visible ? "Parolni yashirish" : "Parolni ko'rsatish"}
         title={visible ? "Parolni yashirish" : "Parolni ko'rsatish"}
       >

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authApi } from "../../api/crmApi";
+import { authApi, isMissingEndpointError } from "../../api/crmApi";
 import { API_BASE_URL } from "../../api/client";
 import PhoneInput from "../../components/ui/PhoneInput";
 import {
@@ -17,9 +17,12 @@ const isAdminPhone = (value) =>
   Boolean(ADMIN_PHONE) && normalizePhone(value) === ADMIN_PHONE;
 
 const inputClass =
-  "w-full border border-gray-300 rounded-xl sm:rounded-2xl px-3 sm:px-5 py-2.5 sm:py-4 text-sm sm:text-base outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition";
+  "w-full border border-gray-300 rounded-xl px-3 sm:px-4 py-2.5 text-sm sm:text-base outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition";
 
-const labelClass = "block mb-2 text-sm sm:text-base md:text-lg font-medium";
+const labelClass = "block mb-1.5 text-sm sm:text-base font-medium";
+
+/** Maydonlar orasidagi oraliq — forma noutbuk ekraniga sig'ishi uchun ixcham. */
+const fieldClass = "mb-3 sm:mb-4";
 
 const linkClass =
   "text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-2 cursor-pointer";
@@ -142,8 +145,12 @@ export default function LoginPage() {
       return `Backendga ulanib bo'lmadi (${API_BASE_URL}). Serverni tekshiring`;
     }
 
-    // 404 = so'ralgan endpoint serverda umuman yo'q (odatda eski deploy).
-    if (error.response.status === 404) {
+    /*
+      404 ikki xil: marshrut yo'q (eski deploy) yoki servis "topilmadi" dedi.
+      Ikkinchisida serverning o'z xabari aynan foydalanuvchiga kerak —
+      masalan "Bu telefon raqami ro'yxatdan o'tmagan".
+    */
+    if (isMissingEndpointError(error)) {
       return `Endpoint topilmadi: ${error.config?.url}. Server eski versiyada ishlayapti`;
     }
 
@@ -420,7 +427,7 @@ export default function LoginPage() {
         : "Kirish";
 
   return (
-    <div className="min-h-screen grid md:grid-cols-2">
+    <div className="min-h-screen md:h-screen grid md:grid-cols-2 md:overflow-hidden">
       <div
         className={`fixed top-4 right-4 z-50 transform transition-all duration-500 ${
           toast.show
@@ -437,7 +444,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="hidden md:block">
+      <div className="hidden md:block h-full overflow-hidden">
         <img
           src="/login-bg.jpg"
           alt="EduCenter o'quv xonasi"
@@ -445,16 +452,16 @@ export default function LoginPage() {
         />
       </div>
 
-      <div className="flex flex-col items-center justify-center bg-[#f5f5fa] px-4 sm:px-6 py-8 sm:py-10 min-h-screen">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-500 mb-8 sm:mb-10">
+      <div className="flex flex-col items-center justify-center bg-[#f5f5fa] px-4 sm:px-6 py-6 min-h-screen md:h-screen md:min-h-0 md:overflow-y-auto">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-500 mb-4 sm:mb-6 shrink-0">
           EduCenter
         </h1>
 
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-sm sm:max-w-md lg:max-w-115 bg-white rounded-2xl sm:rounded-3xl shadow-lg p-6 sm:p-8 md:p-10"
+          className="w-full max-w-sm sm:max-w-md lg:max-w-115 bg-white rounded-2xl shadow-lg p-5 sm:p-6 md:p-8 shrink-0"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">
             {isRegister
               ? "Ro'yxatdan o'tish"
               : isForgot
@@ -463,7 +470,7 @@ export default function LoginPage() {
           </h2>
 
           {isRegister && (
-            <div className="mb-4 sm:mb-5">
+            <div className={fieldClass}>
               <label className={labelClass}>Ismingiz</label>
               <input
                 type="text"
@@ -478,7 +485,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div className="mb-4 sm:mb-5">
+          <div className={fieldClass}>
             <label className={labelClass}>
               {isRegister || isForgot
                 ? "Telefon raqamingiz"
@@ -498,7 +505,7 @@ export default function LoginPage() {
           </div>
 
           {isRegister && (
-            <div className="mb-4 sm:mb-5">
+            <div className={fieldClass}>
               <label className={labelClass}>Tug'ilgan sana</label>
               <input
                 type="date"
@@ -514,7 +521,7 @@ export default function LoginPage() {
 
           {/* Parolni tiklashda yangi parol faqat kod tasdiqlangach so'raladi. */}
           {(!isForgot || isCodeStep) && (
-            <div className={isRegister || isForgot ? "mb-4 sm:mb-5" : "mb-4"}>
+            <div className={fieldClass}>
               <label className={labelClass}>
                 {isForgot ? "Yangi parol" : "Parol"}
               </label>
@@ -550,7 +557,7 @@ export default function LoginPage() {
           )}
 
           {(isRegister || (isForgot && isCodeStep)) && (
-            <div className="mb-4 sm:mb-5">
+            <div className={fieldClass}>
               <label className={labelClass}>Parolni tasdiqlang</label>
               <div className="relative">
                 <input
@@ -572,7 +579,7 @@ export default function LoginPage() {
           )}
 
           {isCodeStep && (
-            <div className="mb-4 sm:mb-5">
+            <div className={fieldClass}>
               <label className={labelClass}>SMS kod</label>
               <input
                 type="text"
@@ -606,7 +613,7 @@ export default function LoginPage() {
 
           {/* Raqam band bo'lsa, foydalanuvchini boshi berk ko'chada qoldirmaymiz */}
           {accountExists && (
-            <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="mb-3 sm:mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
               <p className="mb-3">
                 Bu raqam allaqachon ro'yxatdan o'tgan. Tizimga kiring yoki
                 parolni tiklang.

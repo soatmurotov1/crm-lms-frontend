@@ -39,6 +39,7 @@ const EMPTY_FORM = {
   name: "",
   phone: "",
   password: "",
+  confirmPassword: "",
   adminName: "",
   address: "",
   directorName: "",
@@ -112,6 +113,7 @@ export default function OrganizationsPage() {
       name: organization.name || "",
       phone: organization.phone || "",
       password: "",
+      confirmPassword: "",
       adminName: organization.admin?.fullName || "",
       address: organization.address || "",
       directorName: organization.directorName || "",
@@ -156,6 +158,13 @@ export default function OrganizationsPage() {
       formData.password.trim().length < MIN_PASSWORD_LENGTH
     ) {
       alert(`Parol kamida ${MIN_PASSWORD_LENGTH} ta belgidan iborat bo'lishi kerak`);
+      return;
+    }
+
+    // Parol tasdiqlash — noto'g'ri terilgan parol bilan tashkilot ochilib,
+    // admin o'z hisobiga kira olmay qolmasligi uchun.
+    if (formData.password.trim() !== formData.confirmPassword.trim()) {
+      alert("Parollar mos kelmadi");
       return;
     }
 
@@ -448,6 +457,20 @@ export default function OrganizationsPage() {
                         ? `Kamida ${MIN_PASSWORD_LENGTH} ta belgi`
                         : "Bo'sh qoldirilsa o'zgarmaydi"
                     }
+                  />
+                </div>
+
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${theme.text}`}
+                  >
+                    Parolni tasdiqlang {editingId === null ? "*" : ""}
+                  </label>
+                  <PasswordInput
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Parolni qayta kiriting"
                   />
                 </div>
 
