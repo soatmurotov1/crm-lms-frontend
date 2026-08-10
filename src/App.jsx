@@ -89,6 +89,7 @@ const ADMIN_ROUTES = [
   { path: "/dashboard/room", menu: "settings", management: "rooms" },
   { path: "/dashboard/rooms", menu: "settings", management: "rooms" },
   { path: "/dashboard/employees", menu: "settings", management: "employees" },
+  { path: "/dashboard/security", menu: "settings", management: "security" },
 ];
 
 const SUPERADMIN_ROUTES = [

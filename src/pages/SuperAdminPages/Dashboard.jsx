@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PanelLayout from "../../components/layout/PanelLayout";
 import Card from "../../components/ui/Card";
+import ChangePasswordCard from "../../components/ui/ChangePasswordCard";
 import ChartFallback from "../../components/ui/ChartFallback";
 import ListCard from "../../components/ui/ListCard";
 import PlaceholderSection from "../../components/ui/PlaceholderSection";
@@ -24,10 +25,8 @@ import {
   usersApi,
 } from "../../api/crmApi";
 import { formatUzDate } from "../../utils/date";
-import {
-  clearAuthSession,
-  getAuthUserFromStorage,
-} from "../../utils/authToken";
+import { getAuthUserFromStorage } from "../../utils/authToken";
+import { logout } from "../../api/client";
 import { useTheme } from "../../theme/themeContext";
 
 const RevenueLineChart = lazy(
@@ -265,8 +264,10 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
     [organizations],
   );
 
-  const handleLogout = () => {
-    clearAuthSession();
+  const handleLogout = async () => {
+    // Sessiya serverda ham yopiladi — shu qurilmadagi token darhol o'lik
+    // bo'ladi, muddati tugashini kutmaydi.
+    await logout();
     navigate("/", { replace: true });
   };
 
@@ -512,18 +513,22 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
 
     if (activeMenu === "settings") {
       return (
-        <PlaceholderSection
-          icon="⚙️"
-          title="Tizim sozlamalari"
-          description="Butun platforma uchun umumiy sozlamalar bo'limi."
-          points={[
-            "Tashkilot nomi, logotipi va aloqa ma'lumotlari",
-            "SMS provayderi va xabarnoma shablonlari",
-            "To'lov tizimlari (Payme, Click) kalitlari",
-            "Rollar va ruxsatlar matritsasi",
-          ]}
-          note="Backend'da settings endpointlari qo'shilganda shu bo'lim real ma'lumot bilan to'ldiriladi."
-        />
+        <div className="space-y-5">
+          <ChangePasswordCard onSubmit={usersApi.changeMyPassword} />
+
+          <PlaceholderSection
+            icon="⚙️"
+            title="Tizim sozlamalari"
+            description="Butun platforma uchun umumiy sozlamalar bo'limi."
+            points={[
+              "Tashkilot nomi, logotipi va aloqa ma'lumotlari",
+              "SMS provayderi va xabarnoma shablonlari",
+              "To'lov tizimlari (Payme, Click) kalitlari",
+              "Rollar va ruxsatlar matritsasi",
+            ]}
+            note="Backend'da settings endpointlari qo'shilganda shu bo'lim real ma'lumot bilan to'ldiriladi."
+          />
+        </div>
       );
     }
 

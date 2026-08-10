@@ -3,15 +3,6 @@ import PasswordInput from "../../components/ui/PasswordInput";
 import { usersApi } from "../../api/crmApi";
 import { toInputDate } from "../../utils/date";
 
-const roles = [
-  "SUPERADMIN",
-  "ADMIN",
-  "MANAGEMENT",
-  "ADMINSTRATOR",
-  "TEACHER",
-  "STUDENT",
-];
-
 const formatDate = (value) => {
   if (!value) return "-";
   const [year, month, day] = value.split("-");
@@ -42,7 +33,6 @@ export default function EmployeesPage({ theme, darkMode }) {
     phone: "",
     hireDate: "",
     password: "",
-    role: "",
     position: "",
     address: "",
     photo: "",
@@ -101,7 +91,6 @@ export default function EmployeesPage({ theme, darkMode }) {
       phone: "",
       hireDate: "",
       password: "",
-      role: "",
       position: "",
       address: "",
       photo: "",
@@ -116,7 +105,6 @@ export default function EmployeesPage({ theme, darkMode }) {
       phone: "",
       hireDate: "",
       password: "",
-      role: "",
       position: "",
       address: "",
       photo: "",
@@ -132,7 +120,6 @@ export default function EmployeesPage({ theme, darkMode }) {
       phone: employee.phone,
       hireDate: employee.hireDate,
       password: "",
-      role: employee.role,
       position: employee.position || "",
       address: employee.address || "",
       photo: "",
@@ -182,7 +169,6 @@ export default function EmployeesPage({ theme, darkMode }) {
         await usersApi.update(editingEmployeeId, {
           fullName: formData.fullName.trim(),
           phone: formData.phone.trim(),
-          role: formData.role || undefined,
           position: formData.position.trim(),
           address: formData.address.trim() || undefined,
           ...(formData.photo instanceof File ? { photo: formData.photo } : {}),
@@ -192,16 +178,16 @@ export default function EmployeesPage({ theme, darkMode }) {
           alert("Yangi xodim uchun parol kiriting");
           return;
         }
-        if (!formData.role.trim() || !formData.hireDate) {
-          alert("Yangi xodim uchun role va ishga kirgan sanani kiriting");
+        if (!formData.hireDate) {
+          alert("Yangi xodim uchun ishga kirgan sanani kiriting");
           return;
         }
 
+        // Rol formada tanlanmaydi — backend yangi xodimga ADMIN rolini beradi.
         const createdResult = await usersApi.create({
           fullName: formData.fullName.trim(),
           phone: formData.phone.trim(),
           password: formData.password.trim(),
-          role: formData.role,
           position: formData.position.trim(),
           hire_date: formData.hireDate,
           address: formData.address.trim() || undefined,
@@ -653,27 +639,6 @@ export default function EmployeesPage({ theme, darkMode }) {
                       : "Parol"
                   }
                 />
-              </div>
-
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-2 ${theme.text}`}
-                >
-                  Rol
-                </label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
-                >
-                  <option value="">Tanlang</option>
-                  {roles.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div>

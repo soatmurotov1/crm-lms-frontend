@@ -14,7 +14,9 @@ import {
   groupsApi,
   paymentsApi,
   studentsApi,
+  usersApi,
 } from "../../api/crmApi";
+import ChangePasswordCard from "../../components/ui/ChangePasswordCard";
 import StatCard from "../../components/ui/StatCard";
 import Card from "../../components/ui/Card";
 import SectionHeader from "../../components/ui/SectionHeader";
@@ -35,10 +37,8 @@ const PaymentsDonut = lazy(
 const AttendanceBars = lazy(
   () => import("../../components/charts/AttendanceBars"),
 );
-import {
-  clearAuthSession,
-  getAuthUserFromStorage,
-} from "../../utils/authToken";
+import { getAuthUserFromStorage } from "../../utils/authToken";
+import { logout } from "../../api/client";
 import { useTheme } from "../../theme/themeContext";
 
 const menuItems = [
@@ -59,6 +59,7 @@ const managementItems = [
   { id: 2, key: "rooms", icon: "🚪" },
   { id: 3, key: "employees", icon: "👤" },
   { id: 4, key: "exams", icon: "📝" },
+  { id: 5, key: "security", icon: "🔐" },
 ];
 
 const statsData = [
@@ -149,6 +150,7 @@ const translations = {
     courses: "Kurslar",
     rooms: "Xonalar",
     employees: "Hodimlar",
+    security: "Xavfsizlik",
     activeStudents: "Faol talabalar",
     frozen: "Muzlatilganlar",
     archived: "Arxivdagilar",
@@ -177,6 +179,8 @@ const translations = {
     courseDurationMonth: "Kurs davomiyligi (oy)",
     price: "Narx",
     pricePlaceholder: "Masalan: 250000",
+    durationMinPlaceholder: "Yozing yoki quyidan tanlang, masalan: 75",
+    durationMonthPlaceholder: "Yozing yoki quyidan tanlang, masalan: 4",
     description: "Tavsif",
     descriptionPlaceholder: "Kurs haqida qisqacha...",
     choose: "Tanlang",
@@ -209,6 +213,7 @@ const translations = {
     courses: "Courses",
     rooms: "Rooms",
     employees: "Employees",
+    security: "Security",
     faq: "FAQ",
     inspection: "Inspection",
     activeStudents: "Active students",
@@ -239,6 +244,8 @@ const translations = {
     courseDurationMonth: "Course duration (month)",
     price: "Price",
     pricePlaceholder: "Example: 250000",
+    durationMinPlaceholder: "Type or pick below, e.g. 75",
+    durationMonthPlaceholder: "Type or pick below, e.g. 4",
     description: "Description",
     descriptionPlaceholder: "Short description...",
     choose: "Select",
@@ -271,6 +278,7 @@ const translations = {
     courses: "Курсы",
     rooms: "Комнаты",
     employees: "Сотрудники",
+    security: "Безопасность",
     activeStudents: "Активные студенты",
     frozen: "Замороженные",
     archived: "В архиве",
@@ -299,6 +307,8 @@ const translations = {
     courseDurationMonth: "Длительность курса (месяц)",
     price: "Цена",
     pricePlaceholder: "Например: 250000",
+    durationMinPlaceholder: "Введите или выберите ниже, например: 75",
+    durationMonthPlaceholder: "Введите или выберите ниже, например: 4",
     description: "Описание",
     descriptionPlaceholder: "Кратко о курсе...",
     choose: "Выберите",
@@ -334,25 +344,51 @@ function InputField({
   );
 }
 
-function SelectField({ label, name, value, onChange, items, theme, choose }) {
+/**
+ * Kurs davomiyligi kabi maydonlar uchun: qiymatni qo'lda yozish ham, tayyor
+ * variantlardan tanlash ham mumkin. Tanlangan variant tugmasi ajratib turadi,
+ * lekin ro'yxatda yo'q qiymat yozilsa ham forma uni qabul qiladi.
+ */
+function NumberChoiceField({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  items,
+  theme,
+}) {
   return (
     <div>
       <label className={`block text-sm font-medium mb-2 ${theme.text}`}>
         {label}
       </label>
-      <select
+      <input
+        type="number"
+        min="1"
         name={name}
         value={value}
         onChange={onChange}
+        placeholder={placeholder}
         className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
-      >
-        <option value="">{choose}</option>
+      />
+
+      <div className="flex flex-wrap gap-2 mt-2">
         {items.map((item) => (
-          <option key={item.value} value={item.value}>
+          <button
+            key={item.value}
+            type="button"
+            onClick={() =>
+              onChange({ target: { name, value: item.value } })
+            }
+            className={`px-3 py-1.5 rounded-xl border text-sm cursor-pointer ${
+              String(value) === item.value ? theme.tabActive : theme.tab
+            }`}
+          >
             {item.label}
-          </option>
+          </button>
         ))}
-      </select>
+      </div>
     </div>
   );
 }
@@ -536,6 +572,7 @@ export default function DashboardPage({
     rooms: "/dashboard/room",
     employees: "/dashboard/employees",
     exams: "/dashboard/exams",
+    security: "/dashboard/security",
   };
 
   const openMenu = (menuKey) => {
@@ -551,8 +588,10 @@ export default function DashboardPage({
     navigate(managementPathMap[managementKey] || "/dashboard/settings");
   };
 
-  const handleLogout = () => {
-    clearAuthSession();
+  const handleLogout = async () => {
+    // Sessiya serverda ham yopiladi — shu qurilmadagi token darhol o'lik
+    // bo'ladi, muddati tugashini kutmaydi.
+    await logout();
     navigate("/", { replace: true });
   };
 
@@ -941,12 +980,12 @@ export default function DashboardPage({
                   theme={theme}
                 />
 
-                <SelectField
+                <NumberChoiceField
                   label={t.courseDurationMin}
                   name="durationMin"
                   value={formData.durationMin}
                   onChange={handleFormChange}
-                  choose={t.choose}
+                  placeholder={t.durationMinPlaceholder}
                   items={[
                     { value: "60", label: "60 min" },
                     { value: "90", label: "90 min" },
@@ -955,12 +994,12 @@ export default function DashboardPage({
                   theme={theme}
                 />
 
-                <SelectField
+                <NumberChoiceField
                   label={t.courseDurationMonth}
                   name="durationMonth"
                   value={formData.durationMonth}
                   onChange={handleFormChange}
-                  choose={t.choose}
+                  placeholder={t.durationMonthPlaceholder}
                   items={[
                     { value: "3", label: "3 oy" },
                     { value: "6", label: "6 oy" },
@@ -1028,6 +1067,8 @@ export default function DashboardPage({
     if (activeManagement === "employees")
       return <EmployeesPage theme={theme} darkMode={darkMode} />;
     if (activeManagement === "exams") return <ExamsPage />;
+    if (activeManagement === "security")
+      return <ChangePasswordCard onSubmit={usersApi.changeMyPassword} />;
     return null;
   };
 

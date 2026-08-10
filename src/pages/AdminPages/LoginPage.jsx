@@ -4,9 +4,9 @@ import { authApi, isMissingEndpointError } from "../../api/crmApi";
 import { API_BASE_URL } from "../../api/client";
 import PhoneInput from "../../components/ui/PhoneInput";
 import {
-  ACCESS_TOKEN_KEY,
   clearAuthSession,
   parseAuthToken,
+  saveAuthTokens,
 } from "../../utils/authToken";
 import { PHONE_ERROR_MESSAGE, isValidPhone, normalizePhone } from "../../utils/phone";
 
@@ -159,10 +159,12 @@ export default function LoginPage() {
   };
 
   /** Token olingandan keyingi umumiy qadam: saqlash va rolga qarab yo'naltirish. */
-  const applyAccessToken = (accessToken, successMessage) => {
+  const applySession = (result, successMessage) => {
+    const accessToken = result?.accessToken || result?.access_token;
+
     // Oldingi foydalanuvchining keshi yangi sessiyaga o'tib ketmasligi kerak.
     clearAuthSession();
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    saveAuthTokens({ accessToken, refreshToken: result?.refreshToken });
     showToast("success", successMessage);
 
     const role = String(parseAuthToken(accessToken)?.role || "").toUpperCase();
@@ -238,7 +240,7 @@ export default function LoginPage() {
         throw new Error("Token kelmadi");
       }
 
-      applyAccessToken(result.accessToken, "Tizimga muvaffaqiyatli kirdingiz");
+      applySession(result, "Tizimga muvaffaqiyatli kirdingiz");
     } catch (error) {
       showToast(
         "error",
@@ -345,7 +347,7 @@ export default function LoginPage() {
         throw new Error("Token kelmadi");
       }
 
-      applyAccessToken(result.accessToken, "Ro'yxatdan o'tdingiz");
+      applySession(result, "Ro'yxatdan o'tdingiz");
     } catch (error) {
       if (error?.response?.status === 409) {
         setAccountExists(true);

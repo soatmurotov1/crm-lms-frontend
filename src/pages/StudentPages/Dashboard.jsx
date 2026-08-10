@@ -26,10 +26,8 @@ import StatCard from "../../components/ui/StatCard";
 import ListCard from "../../components/ui/ListCard";
 import PlaceholderSection from "../../components/ui/PlaceholderSection";
 import { useTheme } from "../../theme/themeContext";
-import {
-  clearAuthSession,
-  getAuthUserFromStorage,
-} from "../../utils/authToken";
+import { getAuthUserFromStorage } from "../../utils/authToken";
+import { logout } from "../../api/client";
 import {
   DAY_INDEX_TO_ENUM,
   WEEK_DAYS,
@@ -1049,8 +1047,10 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     });
   };
 
-  const handleLogout = () => {
-    clearAuthSession();
+  const handleLogout = async () => {
+    // Sessiya serverda ham yopiladi — shu qurilmadagi token darhol o'lik
+    // bo'ladi, muddati tugashini kutmaydi.
+    await logout();
     navigate("/", { replace: true });
   };
 

@@ -1,17 +1,16 @@
 import { apiClient } from "./client";
+import { getSessionScope } from "../utils/authToken";
 
 const unwrap = (response) => response?.data;
 const API_CACHE_PREFIX = "crm_api_cache_v1:";
 const API_CACHE_TTL = 1000 * 60 * 5;
 
-const getAuthScope = () => {
-  try {
-    const token = localStorage.getItem("crm_access_token") || "guest";
-    return token.slice(-16);
-  } catch {
-    return "guest";
-  }
-};
+/*
+  Kesh sessiya bo'yicha ajratiladi. Ilgari bu access tokenning oxirgi 16
+  belgisi edi — token har yangilanganda o'zgarardi va butun kesh bekorga
+  yo'qolardi. Sessiya belgisi (`sid`) esa qayta login qilinmaguncha o'zgarmaydi.
+*/
+const getAuthScope = () => getSessionScope();
 
 const getCacheKey = (key) => `${API_CACHE_PREFIX}${getAuthScope()}:${key}`;
 
@@ -690,4 +689,7 @@ export const usersApi = {
     withCacheInvalidation(async () =>
       unwrap(await apiClient.delete(`/users/${id}`)),
     ),
+  /** Xodim (admin, superadmin, menejer, administrator) o'z parolini almashtiradi. */
+  changeMyPassword: async (payload) =>
+    unwrap(await apiClient.put("/users/my/password", payload)),
 };

@@ -13,10 +13,8 @@ import NotificationsSection from "../../components/notifications/NotificationsSe
 import GradesSection from "../../components/grades/GradesSection";
 import SectionHeader from "../../components/ui/SectionHeader";
 import StatCard from "../../components/ui/StatCard";
-import {
-  clearAuthSession,
-  getAuthUserFromStorage,
-} from "../../utils/authToken";
+import { getAuthUserFromStorage } from "../../utils/authToken";
+import { logout } from "../../api/client";
 import { useTheme } from "../../theme/themeContext";
 import { attendanceApi, groupsApi, homeworkApi } from "../../api/crmApi";
 import StudentHome from "../StudentPages/components/StudentHome";
@@ -545,8 +543,10 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
     navigate(MENU_PATHS[menuKey] || "/teacher");
   };
 
-  const handleLogout = () => {
-    clearAuthSession();
+  const handleLogout = async () => {
+    // Sessiya serverda ham yopiladi — shu qurilmadagi token darhol o'lik
+    // bo'ladi, muddati tugashini kutmaydi.
+    await logout();
     navigate("/", { replace: true });
   };
 
