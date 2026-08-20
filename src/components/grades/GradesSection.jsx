@@ -5,13 +5,14 @@ import StatCard from "../ui/StatCard";
 import { gradesApi, groupsApi, lessonsApi } from "../../api/crmApi";
 import { formatUzDate, toInputDate } from "../../utils/date";
 import { useTheme } from "../../theme/themeContext";
+import Icon from "../ui/Icon";
 
 const GRADE_TYPES = [
-  { value: "LESSON", label: "Dars", icon: "📖" },
-  { value: "HOMEWORK", label: "Uy vazifa", icon: "📝" },
-  { value: "EXAM", label: "Imtihon", icon: "🧪" },
-  { value: "BEHAVIOR", label: "Xulq", icon: "🙂" },
-  { value: "OTHER", label: "Boshqa", icon: "⭐" },
+  { value: "LESSON", label: "Dars", icon: "groups" },
+  { value: "HOMEWORK", label: "Uy vazifa", icon: "homework" },
+  { value: "EXAM", label: "Imtihon", icon: "exams" },
+  { value: "BEHAVIOR", label: "Xulq", icon: "smile" },
+  { value: "OTHER", label: "Boshqa", icon: "star" },
 ];
 
 const getTypeLabel = (type) =>
@@ -27,10 +28,12 @@ const EMPTY_FORM = {
   date: "",
 };
 
+// `StatCard` faqat e'tibor talab qiladigan ohanglarni bo'yaydi: yuqori
+// natija neytral qoladi, past natija ko'zga tashlanadi.
 const percentTone = (percent) => {
-  if (percent >= 85) return "emerald";
-  if (percent >= 60) return "amber";
-  return "rose";
+  if (percent >= 85) return "neutral";
+  if (percent >= 60) return "warning";
+  return "danger";
 };
 
 /**
@@ -38,7 +41,7 @@ const percentTone = (percent) => {
  * Guruh tanlanadi, so'ng o'sha guruh o'quvchilariga baho qo'yiladi.
  */
 export default function GradesSection({ groups = [], loading = false }) {
-  const { theme, darkMode } = useTheme();
+  const { theme } = useTheme();
 
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [students, setStudents] = useState([]);
@@ -199,19 +202,19 @@ export default function GradesSection({ groups = [], loading = false }) {
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <StatCard
-          icon="⭐"
+          icon="star"
           tone="violet"
           label="Qo'yilgan baholar"
           value={gradesLoading ? "..." : grades.length}
         />
         <StatCard
-          icon="📊"
+          icon="reports"
           tone="blue"
           label="O'rtacha ball"
           value={gradesLoading ? "..." : stats.average}
         />
         <StatCard
-          icon="✅"
+          icon="checkCircle"
           tone={percentTone(stats.averagePercent)}
           label="O'rtacha foiz"
           value={gradesLoading ? "..." : `${stats.averagePercent}%`}
@@ -227,7 +230,7 @@ export default function GradesSection({ groups = [], loading = false }) {
               type="button"
               onClick={() => (showForm ? closeForm() : openForm(null))}
               disabled={!selectedGroupId}
-              className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium disabled:opacity-60"
+              className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md text-sm font-medium disabled:opacity-60"
             >
               {showForm ? "Yopish" : "+ Baho qo'yish"}
             </button>
@@ -241,7 +244,7 @@ export default function GradesSection({ groups = [], loading = false }) {
           <select
             value={selectedGroupId}
             onChange={(event) => setSelectedGroupId(event.target.value)}
-            className={`w-full sm:max-w-xs rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+            className={`w-full sm:max-w-xs field`}
           >
             <option value="">Guruhni tanlang</option>
             {groups.map((group) => (
@@ -260,7 +263,7 @@ export default function GradesSection({ groups = [], loading = false }) {
                 value={form.studentId}
                 onChange={handleChange}
                 disabled={editingId !== null}
-                className={`w-full rounded-xl border px-4 py-3 outline-none disabled:opacity-60 ${theme.select}`}
+                className={`w-full field disabled:opacity-60`}
               >
                 <option value="">O'quvchini tanlang</option>
                 {students.map((student) => (
@@ -274,7 +277,7 @@ export default function GradesSection({ groups = [], loading = false }) {
                 name="type"
                 value={form.type}
                 onChange={handleChange}
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                className={`w-full field`}
               >
                 {GRADE_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -288,7 +291,7 @@ export default function GradesSection({ groups = [], loading = false }) {
                 value={form.lessonId}
                 onChange={handleChange}
                 disabled={editingId !== null}
-                className={`w-full rounded-xl border px-4 py-3 outline-none disabled:opacity-60 ${theme.select}`}
+                className={`w-full field disabled:opacity-60`}
               >
                 <option value="">Dars tanlanmagan</option>
                 {lessons.map((lesson) => (
@@ -303,7 +306,7 @@ export default function GradesSection({ groups = [], loading = false }) {
                 name="date"
                 value={form.date}
                 onChange={handleChange}
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                className={`w-full field`}
               />
 
               <input
@@ -312,7 +315,7 @@ export default function GradesSection({ groups = [], loading = false }) {
                 value={form.score}
                 onChange={handleChange}
                 placeholder="Baho (masalan: 85)"
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                className={`w-full field`}
               />
 
               <input
@@ -321,7 +324,7 @@ export default function GradesSection({ groups = [], loading = false }) {
                 value={form.maxScore}
                 onChange={handleChange}
                 placeholder="Maksimal ball (100)"
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                className={`w-full field`}
               />
             </div>
 
@@ -338,7 +341,7 @@ export default function GradesSection({ groups = [], loading = false }) {
               <button
                 type="button"
                 onClick={closeForm}
-                className={`px-5 py-2.5 rounded-xl border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
+                className={`px-3.5 py-2 rounded-md border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
               >
                 Bekor qilish
               </button>
@@ -346,7 +349,7 @@ export default function GradesSection({ groups = [], loading = false }) {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium disabled:opacity-60"
+                className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white text-sm font-medium disabled:opacity-60"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>
@@ -354,7 +357,7 @@ export default function GradesSection({ groups = [], loading = false }) {
           </div>
         )}
 
-        {error && <p className="text-sm text-rose-500 mb-4">{error}</p>}
+        {error && <p className="text-sm text-danger mb-4">{error}</p>}
 
         {loading || gradesLoading ? (
           <p className={`text-sm ${theme.soft}`}>Yuklanmoqda...</p>
@@ -387,7 +390,7 @@ export default function GradesSection({ groups = [], loading = false }) {
                       </p>
                       {grade.comment && (
                         <p className={`text-sm mt-1 ${theme.soft}`}>
-                          💬 {grade.comment}
+                          <Icon name="chat" size={14} className="inline align-[-0.1875em]" /> {grade.comment}
                         </p>
                       )}
                     </div>
@@ -407,20 +410,16 @@ export default function GradesSection({ groups = [], loading = false }) {
                     <button
                       type="button"
                       onClick={() => openForm(grade)}
-                      className={`px-4 py-2 rounded-xl border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
+                      className={`px-3 py-1.5 rounded-md border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
                     >
-                      ✏️ Tahrirlash
+                      Tahrirlash
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDelete(grade)}
-                      className={`px-4 py-2 rounded-xl border text-sm ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-red-900/30 text-slate-300"
-                          : "border-slate-200 hover:bg-red-50 text-slate-600"
-                      }`}
+                      className={`px-3 py-1.5 rounded-md border text-sm border-line hover:bg-danger-soft text-fg-muted`}
                     >
-                      🗑️
+                      <Icon name="trash" size={16} />
                     </button>
                   </div>
                 </div>

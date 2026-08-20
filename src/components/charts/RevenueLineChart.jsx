@@ -8,7 +8,13 @@ import {
   YAxis,
 } from "recharts";
 import { useTheme } from "../../theme/themeContext";
-import { MONTH_LABELS, compactUzs, fullUzs, getChartColors } from "./chartTheme";
+import {
+  MONTH_LABELS,
+  compactUzs,
+  fullUzs,
+  getChartColors,
+  getTooltipStyle,
+} from "./chartTheme";
 
 /**
  * "Daromad statistikasi" — yil davomida oylik to'langan summa.
@@ -39,36 +45,34 @@ export default function RevenueLineChart({ months = [], height = 260 }) {
       <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
         <defs>
           <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colors.accent} stopOpacity={0.35} />
+            <stop offset="0%" stopColor={colors.accent} stopOpacity={0.16} />
             <stop offset="100%" stopColor={colors.accent} stopOpacity={0} />
           </linearGradient>
         </defs>
 
-        <CartesianGrid stroke={colors.grid} vertical={false} />
+        {/* Faqat gorizontal chiziqlar va ular ham uzuq — to'r ma'lumotni
+            o'qishga yordam berishi kerak, u bilan raqobatlashmasligi emas. */}
+        <CartesianGrid stroke={colors.grid} strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="label"
           stroke={colors.axis}
           tickLine={false}
           axisLine={false}
-          fontSize={12}
+          fontSize={11}
+          dy={4}
         />
         <YAxis
           stroke={colors.axis}
           tickLine={false}
           axisLine={false}
-          fontSize={12}
+          fontSize={11}
           tickFormatter={compactUzs}
-          width={64}
+          width={56}
         />
         <Tooltip
           formatter={(value) => [fullUzs(value), "To'langan"]}
-          contentStyle={{
-            background: colors.tooltipBg,
-            border: `1px solid ${colors.tooltipBorder}`,
-            borderRadius: 12,
-            color: colors.tooltipText,
-          }}
-          labelStyle={{ color: colors.tooltipText }}
+          cursor={{ stroke: colors.axis, strokeDasharray: "3 3" }}
+          {...getTooltipStyle(colors)}
         />
         <Area
           type="monotone"
@@ -76,6 +80,7 @@ export default function RevenueLineChart({ months = [], height = 260 }) {
           stroke={colors.accent}
           strokeWidth={2}
           fill="url(#revenueFill)"
+          activeDot={{ r: 3.5, strokeWidth: 2, stroke: colors.tooltipBg }}
         />
       </AreaChart>
     </ResponsiveContainer>

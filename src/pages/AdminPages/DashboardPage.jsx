@@ -25,6 +25,7 @@ import ListCard from "../../components/ui/ListCard";
 import PlaceholderSection from "../../components/ui/PlaceholderSection";
 import NotificationsSection from "../../components/notifications/NotificationsSection";
 import PanelLayout from "../../components/layout/PanelLayout";
+import Icon from "../../components/ui/Icon";
 
 // Recharts og'ir kutubxona — faqat dashboard ochilganda yuklanadi,
 // login sahifasining bundle'iga tushmasligi uchun lazy import qilinadi.
@@ -42,31 +43,31 @@ import { logout } from "../../api/client";
 import { useTheme } from "../../theme/themeContext";
 
 const menuItems = [
-  { id: 1, key: "dashboard", icon: "🏠" },
-  { id: 2, key: "students", icon: "🎓" },
-  { id: 3, key: "groups", icon: "📚" },
-  { id: 4, key: "teachers", icon: "👨‍🏫" },
-  { id: 5, key: "attendance", icon: "✅" },
-  { id: 6, key: "payments", icon: "💳" },
-  { id: 7, key: "reports", icon: "📊" },
-  { id: 8, key: "notifications", icon: "🔔" },
-  { id: 9, key: "settings", icon: "⚙️" },
+  { id: 1, key: "dashboard", icon: "home" },
+  { id: 2, key: "students", icon: "students" },
+  { id: 3, key: "groups", icon: "groups" },
+  { id: 4, key: "teachers", icon: "teachers" },
+  { id: 5, key: "attendance", icon: "checkCircle" },
+  { id: 6, key: "payments", icon: "payments" },
+  { id: 7, key: "reports", icon: "reports" },
+  { id: 8, key: "notifications", icon: "bell" },
+  { id: 9, key: "settings", icon: "settings" },
 ];
 
 // Eski "Boshqarish" bo'limi endi "Sozlamalar" ichidagi tablar sifatida yashaydi.
 const managementItems = [
-  { id: 1, key: "courses", icon: "📘" },
-  { id: 2, key: "rooms", icon: "🚪" },
-  { id: 3, key: "employees", icon: "👤" },
-  { id: 4, key: "exams", icon: "📝" },
-  { id: 5, key: "security", icon: "🔐" },
+  { id: 1, key: "courses", icon: "folder" },
+  { id: 2, key: "rooms", icon: "door" },
+  { id: 3, key: "employees", icon: "user" },
+  { id: 4, key: "exams", icon: "homework" },
+  { id: 5, key: "security", icon: "security" },
 ];
 
 const statsData = [
-  { id: 1, key: "totalStudents", icon: "🎓" },
-  { id: 2, key: "activeGroups", icon: "📚" },
-  { id: 3, key: "todayAttendance", icon: "✅" },
-  { id: 4, key: "debtors", icon: "⚠️" },
+  { id: 1, key: "totalStudents", icon: "students" },
+  { id: 2, key: "activeGroups", icon: "groups" },
+  { id: 3, key: "todayAttendance", icon: "checkCircle" },
+  { id: 4, key: "debtors", icon: "warning" },
 ];
 
 const STAT_TONES = {
@@ -338,7 +339,7 @@ function InputField({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+        className={`w-full field`}
       />
     </div>
   );
@@ -370,7 +371,7 @@ function NumberChoiceField({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+        className={`w-full field`}
       />
 
       <div className="flex flex-wrap gap-2 mt-2">
@@ -381,7 +382,7 @@ function NumberChoiceField({
             onClick={() =>
               onChange({ target: { name, value: item.value } })
             }
-            className={`px-3 py-1.5 rounded-xl border text-sm cursor-pointer ${
+            className={`px-2.5 py-1.5 rounded-md border text-sm cursor-pointer ${
               String(value) === item.value ? theme.tabActive : theme.tab
             }`}
           >
@@ -853,7 +854,7 @@ export default function DashboardPage({
 
             <button
               onClick={openAddDrawer}
-              className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-3 rounded-xl font-medium"
+              className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md font-medium"
             >
               + {t.addCourse}
             </button>
@@ -886,34 +887,32 @@ export default function DashboardPage({
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleDeleteCourse(course.id)}
-                        className={`w-8 h-8 rounded-lg border ${theme.rowBorder} ${
-                          darkMode ? "hover:bg-red-900/30" : "hover:bg-red-50"
-                        }`}
+                        className={`w-8 h-8 rounded-lg border ${theme.rowBorder} hover:bg-danger-soft`}
                       >
-                        🗑️
+                        <Icon name="trash" size={16} />
                       </button>
                       <button
                         onClick={() => openEditDrawer(course)}
                         className={`w-8 h-8 rounded-lg border ${theme.rowBorder} ${theme.hover}`}
                       >
-                        ✏️
+                        <Icon name="edit" size={16} />
                       </button>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2 mt-5">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs border ${theme.chip}`}
+                      className={`px-2 py-0.5 rounded-md text-xs border ${theme.chip}`}
                     >
                       {course.durationMin} min
                     </span>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs border ${theme.chip}`}
+                      className={`px-2 py-0.5 rounded-md text-xs border ${theme.chip}`}
                     >
                       {course.durationMonth} oy
                     </span>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs border ${theme.chip}`}
+                      className={`px-2 py-0.5 rounded-md text-xs border ${theme.chip}`}
                     >
                       {Number(course.price).toLocaleString()} so'm
                     </span>
@@ -930,7 +929,7 @@ export default function DashboardPage({
 
           <div className={`overflow-hidden rounded-xl border ${theme.rowBorder}`}>
             <table className="w-full text-sm">
-              <thead className={darkMode ? "bg-slate-800" : "bg-slate-50"}>
+              <thead className={"bg-surface-2"}>
                 <tr>
                   <th className={`text-left px-4 py-3 ${theme.text}`}>#</th>
                   <th className={`text-left px-4 py-3 ${theme.text}`}>Nomi</th>
@@ -951,9 +950,7 @@ export default function DashboardPage({
         {showCourseDrawer && (
           <div className={`fixed inset-0 z-50 ${theme.overlay}`}>
             <div
-              className={`absolute inset-y-0 right-0 w-full max-w-107.5 shadow-2xl overflow-y-auto ${
-                darkMode ? "bg-slate-900" : "bg-white"
-              }`}
+              className={`absolute inset-y-0 right-0 w-full max-w-107.5 shadow-2xl overflow-y-auto bg-surface`}
             >
               <div
                 className={`p-6 border-b flex items-center justify-between ${theme.rowBorder}`}
@@ -1030,7 +1027,7 @@ export default function DashboardPage({
                     value={formData.description}
                     onChange={handleFormChange}
                     placeholder={t.descriptionPlaceholder}
-                    className={`w-full rounded-xl border px-4 py-3 outline-none resize-none ${theme.input}`}
+                    className={`w-full field resize-none`}
                   />
                 </div>
               </div>
@@ -1040,7 +1037,7 @@ export default function DashboardPage({
               >
                 <button
                   onClick={closeDrawer}
-                  className={`px-5 py-3 rounded-xl border ${theme.rowBorder} ${theme.text}`}
+                  className={`px-3.5 py-2 rounded-md border ${theme.rowBorder} ${theme.text}`}
                 >
                   {t.cancel}
                 </button>
@@ -1048,7 +1045,7 @@ export default function DashboardPage({
                 <button
                   onClick={handleSaveCourse}
                   disabled={courseSaving}
-                  className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium"
+                  className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white font-medium"
                 >
                   {courseSaving ? "Saqlanmoqda..." : t.save}
                 </button>
@@ -1081,7 +1078,7 @@ export default function DashboardPage({
           <button
             key={item.id}
             onClick={() => openManagementMenu(item.key)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-md border text-sm font-medium transition cursor-pointer ${
               activeManagement === item.key ? theme.tabActive : theme.tab
             }`}
           >
@@ -1211,11 +1208,11 @@ export default function DashboardPage({
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div
-                  className={`rounded-2xl border p-5 ${theme.rowBorder} ${darkMode ? "bg-emerald-500/10" : "bg-emerald-50"}`}
+                  className={`rounded-2xl border p-5 ${theme.rowBorder} bg-success-soft`}
                 >
                   <p className={`mb-2 text-sm ${theme.soft}`}>{t.paid}</p>
                   <h3
-                    className={`text-2xl font-bold ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}
+                    className={`text-2xl font-bold text-success`}
                   >
                     {monthlyPayments.loading
                       ? "..."
@@ -1224,11 +1221,11 @@ export default function DashboardPage({
                 </div>
 
                 <div
-                  className={`rounded-2xl border p-5 ${theme.rowBorder} ${darkMode ? "bg-amber-500/10" : "bg-yellow-50"}`}
+                  className={`rounded-2xl border p-5 ${theme.rowBorder} bg-warning-soft`}
                 >
                   <p className={`mb-2 text-sm ${theme.soft}`}>{t.pending}</p>
                   <h3
-                    className={`text-2xl font-bold ${darkMode ? "text-amber-400" : "text-yellow-600"}`}
+                    className={`text-2xl font-bold text-warning`}
                   >
                     {monthlyPayments.loading
                       ? "..."
@@ -1237,11 +1234,11 @@ export default function DashboardPage({
                 </div>
 
                 <div
-                  className={`rounded-2xl border p-5 ${theme.rowBorder} ${darkMode ? "bg-rose-500/10" : "bg-red-50"}`}
+                  className={`rounded-2xl border p-5 ${theme.rowBorder} bg-danger-soft`}
                 >
                   <p className={`mb-2 text-sm ${theme.soft}`}>{t.balance}</p>
                   <h3
-                    className={`text-2xl font-bold ${darkMode ? "text-rose-400" : "text-red-500"}`}
+                    className={`text-2xl font-bold text-danger`}
                   >
                     {monthlyPayments.loading
                       ? "..."
@@ -1278,7 +1275,7 @@ export default function DashboardPage({
                         {lesson.startTime} - {lesson.endTime}
                       </p>
                     </div>
-                    <span className="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm">
+                    <span className="px-3 py-1.5 rounded-md bg-success-soft text-success text-sm">
                       {t.today}
                     </span>
                   </div>
@@ -1353,20 +1350,20 @@ export default function DashboardPage({
         <div className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
-              icon="✅"
+              icon="checkCircle"
               tone="emerald"
               label={t.todayAttendance}
               value={`${todayAttendance.percent}%`}
               deltaLabel={statHints.todayAttendance}
             />
             <StatCard
-              icon="🎓"
+              icon="students"
               tone="violet"
               label="Bugun kelganlar"
               value={todayAttendance.present}
             />
             <StatCard
-              icon="📋"
+              icon="clipboard"
               tone="blue"
               label="Bugun belgilanganlar"
               value={todayAttendance.total}
@@ -1409,25 +1406,25 @@ export default function DashboardPage({
         <div className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
             <StatCard
-              icon="🎓"
+              icon="students"
               tone="violet"
               label={t.totalStudents}
               value={statValues.totalStudents}
             />
             <StatCard
-              icon="📚"
+              icon="groups"
               tone="blue"
               label={t.activeGroups}
               value={statValues.activeGroups}
             />
             <StatCard
-              icon="💰"
+              icon="money"
               tone="emerald"
               label={t.paid}
               value={formatUzs(monthlyPayments.paid)}
             />
             <StatCard
-              icon="⚠️"
+              icon="warning"
               tone="rose"
               label={t.debtors}
               value={debtorsCount}
@@ -1479,7 +1476,7 @@ export default function DashboardPage({
               meta: `${row.groupName} · ${formatUzs(row.amount)}`,
               badge: "Qarz",
               tone: "rose",
-              icon: "⚠️",
+              icon: "warning",
             }))}
             emptyText="Qarzdor o'quvchi yo'q"
             maxHeight={360}

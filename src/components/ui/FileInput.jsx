@@ -1,5 +1,6 @@
 import { useId, useState } from "react";
 import { useTheme } from "../../theme/themeContext";
+import Icon from "./Icon";
 
 const formatSize = (bytes) => {
   if (!bytes) return "";
@@ -43,32 +44,40 @@ export default function FileInput({
         accept={accept}
         disabled={disabled}
         onChange={handleChange}
-        className="hidden"
+        className="sr-only"
       />
 
       <label
         htmlFor={inputId}
-        className={`flex items-center gap-3 w-full rounded-xl border px-4 py-3 ${theme.input} ${
-          disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
-        }`}
+        className={`flex items-center gap-2.5 w-full rounded-md border border-line-strong
+          bg-surface px-1.5 py-1.5 transition-colors
+          ${
+            disabled
+              ? "opacity-60 cursor-not-allowed"
+              : "cursor-pointer hover:border-fg-subtle"
+          }`}
       >
         <span
-          className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium ${theme.tabActive}`}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-sm border border-line
+            bg-surface-2 px-2.5 py-1 text-xs font-medium text-fg"
         >
+          <Icon name="attachment" size={14} />
           {buttonLabel}
         </span>
 
         <span
           className={`min-w-0 flex-1 truncate text-sm ${
-            selected ? theme.text : theme.soft
+            selected ? theme.text : theme.subtle
           }`}
           title={selected?.name}
         >
-          {selected ? `${selected.name} · ${formatSize(selected.size)}` : placeholder}
+          {selected
+            ? `${selected.name} · ${formatSize(selected.size)}`
+            : placeholder}
         </span>
       </label>
 
-      {hint && <p className={`mt-1.5 text-xs ${theme.soft}`}>{hint}</p>}
+      {hint && <p className={`mt-1.5 text-xs ${theme.subtle}`}>{hint}</p>}
     </div>
   );
 }

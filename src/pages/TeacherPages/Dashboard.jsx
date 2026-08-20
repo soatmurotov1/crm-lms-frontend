@@ -36,22 +36,22 @@ const MENU_ITEMS = [
     key: "dashboard",
     label: "Boshqaruv paneli",
     shortLabel: "Asosiy",
-    icon: "🏠",
+    icon: "home",
   },
   {
     key: "groups",
     label: "Mening guruhlarim",
     shortLabel: "Guruhlar",
-    icon: "📚",
+    icon: "groups",
   },
-  { key: "schedule", label: "Dars jadvali", shortLabel: "Jadval", icon: "🗓️" },
-  { key: "attendance", label: "Davomat", icon: "✅" },
-  { key: "grades", label: "Baholar", icon: "⭐" },
-  { key: "homework", label: "Uy vazifalar", icon: "📝" },
-  { key: "exams", label: "Testlar", icon: "🧪" },
-  { key: "students", label: "O'quvchilar", icon: "🎓" },
-  { key: "notifications", label: "Xabarnomalar", icon: "🔔" },
-  { key: "settings", label: "Sozlamalar", icon: "⚙️" },
+  { key: "schedule", label: "Dars jadvali", shortLabel: "Jadval", icon: "calendar" },
+  { key: "attendance", label: "Davomat", icon: "checkCircle" },
+  { key: "grades", label: "Baholar", icon: "star" },
+  { key: "homework", label: "Uy vazifalar", icon: "homework" },
+  { key: "exams", label: "Testlar", icon: "exams" },
+  { key: "students", label: "O'quvchilar", icon: "students" },
+  { key: "notifications", label: "Xabarnomalar", icon: "bell" },
+  { key: "settings", label: "Sozlamalar", icon: "settings" },
 ];
 
 const MENU_PATHS = {
@@ -472,7 +472,7 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
         )} · ${group.room?.name || "Xona belgilanmagan"}`,
         badge: "Bugun",
         tone: "emerald",
-        icon: "🕘",
+        icon: "clock",
         group,
       }))
       .sort((a, b) => String(a.meta).localeCompare(String(b.meta)));
@@ -601,25 +601,25 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
         <StatCard
-          icon="📚"
+          icon="groups"
           tone="violet"
           label="Mening guruhlarim"
           value={isLoading ? "..." : groups.length}
         />
         <StatCard
-          icon="🕘"
+          icon="clock"
           tone="blue"
           label="Bugungi darslar"
           value={isLoading ? "..." : todayLessons.length}
         />
         <StatCard
-          icon="🎓"
+          icon="students"
           tone="emerald"
           label="Jami o'quvchilar"
           value={uniqueStudents.length}
         />
         <StatCard
-          icon="✅"
+          icon="checkCircle"
           tone="amber"
           label="O'rtacha davomat"
           value={`${attendanceTotals.percent}%`}
@@ -672,7 +672,7 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
 
           <button
             onClick={() => openMenu("attendance")}
-            className="mt-5 w-full rounded-xl bg-violet-600 hover:bg-violet-700 text-white py-2.5 text-sm font-medium"
+            className="mt-5 w-full rounded-xl bg-accent hover:bg-accent-hover text-white py-2.5 text-sm font-medium"
           >
             Davomat belgilash
           </button>
@@ -687,7 +687,7 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
             meta: `${student.present} / ${student.total} darsda qatnashgan`,
             badge: `${student.percent}%`,
             tone: index === 0 ? "amber" : "violet",
-            icon: index === 0 ? "🏆" : "🎓",
+            icon: index === 0 ? "trophy" : "students",
           }))}
           emptyText="Davomat ma'lumoti yetarli emas"
           maxHeight={300}
@@ -706,7 +706,7 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
             } ta javob`,
             badge: `${homework?._count?.homeworkResults || 0} tekshirilgan`,
             tone: "violet",
-            icon: "📝",
+            icon: "homework",
           }))}
           emptyText="Uy vazifa berilmagan"
           maxHeight={320}
@@ -786,19 +786,19 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
         <div className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <StatCard
-              icon="✅"
+              icon="checkCircle"
               tone="emerald"
               label="O'rtacha davomat"
               value={`${attendanceTotals.percent}%`}
             />
             <StatCard
-              icon="🎓"
+              icon="students"
               tone="violet"
               label="Kelganlar"
               value={attendanceTotals.present}
             />
             <StatCard
-              icon="🚫"
+              icon="ban"
               tone="rose"
               label="Kelmaganlar"
               value={attendanceTotals.absent}
@@ -826,7 +826,7 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
               }`,
               badge: "Davomat",
               tone: "emerald",
-              icon: "📋",
+              icon: "clipboard",
               onClick: () =>
                 openGroupDetails(
                   { ...group, initialMainTab: "akademik-davomat" },
@@ -858,7 +858,7 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
               } ta javob · ${homework?._count?.homeworkResults || 0} tekshirilgan`,
               badge: homework.lesson?.title || "Dars",
               tone: "violet",
-              icon: "📝",
+              icon: "homework",
               onClick: group
                 ? () => openGroupDetails(group, "homework")
                 : undefined,
@@ -897,7 +897,7 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
                 meta: `${homeworks.length} vazifa · ${responses} javob · ${reviewed} baholangan`,
                 badge: "Ochish",
                 tone: "violet",
-                icon: "⭐",
+                icon: "star",
                 onClick: () => openGroupDetails(group, "grades"),
               };
             })}
@@ -932,7 +932,7 @@ export default function TeacherDashboard({ initialMenu = "dashboard" }) {
                 studentGroups ? ` · ${studentGroups}` : ""
               }`,
               tone: "violet",
-              icon: "🎓",
+              icon: "students",
             };
           })}
           loading={isLoading}

@@ -39,34 +39,35 @@ import {
   getInitials,
   normalizeHomeworkStatus,
 } from "./studentDashboardUtils";
+import Icon from "../../components/ui/Icon";
 
 const NAV_ITEMS = [
   {
     key: "dashboard",
     label: "Boshqaruv paneli",
     shortLabel: "Asosiy",
-    icon: "🏠",
+    icon: "home",
   },
-  { key: "schedule", label: "Dars jadvali", shortLabel: "Jadval", icon: "🗓️" },
+  { key: "schedule", label: "Dars jadvali", shortLabel: "Jadval", icon: "calendar" },
   {
     key: "lessons",
     label: "Mening darslarim",
     shortLabel: "Darslar",
-    icon: "📖",
+    icon: "groups",
   },
   {
     key: "groups",
     label: "Mening guruhlarim",
     shortLabel: "Guruhlar",
-    icon: "📚",
+    icon: "groups",
   },
-  { key: "homework", label: "Uy vazifalar", icon: "📝" },
-  { key: "exams", label: "Testlar", icon: "🧪" },
-  { key: "grades", label: "Baholarim", icon: "⭐" },
-  { key: "attendance", label: "Davomat", icon: "✅" },
-  { key: "notifications", label: "Xabarnomalar", icon: "🔔" },
-  { key: "profile", label: "Profilim", icon: "👤" },
-  { key: "payments", label: "To'lovlarim", icon: "💳" },
+  { key: "homework", label: "Uy vazifalar", icon: "homework" },
+  { key: "exams", label: "Testlar", icon: "exams" },
+  { key: "grades", label: "Baholarim", icon: "star" },
+  { key: "attendance", label: "Davomat", icon: "checkCircle" },
+  { key: "notifications", label: "Xabarnomalar", icon: "bell" },
+  { key: "profile", label: "Profilim", icon: "user" },
+  { key: "payments", label: "To'lovlarim", icon: "payments" },
 ];
 
 const pageTitles = Object.fromEntries(
@@ -1189,14 +1190,14 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     const items = [
       {
         id: "active",
-        icon: "🎯",
+        icon: "target",
         title: "Faol o'quvchi",
         meta: `${activeGroups.length} ta faol guruhdasiz`,
         earned: activeGroups.length > 0,
       },
       {
         id: "payments",
-        icon: "💳",
+        icon: "payments",
         title: "Intizomli to'lovchi",
         meta:
           paymentTotals.due > 0
@@ -1206,7 +1207,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
       },
       {
         id: "schedule",
-        icon: "🗓️",
+        icon: "calendar",
         title: "Darsga tayyor",
         meta: todayLessons.length
           ? `Bugun ${todayLessons.length} ta dars`
@@ -1215,7 +1216,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
       },
       {
         id: "finished",
-        icon: "🏁",
+        icon: "flag",
         title: "Kursni tamomlagan",
         meta: `${completedGroups.length} ta guruh yakunlangan`,
         earned: completedGroups.length > 0,
@@ -1244,7 +1245,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     () => [
       {
         id: "me",
-        icon: "🎓",
+        icon: "students",
         title: profileName,
         meta: `${activeGroups.length} faol guruh · ${completedGroups.length} yakunlangan`,
         badge: "Men",
@@ -1619,25 +1620,25 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
         <StatCard
-          icon="📚"
+          icon="groups"
           tone="violet"
           label="Faol guruhlarim"
           value={activeGroups.length}
         />
         <StatCard
-          icon="🗓️"
+          icon="calendar"
           tone="blue"
           label="Bugungi darslar"
           value={todayLessons.length}
         />
         <StatCard
-          icon="🏁"
+          icon="flag"
           tone="emerald"
           label="Tugatilgan guruhlar"
           value={completedGroups.length}
         />
         <StatCard
-          icon="💳"
+          icon="payments"
           tone={paymentTotals.due > 0 ? "rose" : "emerald"}
           label="To'lov qoldig'i"
           value={formatMoney(paymentTotals.due)}
@@ -1654,7 +1655,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
             meta: `${lesson.time} · ${lesson.room}`,
             badge: "Bugun",
             tone: "emerald",
-            icon: "🕘",
+            icon: "clock",
           }))}
           loading={isLoading}
           emptyText="Bugun dars yo'q"
@@ -1662,7 +1663,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
             <button
               type="button"
               onClick={() => goToPage("schedule")}
-              className="text-sm font-medium text-violet-500"
+              className="text-sm font-medium text-accent-soft-fg"
             >
               To'liq jadval
             </button>
@@ -1749,7 +1750,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
                 (grade.score / (grade.maxScore || 100)) * 100,
               )}%`,
               tone: getGradeTone(grade),
-              icon: "⭐",
+              icon: "star",
             }))}
             loading={myGradesLoading}
             emptyText="Hozircha baho qo'yilmagan"
@@ -1766,7 +1767,7 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
     if (activePage === "attendance") {
       return (
         <PlaceholderSection
-          icon="✅"
+          icon="checkCircle"
           title="Davomat"
           description="Bu yerda darslarga qatnashuv tarixingiz chiqadi."
           points={[
@@ -1844,9 +1845,9 @@ export default function StudentDashboardPage({ initialMenu = "home" }) {
             className={`relative w-10 h-10 flex items-center justify-center rounded-xl border cursor-pointer ${theme.topBtn}`}
             aria-label="Xabarlarni ochish"
           >
-            🔔
+            <Icon name="bell" size={18} />
             {unreadNotificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-danger text-white text-[10px] font-bold flex items-center justify-center">
                 {unreadNotificationCount}
               </span>
             )}

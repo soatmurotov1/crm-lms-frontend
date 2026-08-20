@@ -8,7 +8,7 @@ import {
   YAxis,
 } from "recharts";
 import { useTheme } from "../../theme/themeContext";
-import { getChartColors } from "./chartTheme";
+import { getChartColors, getTooltipStyle } from "./chartTheme";
 
 /**
  * "Davomat statistikasi" — oxirgi 7 kun, hafta kunlari bo'yicha davomat foizi.
@@ -34,42 +34,37 @@ export default function AttendanceBars({ days = [], height = 260 }) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={days} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-        <CartesianGrid stroke={colors.grid} vertical={false} />
+        <CartesianGrid stroke={colors.grid} strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="day"
           stroke={colors.axis}
           tickLine={false}
           axisLine={false}
-          fontSize={12}
+          fontSize={11}
+          dy={4}
         />
         <YAxis
           stroke={colors.axis}
           tickLine={false}
           axisLine={false}
-          fontSize={12}
+          fontSize={11}
           domain={[0, 100]}
           tickFormatter={(value) => `${value}%`}
-          width={44}
+          width={40}
         />
         <Tooltip
-          cursor={{ fill: colors.grid, opacity: 0.4 }}
+          cursor={{ fill: colors.grid, opacity: 0.35 }}
           formatter={(value, _name, entry) => [
             `${value}% (${entry?.payload?.present || 0}/${entry?.payload?.total || 0})`,
             "Davomat",
           ]}
-          contentStyle={{
-            background: colors.tooltipBg,
-            border: `1px solid ${colors.tooltipBorder}`,
-            borderRadius: 12,
-            color: colors.tooltipText,
-          }}
-          labelStyle={{ color: colors.tooltipText }}
+          {...getTooltipStyle(colors)}
         />
         <Bar
           dataKey="percent"
           fill={colors.accent}
-          radius={[6, 6, 0, 0]}
-          maxBarSize={38}
+          radius={[3, 3, 0, 0]}
+          maxBarSize={32}
         />
       </BarChart>
     </ResponsiveContainer>

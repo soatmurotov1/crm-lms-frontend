@@ -224,7 +224,7 @@ export default function ExamsPage() {
           <select
             value={selectedGroupId}
             onChange={(e) => setSelectedGroupId(e.target.value)}
-            className={`min-w-64 rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+            className={`min-w-64 field`}
           >
             <option value="">Guruhni tanlang</option>
             {groups.map((group) => (
@@ -244,7 +244,7 @@ export default function ExamsPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-red-700">
+        <div className="mb-4 rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-danger">
           {error}
         </div>
       )}
@@ -285,7 +285,7 @@ export default function ExamsPage() {
                           <h4 className="text-base font-semibold">
                             {exam.title}
                           </h4>
-                          <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">
+                          <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent">
                             {examState}
                           </span>
                         </div>
@@ -307,7 +307,7 @@ export default function ExamsPage() {
                             href={exam.file}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-2 inline-block text-sm text-violet-600 underline"
+                            className="mt-2 inline-block text-sm text-accent underline"
                           >
                             Attached file
                           </a>
@@ -318,14 +318,14 @@ export default function ExamsPage() {
                           type="button"
                           disabled={!canEdit}
                           onClick={() => handleEdit(exam)}
-                          className={`rounded-xl px-4 py-2 text-sm font-medium ${canEdit ? theme.button : "bg-slate-300 text-slate-500"}`}
+                          className={`rounded-xl px-4 py-2 text-sm font-medium ${canEdit ? theme.button : "bg-surface-3 text-fg-muted"}`}
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(exam.id)}
-                          className="rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
+                          className="rounded-xl bg-danger px-4 py-2 text-sm font-medium text-white hover:bg-danger"
                         >
                           Delete
                         </button>
@@ -364,7 +364,7 @@ export default function ExamsPage() {
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, title: e.target.value }))
                 }
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                className={`w-full field`}
                 placeholder="Exam title"
               />
             </div>
@@ -386,7 +386,7 @@ export default function ExamsPage() {
                   }));
                   setSelectedGroupId(nextGroupId);
                 }}
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                className={`w-full field`}
               >
                 <option value="">Tanlang</option>
                 {groups.map((group) => (
@@ -408,7 +408,7 @@ export default function ExamsPage() {
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, lessonId: e.target.value }))
                 }
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                className={`w-full field`}
               >
                 <option value="">Tanlang</option>
                 {lessons.map((lesson) => (
@@ -432,7 +432,7 @@ export default function ExamsPage() {
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, startAt: e.target.value }))
                   }
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                  className={`w-full field`}
                 />
               </div>
               <div>
@@ -447,7 +447,7 @@ export default function ExamsPage() {
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, endAt: e.target.value }))
                   }
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                  className={`w-full field`}
                 />
               </div>
             </div>
@@ -464,7 +464,7 @@ export default function ExamsPage() {
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, description: e.target.value }))
                 }
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                className={`w-full field`}
                 placeholder="Exam instructions"
               />
             </div>

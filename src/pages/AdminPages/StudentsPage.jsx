@@ -10,11 +10,11 @@ import {
 
 export default function StudentsPage({
   theme = {
-    card: "bg-white",
-    text: "text-slate-900",
-    soft: "text-slate-500",
-    rowBorder: "border-slate-200",
-    input: "bg-white border-slate-200 text-slate-900",
+    card: "bg-surface",
+    text: "text-fg",
+    soft: "text-fg-muted",
+    rowBorder: "border-line",
+    input: "bg-surface border-line text-fg",
   },
   darkMode = false,
   onOpenGroupDetails,
@@ -374,10 +374,10 @@ export default function StudentsPage({
         <div
           className={`rounded-2xl px-5 py-3 shadow-xl text-white min-w-72 text-center ${
             toast.type === "error"
-              ? "bg-red-500"
+              ? "bg-danger"
               : toast.type === "warning"
-                ? "bg-amber-500"
-                : "bg-emerald-500"
+                ? "bg-warning"
+                : "bg-success"
           }`}
         >
           {toast.message}
@@ -402,7 +402,7 @@ export default function StudentsPage({
             });
             setOpenModal(true);
           }}
-          className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg"
+          className="bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded-lg"
         >
           + Talaba qo'shish
         </button>
@@ -413,7 +413,7 @@ export default function StudentsPage({
         className={`${theme.card} border ${theme.rowBorder} rounded-xl shadow overflow-hidden`}
       >
         <table className="w-full">
-          <thead className={darkMode ? "bg-slate-800" : "bg-slate-100"}>
+          <thead className={"bg-surface-2"}>
             <tr className={`text-left ${theme.text}`}>
               <th className="p-4">#</th>
               <th className="p-4">Rasm</th>
@@ -444,11 +444,7 @@ export default function StudentsPage({
                       />
                     ) : (
                       <div
-                        className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs ${
-                          darkMode
-                            ? "bg-slate-800 text-slate-300 border-slate-700"
-                            : "bg-slate-100 text-slate-600 border-slate-200"
-                        }`}
+                        className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs bg-surface-2 text-fg-muted border-line`}
                       >
                         Rasm yo'q
                       </div>
@@ -467,8 +463,8 @@ export default function StudentsPage({
                         onClick={() => openEditModal(s)}
                         className={`px-2 py-1 text-xs rounded-lg border ${
                           darkMode
-                            ? "border-slate-600 hover:bg-slate-800 text-slate-200"
-                            : "border-slate-200 hover:bg-slate-50 text-slate-700"
+                            ? "border-line-strong hover:bg-surface-2 text-fg-muted"
+                            : "border-line hover:bg-surface-2 text-fg-muted"
                         }`}
                       >
                         Tahrirlash
@@ -477,12 +473,8 @@ export default function StudentsPage({
                         onClick={() => toggleStudentStatus(s)}
                         className={`px-2 py-1 text-xs rounded-lg border ${
                           s.status === "ACTIVE"
-                            ? darkMode
-                              ? "border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10"
-                              : "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                            : darkMode
-                              ? "border-amber-500/40 text-amber-300 hover:bg-amber-500/10"
-                              : "border-amber-200 text-amber-700 hover:bg-amber-50"
+                            ? "border-success-border text-success hover:bg-success-soft"
+                            : "border-warning-border text-warning hover:bg-warning-soft"
                         }`}
                       >
                         Status: {s.status || "ACTIVE"}
@@ -491,8 +483,8 @@ export default function StudentsPage({
                         onClick={() => openStudentGroups(s)}
                         className={`px-2 py-1 text-xs rounded-lg border ${
                           darkMode
-                            ? "border-slate-600 hover:bg-slate-800 text-slate-200"
-                            : "border-slate-200 hover:bg-slate-50 text-slate-700"
+                            ? "border-line-strong hover:bg-surface-2 text-fg-muted"
+                            : "border-line hover:bg-surface-2 text-fg-muted"
                         }`}
                       >
                         Guruhlari
@@ -501,8 +493,8 @@ export default function StudentsPage({
                         onClick={() => openStudentPayments(s)}
                         className={`px-2 py-1 text-xs rounded-lg border ${
                           darkMode
-                            ? "border-slate-600 hover:bg-slate-800 text-slate-200"
-                            : "border-slate-200 hover:bg-slate-50 text-slate-700"
+                            ? "border-line-strong hover:bg-surface-2 text-fg-muted"
+                            : "border-line hover:bg-surface-2 text-fg-muted"
                         }`}
                       >
                         To'lovlar
@@ -528,16 +520,10 @@ export default function StudentsPage({
 
       {groupsModalStudent && (
         <div
-          className={`fixed inset-0 z-40 flex items-center justify-center p-4 ${
-            darkMode ? "bg-slate-900/70" : "bg-slate-900/40"
-          }`}
+          className={`fixed inset-0 z-40 flex items-center justify-center p-4 bg-surface`}
         >
           <div
-            className={`w-full max-w-lg rounded-xl border p-5 ${
-              darkMode
-                ? "bg-slate-900 border-slate-700"
-                : "bg-white border-slate-200"
-            }`}
+            className={`w-full max-w-lg rounded-xl border p-5 bg-surface border-line`}
           >
             <div className="flex items-center justify-between gap-3 mb-4">
               <h3 className={`text-lg font-semibold ${theme.text}`}>
@@ -567,8 +553,8 @@ export default function StudentsPage({
                     onClick={() => handleOpenGroupDetails(group)}
                     className={`rounded-lg border px-3 py-2 w-full text-left cursor-pointer ${
                       darkMode
-                        ? "border-slate-700 text-slate-200 hover:bg-slate-800"
-                        : "border-slate-200 text-slate-800 hover:bg-slate-50"
+                        ? "border-line text-fg-muted hover:bg-surface-2"
+                        : "border-line text-fg hover:bg-surface-2"
                     }`}
                   >
                     {group.name}
@@ -582,16 +568,10 @@ export default function StudentsPage({
 
       {paymentsModalStudent && (
         <div
-          className={`fixed inset-0 z-40 flex items-center justify-center p-4 ${
-            darkMode ? "bg-slate-900/70" : "bg-slate-900/40"
-          }`}
+          className={`fixed inset-0 z-40 flex items-center justify-center p-4 bg-surface`}
         >
           <div
-            className={`w-full max-w-2xl rounded-xl border p-5 ${
-              darkMode
-                ? "bg-slate-900 border-slate-700"
-                : "bg-white border-slate-200"
-            }`}
+            className={`w-full max-w-2xl rounded-xl border p-5 bg-surface border-line`}
           >
             <div className="flex items-center justify-between gap-3 mb-4">
               <h3 className={`text-lg font-semibold ${theme.text}`}>
@@ -624,11 +604,11 @@ export default function StudentsPage({
                     }[item.status] || item.status;
                   const statusClass =
                     {
-                      DEBT: "bg-red-100 text-red-700",
-                      PENDING: "bg-amber-100 text-amber-700",
-                      PAID: "bg-emerald-100 text-emerald-700",
-                      CANCELED: "bg-slate-200 text-slate-600",
-                    }[item.status] || "bg-slate-100 text-slate-600";
+                      DEBT: "bg-danger-soft text-danger",
+                      PENDING: "bg-warning-soft text-warning",
+                      PAID: "bg-success-soft text-success",
+                      CANCELED: "bg-surface-3 text-fg-muted",
+                    }[item.status] || "bg-surface-2 text-fg-muted";
                   const isStarting =
                     paymentActionLoading === `start-${item.groupId}`;
                   const isMarking =
@@ -639,8 +619,8 @@ export default function StudentsPage({
                       key={item.groupId}
                       className={`rounded-xl border p-4 ${
                         darkMode
-                          ? "border-slate-700 text-slate-200"
-                          : "border-slate-200 text-slate-800"
+                          ? "border-line text-fg-muted"
+                          : "border-line text-fg"
                       }`}
                     >
                       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -655,7 +635,7 @@ export default function StudentsPage({
 
                         <div className="flex flex-wrap items-center gap-2">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${statusClass}`}
+                            className={`px-2 py-0.5 rounded-md text-xs font-semibold ${statusClass}`}
                           >
                             {statusLabel}
                           </span>
@@ -664,7 +644,7 @@ export default function StudentsPage({
                             <button
                               onClick={() => handleStartPayment(item)}
                               disabled={isStarting}
-                              className="px-3 py-2 text-xs rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-60"
+                              className="px-3 py-2 text-xs rounded-lg bg-accent text-white hover:bg-accent disabled:opacity-60"
                             >
                               {isStarting ? "Yuborilmoqda..." : "To'lov qilish"}
                             </button>
@@ -674,11 +654,7 @@ export default function StudentsPage({
                             <button
                               onClick={() => handleMarkPaid(item)}
                               disabled={isMarking}
-                              className={`px-3 py-2 text-xs rounded-lg border ${
-                                darkMode
-                                  ? "border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10"
-                                  : "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                              } disabled:opacity-60`}
+                              className={`px-3 py-2 text-xs rounded-lg border border-success-border text-success hover:bg-success-soft disabled:opacity-60`}
                             >
                               {isMarking ? "Saqlanmoqda..." : "Tasdiqlash"}
                             </button>
@@ -697,11 +673,7 @@ export default function StudentsPage({
       {/* MODAL */}
       {openModal && (
         <div
-          className={`fixed top-0 right-0 h-full w-100 shadow-2xl p-6 border-l ${
-            darkMode
-              ? "bg-slate-900 border-slate-700"
-              : "bg-white border-slate-200"
-          }`}
+          className={`fixed top-0 right-0 h-full w-100 shadow-2xl p-6 border-l bg-surface border-line`}
         >
           <h3 className={`text-xl font-bold mb-6 ${theme.text}`}>
             {editingStudent ? "Talabani tahrirlash" : "Talaba qo'shish"}
@@ -888,7 +860,7 @@ export default function StudentsPage({
             <button
               disabled={saving}
               onClick={handleSaveStudent}
-              className="px-4 py-2 bg-purple-500 text-white rounded-lg disabled:opacity-60"
+              className="px-4 py-2 bg-accent text-white rounded-lg disabled:opacity-60"
             >
               {saving ? "Saqlanmoqda..." : "Saqlash"}
             </button>

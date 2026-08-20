@@ -1,71 +1,84 @@
 /**
- * EduCenter dizayn tokenlari — butun ilova uchun yagona manba.
+ * EduCenter dizayn tokenlari — sinf nomlari darajasidagi yagona manba.
  *
- * Kalit nomlari avval DashboardPage, TeacherPages/Dashboard va ExamsPage ichida
- * takrorlangan uchta obyektdan olingan, shuning uchun mavjud sahifalar
- * o'zgarishsiz ishlashda davom etadi.
+ * Ranglarning o'zi `index.css` da yashaydi va `[data-theme="dark"]` ostida
+ * qayta e'lon qilinadi. Ya'ni `bg-surface` yorug' rejimda oq, tungi rejimda
+ * to'q ko'rinadi — bitta sinf, ikkita natija.
+ *
+ * Shu sababli bu yerda ikkita alohida obyekt saqlashning hojati yo'q:
+ * `getThemeTokens` ikkala rejimda ham bir xil to'plamni qaytaradi.
+ * Funksiya imzosi va kalit nomlari eski holicha qoldirildi — ularga
+ * o'nlab sahifa tayanadi.
  */
 
-const darkTokens = {
-  app: "bg-slate-950",
-  sidebar: "bg-slate-900 border-slate-800",
-  main: "bg-slate-950",
-  card: "bg-slate-900 border-slate-800",
-  text: "text-white",
-  soft: "text-slate-400",
-  menu: "text-slate-200",
-  hover: "hover:bg-slate-800",
-  topBtn: "bg-slate-900 border-slate-700 text-white",
-  active: "bg-violet-600 text-white",
-  select: "bg-slate-900 border-slate-700 text-white",
-  subpanel: "bg-slate-900 border-slate-800",
-  submenuActive: "bg-violet-600 text-white",
-  submenuText: "text-slate-200",
-  rowBorder: "border-slate-700",
-  input: "bg-slate-900 border-slate-700 text-white placeholder:text-slate-500",
-  overlay: "bg-black/50",
-  tab: "bg-slate-900 text-slate-300 border-slate-700",
-  tabActive: "bg-violet-600 text-white border-violet-600",
-  chip: "bg-slate-800 text-slate-300 border-slate-700",
+const tokens = {
+  /* ---- Qobiq ---- */
+  app: "bg-canvas",
+  main: "bg-canvas",
+  shell: "bg-canvas text-fg",
+  sidebar: "bg-surface border-line",
+  subpanel: "bg-surface border-line shadow-md",
 
-  // ExamsPage vocabulary'si
-  shell: "bg-slate-950 text-slate-100",
-  panel: "bg-slate-900 border-slate-800",
-  muted: "text-slate-400",
-  button: "bg-violet-600 hover:bg-violet-700 text-white",
-  secondary: "bg-slate-800 hover:bg-slate-700 text-slate-100",
+  /* ---- Sirtlar ---- */
+  card: "bg-surface border-line",
+  panel: "bg-surface border-line",
+
+  /* ---- Matn ---- */
+  text: "text-fg",
+  soft: "text-fg-muted",
+  muted: "text-fg-muted",
+  subtle: "text-fg-subtle",
+
+  /* ---- Navigatsiya ----
+     Aktiv element to'la bo'yalgan tugma emas: yumshoq fon + kuchli matn
+     ko'z uchun tinchroq va ro'yxatni "rangli tugmalar to'plami"ga
+     aylantirmaydi. */
+  menu: "text-fg-muted",
+  hover: "hover:bg-surface-2 hover:text-fg",
+  active: "bg-accent-soft text-accent-soft-fg",
+  submenuActive: "bg-accent-soft text-accent-soft-fg",
+  submenuText: "text-fg-muted",
+
+  /* ---- Boshqaruv elementlari ---- */
+  topBtn:
+    "bg-surface border-line text-fg-muted hover:text-fg hover:bg-surface-2",
+  button: "bg-accent hover:bg-accent-hover text-accent-fg",
+  secondary: "bg-surface-2 hover:bg-surface-3 text-fg border-line",
+  danger: "bg-danger hover:bg-danger-hover text-white",
+
+  input:
+    "bg-surface border-line-strong text-fg placeholder:text-fg-subtle focus:border-accent focus:outline-none",
+  select: "bg-surface border-line-strong text-fg",
+
+  /* ---- Jadval / ro'yxat ---- */
+  rowBorder: "border-line",
+  tableHead: "bg-surface-2 text-fg-muted",
+  rowHover: "hover:bg-surface-2",
+
+  /* ---- Tab va yorliqlar ---- */
+  tab: "bg-transparent text-fg-muted border-transparent hover:text-fg",
+  tabActive: "bg-accent-soft text-accent-soft-fg border-accent-border",
+  chip: "bg-surface-2 text-fg-muted border-line",
+
+  /* ---- Qatlamlar ---- */
+  overlay: "bg-overlay",
 };
 
-const lightTokens = {
-  app: "bg-slate-100",
-  sidebar: "bg-white border-slate-200",
-  main: "bg-slate-100",
-  card: "bg-white border-slate-200",
-  text: "text-slate-900",
-  soft: "text-slate-500",
-  menu: "text-slate-700",
-  hover: "hover:bg-slate-100",
-  topBtn: "bg-white border-slate-200 text-slate-700",
-  active: "bg-violet-500 text-white",
-  select: "bg-white border-slate-200 text-slate-700",
-  subpanel: "bg-white border-slate-200",
-  submenuActive: "bg-violet-100 text-violet-700",
-  submenuText: "text-slate-700",
-  rowBorder: "border-slate-200",
-  input: "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400",
-  overlay: "bg-black/30",
-  tab: "bg-white text-slate-600 border-slate-200",
-  tabActive: "bg-violet-100 text-violet-700 border-violet-200",
-  chip: "bg-slate-50 text-slate-600 border-slate-200",
+// Sahifalar tokenlarni mutatsiya qilmasligi uchun.
+Object.freeze(tokens);
 
-  // ExamsPage vocabulary'si
-  shell: "bg-slate-50 text-slate-900",
-  panel: "bg-white border-slate-200",
-  muted: "text-slate-500",
-  button: "bg-violet-600 hover:bg-violet-700 text-white",
-  secondary: "bg-slate-100 hover:bg-slate-200 text-slate-900",
-};
-
-export function getThemeTokens(darkMode) {
-  return darkMode ? darkTokens : lightTokens;
+export function getThemeTokens() {
+  return tokens;
 }
+
+/**
+ * Status ranglari — faqat ma'no tashiganda ishlatiladi (to'landi, qarz,
+ * kutilmoqda, bekor qilingan). Bezak uchun emas.
+ */
+export const TONE = Object.freeze({
+  neutral: "bg-surface-2 text-fg-muted border-line",
+  accent: "bg-accent-soft text-accent-soft-fg border-accent-border",
+  success: "bg-success-soft text-success border-success-border",
+  warning: "bg-warning-soft text-warning border-warning-border",
+  danger: "bg-danger-soft text-danger border-danger-border",
+});

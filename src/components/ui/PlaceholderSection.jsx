@@ -1,5 +1,6 @@
 import { useTheme } from "../../theme/themeContext";
 import Card from "./Card";
+import Icon from "./Icon";
 
 /**
  * Backend'da hali endpoint bo'lmagan bo'limlar uchun bir xil ko'rinish.
@@ -7,7 +8,7 @@ import Card from "./Card";
  * ochiq aytiladi — bo'sh oq ekran qoldirilmaydi.
  */
 export default function PlaceholderSection({
-  icon = "🧩",
+  icon = "puzzle",
   title,
   description,
   points = [],
@@ -18,12 +19,17 @@ export default function PlaceholderSection({
   return (
     <Card>
       <div className="flex items-start gap-4">
-        <span className="w-12 h-12 shrink-0 rounded-2xl bg-violet-500/15 text-violet-500 flex items-center justify-center text-2xl">
-          {icon}
+        <span
+          className="w-10 h-10 shrink-0 rounded-lg border border-line bg-surface-2
+            text-fg-subtle flex items-center justify-center"
+        >
+          <Icon name={icon} size={18} />
         </span>
 
         <div className="min-w-0">
-          <h2 className={`text-lg font-semibold ${theme.text}`}>{title}</h2>
+          <h2 className={`text-[0.9375rem] font-semibold ${theme.text}`}>
+            {title}
+          </h2>
           {description && (
             <p className={`text-sm mt-1 ${theme.soft}`}>{description}</p>
           )}
@@ -31,8 +37,15 @@ export default function PlaceholderSection({
           {points.length > 0 && (
             <ul className="mt-4 space-y-2">
               {points.map((point) => (
-                <li key={point} className={`text-sm flex gap-2 ${theme.soft}`}>
-                  <span className="text-violet-500">•</span>
+                <li
+                  key={point}
+                  className={`text-sm flex gap-2.5 items-start ${theme.soft}`}
+                >
+                  <Icon
+                    name="check"
+                    size={15}
+                    className="mt-0.5 text-fg-subtle"
+                  />
                   <span>{point}</span>
                 </li>
               ))}
@@ -41,7 +54,7 @@ export default function PlaceholderSection({
 
           {note && (
             <p
-              className={`text-xs mt-4 rounded-xl border p-3 ${theme.rowBorder} ${theme.soft}`}
+              className={`text-xs mt-4 rounded-md border border-line bg-surface-2 p-3 ${theme.soft}`}
             >
               {note}
             </p>

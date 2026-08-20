@@ -9,10 +9,10 @@ const STATUS_LABELS = {
 };
 
 const STATUS_STYLES = {
-  DEBT: "bg-red-100 text-red-700",
-  PENDING: "bg-amber-100 text-amber-700",
-  PAID: "bg-emerald-100 text-emerald-700",
-  CANCELED: "bg-slate-200 text-slate-600",
+  DEBT: "bg-danger-soft text-danger",
+  PENDING: "bg-warning-soft text-warning",
+  PAID: "bg-success-soft text-success",
+  CANCELED: "bg-surface-3 text-fg-muted",
 };
 
 /** Joriy oy xulosasi uchun kartalar — yorug' va tungi rejim ranglari. */
@@ -20,26 +20,26 @@ const SUMMARY_TILES = [
   {
     key: "paid",
     label: "To'langan",
-    lightTile: "bg-emerald-50",
-    darkTile: "bg-emerald-500/10 border border-emerald-500/20",
-    lightValue: "text-emerald-600",
-    darkValue: "text-emerald-400",
+    lightTile: "bg-success-soft",
+    darkTile: "bg-success-soft border border-success-border",
+    lightValue: "text-success",
+    darkValue: "text-success",
   },
   {
     key: "pending",
     label: "Kutilmoqda",
-    lightTile: "bg-yellow-50",
-    darkTile: "bg-amber-500/10 border border-amber-500/20",
-    lightValue: "text-yellow-600",
-    darkValue: "text-amber-400",
+    lightTile: "bg-warning-soft",
+    darkTile: "bg-warning-soft border border-warning-border",
+    lightValue: "text-warning",
+    darkValue: "text-warning",
   },
   {
     key: "debt",
     label: "Qoldiq",
-    lightTile: "bg-red-50",
-    darkTile: "bg-rose-500/10 border border-rose-500/20",
-    lightValue: "text-red-500",
-    darkValue: "text-rose-400",
+    lightTile: "bg-danger-soft",
+    darkTile: "bg-danger-soft border border-danger-border",
+    lightValue: "text-danger",
+    darkValue: "text-danger",
   },
 ];
 
@@ -245,7 +245,7 @@ export default function PaymentsPage({ theme, darkMode }) {
               placeholder="Talaba, kurs yoki guruh"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`w-full sm:w-60 rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+              className={`w-full sm:w-60 field`}
             />
             <select
               value={statusFilter}
@@ -254,7 +254,7 @@ export default function PaymentsPage({ theme, darkMode }) {
                 setStatusFilter(next);
                 loadPayments(next);
               }}
-              className={`w-full sm:w-50 rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+              className={`w-full sm:w-50 field`}
             >
               <option value="ALL">Barchasi</option>
               <option value="PAID">Qabul qilingan</option>
@@ -265,9 +265,9 @@ export default function PaymentsPage({ theme, darkMode }) {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-slate-200">
+        <div className="overflow-hidden rounded-xl border border-line">
           <table className="w-full text-sm">
-            <thead className={darkMode ? "bg-slate-800" : "bg-slate-50"}>
+            <thead className={"bg-surface-2"}>
               <tr>
                 <th className={`text-left px-4 py-3 ${theme.text}`}>Talaba</th>
                 <th className={`text-left px-4 py-3 ${theme.text}`}>Kurs</th>
@@ -294,7 +294,7 @@ export default function PaymentsPage({ theme, darkMode }) {
                 filteredPayments.map((item) => {
                   const statusLabel = STATUS_LABELS[item.status] || item.status;
                   const statusClass =
-                    STATUS_STYLES[item.status] || "bg-slate-100 text-slate-600";
+                    STATUS_STYLES[item.status] || "bg-surface-2 text-fg-muted";
                   const isStarting =
                     actionLoading === `start-${item.studentId}-${item.groupId}`;
                   const isMarking = actionLoading === `paid-${item.paymentId}`;
@@ -323,7 +323,7 @@ export default function PaymentsPage({ theme, darkMode }) {
                       </td>
                       <td className={`px-4 py-4 ${theme.text}`}>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${statusClass}`}
+                          className={`px-2 py-0.5 rounded-md text-xs font-semibold ${statusClass}`}
                         >
                           {statusLabel}
                         </span>
@@ -353,8 +353,8 @@ export default function PaymentsPage({ theme, darkMode }) {
                           }
                           className={`px-3 py-2 text-xs rounded-lg border ${
                             darkMode
-                              ? "border-slate-600 text-slate-200 hover:bg-slate-800"
-                              : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                              ? "border-line-strong text-fg-muted hover:bg-surface-2"
+                              : "border-line text-fg-muted hover:bg-surface-2"
                           }`}
                         >
                           ...
@@ -364,11 +364,7 @@ export default function PaymentsPage({ theme, darkMode }) {
                           (item.paymentId ||
                             `${item.studentId}-${item.groupId}`) && (
                           <div
-                            className={`absolute right-0 mt-2 w-48 rounded-xl border shadow-lg z-10 ${
-                              darkMode
-                                ? "bg-slate-900 border-slate-700"
-                                : "bg-white border-slate-200"
-                            }`}
+                            className={`absolute right-0 mt-2 w-48 rounded-xl border shadow-lg z-10 bg-surface border-line`}
                           >
                             <button
                               onClick={() => {
@@ -376,11 +372,7 @@ export default function PaymentsPage({ theme, darkMode }) {
                                 handleStartPayment(item);
                               }}
                               disabled={isStarting}
-                              className={`w-full text-left px-4 py-2 text-sm ${
-                                darkMode
-                                  ? "text-slate-200 hover:bg-slate-800"
-                                  : "text-slate-700 hover:bg-slate-50"
-                              } disabled:opacity-60`}
+                              className={`w-full text-left px-4 py-2 text-sm text-fg-muted hover:bg-surface-2 disabled:opacity-60`}
                             >
                               {isStarting ? "..." : "To'lovni boshlash"}
                             </button>
@@ -390,11 +382,7 @@ export default function PaymentsPage({ theme, darkMode }) {
                                 handleMarkPaid(item);
                               }}
                               disabled={isMarking}
-                              className={`w-full text-left px-4 py-2 text-sm ${
-                                darkMode
-                                  ? "text-slate-200 hover:bg-slate-800"
-                                  : "text-slate-700 hover:bg-slate-50"
-                              } disabled:opacity-60`}
+                              className={`w-full text-left px-4 py-2 text-sm text-fg-muted hover:bg-surface-2 disabled:opacity-60`}
                             >
                               {isMarking ? "..." : "Tasdiqlash"}
                             </button>
@@ -404,11 +392,7 @@ export default function PaymentsPage({ theme, darkMode }) {
                                 handleCancelPayment(item);
                               }}
                               disabled={isCanceling}
-                              className={`w-full text-left px-4 py-2 text-sm ${
-                                darkMode
-                                  ? "text-slate-200 hover:bg-slate-800"
-                                  : "text-slate-700 hover:bg-slate-50"
-                              } disabled:opacity-60`}
+                              className={`w-full text-left px-4 py-2 text-sm text-fg-muted hover:bg-surface-2 disabled:opacity-60`}
                             >
                               {isCanceling ? "..." : "Bekor qilish"}
                             </button>
@@ -418,11 +402,7 @@ export default function PaymentsPage({ theme, darkMode }) {
                                 handleAcceptPayment(item);
                               }}
                               disabled={isAccepting}
-                              className={`w-full text-left px-4 py-2 text-sm ${
-                                darkMode
-                                  ? "text-slate-200 hover:bg-slate-800"
-                                  : "text-slate-700 hover:bg-slate-50"
-                              } disabled:opacity-60`}
+                              className={`w-full text-left px-4 py-2 text-sm text-fg-muted hover:bg-surface-2 disabled:opacity-60`}
                             >
                               {isAccepting ? "..." : "Qabul qilingan"}
                             </button>

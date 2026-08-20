@@ -1,79 +1,84 @@
 import { useTheme } from "../../theme/themeContext";
-
-const TONE_CHIPS = {
-  violet: {
-    dark: "bg-violet-500/15 text-violet-300",
-    light: "bg-violet-50 text-violet-600",
-  },
-  blue: {
-    dark: "bg-blue-500/15 text-blue-300",
-    light: "bg-blue-50 text-blue-600",
-  },
-  emerald: {
-    dark: "bg-emerald-500/15 text-emerald-300",
-    light: "bg-emerald-50 text-emerald-600",
-  },
-  amber: {
-    dark: "bg-amber-500/15 text-amber-300",
-    light: "bg-amber-50 text-amber-600",
-  },
-  rose: {
-    dark: "bg-rose-500/15 text-rose-300",
-    light: "bg-rose-50 text-rose-600",
-  },
-};
+import Icon from "./Icon";
 
 /**
- * Mockupdagi statistika kartasi: rangli ikonka chipi, katta qiymat va
- * ixtiyoriy o'zgarish ko'rsatkichi (+12% / -3%).
+ * Statistika kartasi.
+ *
+ * Avvalgi variantda har bir kartaning ikonkasi o'z rangida bo'yalgan chipda
+ * turardi (binafsha, ko'k, yashil, sariq, pushti — qatorma-qator). Bir
+ * qatorda beshta rang bo'lsa, ularning hech biri hech narsa anglatmaydi.
+ *
+ * Shuning uchun bu yerda rang qat'iy me'yorlangan:
+ *   - ikonka har doim neytral;
+ *   - `tone` faqat `warning` va `danger` bo'lganda ishlaydi, ya'ni ko'rsatkich
+ *     haqiqatan e'tibor talab qilganda (qarzdorlar, muddati o'tganlar);
+ *   - o'zgarish foizi o'z ma'nosiga qarab yashil/qizil bo'ladi.
+ *
+ * Ko'zni tortadigan yagona narsa — sonning o'zi.
  */
+
+const ATTENTION_TONES = {
+  warning: "text-warning",
+  danger: "text-danger",
+};
+
 export default function StatCard({
   icon,
   label,
   value,
   delta,
   deltaLabel,
-  tone = "violet",
+  tone,
   onClick,
+  className = "",
 }) {
-  const { theme, darkMode } = useTheme();
+  const { theme } = useTheme();
 
-  const chip = (TONE_CHIPS[tone] || TONE_CHIPS.violet)[
-    darkMode ? "dark" : "light"
-  ];
+  const iconColor = ATTENTION_TONES[tone] || "text-fg-subtle";
 
   const hasDelta = Number.isFinite(delta);
   const isPositive = hasDelta && delta >= 0;
-  const deltaColor = isPositive ? "text-emerald-500" : "text-rose-500";
 
   const Wrapper = onClick ? "button" : "div";
 
   return (
     <Wrapper
       {...(onClick ? { type: "button", onClick } : {})}
-      className={`${theme.card} border rounded-2xl p-5 shadow-sm text-left w-full ${
-        onClick ? "cursor-pointer hover:shadow-md transition" : ""
-      }`}
+      className={`${theme.card} border rounded-lg p-4 text-left w-full min-w-0
+        ${onClick ? "cursor-pointer hover:border-line-strong hover:bg-surface-2 transition-colors" : ""}
+        ${className}`}
     >
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <span
-          className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${chip}`}
-        >
-          {icon}
-        </span>
-        {hasDelta && (
-          <span className={`text-sm font-semibold ${deltaColor}`}>
-            {isPositive ? "+" : ""}
-            {delta}%
-          </span>
-        )}
+      <div className="flex items-start justify-between gap-3">
+        <p className={`text-[0.8125rem] leading-5 truncate ${theme.soft}`}>
+          {label}
+        </p>
+        {icon && <Icon name={icon} size={16} className={iconColor} />}
       </div>
 
-      <p className={`text-sm mb-1 ${theme.soft}`}>{label}</p>
-      <h3 className={`text-3xl font-bold ${theme.text}`}>{value}</h3>
+      <p
+        className={`mt-2 text-[1.75rem] leading-9 font-semibold tabular-nums tracking-tight ${theme.text}`}
+      >
+        {value}
+      </p>
 
-      {deltaLabel && (
-        <p className={`text-xs mt-2 ${theme.soft}`}>{deltaLabel}</p>
+      {(hasDelta || deltaLabel) && (
+        <div className="mt-1.5 flex items-center gap-1.5 min-w-0">
+          {hasDelta && (
+            <span
+              className={`inline-flex items-center gap-0.5 text-xs font-medium tabular-nums
+                ${isPositive ? "text-success" : "text-danger"}`}
+            >
+              <Icon name={isPositive ? "trendUp" : "trendDown"} size={13} />
+              {isPositive ? "+" : ""}
+              {delta}%
+            </span>
+          )}
+          {deltaLabel && (
+            <span className={`text-xs truncate ${theme.subtle}`}>
+              {deltaLabel}
+            </span>
+          )}
+        </div>
       )}
     </Wrapper>
   );

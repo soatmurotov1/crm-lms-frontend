@@ -7,6 +7,7 @@ import {
   isValidPhone,
   normalizePhone,
 } from "../../utils/phone";
+import Icon from "../../components/ui/Icon";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -361,10 +362,10 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
         <div
           className={`rounded-2xl px-5 py-3 shadow-xl text-white min-w-72 text-center ${
             toast.type === "error"
-              ? "bg-red-500"
+              ? "bg-danger"
               : toast.type === "warning"
-                ? "bg-amber-500"
-                : "bg-emerald-500"
+                ? "bg-warning"
+                : "bg-success"
           }`}
         >
           {toast.message}
@@ -382,7 +383,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
           <div className="flex flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 w-full xl:w-auto">
             <button
               onClick={openAddDrawer}
-              className="bg-violet-600 hover:bg-violet-700 text-white px-4 sm:px-5 py-3 rounded-xl font-medium"
+              className="bg-accent hover:bg-accent-hover text-white px-4 sm:px-3.5 py-2 rounded-md font-medium"
             >
               + O‘qituvchi qo‘shish
             </button>
@@ -393,7 +394,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setActiveTab("active")}
-              className={`px-4 py-2 rounded-xl text-sm font-medium border ${
+              className={`px-3 py-1.5 rounded-md text-sm font-medium border ${
                 activeTab === "active" ? theme.tabActive : theme.tab
               }`}
             >
@@ -402,7 +403,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
 
             <button
               onClick={() => setActiveTab("archive")}
-              className={`px-4 py-2 rounded-xl text-sm font-medium border ${
+              className={`px-3 py-1.5 rounded-md text-sm font-medium border ${
                 activeTab === "archive" ? theme.tabActive : theme.tab
               }`}
             >
@@ -415,7 +416,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
             placeholder="Qidirish..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className={`w-full lg:w-[260px] rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+            className={`w-full lg:w-[260px] field min-w-0`}
           />
         </div>
 
@@ -423,7 +424,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
           <div className="rounded-2xl border overflow-hidden">
             <div className="overflow-x-auto w-full">
               <table className="w-full min-w-[980px] text-sm table-fixed">
-                <thead className={darkMode ? "bg-slate-900/60" : "bg-slate-50"}>
+                <thead className={darkMode ? "bg-surface" : "bg-surface-2"}>
                   <tr className={theme.soft}>
                     <th className="text-left font-medium px-3 py-4 w-[50px]">
                       #
@@ -465,8 +466,8 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                         key={teacher.id}
                         className={`border-t transition ${
                           darkMode
-                            ? "border-slate-800 hover:bg-slate-900/40"
-                            : "border-slate-100 hover:bg-slate-50/70"
+                            ? "border-line hover:bg-surface"
+                            : "border-line hover:bg-surface-2"
                         }`}
                       >
                         <td className={`px-3 py-4 ${theme.text}`}>
@@ -483,11 +484,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                               />
                             ) : (
                               <div
-                                className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                                  darkMode
-                                    ? "bg-slate-800 text-slate-200"
-                                    : "bg-slate-100 text-slate-600"
-                                }`}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-surface-2 text-fg-muted`}
                               >
                                 {getInitials(teacher.fullName)}
                               </div>
@@ -529,56 +526,40 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => toggleArchive(teacher)}
-                              className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                                darkMode
-                                  ? "border-slate-700 hover:bg-slate-800"
-                                  : "border-slate-200 hover:bg-slate-50"
-                              }`}
+                              className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-surface-2`}
                               title={
                                 teacher.archived
                                   ? "Arxivdan chiqarish"
                                   : "Arxivga yuborish"
                               }
                             >
-                              {teacher.archived ? "♻️" : "📦"}
+                              {teacher.archived ? "refresh" : "package"}
                             </button>
 
                             {teacher.archived && (
                               <button
                                 onClick={() => deleteArchivedTeacher(teacher)}
-                                className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                                  darkMode
-                                    ? "border-red-700/60 hover:bg-red-900/30"
-                                    : "border-red-200 hover:bg-red-50"
-                                }`}
+                                className={`w-9 h-9 rounded-xl border flex items-center justify-center border-danger-border hover:bg-danger-soft`}
                                 title="Arxivdan o'chirish"
                               >
-                                🗑️
+                                <Icon name="trash" size={16} />
                               </button>
                             )}
 
                             <button
                               onClick={() => openTeacherGroups(teacher)}
-                              className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                                darkMode
-                                  ? "border-slate-700 hover:bg-slate-800"
-                                  : "border-slate-200 hover:bg-slate-50"
-                              }`}
+                              className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-surface-2`}
                               title="Guruhlari"
                             >
-                              👥
+                              <Icon name="users" size={16} />
                             </button>
 
                             <button
                               onClick={() => openEditDrawer(teacher)}
-                              className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                                darkMode
-                                  ? "border-slate-700 hover:bg-slate-800"
-                                  : "border-slate-200 hover:bg-slate-50"
-                              }`}
+                              className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-surface-2`}
                               title="Tahrirlash"
                             >
-                              ✏️
+                              <Icon name="edit" size={16} />
                             </button>
                           </div>
                         </td>
@@ -605,11 +586,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
             filteredTeachers.map((teacher, index) => (
               <div
                 key={teacher.id}
-                className={`rounded-2xl border p-4 ${
-                  darkMode
-                    ? "border-slate-800 bg-slate-900/40"
-                    : "border-slate-200 bg-white"
-                }`}
+                className={`rounded-2xl border p-4 border-line bg-surface`}
               >
                 <div className="flex items-start gap-3">
                   {teacher.photo ? (
@@ -620,11 +597,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                     />
                   ) : (
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                        darkMode
-                          ? "bg-slate-800 text-slate-200"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0 bg-surface-2 text-fg-muted`}
                     >
                       {getInitials(teacher.fullName)}
                     </div>
@@ -664,56 +637,40 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleArchive(teacher)}
-                      className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-slate-800"
-                          : "border-slate-200 hover:bg-slate-50"
-                      }`}
+                      className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-surface-2`}
                       title={
                         teacher.archived
                           ? "Arxivdan chiqarish"
                           : "Arxivga yuborish"
                       }
                     >
-                      {teacher.archived ? "♻️" : "📦"}
+                      {teacher.archived ? "refresh" : "package"}
                     </button>
 
                     {teacher.archived && (
                       <button
                         onClick={() => deleteArchivedTeacher(teacher)}
-                        className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                          darkMode
-                            ? "border-red-700/60 hover:bg-red-900/30"
-                            : "border-red-200 hover:bg-red-50"
-                        }`}
+                        className={`w-9 h-9 rounded-xl border flex items-center justify-center border-danger-border hover:bg-danger-soft`}
                         title="Arxivdan o'chirish"
                       >
-                        🗑️
+                        <Icon name="trash" size={16} />
                       </button>
                     )}
 
                     <button
                       onClick={() => openTeacherGroups(teacher)}
-                      className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-slate-800"
-                          : "border-slate-200 hover:bg-slate-50"
-                      }`}
+                      className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-surface-2`}
                       title="Guruhlari"
                     >
-                      👥
+                      <Icon name="users" size={16} />
                     </button>
 
                     <button
                       onClick={() => openEditDrawer(teacher)}
-                      className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-slate-800"
-                          : "border-slate-200 hover:bg-slate-50"
-                      }`}
+                      className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-surface-2`}
                       title="Tahrirlash"
                     >
-                      ✏️
+                      <Icon name="edit" size={16} />
                     </button>
                   </div>
                 </div>
@@ -721,9 +678,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
             ))
           ) : (
             <div
-              className={`col-span-full text-center py-10 rounded-2xl border ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              } ${theme.soft}`}
+              className={`col-span-full text-center py-10 rounded-2xl border border-line ${theme.soft}`}
             >
               Ma’lumot topilmadi
             </div>
@@ -734,8 +689,8 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
           <div
             className={`mt-6 rounded-2xl border p-4 ${
               darkMode
-                ? "border-slate-800 bg-slate-900/40"
-                : "border-slate-200 bg-slate-50"
+                ? "border-line bg-surface"
+                : "border-line bg-surface-2"
             }`}
           >
             <div className="flex items-center justify-between gap-3 mb-4">
@@ -766,7 +721,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                 {teacherGroups.map((group) => (
                   <div
                     key={group.id}
-                    className={`rounded-xl border p-3 ${darkMode ? "border-slate-700" : "border-slate-200"}`}
+                    className={`rounded-xl border p-3 border-line`}
                   >
                     <div className="flex items-center justify-between gap-3 mb-2">
                       <h4 className={`font-semibold ${theme.text}`}>
@@ -803,14 +758,10 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
           <div className="absolute inset-0" onClick={closeDrawer} />
 
           <div
-            className={`absolute inset-y-0 right-0 w-full sm:max-w-[420px] shadow-2xl overflow-y-auto z-10 ${
-              darkMode ? "bg-slate-900" : "bg-white"
-            }`}
+            className={`absolute inset-y-0 right-0 w-full sm:max-w-[420px] shadow-2xl overflow-y-auto z-10 bg-surface`}
           >
             <div
-              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b border-line`}
             >
               <div className="min-w-0">
                 <h2 className={`text-lg sm:text-xl font-bold ${theme.text}`}>
@@ -842,7 +793,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                   onChange={handleChange}
                   autoComplete="name"
                   placeholder="Ism Familiya Otasining ismi"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -857,7 +808,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                   value={formData.phone}
                   onChange={handleChange}
                   autoComplete="tel"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -967,7 +918,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                   value={formData.position}
                   onChange={handleChange}
                   placeholder="teacher"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -987,7 +938,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                   onWheel={preventExperienceAutoChange}
                   onKeyDown={preventExperienceAutoChange}
                   placeholder="Masalan: 4"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -1001,8 +952,8 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                 <label
                   className={`flex flex-col items-center justify-center rounded-2xl border border-dashed px-4 py-8 text-center cursor-pointer ${
                     darkMode
-                      ? "border-slate-700 hover:bg-slate-800/70"
-                      : "border-slate-300 hover:bg-slate-50"
+                      ? "border-line hover:bg-surface-2"
+                      : "border-line-strong hover:bg-surface-2"
                   }`}
                 >
                   <input
@@ -1020,7 +971,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
                       className="w-20 h-20 rounded-full object-cover mb-3"
                     />
                   ) : (
-                    <div className={`text-3xl mb-3 ${theme.soft}`}>⬆️</div>
+                    <div className={`text-3xl mb-3 ${theme.soft}`}><Icon name="upload" size={24} /></div>
                   )}
 
                   <p className={`text-sm font-medium ${theme.text}`}>
@@ -1032,17 +983,11 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
             </div>
 
             <div
-              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t border-line`}
             >
               <button
                 onClick={closeDrawer}
-                className={`px-5 py-3 rounded-xl border ${
-                  darkMode
-                    ? "border-slate-700 text-slate-300"
-                    : "border-slate-200 text-slate-600"
-                }`}
+                className={`px-3.5 py-2 rounded-md border border-line text-fg-muted`}
               >
                 Bekor qilish
               </button>
@@ -1050,7 +995,7 @@ export default function TeachersPage({ theme, darkMode, currentUser }) {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium"
+                className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white font-medium"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>

@@ -1,99 +1,46 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap");
+/*
+  O'quvchi paneli tarixan alohida dizaynga ega edi: o'z shrifti (Outfit),
+  o'z aksenti (to'q sariq) va o'z rang o'zgaruvchilari. Bir ilova ichida
+  ikkita dizayn tili bo'lib qolgandi.
+
+  Endi bu yerdagi o'zgaruvchilar `index.css` dagi global tokenlarga
+  ulanadi — quyidagi 1400 qator qoida `var(--accent)`, `var(--card-bg)`
+  ko'rinishida yozilgani uchun ular o'zi yangi palitraga o'tadi.
+
+  Tungi rejim uchun alohida blok ham kerak emas: global tokenlar
+  `[data-theme="dark"]` ostida o'zi almashadi, ya'ni `.dark` sinfi bu
+  yerda hech narsani o'zgartirmasligi kerak.
+*/
+
+.student-dashboard,
+.student-scope {
+  --bg: var(--c-canvas);
+  --sidebar-bg: var(--c-surface);
+  --sidebar-width: 230px;
+  --accent: var(--c-accent);
+  --accent2: var(--c-accent-hover);
+  --text: var(--c-fg);
+  --text-muted: var(--c-fg-muted);
+  --border: var(--c-line);
+  --card-bg: var(--c-surface);
+  --green: var(--c-success);
+  --green-light: var(--c-success-soft);
+  --red: var(--c-danger);
+  --red-light: var(--c-danger-soft);
+  --blue: var(--c-accent);
+  --blue-light: var(--c-accent-soft);
+  --orange-light: var(--c-warning-soft);
+  --radius: 8px;
+  --shadow: var(--s-sm);
+
+  color: var(--text);
+}
 
 .student-dashboard {
-  --bg: #f4f6f9;
-  --sidebar-bg: #ffffff;
-  --sidebar-width: 230px;
-  --accent: #e07b2b;
-  --accent2: #f5a623;
-  --text: #1a1d23;
-  --text-muted: #7a8494;
-  --border: #e8ecf2;
-  --card-bg: #ffffff;
-  --green: #22c55e;
-  --green-light: #dcfce7;
-  --red: #ef4444;
-  --red-light: #fee2e2;
-  --blue: #3b82f6;
-  --blue-light: #dbeafe;
-  --orange-light: #fff7ed;
-  --radius: 12px;
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
-
-  font-family: "Outfit", sans-serif;
   background: var(--bg);
-  color: var(--text);
   display: flex;
   height: 100vh;
   overflow: hidden;
-}
-
-/* Dark rejim — faqat o'zgaruvchilar qayta e'lon qilinadi, qolgan qoidalar
-   var() orqali avtomatik moslashadi. Qiymatlar StudentHome ichidagi
-   inline dark palitra bilan bir xil. */
-.student-dashboard.dark {
-  --bg: #0f172a;
-  --sidebar-bg: #111827;
-  --accent: #a78bfa;
-  --accent2: #8b5cf6;
-  --text: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: #334155;
-  --card-bg: #111827;
-  --green: #34d399;
-  --green-light: #052e2b;
-  --red: #f87171;
-  --red-light: #3f1d1d;
-  --blue: #60a5fa;
-  --blue-light: #1e293b;
-  --orange-light: #2a1f14;
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
-}
-
-/* PanelLayout ichida ishlatiladigan scope: bu yerda faqat o'zgaruvchilar va
-   tipografiya bor, layout (flex / 100vh / overflow) yo'q — chunki tashqi
-   qobiqni PanelLayout beradi. */
-.student-scope {
-  --bg: #f4f6f9;
-  --sidebar-bg: #ffffff;
-  --sidebar-width: 230px;
-  --accent: #e07b2b;
-  --accent2: #f5a623;
-  --text: #1a1d23;
-  --text-muted: #7a8494;
-  --border: #e8ecf2;
-  --card-bg: #ffffff;
-  --green: #22c55e;
-  --green-light: #dcfce7;
-  --red: #ef4444;
-  --red-light: #fee2e2;
-  --blue: #3b82f6;
-  --blue-light: #dbeafe;
-  --orange-light: #fff7ed;
-  --radius: 12px;
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
-
-  font-family: "Outfit", sans-serif;
-  color: var(--text);
-}
-
-.student-scope.dark {
-  --bg: #0f172a;
-  --sidebar-bg: #111827;
-  --accent: #a78bfa;
-  --accent2: #8b5cf6;
-  --text: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: #334155;
-  --card-bg: #111827;
-  --green: #34d399;
-  --green-light: #052e2b;
-  --red: #f87171;
-  --red-light: #3f1d1d;
-  --blue: #60a5fa;
-  --blue-light: #1e293b;
-  --orange-light: #2a1f14;
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 
 .student-scope button {
@@ -140,8 +87,8 @@
 .logo-icon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: 9px;
+  background: var(--accent);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -166,7 +113,7 @@
   background: var(--accent);
   color: #fff;
   padding: 1px 6px;
-  border-radius: 20px;
+  border-radius: 6px;
   font-weight: 600;
   width: fit-content;
   margin-top: 2px;
@@ -182,7 +129,7 @@
   align-items: center;
   gap: 11px;
   padding: 10px 12px;
-  border-radius: 9px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -267,7 +214,7 @@
   height: 28px;
   border-radius: 8px;
   background: transparent;
-  color: #7a7a7a;
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -275,7 +222,7 @@
 }
 
 .notif-btn:hover {
-  color: #606060;
+  color: var(--text);
 }
 
 .notif-btn.has-unread {
@@ -283,7 +230,7 @@
   height: 36px;
   border-radius: 50%;
   background: var(--bg);
-  color: #555;
+  color: var(--text-muted);
 }
 
 .notif-badge {
@@ -301,7 +248,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #fff;
+  border: 1px solid var(--card-bg);
 }
 
 .notif-panel-wrap {
@@ -314,9 +261,9 @@
 .notif-panel {
   width: min(520px, calc(100vw - 40px));
   max-height: 70vh;
-  background: #fff;
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 8px;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
   padding: 14px;
   display: grid;
@@ -333,13 +280,13 @@
 .notif-panel-title {
   font-size: 20px;
   font-weight: 700;
-  color: #2f3542;
+  color: var(--text);
 }
 
 .notif-mark-all {
   border: 1px solid var(--border);
-  background: #fff;
-  border-radius: 10px;
+  background: var(--card-bg);
+  border-radius: 8px;
   padding: 8px 12px;
   font-size: 12px;
   font-weight: 600;
@@ -363,9 +310,9 @@
 .notif-item {
   width: 100%;
   text-align: left;
-  background: #f3f5f8;
-  border: 1px solid #edf0f4;
-  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 14px 16px;
   display: grid;
   gap: 8px;
@@ -373,23 +320,23 @@
 }
 
 .notif-item.unread {
-  border-color: #d8dfea;
-  background: #eef2f8;
+  border-color: var(--border);
+  background: var(--blue-light);
 }
 
 .notif-item:hover {
-  border-color: #cfd8e5;
+  border-color: var(--text-muted);
 }
 
 .notif-item-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text);
 }
 
 .notif-item-message {
   font-size: 14px;
-  color: #374151;
+  color: var(--text);
 }
 
 .notif-item-time {
@@ -407,7 +354,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  background: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -495,7 +442,7 @@
 .cal-nav button {
   width: 28px;
   height: 28px;
-  border-radius: 7px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
   cursor: pointer;
@@ -535,7 +482,7 @@
   padding: 6px 2px;
   font-size: 13px;
   cursor: pointer;
-  border-radius: 7px;
+  border-radius: 6px;
   position: relative;
   transition: 0.15s;
   line-height: 1.6;
@@ -575,7 +522,7 @@
 }
 
 .cal-day.selected::after {
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .cal-day.empty {
@@ -585,7 +532,7 @@
 .lesson-card {
   background: var(--green-light);
   border-left: 3px solid var(--green);
-  border-radius: 9px;
+  border-radius: 6px;
   padding: 14px 16px;
   margin-bottom: 10px;
 }
@@ -601,7 +548,7 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #15803d;
+  color: var(--green);
   font-weight: 500;
 }
 
@@ -625,9 +572,9 @@
 }
 
 .modal-card {
-  background: var(--card-bg, #ffffff);
-  border: 1px solid var(--border, #e8ecf2);
-  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   width: min(520px, 100%);
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
   padding: 22px 24px;
@@ -651,12 +598,12 @@
 .modal-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text, #0f172a);
+  color: var(--text);
 }
 
 .modal-subtitle {
   font-size: 12px;
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted);
   margin-top: 4px;
 }
 
@@ -664,9 +611,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid var(--border, #e8ecf2);
-  background: var(--bg, #f4f6f9);
-  color: var(--text, #0f172a);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
   font-size: 20px;
   line-height: 1;
   display: grid;
@@ -694,21 +641,21 @@
 .modal-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted);
 }
 
 .modal-input {
   display: flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid var(--border, #e8ecf2);
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 8px 10px 8px 12px;
-  background: var(--bg, #f4f6f9);
+  background: var(--bg);
 }
 
 .modal-input.error {
-  border-color: #ef4444;
+  border-color: var(--red);
   background: rgba(239, 68, 68, 0.1);
 }
 
@@ -717,12 +664,12 @@
   border: none;
   outline: none;
   background: transparent;
-  color: var(--text, #0f172a);
+  color: var(--text);
   font-size: 14px;
 }
 
 .modal-input input::placeholder {
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted);
 }
 
 .eye-btn {
@@ -745,15 +692,15 @@
 .eye-icon {
   width: 22px;
   height: 22px;
-  fill: #7a7d83;
+  fill: var(--text-muted);
 }
 
 .eye-btn:hover .eye-icon {
-  fill: #5f6369;
+  fill: var(--text);
 }
 
 .modal-error {
-  color: #ef4444;
+  color: var(--red);
   font-size: 12px;
 }
 
@@ -783,7 +730,7 @@
 .filter-select {
   width: min(260px, 100%);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 10px 12px;
   background: var(--bg);
   font-size: 14px;
@@ -821,8 +768,8 @@
   min-width: 22px;
   height: 22px;
   border-radius: 999px;
-  border: 1px solid #60a5fa;
-  color: #2563eb;
+  border: 1px solid var(--blue);
+  color: var(--blue);
   font-size: 12px;
 }
 
@@ -834,28 +781,28 @@
 }
 
 .status-pill.neutral {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--border);
+  color: var(--text);
 }
 
 .status-pill.success {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--green-light);
+  color: var(--green);
 }
 
 .status-pill.info {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--blue-light);
+  color: var(--blue);
 }
 
 .status-pill.warning {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--orange-light);
+  color: var(--c-warning);
 }
 
 .status-pill.danger {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--red-light);
+  color: var(--red);
 }
 
 .lesson-detail-header {
@@ -907,9 +854,9 @@
 
 .video-item {
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 8px;
   padding: 12px;
-  background: #fafafa;
+  background: var(--bg);
   min-width: 0;
   overflow: hidden;
 }
@@ -919,7 +866,7 @@
   width: 100%;
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #000;
   max-height: 360px;
   object-fit: contain;
@@ -962,7 +909,7 @@
 
 .modal-textarea {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 10px 12px;
   font-size: 13px;
   resize: vertical;
@@ -970,10 +917,10 @@
 
 .modal-file {
   border: 1px dashed var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 10px;
   font-size: 13px;
-  background: #fafafa;
+  background: var(--bg);
 }
 
 .modal-file.is-hidden {
@@ -989,10 +936,10 @@
 
 .submission-input {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 12px 14px;
   font-size: 13px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .attach-btn,
@@ -1007,18 +954,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #8d8d8d;
+  color: var(--text-muted);
   line-height: 1;
   position: relative;
 }
 
 .send-btn {
-  color: #2f3238;
+  color: var(--text);
 }
 
 .attach-btn:hover,
 .send-btn:hover {
-  color: #191c21;
+  color: var(--text);
 }
 
 .send-btn:disabled {
@@ -1033,14 +980,14 @@
   min-width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: #b98652;
+  background: var(--accent-hover, var(--accent));
   color: #fff;
   font-size: 10px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #fff;
+  border: 1px solid var(--card-bg);
 }
 
 .submission-info {
@@ -1076,7 +1023,7 @@
 
 .modal-btn {
   padding: 10px 22px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -1087,7 +1034,7 @@
 }
 
 .modal-btn.primary {
-  background: #c59059;
+  background: var(--accent);
   color: #fff;
 }
 
@@ -1127,10 +1074,10 @@
 }
 
 .badge-prog {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: var(--blue-light);
+  color: var(--blue);
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
 }
@@ -1139,7 +1086,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: var(--c-warning);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1219,9 +1166,9 @@
 
 .status-paid {
   background: var(--green-light);
-  color: #15803d;
+  color: var(--green);
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
 }
@@ -1230,7 +1177,7 @@
   background: var(--red-light);
   color: var(--red);
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
 }
@@ -1258,11 +1205,11 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: #f1f5f9;
+  background: var(--bg);
   display: grid;
   place-items: center;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .photo-hint {
@@ -1291,7 +1238,7 @@
 
 .settings-mini {
   background: var(--bg);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 16px;
   display: flex;
   align-items: center;
@@ -1319,7 +1266,7 @@
 }
 
 .mini-edit {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .profile-card {
@@ -1332,7 +1279,7 @@
   height: 80px;
   border-radius: 50%;
   margin: 0 auto 14px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  background: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1352,7 +1299,7 @@
   background: var(--blue-light);
   color: var(--blue);
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: 6px;
   display: inline-block;
   font-weight: 600;
 }
@@ -1409,7 +1356,7 @@
 .settings-form input:focus,
 .settings-form select:focus {
   border-color: var(--accent);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .form-row {
@@ -1419,11 +1366,11 @@
 }
 
 .btn-save {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  background: var(--accent);
   color: #fff;
   border: none;
   padding: 11px 28px;
-  border-radius: 9px;
+  border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;

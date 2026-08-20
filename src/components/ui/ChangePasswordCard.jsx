@@ -1,8 +1,10 @@
 import { useState } from "react";
+import Alert from "./Alert";
+import Button from "./Button";
 import Card from "./Card";
+import Field from "./Field";
 import PasswordInput from "./PasswordInput";
 import SectionHeader from "./SectionHeader";
-import { useTheme } from "../../theme/themeContext";
 
 const EMPTY_FORM = { current: "", next: "", confirm: "" };
 
@@ -18,8 +20,6 @@ export default function ChangePasswordCard({
   title = "Parolni o'zgartirish",
   subtitle = "Yangi parol kamida 8 ta belgidan iborat bo'lsin",
 }) {
-  const { theme } = useTheme();
-
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -76,54 +76,50 @@ export default function ChangePasswordCard({
     <Card>
       <SectionHeader title={title} subtitle={subtitle} />
 
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <div>
-          <label className={`block text-sm font-medium mb-2 ${theme.text}`}>
-            Amaldagi parol
-          </label>
-          <PasswordInput
-            name="current"
-            value={form.current}
-            onChange={handleChange}
-            autoComplete="current-password"
-            placeholder="Amaldagi parol"
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-sm">
+        <Field label="Amaldagi parol">
+          {(id) => (
+            <PasswordInput
+              id={id}
+              name="current"
+              value={form.current}
+              onChange={handleChange}
+              autoComplete="current-password"
+              placeholder="Amaldagi parol"
+            />
+          )}
+        </Field>
 
-        <div>
-          <label className={`block text-sm font-medium mb-2 ${theme.text}`}>
-            Yangi parol
-          </label>
-          <PasswordInput
-            name="next"
-            value={form.next}
-            onChange={handleChange}
-            placeholder="Kamida 8 ta belgi"
-          />
-        </div>
+        <Field label="Yangi parol">
+          {(id) => (
+            <PasswordInput
+              id={id}
+              name="next"
+              value={form.next}
+              onChange={handleChange}
+              placeholder="Kamida 8 ta belgi"
+            />
+          )}
+        </Field>
 
-        <div>
-          <label className={`block text-sm font-medium mb-2 ${theme.text}`}>
-            Yangi parolni tasdiqlang
-          </label>
-          <PasswordInput
-            name="confirm"
-            value={form.confirm}
-            onChange={handleChange}
-            placeholder="Parolni qayta kiriting"
-          />
-        </div>
+        <Field label="Yangi parolni tasdiqlang">
+          {(id) => (
+            <PasswordInput
+              id={id}
+              name="confirm"
+              value={form.confirm}
+              onChange={handleChange}
+              placeholder="Parolni qayta kiriting"
+            />
+          )}
+        </Field>
 
-        {error && <p className="text-sm text-rose-500">{error}</p>}
-        {success && <p className="text-sm text-emerald-500">{success}</p>}
+        {error && <Alert tone="danger">{error}</Alert>}
+        {success && <Alert tone="success">{success}</Alert>}
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium disabled:opacity-60"
-        >
+        <Button type="submit" variant="primary" loading={saving}>
           {saving ? "Saqlanmoqda..." : "Parolni saqlash"}
-        </button>
+        </Button>
       </form>
     </Card>
   );

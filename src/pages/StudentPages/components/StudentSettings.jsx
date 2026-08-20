@@ -1,3 +1,4 @@
+import Icon from "../../../components/ui/Icon";
 export default function StudentSettings({
   profileName,
   profilePhone,
@@ -112,14 +113,14 @@ export default function StudentSettings({
                 <div className="mini-title">Parol</div>
                 <div className="mini-value">••••••••</div>
               </div>
-              <span className="mini-edit">✎</span>
+              <span className="mini-edit"><Icon name="edit" size={14} /></span>
             </button>
             <div className="settings-mini">
               <div>
                 <div className="mini-title">Bildirishnoma sozlamalari</div>
                 <div className="mini-value">-</div>
               </div>
-              <span className="mini-edit">✎</span>
+              <span className="mini-edit"><Icon name="edit" size={14} /></span>
             </div>
           </div>
         </div>

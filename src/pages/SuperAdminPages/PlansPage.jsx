@@ -5,6 +5,7 @@ import StatCard from "../../components/ui/StatCard";
 import { organizationsApi, plansApi, subscriptionsApi } from "../../api/crmApi";
 import { formatUzDate, toInputDate } from "../../utils/date";
 import { useTheme } from "../../theme/themeContext";
+import Icon from "../../components/ui/Icon";
 
 const TABS = [
   { key: "plans", label: "Tariflar" },
@@ -28,20 +29,20 @@ const SUBSCRIPTION_LABELS = {
 
 const SUBSCRIPTION_TONES = {
   PENDING: {
-    dark: "bg-amber-500/15 text-amber-300",
-    light: "bg-amber-50 text-amber-600",
+    dark: "bg-warning-soft text-warning",
+    light: "bg-warning-soft text-warning",
   },
   ACTIVE: {
-    dark: "bg-emerald-500/15 text-emerald-300",
-    light: "bg-emerald-50 text-emerald-600",
+    dark: "bg-success-soft text-success",
+    light: "bg-success-soft text-success",
   },
   EXPIRED: {
-    dark: "bg-slate-500/15 text-slate-300",
-    light: "bg-slate-100 text-slate-600",
+    dark: "bg-surface-3 text-fg-muted",
+    light: "bg-surface-2 text-fg-muted",
   },
   CANCELED: {
-    dark: "bg-rose-500/15 text-rose-300",
-    light: "bg-rose-50 text-rose-600",
+    dark: "bg-danger-soft text-danger",
+    light: "bg-danger-soft text-danger",
   },
 };
 
@@ -330,14 +331,14 @@ export default function PlansPage() {
           <button
             type="button"
             onClick={() => openPlanDrawer(null)}
-            className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium"
+            className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md text-sm font-medium"
           >
             + Tarif qo'shish
           </button>
         }
       />
 
-      {error && <p className="text-sm text-rose-500 mb-4">{error}</p>}
+      {error && <p className="text-sm text-danger mb-4">{error}</p>}
 
       {loading ? (
         <p className={`text-sm ${theme.soft}`}>Yuklanmoqda...</p>
@@ -355,7 +356,7 @@ export default function PlansPage() {
                   {plan.name}
                 </h3>
                 <span
-                  className={`shrink-0 text-xs px-2.5 py-1 rounded-full ${
+                  className={`shrink-0 text-xs px-2 py-0.5 rounded-md ${
                     plan.status === "ACTIVE"
                       ? subscriptionTone("ACTIVE")
                       : subscriptionTone("EXPIRED")
@@ -376,17 +377,17 @@ export default function PlansPage() {
                 className={`mt-4 pt-4 border-t text-sm space-y-1 ${theme.rowBorder} ${theme.soft}`}
               >
                 <p>
-                  🎓 {plan.maxStudents ?? "∞"} o'quvchi · 👨‍🏫{" "}
+                  <Icon name="students" size={14} className="inline align-[-0.1875em]" /> {plan.maxStudents ?? "∞"} o'quvchi ·{" "}
                   {plan.maxTeachers ?? "∞"} o'qituvchi
                 </p>
-                <p>📚 {plan.maxGroups ?? "∞"} guruh</p>
+                <p><Icon name="groups" size={14} className="inline align-[-0.1875em]" /> {plan.maxGroups ?? "∞"} guruh</p>
                 {plan.description && <p>{plan.description}</p>}
               </div>
 
               {(plan.features || []).length > 0 && (
                 <ul className={`mt-3 space-y-1 text-sm ${theme.soft}`}>
                   {plan.features.map((feature) => (
-                    <li key={feature}>✅ {feature}</li>
+                    <li key={feature}><Icon name="check" size={14} className="inline align-[-0.1875em]" /> {feature}</li>
                   ))}
                 </ul>
               )}
@@ -397,18 +398,14 @@ export default function PlansPage() {
                   onClick={() => openPlanDrawer(plan)}
                   className={`flex-1 py-2.5 rounded-xl border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
                 >
-                  ✏️ Tahrirlash
+                  Tahrirlash
                 </button>
                 <button
                   type="button"
                   onClick={() => handlePlanDelete(plan)}
-                  className={`w-11 rounded-xl border flex items-center justify-center ${
-                    darkMode
-                      ? "border-slate-700 hover:bg-red-900/30"
-                      : "border-slate-200 hover:bg-red-50"
-                  }`}
+                  className={`w-11 rounded-xl border flex items-center justify-center border-line hover:bg-danger-soft`}
                 >
-                  🗑️
+                  <Icon name="trash" size={16} />
                 </button>
               </div>
             </div>
@@ -427,7 +424,7 @@ export default function PlansPage() {
           <button
             type="button"
             onClick={() => openSubscriptionDrawer(null)}
-            className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium"
+            className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md text-sm font-medium"
           >
             + Obuna qo'shish
           </button>
@@ -440,7 +437,7 @@ export default function PlansPage() {
             key={filter.value}
             type="button"
             onClick={() => setSubscriptionFilter(filter.value)}
-            className={`px-4 py-2 rounded-xl border text-sm ${
+            className={`px-3 py-1.5 rounded-md border text-sm ${
               subscriptionFilter === filter.value ? theme.tabActive : theme.tab
             }`}
           >
@@ -475,13 +472,13 @@ export default function PlansPage() {
                   </p>
                   {subscription.comment && (
                     <p className={`text-xs mt-1 ${theme.soft}`}>
-                      💬 {subscription.comment}
+                      <Icon name="chat" size={14} className="inline align-[-0.1875em]" /> {subscription.comment}
                     </p>
                   )}
                 </div>
 
                 <span
-                  className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${subscriptionTone(
+                  className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-md ${subscriptionTone(
                     subscription.status,
                   )}`}
                 >
@@ -497,7 +494,7 @@ export default function PlansPage() {
                     onClick={() =>
                       handleSubscriptionStatus(subscription, "ACTIVE")
                     }
-                    className="px-4 py-2 rounded-xl text-sm bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="px-3 py-1.5 rounded-md text-sm bg-accent hover:bg-accent-hover text-white"
                   >
                     Faollashtirish
                   </button>
@@ -508,7 +505,7 @@ export default function PlansPage() {
                     onClick={() =>
                       handleSubscriptionStatus(subscription, "CANCELED")
                     }
-                    className={`px-4 py-2 rounded-xl border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
+                    className={`px-3 py-1.5 rounded-md border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
                   >
                     Bekor qilish
                   </button>
@@ -516,20 +513,16 @@ export default function PlansPage() {
                 <button
                   type="button"
                   onClick={() => openSubscriptionDrawer(subscription)}
-                  className={`px-4 py-2 rounded-xl border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
+                  className={`px-3 py-1.5 rounded-md border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
                 >
-                  ✏️ Tahrirlash
+                  Tahrirlash
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSubscriptionDelete(subscription)}
-                  className={`px-4 py-2 rounded-xl border text-sm ${
-                    darkMode
-                      ? "border-slate-700 hover:bg-red-900/30 text-slate-300"
-                      : "border-slate-200 hover:bg-red-50 text-slate-600"
-                  }`}
+                  className={`px-3 py-1.5 rounded-md border text-sm border-line hover:bg-danger-soft text-fg-muted`}
                 >
-                  🗑️
+                  <Icon name="trash" size={16} />
                 </button>
               </div>
             </div>
@@ -543,13 +536,13 @@ export default function PlansPage() {
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         <StatCard
-          icon="💎"
+          icon="plans"
           tone="violet"
           label="Tariflar"
           value={loading ? "..." : plans.length}
         />
         <StatCard
-          icon="✅"
+          icon="checkCircle"
           tone="emerald"
           label="Faol obunalar"
           value={loading ? "..." : (summary?.ACTIVE ?? 0)}
@@ -562,7 +555,7 @@ export default function PlansPage() {
           deltaLabel="7 kun ichida"
         />
         <StatCard
-          icon="💰"
+          icon="money"
           tone="blue"
           label="Obunalar summasi"
           value={loading ? "..." : formatUzs(summary?.totalAmount)}
@@ -575,7 +568,7 @@ export default function PlansPage() {
             key={tab.key}
             type="button"
             onClick={() => setActiveTab(tab.key)}
-            className={`px-5 py-2.5 rounded-xl border text-sm font-medium ${
+            className={`px-3.5 py-2 rounded-md border text-sm font-medium ${
               activeTab === tab.key ? theme.tabActive : theme.tab
             }`}
           >
@@ -591,14 +584,10 @@ export default function PlansPage() {
           <div className="absolute inset-0" onClick={closePlanDrawer} />
 
           <div
-            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 ${
-              darkMode ? "bg-slate-900" : "bg-white"
-            }`}
+            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 bg-surface`}
           >
             <div
-              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b border-line`}
             >
               <h2 className={`text-lg sm:text-xl font-bold ${theme.text}`}>
                 {editingPlanId !== null
@@ -627,7 +616,7 @@ export default function PlansPage() {
                   value={planForm.name}
                   onChange={handlePlanChange}
                   placeholder="Masalan: Standart"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                  className={`w-full field`}
                 />
               </div>
 
@@ -644,7 +633,7 @@ export default function PlansPage() {
                     value={planForm.price}
                     onChange={handlePlanChange}
                     placeholder="500000"
-                    className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                    className={`w-full field`}
                   />
                 </div>
                 <div>
@@ -659,7 +648,7 @@ export default function PlansPage() {
                     value={planForm.durationMonth}
                     onChange={handlePlanChange}
                     placeholder="1"
-                    className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                    className={`w-full field`}
                   />
                 </div>
               </div>
@@ -677,7 +666,7 @@ export default function PlansPage() {
                     value={planForm.maxStudents}
                     onChange={handlePlanChange}
                     placeholder="200"
-                    className={`w-full rounded-xl border px-3 py-3 outline-none ${theme.input}`}
+                    className={`w-full field`}
                   />
                 </div>
                 <div>
@@ -692,7 +681,7 @@ export default function PlansPage() {
                     value={planForm.maxTeachers}
                     onChange={handlePlanChange}
                     placeholder="20"
-                    className={`w-full rounded-xl border px-3 py-3 outline-none ${theme.input}`}
+                    className={`w-full field`}
                   />
                 </div>
                 <div>
@@ -707,7 +696,7 @@ export default function PlansPage() {
                     value={planForm.maxGroups}
                     onChange={handlePlanChange}
                     placeholder="30"
-                    className={`w-full rounded-xl border px-3 py-3 outline-none ${theme.input}`}
+                    className={`w-full field`}
                   />
                 </div>
               </div>
@@ -723,7 +712,7 @@ export default function PlansPage() {
                   value={planForm.description}
                   onChange={handlePlanChange}
                   rows={2}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none resize-none ${theme.input}`}
+                  className={`w-full field resize-none`}
                 />
               </div>
 
@@ -739,7 +728,7 @@ export default function PlansPage() {
                   onChange={handlePlanChange}
                   rows={4}
                   placeholder={"SMS xabarnoma\nHisobotlar"}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none resize-none ${theme.input}`}
+                  className={`w-full field resize-none`}
                 />
               </div>
 
@@ -753,7 +742,7 @@ export default function PlansPage() {
                   name="status"
                   value={planForm.status}
                   onChange={handlePlanChange}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                  className={`w-full field`}
                 >
                   <option value="ACTIVE">Faol</option>
                   <option value="INACTIVE">Nofaol</option>
@@ -763,18 +752,12 @@ export default function PlansPage() {
             </div>
 
             <div
-              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t border-line`}
             >
               <button
                 type="button"
                 onClick={closePlanDrawer}
-                className={`px-5 py-3 rounded-xl border ${
-                  darkMode
-                    ? "border-slate-700 text-slate-300"
-                    : "border-slate-200 text-slate-600"
-                }`}
+                className={`px-3.5 py-2 rounded-md border border-line text-fg-muted`}
               >
                 Bekor qilish
               </button>
@@ -782,7 +765,7 @@ export default function PlansPage() {
                 type="button"
                 onClick={handlePlanSave}
                 disabled={saving}
-                className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium disabled:opacity-60"
+                className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white font-medium disabled:opacity-60"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>
@@ -796,14 +779,10 @@ export default function PlansPage() {
           <div className="absolute inset-0" onClick={closeSubscriptionDrawer} />
 
           <div
-            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 ${
-              darkMode ? "bg-slate-900" : "bg-white"
-            }`}
+            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 bg-surface`}
           >
             <div
-              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b border-line`}
             >
               <h2 className={`text-lg sm:text-xl font-bold ${theme.text}`}>
                 {editingSubscriptionId !== null
@@ -830,7 +809,7 @@ export default function PlansPage() {
                   name="organizationId"
                   value={subscriptionForm.organizationId}
                   onChange={handleSubscriptionChange}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                  className={`w-full field`}
                 >
                   <option value="">Tanlang</option>
                   {organizations.map((organization) => (
@@ -851,7 +830,7 @@ export default function PlansPage() {
                   name="planId"
                   value={subscriptionForm.planId}
                   onChange={handleSubscriptionChange}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                  className={`w-full field`}
                 >
                   <option value="">Tanlang</option>
                   {plans.map((plan) => (
@@ -884,7 +863,7 @@ export default function PlansPage() {
                     name="startDate"
                     value={subscriptionForm.startDate}
                     onChange={handleSubscriptionChange}
-                    className={`w-full rounded-xl border px-3 py-3 outline-none ${theme.input}`}
+                    className={`w-full field`}
                   />
                 </div>
                 <div>
@@ -898,7 +877,7 @@ export default function PlansPage() {
                     name="endDate"
                     value={subscriptionForm.endDate}
                     onChange={handleSubscriptionChange}
-                    className={`w-full rounded-xl border px-3 py-3 outline-none ${theme.input}`}
+                    className={`w-full field`}
                   />
                 </div>
               </div>
@@ -915,7 +894,7 @@ export default function PlansPage() {
                   value={subscriptionForm.amount}
                   onChange={handleSubscriptionChange}
                   placeholder="Bo'sh qoldirilsa tarif narxi"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                  className={`w-full field`}
                 />
               </div>
 
@@ -929,7 +908,7 @@ export default function PlansPage() {
                   name="status"
                   value={subscriptionForm.status}
                   onChange={handleSubscriptionChange}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                  className={`w-full field`}
                 >
                   <option value="PENDING">Kutilmoqda</option>
                   <option value="ACTIVE">Faol</option>
@@ -949,24 +928,18 @@ export default function PlansPage() {
                   value={subscriptionForm.comment}
                   onChange={handleSubscriptionChange}
                   rows={3}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none resize-none ${theme.input}`}
+                  className={`w-full field resize-none`}
                 />
               </div>
             </div>
 
             <div
-              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t border-line`}
             >
               <button
                 type="button"
                 onClick={closeSubscriptionDrawer}
-                className={`px-5 py-3 rounded-xl border ${
-                  darkMode
-                    ? "border-slate-700 text-slate-300"
-                    : "border-slate-200 text-slate-600"
-                }`}
+                className={`px-3.5 py-2 rounded-md border border-line text-fg-muted`}
               >
                 Bekor qilish
               </button>
@@ -974,7 +947,7 @@ export default function PlansPage() {
                 type="button"
                 onClick={handleSubscriptionSave}
                 disabled={saving}
-                className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium disabled:opacity-60"
+                className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white font-medium disabled:opacity-60"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import PasswordInput from "../../components/ui/PasswordInput";
 import { usersApi } from "../../api/crmApi";
 import { toInputDate } from "../../utils/date";
+import Icon from "../../components/ui/Icon";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -220,31 +221,19 @@ export default function EmployeesPage({ theme, darkMode }) {
   };
 
   const roleBadgeClass = (role) => {
-    const base = "inline-flex px-2.5 py-1 rounded-full text-[11px] font-medium";
+    const base = "inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium";
     const map = {
-      SUPERADMIN: darkMode
-        ? "bg-red-500/10 text-red-300"
-        : "bg-red-50 text-red-500",
-      ADMIN: darkMode
-        ? "bg-orange-500/10 text-orange-300"
-        : "bg-orange-50 text-orange-500",
-      MANAGEMENT: darkMode
-        ? "bg-pink-500/10 text-pink-300"
-        : "bg-pink-50 text-pink-500",
-      ADMINSTRATOR: darkMode
-        ? "bg-blue-500/10 text-blue-300"
-        : "bg-blue-50 text-blue-500",
-      TEACHER: darkMode
-        ? "bg-violet-500/10 text-violet-300"
-        : "bg-violet-50 text-violet-500",
-      STUDENT: darkMode
-        ? "bg-emerald-500/10 text-emerald-300"
-        : "bg-emerald-50 text-emerald-500",
+      SUPERADMIN: "bg-danger-soft text-danger",
+      ADMIN: "bg-warning-soft text-warning",
+      MANAGEMENT: "bg-danger-soft text-danger",
+      ADMINSTRATOR: "bg-accent-soft text-accent-soft-fg",
+      TEACHER: "bg-accent-soft text-accent-soft-fg",
+      STUDENT: "bg-success-soft text-success",
     };
 
     return `${base} ${
       map[role] ||
-      (darkMode ? "bg-slate-700 text-slate-200" : "bg-slate-100 text-slate-600")
+      (darkMode ? "bg-surface-3 text-fg-muted" : "bg-surface-2 text-fg-muted")
     }`;
   };
 
@@ -276,7 +265,7 @@ export default function EmployeesPage({ theme, darkMode }) {
 
             <button
               onClick={openAddDrawer}
-              className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-3 rounded-xl font-medium shrink-0"
+              className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md font-medium shrink-0"
             >
               + Xodim qo‘shish
             </button>
@@ -285,7 +274,7 @@ export default function EmployeesPage({ theme, darkMode }) {
 
         <div className="hidden lg:block mt-5 rounded-2xl border overflow-hidden">
           <table className="w-full text-sm table-fixed">
-            <thead className={darkMode ? "bg-slate-900/60" : "bg-slate-50"}>
+            <thead className={darkMode ? "bg-surface" : "bg-surface-2"}>
               <tr className={theme.soft}>
                 <th className="text-left font-medium px-3 py-4 w-[210px]">
                   Nomi
@@ -327,8 +316,8 @@ export default function EmployeesPage({ theme, darkMode }) {
                     key={employee.id}
                     className={`border-t ${
                       darkMode
-                        ? "border-slate-800 hover:bg-slate-900/40"
-                        : "border-slate-100 hover:bg-slate-50/80"
+                        ? "border-line hover:bg-surface"
+                        : "border-line hover:bg-surface-2"
                     } transition`}
                   >
                     <td className="px-3 py-4">
@@ -341,11 +330,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                           />
                         ) : (
                           <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                              darkMode
-                                ? "bg-slate-800 text-slate-200"
-                                : "bg-slate-100 text-slate-600"
-                            }`}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-surface-2 text-fg-muted`}
                           >
                             {getInitials(employee.fullName) || index + 1}
                           </div>
@@ -403,24 +388,16 @@ export default function EmployeesPage({ theme, darkMode }) {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleDelete(employee.id)}
-                          className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                            darkMode
-                              ? "border-slate-700 hover:bg-red-900/30"
-                              : "border-slate-200 hover:bg-red-50"
-                          }`}
+                          className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-danger-soft`}
                         >
-                          🗑️
+                          <Icon name="trash" size={16} />
                         </button>
 
                         <button
                           onClick={() => openEditDrawer(employee)}
-                          className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                            darkMode
-                              ? "border-slate-700 hover:bg-slate-800"
-                              : "border-slate-200 hover:bg-slate-50"
-                          }`}
+                          className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-surface-2`}
                         >
-                          ✏️
+                          <Icon name="edit" size={16} />
                         </button>
                       </div>
                     </td>
@@ -440,9 +417,7 @@ export default function EmployeesPage({ theme, darkMode }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden mt-5">
           {loading ? (
             <div
-              className={`col-span-full text-center py-10 rounded-2xl border ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              } ${theme.soft}`}
+              className={`col-span-full text-center py-10 rounded-2xl border border-line ${theme.soft}`}
             >
               Yuklanmoqda...
             </div>
@@ -462,11 +437,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                       />
                     ) : (
                       <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                          darkMode
-                            ? "bg-slate-800 text-slate-200"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
+                        className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0 bg-surface-2 text-fg-muted`}
                       >
                         {getInitials(employee.fullName) || index + 1}
                       </div>
@@ -487,24 +458,16 @@ export default function EmployeesPage({ theme, darkMode }) {
                   <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => handleDelete(employee.id)}
-                      className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-red-900/30"
-                          : "border-slate-200 hover:bg-red-50"
-                      }`}
+                      className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-danger-soft`}
                     >
-                      🗑️
+                      <Icon name="trash" size={16} />
                     </button>
 
                     <button
                       onClick={() => openEditDrawer(employee)}
-                      className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-slate-800"
-                          : "border-slate-200 hover:bg-slate-50"
-                      }`}
+                      className={`w-9 h-9 rounded-xl border flex items-center justify-center border-line hover:bg-surface-2`}
                     >
-                      ✏️
+                      <Icon name="edit" size={16} />
                     </button>
                   </div>
                 </div>
@@ -537,9 +500,7 @@ export default function EmployeesPage({ theme, darkMode }) {
             ))
           ) : (
             <div
-              className={`col-span-full text-center py-10 rounded-2xl border ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              } ${theme.soft}`}
+              className={`col-span-full text-center py-10 rounded-2xl border border-line ${theme.soft}`}
             >
               Xodim topilmadi
             </div>
@@ -552,14 +513,10 @@ export default function EmployeesPage({ theme, darkMode }) {
           <div className="absolute inset-0" onClick={closeDrawer} />
 
           <div
-            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 ${
-              darkMode ? "bg-slate-900" : "bg-white"
-            }`}
+            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 bg-surface`}
           >
             <div
-              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b border-line`}
             >
               <h2 className={`text-lg sm:text-xl font-bold ${theme.text}`}>
                 {editingEmployeeId !== null
@@ -588,7 +545,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                   value={formData.fullName}
                   onChange={handleChange}
                   placeholder="Ism"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -604,7 +561,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+998901234567"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -620,7 +577,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                   value={formData.hireDate}
                   onChange={handleChange}
                   disabled={editingEmployeeId !== null}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -653,7 +610,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                   value={formData.position}
                   onChange={handleChange}
                   placeholder="Masalan: Manager"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -669,7 +626,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                   value={formData.address}
                   onChange={handleChange}
                   placeholder="Manzil"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -683,8 +640,8 @@ export default function EmployeesPage({ theme, darkMode }) {
                 <label
                   className={`flex flex-col items-center justify-center rounded-2xl border border-dashed px-4 py-8 text-center cursor-pointer ${
                     darkMode
-                      ? "border-slate-700 hover:bg-slate-800/70"
-                      : "border-slate-300 hover:bg-slate-50"
+                      ? "border-line hover:bg-surface-2"
+                      : "border-line-strong hover:bg-surface-2"
                   }`}
                 >
                   <input
@@ -702,7 +659,7 @@ export default function EmployeesPage({ theme, darkMode }) {
                       className="w-20 h-20 rounded-full object-cover mb-3"
                     />
                   ) : (
-                    <div className={`text-3xl mb-3 ${theme.soft}`}>⬆️</div>
+                    <div className={`text-3xl mb-3 ${theme.soft}`}><Icon name="upload" size={24} /></div>
                   )}
 
                   <p className={`text-sm font-medium ${theme.text}`}>
@@ -714,17 +671,11 @@ export default function EmployeesPage({ theme, darkMode }) {
             </div>
 
             <div
-              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t border-line`}
             >
               <button
                 onClick={closeDrawer}
-                className={`px-5 py-3 rounded-xl border ${
-                  darkMode
-                    ? "border-slate-700 text-slate-300"
-                    : "border-slate-200 text-slate-600"
-                }`}
+                className={`px-3.5 py-2 rounded-md border border-line text-fg-muted`}
               >
                 Bekor qilish
               </button>
@@ -732,7 +683,7 @@ export default function EmployeesPage({ theme, darkMode }) {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium"
+                className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white font-medium"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>

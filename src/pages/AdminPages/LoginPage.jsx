@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi, isMissingEndpointError } from "../../api/crmApi";
 import { API_BASE_URL } from "../../api/client";
+import Button from "../../components/ui/Button";
 import PhoneInput from "../../components/ui/PhoneInput";
 import {
   clearAuthSession,
@@ -9,6 +10,7 @@ import {
   saveAuthTokens,
 } from "../../utils/authToken";
 import { PHONE_ERROR_MESSAGE, isValidPhone, normalizePhone } from "../../utils/phone";
+import Icon from "../../components/ui/Icon";
 
 /** `.env` dagi admin raqami: shu raqam bilan kirilsa admin panel ochiladi. */
 const ADMIN_PHONE = normalizePhone(import.meta.env.VITE_ADMIN_PHONE);
@@ -16,16 +18,21 @@ const ADMIN_PHONE = normalizePhone(import.meta.env.VITE_ADMIN_PHONE);
 const isAdminPhone = (value) =>
   Boolean(ADMIN_PHONE) && normalizePhone(value) === ADMIN_PHONE;
 
-const inputClass =
-  "w-full border border-gray-300 rounded-xl px-3 sm:px-4 py-2.5 text-sm sm:text-base outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition";
+/*
+  Maydon uslublari `index.css` dagi `.field` sinfidan keladi, ya'ni login
+  ekranidagi input panel ichidagi input bilan bir xil ko'rinadi. Avval bu
+  sahifa o'z ranglarini (yashil fokus, kulrang ramka) ishlatardi va ilovaning
+  qolgan qismidan ajralib turardi.
+*/
+const inputClass = "field";
 
-const labelClass = "block mb-1.5 text-sm sm:text-base font-medium";
+const labelClass = "mb-1.5 block text-[0.8125rem] font-medium text-fg";
 
 /** Maydonlar orasidagi oraliq — forma noutbuk ekraniga sig'ishi uchun ixcham. */
-const fieldClass = "mb-3 sm:mb-4";
+const fieldClass = "mb-3.5";
 
 const linkClass =
-  "text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-2 cursor-pointer";
+  "font-medium text-accent hover:underline underline-offset-4 cursor-pointer";
 
 /** Parol maydonining ichidagi "ko'z" tugmasi. */
 function PasswordToggle({ visible, onToggle }) {
@@ -33,45 +40,13 @@ function PasswordToggle({ visible, onToggle }) {
     <button
       type="button"
       onClick={onToggle}
-      className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 flex items-center justify-center p-2 sm:p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors cursor-pointer"
+      tabIndex={-1}
+      className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1.5
+        text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
       aria-label={visible ? "Parolni yashirish" : "Parolni ko'rsatish"}
       title={visible ? "Parolni yashirish" : "Parolni ko'rsatish"}
     >
-      {visible ? (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-          />
-        </svg>
-      ) : (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-          />
-        </svg>
-      )}
+      <Icon name={visible ? "eyeOff" : "eye"} size={17} />
     </button>
   );
 }
@@ -428,48 +403,97 @@ export default function LoginPage() {
         ? "Kod olish"
         : "Kirish";
 
+  const heading = isRegister
+    ? "Ro'yxatdan o'tish"
+    : isForgot
+      ? "Parolni tiklash"
+      : "Tizimga kirish";
+
+  const headingNote = isCodeStep
+    ? `${normalizePhone(login)} raqamiga yuborilgan kodni kiriting`
+    : isRegister
+      ? "Talaba hisobini ochish uchun ma'lumotlaringizni kiriting"
+      : isForgot
+        ? "Raqamingizni kiriting — tiklash kodi yuboriladi"
+        : "Hisobingizga kirish uchun raqam va parolni kiriting";
+
   return (
-    <div className="min-h-screen md:h-screen grid md:grid-cols-2 md:overflow-hidden">
+    <div className="grid min-h-screen bg-canvas md:h-screen md:grid-cols-2 md:overflow-hidden">
+      {/*
+        Xabar yuqori o'rtada: o'ng burchakdagi xabar keng ekranda ko'zdan
+        chetda qoladi, forma esa markazda turadi.
+      */}
       <div
-        className={`fixed top-4 right-4 z-50 transform transition-all duration-500 ${
-          toast.show
-            ? "translate-x-0 opacity-100"
-            : "translate-x-8 opacity-0 pointer-events-none"
-        }`}
+        className={`fixed left-1/2 top-4 z-50 w-[min(92vw,26rem)] -translate-x-1/2
+          transition-all duration-200 ${
+            toast.show
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none -translate-y-2 opacity-0"
+          }`}
       >
         <div
-          className={`rounded-2xl px-5 py-3 shadow-xl text-white min-w-70 text-center ${
-            toast.type === "error" ? "bg-red-500" : "bg-emerald-500"
+          role="status"
+          className={`flex items-start gap-2.5 rounded-md border px-3.5 py-2.5 text-sm shadow-md ${
+            toast.type === "error"
+              ? "border-danger-border bg-danger-soft text-danger"
+              : "border-success-border bg-success-soft text-success"
           }`}
         >
-          {toast.message}
+          <Icon
+            name={toast.type === "error" ? "warning" : "checkCircle"}
+            size={16}
+            className="mt-0.5"
+          />
+          <span className="min-w-0 flex-1">{toast.message}</span>
         </div>
       </div>
 
-      <div className="hidden md:block h-full overflow-hidden">
+      {/* Chap ustun — rasm ustidagi brend bloki. Faqat keng ekranda. */}
+      <div className="relative hidden h-full overflow-hidden md:block">
         <img
           src="/login-bg.jpg"
-          alt="EduCenter o'quv xonasi"
-          className="w-full h-full object-cover"
+          alt=""
+          className="h-full w-full object-cover"
         />
+        {/* Rasm ustidagi matn o'qilishi uchun bir tekis qoraytirish */}
+        <div className="absolute inset-0 bg-zinc-950/55" />
+
+        <div className="absolute inset-0 flex flex-col justify-between p-8 text-white">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/15">
+              <Icon name="students" size={17} strokeWidth={2} />
+            </span>
+            <span className="text-sm font-semibold">EduCenter</span>
+          </div>
+
+          <div className="max-w-sm">
+            <p className="text-xl font-semibold leading-snug">
+              O'quv markazini bitta joydan boshqaring
+            </p>
+            <p className="mt-2 text-sm text-white/70">
+              Guruhlar, davomat, to'lovlar va imtihonlar — barchasi bir tizimda.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center bg-[#f5f5fa] px-4 sm:px-6 py-6 min-h-screen md:h-screen md:min-h-0 md:overflow-y-auto">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-500 mb-4 sm:mb-6 shrink-0">
-          EduCenter
-        </h1>
+      <div className="flex min-h-screen flex-col justify-center px-4 py-8 sm:px-6 md:h-screen md:min-h-0 md:overflow-y-auto">
+        <div className="mx-auto w-full max-w-96">
+          <div className="mb-6 flex items-center gap-2.5 md:hidden">
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-accent-fg">
+              <Icon name="students" size={17} strokeWidth={2} />
+            </span>
+            <span className="text-sm font-semibold text-fg">EduCenter</span>
+          </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-sm sm:max-w-md lg:max-w-115 bg-white rounded-2xl shadow-lg p-5 sm:p-6 md:p-8 shrink-0"
-        >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">
-            {isRegister
-              ? "Ro'yxatdan o'tish"
-              : isForgot
-                ? "Parolni tiklash"
-                : "Tizimga kirish"}
-          </h2>
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-lg border border-line bg-surface p-5 shadow-sm sm:p-6"
+          >
+            <h1 className="text-lg font-semibold text-fg">{heading}</h1>
+            <p className="mb-5 mt-1 text-[0.8125rem] text-fg-muted">
+              {headingNote}
+            </p>
 
           {isRegister && (
             <div className={fieldClass}>
@@ -592,22 +616,22 @@ export default function LoginPage() {
                 onChange={(e) =>
                   setSmsCode(e.target.value.replace(/\D/g, "").slice(0, 6))
                 }
-                placeholder="6 xonali kod"
+                placeholder="000000"
                 maxLength={6}
                 autoFocus
-                className={`${inputClass} tracking-[0.4em] text-center`}
+                className={`${inputClass} text-center font-mono text-base tracking-[0.5em]`}
               />
-              <div className="mt-2 flex items-center justify-between text-xs sm:text-sm text-gray-600">
-                <span>{normalizePhone(login)} raqamiga yuborildi</span>
+              <div className="mt-2 flex items-center justify-end text-xs">
                 <button
                   type="button"
                   onClick={() => handleSendCode({ resend: true })}
                   disabled={resendIn > 0 || loading}
-                  className="text-emerald-600 hover:text-emerald-700 font-semibold underline underline-offset-2 disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed cursor-pointer"
+                  className="font-medium text-accent hover:underline underline-offset-4
+                    disabled:cursor-not-allowed disabled:text-fg-subtle disabled:no-underline"
                 >
                   {resendIn > 0
-                    ? `Qayta yuborish (${resendIn})`
-                    : "Qayta yuborish"}
+                    ? `Qayta yuborish (${resendIn}s)`
+                    : "Kodni qayta yuborish"}
                 </button>
               </div>
             </div>
@@ -615,32 +639,35 @@ export default function LoginPage() {
 
           {/* Raqam band bo'lsa, foydalanuvchini boshi berk ko'chada qoldirmaymiz */}
           {accountExists && (
-            <div className="mb-3 sm:mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              <p className="mb-3">
-                Bu raqam allaqachon ro'yxatdan o'tgan. Tizimga kiring yoki
-                parolni tiklang.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
+            <div className="mb-3.5 rounded-md border border-warning-border bg-warning-soft p-3">
+              <div className="flex items-start gap-2.5 text-sm text-warning">
+                <Icon name="warning" size={16} className="mt-0.5" />
+                <p>
+                  Bu raqam allaqachon ro'yxatdan o'tgan. Tizimga kiring yoki
+                  parolni tiklang.
+                </p>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2 pl-6">
+                <Button
+                  size="sm"
+                  variant="primary"
                   onClick={() => switchMode("login", { keepPhone: true })}
-                  className="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white hover:bg-emerald-600 cursor-pointer"
                 >
                   Tizimga kirish
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  size="sm"
                   onClick={() => switchMode("forgot", { keepPhone: true })}
-                  className="rounded-lg border border-amber-300 px-4 py-2 font-semibold hover:bg-amber-100 cursor-pointer"
                 >
                   Parolni tiklash
-                </button>
+                </Button>
               </div>
             </div>
           )}
 
           {/* Parol maydonining tagida - rejimlar orasida o'tish havolalari */}
-          <div className="mb-6 text-sm sm:text-base text-gray-600">
+            <div className="mb-5 text-[0.8125rem] text-fg-muted">
             {isCodeStep ? (
               <span>
                 Ma'lumotlarni tuzatmoqchimisiz?{" "}
@@ -708,24 +735,21 @@ export default function LoginPage() {
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white py-2.5 sm:py-4 rounded-xl sm:rounded-2xl text-base sm:text-xl md:text-2xl font-semibold cursor-pointer transition active:scale-95"
-          >
-            {submitLabel}
-          </button>
+            <Button type="submit" variant="primary" size="lg" full loading={loading}>
+              {submitLabel}
+            </Button>
 
-          {(isRegister || isForgot) && (
-            <p className="mt-4 text-xs sm:text-sm text-gray-500 text-center">
-              {isCodeStep
-                ? "Kod 3 daqiqa amal qiladi."
-                : isForgot
-                  ? "Ro'yxatdan o'tgan raqamingizga tiklash kodi yuboriladi."
-                  : "Raqamingizga SMS kod yuboriladi. Ro'yxatdan o'tgan foydalanuvchi talaba hisobiga ega bo'ladi."}
-            </p>
-          )}
-        </form>
+            {(isRegister || isForgot) && (
+              <p className="mt-3.5 text-center text-xs text-fg-subtle">
+                {isCodeStep
+                  ? "Kod 3 daqiqa amal qiladi."
+                  : isForgot
+                    ? "Ro'yxatdan o'tgan raqamingizga tiklash kodi yuboriladi."
+                    : "Raqamingizga SMS kod yuboriladi. Ro'yxatdan o'tgan foydalanuvchi talaba hisobiga ega bo'ladi."}
+              </p>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import Icon from "../../../components/ui/Icon";
 export default function StudentGroupDetails({
   groupName,
   lessons,
@@ -16,7 +17,7 @@ export default function StudentGroupDetails({
     <div className="page active" id="page-group-details">
       <div className="group-details-head">
         <button type="button" className="back-link" onClick={onBack}>
-          ← Guruhlar ro'yxatiga qaytish
+          <Icon name="arrowLeft" size={15} className="inline align-[-0.1875em]" /> Guruhlar ro'yxatiga qaytish
         </button>
         <div className="section-title">{groupName}</div>
       </div>

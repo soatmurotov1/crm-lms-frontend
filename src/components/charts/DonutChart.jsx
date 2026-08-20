@@ -1,17 +1,10 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { useTheme } from "../../theme/themeContext";
-import { getChartColors } from "./chartTheme";
-
-const DONUT_PALETTE = [
-  "#8b5cf6",
-  "#10b981",
-  "#f59e0b",
-  "#3b82f6",
-  "#f43f5e",
-  "#14b8a6",
-  "#a855f7",
-  "#64748b",
-];
+import {
+  getChartColors,
+  getSeriesPalette,
+  getTooltipStyle,
+} from "./chartTheme";
 
 /**
  * Umumiy aylana (donut) grafik: tariflar bo'yicha taqsimot, davomat holati
@@ -29,11 +22,12 @@ export default function DonutChart({
 }) {
   const { darkMode, theme } = useTheme();
   const colors = getChartColors(darkMode);
+  const palette = getSeriesPalette(darkMode);
 
   const data = slices.map((slice, index) => ({
     name: slice.name,
     value: Number(slice.value || 0),
-    color: slice.color || DONUT_PALETTE[index % DONUT_PALETTE.length],
+    color: slice.color || palette[index % palette.length],
   }));
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
@@ -50,17 +44,17 @@ export default function DonutChart({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6">
-      <div className="relative shrink-0" style={{ width: 180, height }}>
+    <div className="flex flex-wrap items-center justify-center gap-5">
+      <div className="relative shrink-0" style={{ width: 168, height }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               dataKey="value"
               nameKey="name"
-              innerRadius="62%"
-              outerRadius="90%"
-              paddingAngle={2}
+              innerRadius="66%"
+              outerRadius="92%"
+              paddingAngle={1.5}
               stroke="none"
             >
               {data.map((item) => (
@@ -69,43 +63,50 @@ export default function DonutChart({
             </Pie>
             <Tooltip
               formatter={(value, name) => [formatValue(value), name]}
-              contentStyle={{
-                background: colors.tooltipBg,
-                border: `1px solid ${colors.tooltipBorder}`,
-                borderRadius: 12,
-                color: colors.tooltipText,
-              }}
+              {...getTooltipStyle(colors)}
             />
           </PieChart>
         </ResponsiveContainer>
 
         {(centerValue || centerLabel) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className={`text-2xl font-bold ${theme.text}`}>
+            <span
+              className={`text-xl font-semibold tabular-nums ${theme.text}`}
+            >
               {centerValue}
             </span>
-            <span className={`text-xs ${theme.soft}`}>{centerLabel}</span>
+            <span className={`text-xs mt-0.5 ${theme.subtle}`}>
+              {centerLabel}
+            </span>
           </div>
         )}
       </div>
 
-      <ul className="flex-1 w-full space-y-3">
+      {/*
+        Legenda — jadval, ro'yxat emas: nom chapda, son o'ngda bir chiziqda
+        tursa, qiymatlarni bir-biriga taqqoslash osonlashadi.
+      */}
+      <ul className="min-w-40 flex-1 divide-y divide-line">
         {data.map((item) => {
           const percent = Math.round((item.value / total) * 100);
 
           return (
-            <li key={item.name} className="flex items-center gap-3">
+            <li key={item.name} className="flex items-center gap-2.5 py-2">
               <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
+                className="h-2 w-2 shrink-0 rounded-xs"
                 style={{ background: item.color }}
               />
               <span className={`text-sm flex-1 truncate ${theme.soft}`}>
                 {item.name}
               </span>
-              <span className={`text-sm font-semibold ${theme.text}`}>
+              <span
+                className={`text-sm font-medium tabular-nums ${theme.text}`}
+              >
                 {formatValue(item.value)}
               </span>
-              <span className={`text-xs w-10 text-right ${theme.soft}`}>
+              <span
+                className={`text-xs w-9 text-right tabular-nums ${theme.subtle}`}
+              >
                 {percent}%
               </span>
             </li>

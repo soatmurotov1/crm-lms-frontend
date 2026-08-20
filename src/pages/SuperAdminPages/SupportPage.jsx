@@ -5,6 +5,7 @@ import StatCard from "../../components/ui/StatCard";
 import { organizationsApi, supportApi } from "../../api/crmApi";
 import { formatUzDateTime } from "../../utils/date";
 import { useTheme } from "../../theme/themeContext";
+import Icon from "../../components/ui/Icon";
 
 const STATUS_FILTERS = [
   { value: "ALL", label: "Barchasi" },
@@ -23,20 +24,20 @@ const STATUS_LABELS = {
 
 const STATUS_TONES = {
   OPEN: {
-    dark: "bg-amber-500/15 text-amber-300",
-    light: "bg-amber-50 text-amber-600",
+    dark: "bg-warning-soft text-warning",
+    light: "bg-warning-soft text-warning",
   },
   IN_PROGRESS: {
-    dark: "bg-blue-500/15 text-blue-300",
-    light: "bg-blue-50 text-blue-600",
+    dark: "bg-accent-soft text-accent-soft-fg",
+    light: "bg-accent-soft text-accent",
   },
   ANSWERED: {
-    dark: "bg-emerald-500/15 text-emerald-300",
-    light: "bg-emerald-50 text-emerald-600",
+    dark: "bg-success-soft text-success",
+    light: "bg-success-soft text-success",
   },
   CLOSED: {
-    dark: "bg-slate-500/15 text-slate-300",
-    light: "bg-slate-100 text-slate-600",
+    dark: "bg-surface-3 text-fg-muted",
+    light: "bg-surface-2 text-fg-muted",
   },
 };
 
@@ -237,25 +238,25 @@ export default function SupportPage({ canManage = true }) {
       {canManage && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
           <StatCard
-            icon="📬"
+            icon="inbox"
             tone="amber"
             label="Ochiq murojaatlar"
             value={loading ? "..." : (summary?.OPEN ?? 0)}
           />
           <StatCard
-            icon="🔄"
+            icon="refresh"
             tone="blue"
             label="Ko'rilmoqda"
             value={loading ? "..." : (summary?.IN_PROGRESS ?? 0)}
           />
           <StatCard
-            icon="✅"
+            icon="checkCircle"
             tone="emerald"
             label="Javob berilgan"
             value={loading ? "..." : (summary?.ANSWERED ?? 0)}
           />
           <StatCard
-            icon="🗂️"
+            icon="folder"
             tone="violet"
             label="Jami"
             value={loading ? "..." : (summary?.total ?? tickets.length)}
@@ -275,7 +276,7 @@ export default function SupportPage({ canManage = true }) {
             <button
               type="button"
               onClick={() => setShowForm((prev) => !prev)}
-              className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium"
+              className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md text-sm font-medium"
             >
               {showForm ? "Yopish" : "+ Yangi murojaat"}
             </button>
@@ -291,13 +292,13 @@ export default function SupportPage({ canManage = true }) {
                 value={form.subject}
                 onChange={handleFormChange}
                 placeholder="Mavzu"
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                className={`w-full field`}
               />
               <select
                 name="priority"
                 value={form.priority}
                 onChange={handleFormChange}
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                className={`w-full field`}
               >
                 <option value="LOW">Past</option>
                 <option value="NORMAL">O'rtacha</option>
@@ -310,14 +311,14 @@ export default function SupportPage({ canManage = true }) {
                 value={form.contactPhone}
                 onChange={handleFormChange}
                 placeholder="Aloqa telefoni (ixtiyoriy)"
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                className={`w-full field`}
               />
               {canManage && organizations.length > 0 && (
                 <select
                   name="organizationId"
                   value={form.organizationId}
                   onChange={handleFormChange}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                  className={`w-full field`}
                 >
                   <option value="">Tashkilot tanlanmagan</option>
                   {organizations.map((organization) => (
@@ -343,7 +344,7 @@ export default function SupportPage({ canManage = true }) {
                 type="button"
                 onClick={handleCreate}
                 disabled={saving}
-                className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium disabled:opacity-60"
+                className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white text-sm font-medium disabled:opacity-60"
               >
                 {saving ? "Yuborilmoqda..." : "Yuborish"}
               </button>
@@ -357,7 +358,7 @@ export default function SupportPage({ canManage = true }) {
               key={filter.value}
               type="button"
               onClick={() => setStatusFilter(filter.value)}
-              className={`px-4 py-2 rounded-xl border text-sm ${
+              className={`px-3 py-1.5 rounded-md border text-sm ${
                 statusFilter === filter.value ? theme.tabActive : theme.tab
               }`}
             >
@@ -366,7 +367,7 @@ export default function SupportPage({ canManage = true }) {
           ))}
         </div>
 
-        {error && <p className="text-sm text-rose-500 mb-4">{error}</p>}
+        {error && <p className="text-sm text-danger mb-4">{error}</p>}
 
         {loading ? (
           <p className={`text-sm ${theme.soft}`}>Yuklanmoqda...</p>
@@ -406,7 +407,7 @@ export default function SupportPage({ canManage = true }) {
 
                   <div className="flex flex-col items-end gap-2 shrink-0">
                     <span
-                      className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusTone(
+                      className={`text-xs font-semibold px-2 py-0.5 rounded-md ${statusTone(
                         ticket.status,
                       )}`}
                     >
@@ -426,7 +427,7 @@ export default function SupportPage({ canManage = true }) {
                         onClick={() =>
                           handleStatusChange(ticket, "IN_PROGRESS")
                         }
-                        className={`px-4 py-2 rounded-xl border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
+                        className={`px-3 py-1.5 rounded-md border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
                       >
                         Ko'rilmoqda
                       </button>
@@ -435,7 +436,7 @@ export default function SupportPage({ canManage = true }) {
                       <button
                         type="button"
                         onClick={() => handleStatusChange(ticket, "CLOSED")}
-                        className={`px-4 py-2 rounded-xl border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
+                        className={`px-3 py-1.5 rounded-md border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
                       >
                         Yopish
                       </button>
@@ -443,13 +444,9 @@ export default function SupportPage({ canManage = true }) {
                     <button
                       type="button"
                       onClick={() => handleDelete(ticket)}
-                      className={`px-4 py-2 rounded-xl border text-sm ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-red-900/30 text-slate-300"
-                          : "border-slate-200 hover:bg-red-50 text-slate-600"
-                      }`}
+                      className={`px-3 py-1.5 rounded-md border text-sm border-line hover:bg-danger-soft text-fg-muted`}
                     >
-                      🗑️
+                      <Icon name="trash" size={16} />
                     </button>
                   </div>
                 )}
@@ -467,14 +464,10 @@ export default function SupportPage({ canManage = true }) {
           />
 
           <div
-            className={`absolute inset-y-0 right-0 w-full sm:max-w-[520px] shadow-2xl overflow-y-auto z-10 flex flex-col ${
-              darkMode ? "bg-slate-900" : "bg-white"
-            }`}
+            className={`absolute inset-y-0 right-0 w-full sm:max-w-[520px] shadow-2xl overflow-y-auto z-10 flex flex-col bg-surface`}
           >
             <div
-              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b border-line`}
             >
               <div className="min-w-0">
                 <h2 className={`text-lg font-bold break-words ${theme.text}`}>
@@ -521,22 +514,20 @@ export default function SupportPage({ canManage = true }) {
 
             {selectedTicket && (
               <div
-                className={`p-4 sm:p-6 border-t space-y-3 ${
-                  darkMode ? "border-slate-800" : "border-slate-200"
-                }`}
+                className={`p-4 sm:p-6 border-t space-y-3 border-line`}
               >
                 <textarea
                   value={replyText}
                   onChange={(event) => setReplyText(event.target.value)}
                   rows={3}
                   placeholder="Javob yozing..."
-                  className={`w-full rounded-xl border px-4 py-3 outline-none resize-none ${theme.input}`}
+                  className={`w-full field resize-none`}
                 />
                 <button
                   type="button"
                   onClick={handleReply}
                   disabled={replying || !replyText.trim()}
-                  className="w-full px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium disabled:opacity-60"
+                  className="w-full px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white font-medium disabled:opacity-60"
                 >
                   {replying ? "Yuborilmoqda..." : "Javob yuborish"}
                 </button>

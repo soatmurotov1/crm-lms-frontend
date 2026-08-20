@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { roomsApi } from "../../api/crmApi";
+import Icon from "../../components/ui/Icon";
 
-export default function RoomsPage({ theme, darkMode }) {
+export default function RoomsPage({ theme }) {
   const [showDrawer, setShowDrawer] = useState(false);
   const [editingRoomId, setEditingRoomId] = useState(null);
 
@@ -128,7 +129,7 @@ export default function RoomsPage({ theme, darkMode }) {
 
           <button
             onClick={openAddDrawer}
-            className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-3 rounded-xl font-medium shrink-0"
+            className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md font-medium shrink-0"
           >
             + Xonani qo‘shish
           </button>
@@ -167,24 +168,16 @@ export default function RoomsPage({ theme, darkMode }) {
                   <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => handleDelete(room.id)}
-                      className={`w-10 h-10 rounded-xl border flex items-center justify-center transition ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-red-900/30"
-                          : "border-slate-200 hover:bg-red-50"
-                      }`}
+                      className={`w-10 h-10 rounded-xl border flex items-center justify-center transition border-line hover:bg-danger-soft`}
                     >
-                      🗑️
+                      <Icon name="trash" size={16} />
                     </button>
 
                     <button
                       onClick={() => openEditDrawer(room)}
-                      className={`w-10 h-10 rounded-xl border flex items-center justify-center transition ${
-                        darkMode
-                          ? "border-slate-700 hover:bg-slate-800"
-                          : "border-slate-200 hover:bg-slate-50"
-                      }`}
+                      className={`w-10 h-10 rounded-xl border flex items-center justify-center transition border-line hover:bg-surface-2`}
                     >
-                      ✏️
+                      <Icon name="edit" size={16} />
                     </button>
                   </div>
                 </div>
@@ -205,14 +198,10 @@ export default function RoomsPage({ theme, darkMode }) {
           <div className="absolute inset-0" onClick={closeDrawer} />
 
           <div
-            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 ${
-              darkMode ? "bg-slate-900" : "bg-white"
-            }`}
+            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 bg-surface`}
           >
             <div
-              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b border-line`}
             >
               <h2 className={`text-lg sm:text-xl font-bold ${theme.text}`}>
                 {editingRoomId !== null
@@ -241,7 +230,7 @@ export default function RoomsPage({ theme, darkMode }) {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Xona nomi"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
 
@@ -257,23 +246,17 @@ export default function RoomsPage({ theme, darkMode }) {
                   value={formData.capacity}
                   onChange={handleChange}
                   placeholder="Masalan: 20"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none min-w-0 ${theme.input}`}
+                  className={`w-full field min-w-0`}
                 />
               </div>
             </div>
 
             <div
-              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t border-line`}
             >
               <button
                 onClick={closeDrawer}
-                className={`px-5 py-3 rounded-xl border ${
-                  darkMode
-                    ? "border-slate-700 text-slate-300"
-                    : "border-slate-200 text-slate-600"
-                }`}
+                className={`px-3.5 py-2 rounded-md border border-line text-fg-muted`}
               >
                 Bekor qilish
               </button>
@@ -281,7 +264,7 @@ export default function RoomsPage({ theme, darkMode }) {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium"
+                className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white font-medium"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>

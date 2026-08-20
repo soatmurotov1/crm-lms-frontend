@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import Icon from "../../../components/ui/Icon";
 
 export default function StudentLessonDetail({
   groupName,
@@ -57,7 +58,7 @@ export default function StudentLessonDetail({
     <div className="page active" id="page-lesson-detail">
       <div className="group-details-head">
         <button type="button" className="back-link" onClick={onBack}>
-          ← Darslar ro'yxatiga qaytish
+          <Icon name="arrowLeft" size={15} className="inline align-[-0.1875em]" /> Darslar ro'yxatiga qaytish
         </button>
         <div className="section-title">{groupName}</div>
       </div>
@@ -145,7 +146,7 @@ export default function StudentLessonDetail({
                           onClick={handleAttachClick}
                           aria-label="Fayl biriktirish"
                         >
-                          📎
+                          <Icon name="attachment" size={16} />
                         </button>
                         <button
                           type="submit"
@@ -153,7 +154,7 @@ export default function StudentLessonDetail({
                           aria-label="Yuborish"
                           disabled={submitting}
                         >
-                          ➤
+                          <Icon name="send" size={16} />
                           {selectedFile ? (
                             <span className="send-btn-badge">1</span>
                           ) : null}
@@ -231,7 +232,7 @@ export default function StudentLessonDetail({
                           onClick={handleExamAttachClick}
                           aria-label="Exam faylini biriktirish"
                         >
-                          📎
+                          <Icon name="attachment" size={16} />
                         </button>
                         <button
                           type="submit"
@@ -239,7 +240,7 @@ export default function StudentLessonDetail({
                           aria-label="Yuborish"
                           disabled={examSubmitting}
                         >
-                          ➤
+                          <Icon name="send" size={16} />
                           {examFile ? (
                             <span className="send-btn-badge">1</span>
                           ) : null}

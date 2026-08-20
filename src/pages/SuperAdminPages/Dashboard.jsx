@@ -39,26 +39,26 @@ const MENU_ITEMS = [
     key: "dashboard",
     label: "Boshqaruv paneli",
     shortLabel: "Asosiy",
-    icon: "🏠",
+    icon: "home",
   },
-  { key: "organizations", label: "Tashkilotlar", icon: "🏢" },
+  { key: "organizations", label: "Tashkilotlar", icon: "building" },
   {
     key: "users",
     label: "Foydalanuvchilar",
     shortLabel: "Userlar",
-    icon: "👥",
+    icon: "users",
   },
   {
     key: "plans",
     label: "Tariflar va obunalar",
     shortLabel: "Tariflar",
-    icon: "💎",
+    icon: "plans",
   },
-  { key: "payments", label: "To'lovlar", icon: "💳" },
-  { key: "reports", label: "Hisobotlar", icon: "📊" },
-  { key: "settings", label: "Tizim sozlamalari", icon: "⚙️" },
-  { key: "notifications", label: "Xabarnomalar", icon: "🔔" },
-  { key: "support", label: "Qo'llab-quvvatlash", icon: "🛟" },
+  { key: "payments", label: "To'lovlar", icon: "payments" },
+  { key: "reports", label: "Hisobotlar", icon: "reports" },
+  { key: "settings", label: "Tizim sozlamalari", icon: "settings" },
+  { key: "notifications", label: "Xabarnomalar", icon: "bell" },
+  { key: "support", label: "Qo'llab-quvvatlash", icon: "support" },
 ];
 
 /** Menyu kaliti -> URL. App.jsx dagi SUPERADMIN_ROUTES bilan mos bo'lishi kerak. */
@@ -242,7 +242,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
         )} · ${formatUzDate(subscription.endDate)} gacha`,
         badge: "Faol",
         tone: "emerald",
-        icon: "💎",
+        icon: "plans",
       })),
     [activeSubscriptions],
   );
@@ -259,7 +259,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
         )} obuna · ${organization.phone || "Telefon yo'q"}`,
         badge: organization.status === "ACTIVE" ? "Faol" : "Nofaol",
         tone: organization.status === "ACTIVE" ? "violet" : "slate",
-        icon: "🏢",
+        icon: "building",
       })),
     [organizations],
   );
@@ -285,7 +285,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
         <StatCard
-          icon="🏢"
+          icon="building"
           tone="violet"
           label="Jami tashkilotlar"
           onClick={() => goToMenu("organizations")}
@@ -298,7 +298,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           }
         />
         <StatCard
-          icon="💎"
+          icon="plans"
           tone="blue"
           label="Faol obunalar"
           onClick={() => goToMenu("plans")}
@@ -316,7 +316,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           }
         />
         <StatCard
-          icon="🛟"
+          icon="support"
           tone="amber"
           label="Ochiq murojaatlar"
           onClick={() => goToMenu("support")}
@@ -328,7 +328,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           }
         />
         <StatCard
-          icon="💰"
+          icon="money"
           tone="emerald"
           label="Jami daromad"
           onClick={() => goToMenu("payments")}
@@ -339,20 +339,20 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
         <StatCard
-          icon="👥"
+          icon="users"
           tone="blue"
           label="Jami foydalanuvchilar"
           onClick={() => goToMenu("users")}
           value={loading ? "..." : formatNumber(totalUsers)}
         />
         <StatCard
-          icon="🎓"
+          icon="students"
           tone="emerald"
           label="Jami o'quvchilar"
           value={loading ? "..." : formatNumber(students.length)}
         />
         <StatCard
-          icon="📚"
+          icon="groups"
           tone="violet"
           label="Faol guruhlar"
           value={loading ? "..." : formatNumber(activeGroups.length)}
@@ -429,7 +429,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
             meta: `${item.groupName} · ${formatUzs(item.amount)}`,
             badge: "Bekor qilingan",
             tone: "rose",
-            icon: "🚫",
+            icon: "ban",
           }))}
           loading={loading}
           emptyText="Bekor qilingan obuna yo'q"
@@ -443,25 +443,25 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         <StatCard
-          icon="💰"
+          icon="money"
           tone="emerald"
           label="Yillik daromad"
           value={formatUzs(totalRevenue)}
         />
         <StatCard
-          icon="📚"
+          icon="groups"
           tone="violet"
           label="Faol guruhlar"
           value={formatNumber(activeGroups.length)}
         />
         <StatCard
-          icon="🎓"
+          icon="students"
           tone="blue"
           label="O'quvchilar"
           value={formatNumber(students.length)}
         />
         <StatCard
-          icon="👨‍🏫"
+          icon="teachers"
           tone="amber"
           label="O'qituvchilar"
           value={formatNumber(teachers.length)}
@@ -517,7 +517,7 @@ export default function SuperAdminDashboard({ initialMenu = "dashboard" }) {
           <ChangePasswordCard onSubmit={usersApi.changeMyPassword} />
 
           <PlaceholderSection
-            icon="⚙️"
+            icon="settings"
             title="Tizim sozlamalari"
             description="Butun platforma uchun umumiy sozlamalar bo'limi."
             points={[

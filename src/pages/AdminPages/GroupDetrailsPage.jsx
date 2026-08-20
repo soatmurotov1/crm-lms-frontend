@@ -18,14 +18,15 @@ import {
   makeDateHeaders,
 } from "./group-details/constants";
 import { formatUzDate, formatUzDateTime } from "../../utils/date";
+import Icon from "../../components/ui/Icon";
 
 export default function GroupDetailsPage({
   theme = {
-    card: "bg-white",
-    text: "text-slate-900",
-    soft: "text-slate-500",
-    chip: "bg-slate-50 text-slate-700 border-slate-200",
-    rowBorder: "border-slate-200",
+    card: "bg-surface",
+    text: "text-fg",
+    soft: "text-fg-muted",
+    chip: "bg-surface-2 text-fg-muted border-line",
+    rowBorder: "border-line",
   },
   darkMode = false,
   group,
@@ -370,30 +371,21 @@ export default function GroupDetailsPage({
   const [selectedLesson, setSelectedLesson] = useState(null);
   const homeworkFileInputRef = useRef(null);
 
-  const actionBtnClass = darkMode
-    ? "px-3 py-2 rounded-xl border border-slate-700 text-slate-200 hover:bg-slate-800 transition text-sm"
-    : "px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition text-sm";
+  const actionBtnClass = "px-3 py-1.5 rounded-md border border-line text-fg-muted hover:bg-surface-2 transition text-sm";
 
   const infoCardClass = `${theme.card} border rounded-2xl p-3 shadow-sm min-h-0`;
-  const innerBorderClass = darkMode ? "border-slate-700" : "border-slate-200";
-  const personCardClass = darkMode
-    ? "group flex items-center justify-between gap-3 rounded-2xl border border-slate-700/90 bg-slate-900/70 px-3 py-2.5 min-w-0 transition hover:bg-slate-800/80 hover:border-slate-600"
-    : "group flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 min-w-0 transition hover:bg-slate-50 hover:border-slate-300";
-  const avatarClass = darkMode
-    ? "w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100"
-    : "w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700";
+  const innerBorderClass = "border-line";
+  const personCardClass = "group flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-3 py-2.5 min-w-0 transition hover:bg-surface-2 hover:border-line-strong";
+  // Avatar oldin ikki tomonlama gradient bilan bo'yalardi — o'quvchi
+  // ismining bosh harfi uchun ortiqcha bezak. Endi tekis sirt.
+  const avatarClass =
+    "w-9 h-9 rounded-md flex items-center justify-center text-xs font-semibold shrink-0 bg-surface-3 text-fg-muted";
 
-  const inputClass = darkMode
-    ? "w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none"
-    : "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none";
+  const inputClass = "field";
 
   // Tungi rejimda oq qolib ketmasligi kerak bo'lgan umumiy elementlar.
-  const cancelBtnClass = darkMode
-    ? "px-5 py-2.5 rounded-xl border border-slate-700 text-slate-300 bg-slate-900 hover:bg-slate-800"
-    : "px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50";
-  const modalCardClass = darkMode
-    ? "bg-slate-900 border-slate-700 text-slate-100"
-    : "bg-white border-slate-200 text-slate-900";
+  const cancelBtnClass = "px-3.5 py-2 rounded-md border border-line text-fg-muted bg-surface hover:bg-surface-2";
+  const modalCardClass = "bg-surface border-line text-fg";
 
   const sortedHomeworkLessons = [...lessons].sort((a, b) => {
     const dateDiff =
@@ -405,19 +397,15 @@ export default function GroupDetailsPage({
 
   const tabClass = (active) =>
     active
-      ? "pb-3 text-sm font-medium border-b-2 border-emerald-500 text-emerald-600"
-      : darkMode
-        ? "pb-3 text-sm font-medium border-b-2 border-transparent text-slate-400"
-        : "pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500";
+      ? "pb-3 text-sm font-medium border-b-2 border-success-border text-success"
+      : "pb-3 text-sm font-medium border-b-2 border-transparent text-fg-muted";
 
   const subTabClass = (active) =>
     active
       ? darkMode
-        ? "px-4 py-2 rounded-xl bg-slate-800 border border-emerald-500/60 text-emerald-300 text-sm font-medium shadow-sm"
-        : "px-4 py-2 rounded-xl bg-white border border-emerald-300 text-slate-900 text-sm font-medium shadow-sm"
-      : darkMode
-        ? "px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-medium"
-        : "px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-sm font-medium";
+        ? "px-3 py-1.5 rounded-md bg-surface-2 border border-success-border text-success text-sm font-medium shadow-sm"
+        : "px-3 py-1.5 rounded-md bg-surface border border-success-border text-fg text-sm font-medium shadow-sm"
+      : "px-3 py-1.5 rounded-md bg-surface-2 border border-line text-fg-muted text-sm font-medium";
 
   const formatDateTime = (value) => {
     return formatUzDateTime(value);
@@ -1224,7 +1212,7 @@ export default function GroupDetailsPage({
             Bu guruh muvaffaqiyatli o‘chirildi.
           </p>
           <button onClick={onBack} className={actionBtnClass}>
-            ← Orqaga qaytish
+            <Icon name="arrowLeft" size={15} className="inline align-[-0.1875em]" /> Orqaga qaytish
           </button>
         </div>
       </div>
@@ -1238,7 +1226,7 @@ export default function GroupDetailsPage({
           <div className="shrink-0 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 min-w-0">
             <div className="flex items-start sm:items-center gap-3 flex-wrap min-w-0">
               <button onClick={onBack} className={`${actionBtnClass} shrink-0`}>
-                ← Orqaga
+                <Icon name="arrowLeft" size={15} className="inline align-[-0.1875em]" /> Orqaga
               </button>
 
               <div className="min-w-0">
@@ -1256,7 +1244,7 @@ export default function GroupDetailsPage({
             {!isReadOnly && (
               <div className="flex items-center gap-2 flex-wrap">
                 <button onClick={openEditModal} className={actionBtnClass}>
-                  ✏️ Tahrirlash
+                  Tahrirlash
                 </button>
 
                 <button
@@ -1282,15 +1270,15 @@ export default function GroupDetailsPage({
                 <button
                   disabled={groupDeleteLoading}
                   onClick={deleteGroup}
-                  className="w-10 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white transition shrink-0 disabled:opacity-60"
+                  className="w-10 h-10 rounded-xl bg-danger hover:bg-danger-hover text-white transition shrink-0 disabled:opacity-60"
                 >
-                  {groupDeleteLoading ? "..." : "🗑️"}
+                  {groupDeleteLoading ? "..." : "trash"}
                 </button>
               </div>
             )}
           </div>
 
-          <div className="shrink-0 flex items-center gap-3 border-b border-slate-200 overflow-x-auto">
+          <div className="shrink-0 flex items-center gap-3 border-b border-line overflow-x-auto">
             <button
               onClick={() => {
                 setActiveMainTab("malumotlar");
@@ -1335,7 +1323,7 @@ export default function GroupDetailsPage({
                     </h3>
 
                     <span
-                      className={`px-3 py-1 rounded-full text-xs border shrink-0 ${theme.chip}`}
+                      className={`px-2 py-0.5 rounded-md text-xs border shrink-0 ${theme.chip}`}
                     >
                       {groupData.course}
                     </span>
@@ -1406,7 +1394,7 @@ export default function GroupDetailsPage({
                       O‘qituvchilar
                     </h3>
                     <span
-                      className={`px-2.5 py-1 rounded-full text-[11px] border ${theme.chip}`}
+                      className={`px-2 py-0.5 rounded-md text-[11px] border ${theme.chip}`}
                     >
                       {teachers.length} ta
                     </span>
@@ -1446,8 +1434,8 @@ export default function GroupDetailsPage({
                               }
                               className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
                                 darkMode
-                                  ? "border-slate-600 text-slate-200 hover:bg-slate-800"
-                                  : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                                  ? "border-line-strong text-fg-muted hover:bg-surface-2"
+                                  : "border-line text-fg-muted hover:bg-surface-2"
                               }`}
                             >
                               ...
@@ -1456,31 +1444,19 @@ export default function GroupDetailsPage({
                             {openPersonMenu?.type === "teacher" &&
                               openPersonMenu?.id === teacher.id && (
                                 <div
-                                  className={`absolute right-0 top-9 z-30 min-w-30 rounded-xl border shadow-lg p-1 ${
-                                    darkMode
-                                      ? "bg-slate-900 border-slate-700"
-                                      : "bg-white border-slate-200"
-                                  }`}
+                                  className={`absolute right-0 top-9 z-30 min-w-30 rounded-xl border shadow-lg p-1 bg-surface border-line`}
                                 >
                                   <button
                                     type="button"
                                     onClick={() => editTeacher(teacher.id)}
-                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                      darkMode
-                                        ? "text-slate-200 hover:bg-slate-800"
-                                        : "text-slate-700 hover:bg-slate-50"
-                                    }`}
+                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs text-fg-muted hover:bg-surface-2`}
                                   >
                                     Tahrirlash
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => deleteTeacher(teacher.id)}
-                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                      darkMode
-                                        ? "text-red-300 hover:bg-red-500/10"
-                                        : "text-red-600 hover:bg-red-50"
-                                    }`}
+                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs text-danger hover:bg-danger-soft`}
                                   >
                                     O‘chirish
                                   </button>
@@ -1503,7 +1479,7 @@ export default function GroupDetailsPage({
                       Talabalar
                     </h3>
                     <span
-                      className={`px-2.5 py-1 rounded-full text-[11px] border ${theme.chip}`}
+                      className={`px-2 py-0.5 rounded-md text-[11px] border ${theme.chip}`}
                     >
                       {students.length} ta
                     </span>
@@ -1540,11 +1516,7 @@ export default function GroupDetailsPage({
 
                           <div className="flex items-center gap-2 shrink-0">
                             <span
-                              className={`px-2.5 py-1 rounded-full text-[10px] font-medium border ${
-                                darkMode
-                                  ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              }`}
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-medium border bg-success-soft text-success border-success-border`}
                             >
                               Faol
                             </span>
@@ -1563,8 +1535,8 @@ export default function GroupDetailsPage({
                                   }
                                   className={`w-8 h-8 rounded-lg border text-base leading-none flex items-center justify-center cursor-pointer transition ${
                                     darkMode
-                                      ? "border-slate-600 text-slate-200 hover:bg-slate-800"
-                                      : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                                      ? "border-line-strong text-fg-muted hover:bg-surface-2"
+                                      : "border-line text-fg-muted hover:bg-surface-2"
                                   }`}
                                 >
                                   ...
@@ -1573,20 +1545,12 @@ export default function GroupDetailsPage({
                                 {openPersonMenu?.type === "student" &&
                                   openPersonMenu?.id === student.id && (
                                     <div
-                                      className={`absolute right-0 top-9 z-30 min-w-30 rounded-xl border shadow-lg p-1 ${
-                                        darkMode
-                                          ? "bg-slate-900 border-slate-700"
-                                          : "bg-white border-slate-200"
-                                      }`}
+                                      className={`absolute right-0 top-9 z-30 min-w-30 rounded-xl border shadow-lg p-1 bg-surface border-line`}
                                     >
                                       <button
                                         type="button"
                                         onClick={() => editStudent(student.id)}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                          darkMode
-                                            ? "text-slate-200 hover:bg-slate-800"
-                                            : "text-slate-700 hover:bg-slate-50"
-                                        }`}
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs text-fg-muted hover:bg-surface-2`}
                                       >
                                         Tahrirlash
                                       </button>
@@ -1595,11 +1559,7 @@ export default function GroupDetailsPage({
                                         onClick={() =>
                                           deleteStudent(student.id)
                                         }
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                                          darkMode
-                                            ? "text-red-300 hover:bg-red-500/10"
-                                            : "text-red-600 hover:bg-red-50"
-                                        }`}
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs text-danger hover:bg-danger-soft`}
                                       >
                                         O‘chirish
                                       </button>
@@ -1666,7 +1626,7 @@ export default function GroupDetailsPage({
                 {activeLessonTab === "uyga-vazifa" && canUploadHomework && (
                   <button
                     onClick={() => setLessonPage("create-homework")}
-                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
+                    className="px-3 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white text-sm"
                   >
                     Uyga vazifa qo‘shish
                   </button>
@@ -1675,7 +1635,7 @@ export default function GroupDetailsPage({
                 {activeLessonTab === "videolar" && canUploadVideo && (
                   <button
                     onClick={() => setShowVideoUploadModal(true)}
-                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm"
+                    className="px-3 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white text-sm"
                   >
                     Qo‘shish
                   </button>
@@ -1687,7 +1647,7 @@ export default function GroupDetailsPage({
                   <div className="overflow-auto">
                     <table className="w-full text-sm">
                       <thead
-                        className={darkMode ? "bg-slate-800" : "bg-slate-50"}
+                        className={"bg-surface-2"}
                       >
                         <tr className={`border-b ${innerBorderClass}`}>
                           <th
@@ -1721,11 +1681,7 @@ export default function GroupDetailsPage({
                         {lessons.map((lesson, index) => (
                           <tr
                             key={lesson.id}
-                            className={`border-b ${theme.rowBorder} ${
-                              darkMode
-                                ? "hover:bg-slate-800/40"
-                                : "hover:bg-slate-50"
-                            }`}
+                            className={`border-b ${theme.rowBorder} hover:bg-surface-2`}
                           >
                             <td className={`px-3 py-3 ${theme.text}`}>
                               {index + 1}
@@ -1747,7 +1703,7 @@ export default function GroupDetailsPage({
                   <div className="overflow-auto">
                     <table className="w-full min-w-245 text-sm">
                       <thead
-                        className={darkMode ? "bg-slate-800" : "bg-slate-50"}
+                        className={"bg-surface-2"}
                       >
                         <tr className={`border-b ${innerBorderClass}`}>
                           <th
@@ -1761,17 +1717,17 @@ export default function GroupDetailsPage({
                           <th
                             className={`text-center px-3 py-3 w-22.5 ${theme.text}`}
                           >
-                            👤
+                            <Icon name="user" size={16} />
                           </th>
                           <th
                             className={`text-center px-3 py-3 w-22.5 ${theme.text}`}
                           >
-                            🟡
+                            <Icon name="clock" size={16} />
                           </th>
                           <th
                             className={`text-center px-3 py-3 w-22.5 ${theme.text}`}
                           >
-                            🟢
+                            <Icon name="checkCircle" size={16} />
                           </th>
                           <th
                             className={`text-left px-3 py-3 w-45 ${theme.text}`}
@@ -1814,11 +1770,7 @@ export default function GroupDetailsPage({
                           <tr
                             key={item.id}
                             onClick={() => openHomeworkDetail(item)}
-                            className={`border-b ${theme.rowBorder} ${
-                              darkMode
-                                ? "hover:bg-slate-800/40 cursor-pointer"
-                                : "hover:bg-slate-50 cursor-pointer"
-                            }`}
+                            className={`border-b ${theme.rowBorder} hover:bg-surface-2 cursor-pointer`}
                           >
                             <td className={`px-3 py-3 ${theme.text}`}>
                               {index + 1}
@@ -1828,8 +1780,8 @@ export default function GroupDetailsPage({
                                 onClick={() => openHomeworkDetail(item)}
                                 className={`w-full text-left rounded-md px-3 py-2 text-sm ${
                                   darkMode
-                                    ? "bg-slate-800 text-slate-200"
-                                    : "bg-slate-100 text-slate-800"
+                                    ? "bg-surface-2 text-fg-muted"
+                                    : "bg-surface-2 text-fg"
                                 }`}
                               >
                                 {item.title}
@@ -1867,7 +1819,7 @@ export default function GroupDetailsPage({
                                     e.stopPropagation();
                                     deleteHomework(item.id);
                                   }}
-                                  className="text-red-500 text-xs disabled:opacity-60"
+                                  className="text-danger text-xs disabled:opacity-60"
                                 >
                                   {deletingHomeworkId === item.id
                                     ? "O‘chirilmoqda..."
@@ -1897,7 +1849,7 @@ export default function GroupDetailsPage({
                   <div className="overflow-auto">
                     <table className="w-full min-w-275 text-sm">
                       <thead
-                        className={darkMode ? "bg-slate-800" : "bg-slate-50"}
+                        className={"bg-surface-2"}
                       >
                         <tr className={`border-b ${innerBorderClass}`}>
                           <th className={`text-left px-3 py-3 ${theme.text}`}>
@@ -1943,15 +1895,11 @@ export default function GroupDetailsPage({
                         {videos.map((video) => (
                           <tr
                             key={video.id}
-                            className={`border-b ${theme.rowBorder} ${
-                              darkMode
-                                ? "hover:bg-slate-800/40"
-                                : "hover:bg-slate-50"
-                            }`}
+                            className={`border-b ${theme.rowBorder} hover:bg-surface-2`}
                           >
                             <td className={`px-3 py-3 ${theme.text}`}>
                               <div className="flex items-center gap-2">
-                                <span className="text-emerald-500">◔</span>
+                                <span className="text-success">◔</span>
                                 {video.file ? (
                                   <a
                                     href={video.file}
@@ -1973,7 +1921,7 @@ export default function GroupDetailsPage({
                               {video.lessonName}
                             </td>
                             <td className="px-3 py-3">
-                              <span className="px-2 py-1 rounded-full text-[11px] bg-emerald-100 text-emerald-700">
+                              <span className="px-2 py-0.5 rounded-md text-[11px] bg-success-soft text-success">
                                 {video.status}
                               </span>
                             </td>
@@ -1991,7 +1939,7 @@ export default function GroupDetailsPage({
                                 <button
                                   disabled={deletingVideoId === video.id}
                                   onClick={() => deleteVideo(video.id)}
-                                  className="text-red-500 text-xs disabled:opacity-60"
+                                  className="text-danger text-xs disabled:opacity-60"
                                 >
                                   {deletingVideoId === video.id
                                     ? "O‘chirilmoqda..."
@@ -2031,7 +1979,7 @@ export default function GroupDetailsPage({
                     onClick={() => setLessonPage("list")}
                     className={`mb-6 ${theme.soft} hover:opacity-80 text-sm`}
                   >
-                    ← Orqaga
+                    <Icon name="arrowLeft" size={15} className="inline align-[-0.1875em]" /> Orqaga
                   </button>
 
                   <h2 className={`text-2xl font-bold mb-6 ${theme.text}`}>
@@ -2125,14 +2073,14 @@ export default function GroupDetailsPage({
                           <button
                             type="button"
                             onClick={clearHomeworkFile}
-                            className="text-xs text-red-500 hover:underline"
+                            className="text-xs text-danger hover:underline"
                           >
                             Bekor qilish
                           </button>
                         )}
                       </div>
                       <label
-                        className={`flex items-center justify-center w-full rounded-xl border border-dashed ${innerBorderClass} px-4 py-6 cursor-pointer ${darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50"}`}
+                        className={`flex items-center justify-center w-full rounded-xl border border-dashed ${innerBorderClass} px-4 py-6 cursor-pointer hover:bg-surface-2`}
                       >
                         <input
                           type="file"
@@ -2147,7 +2095,7 @@ export default function GroupDetailsPage({
                           }
                         />
                         <span className={theme.soft}>
-                          ⬇ Yuklash{" "}
+                          <Icon name="download" size={15} className="inline align-[-0.1875em]" /> Yuklash{" "}
                           {homeworkForm.file?.name
                             ? `- ${homeworkForm.file.name}`
                             : ""}
@@ -2166,7 +2114,7 @@ export default function GroupDetailsPage({
                       <button
                         disabled={homeworkSaving}
                         onClick={addHomework}
-                        className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
+                        className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white disabled:opacity-60"
                       >
                         {homeworkSaving ? "Saqlanmoqda..." : "E'lon qilish"}
                       </button>
@@ -2187,7 +2135,7 @@ export default function GroupDetailsPage({
                     onClick={() => setLessonPage("list")}
                     className={`mb-6 ${theme.soft} hover:opacity-80 text-sm`}
                   >
-                    ← Orqaga
+                    <Icon name="arrowLeft" size={15} className="inline align-[-0.1875em]" /> Orqaga
                   </button>
 
                   <h2 className={`text-2xl font-bold mb-6 ${theme.text}`}>
@@ -2245,7 +2193,7 @@ export default function GroupDetailsPage({
                       <button
                         disabled={lessonSaving}
                         onClick={addLesson}
-                        className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-60"
+                        className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white disabled:opacity-60"
                       >
                         {lessonSaving ? "Saqlanmoqda..." : "Saqlash"}
                       </button>
@@ -2256,7 +2204,7 @@ export default function GroupDetailsPage({
             )}
 
           {showEditModal && !isReadOnly && (
-            <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-50 bg-overlay flex items-center justify-center p-4">
               <div
                 className={`${theme.card} w-full max-w-xl rounded-2xl border p-4 shadow-xl`}
               >
@@ -2349,7 +2297,7 @@ export default function GroupDetailsPage({
                   </button>
                   <button
                     onClick={saveGroupEdit}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                    className="px-3 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white text-sm"
                   >
                     Saqlash
                   </button>
@@ -2359,7 +2307,7 @@ export default function GroupDetailsPage({
           )}
 
           {showTeacherModal && !isReadOnly && (
-            <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-50 bg-overlay flex items-center justify-center p-4">
               <div
                 className={`${theme.card} w-full max-w-md rounded-2xl border p-4 shadow-xl`}
               >
@@ -2397,7 +2345,7 @@ export default function GroupDetailsPage({
                   <button
                     onClick={addTeacher}
                     disabled={teacherAssigning || teacherOptionsLoading}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm disabled:opacity-60"
+                    className="px-3 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white text-sm disabled:opacity-60"
                   >
                     {teacherAssigning ? "Biriktirilmoqda..." : "Qo‘shish"}
                   </button>
@@ -2407,7 +2355,7 @@ export default function GroupDetailsPage({
           )}
 
           {showStudentModal && !isReadOnly && (
-            <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-50 bg-overlay flex items-center justify-center p-4">
               <div
                 className={`${theme.card} w-full max-w-md rounded-2xl border p-4 shadow-xl`}
               >
@@ -2451,7 +2399,7 @@ export default function GroupDetailsPage({
                   <button
                     disabled={studentAssigning || studentOptionsLoading}
                     onClick={addStudent}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm disabled:opacity-60"
+                    className="px-3 py-1.5 rounded-md bg-accent hover:bg-accent-hover text-white text-sm disabled:opacity-60"
                   >
                     {studentAssigning ? "Qo‘shilmoqda..." : "Qo‘shish"}
                   </button>
@@ -2463,7 +2411,7 @@ export default function GroupDetailsPage({
       </div>
 
       {showVideoUploadModal && canUploadVideo && (
-        <div className="fixed inset-0 z-70 bg-black/40 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-70 bg-overlay flex items-center justify-center p-4">
           <div
             className={`w-full max-w-6xl rounded-2xl shadow-xl border p-5 relative ${modalCardClass}`}
           >
@@ -2501,15 +2449,15 @@ export default function GroupDetailsPage({
                 if (!videoLessonId || videoUploading) return;
                 fileRef.current?.click();
               }}
-              className={`border-2 border-dashed border-emerald-400/60 rounded-2xl p-10 sm:p-16 text-center cursor-pointer ${theme.hover}`}
+              className={`border-2 border-dashed border-success-border rounded-2xl p-10 sm:p-16 text-center cursor-pointer ${theme.hover}`}
             >
-              <div className="text-emerald-500 text-4xl mb-4">🧰</div>
+              <div className="text-success text-4xl mb-4"><Icon name="briefcase" size={24} /></div>
               <p className={`text-base font-medium ${theme.text}`}>
                 Videofaylni yuklash uchun ushbu hudud ustiga bosing yoki faylni
                 shu yerga olib keling
               </p>
               {!videoLessonId && (
-                <p className="text-red-500 text-sm mt-2">
+                <p className="text-danger text-sm mt-2">
                   Avval darsni tanlang
                 </p>
               )}
@@ -2521,7 +2469,7 @@ export default function GroupDetailsPage({
               {videoUploadNotice && (
                 <p
                   className={`text-sm mt-2 ${
-                    videoUploading ? "text-emerald-600" : "text-slate-500"
+                    videoUploading ? "text-success" : "text-fg-muted"
                   }`}
                 >
                   {videoUploadNotice}

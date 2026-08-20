@@ -11,33 +11,34 @@ import {
 } from "../../api/crmApi";
 import { formatUzDateTime } from "../../utils/date";
 import { useTheme } from "../../theme/themeContext";
+import Icon from "../ui/Icon";
 
 const TYPE_META = {
-  INFO: { label: "Ma'lumot", icon: "ℹ️", tone: "blue" },
-  WARNING: { label: "Ogohlantirish", icon: "⚠️", tone: "amber" },
-  PAYMENT: { label: "To'lov", icon: "💳", tone: "emerald" },
-  LESSON: { label: "Dars", icon: "📚", tone: "violet" },
-  HOMEWORK: { label: "Uy vazifa", icon: "📝", tone: "violet" },
-  SYSTEM: { label: "Tizim", icon: "⚙️", tone: "slate" },
+  INFO: { label: "Ma'lumot", icon: "info", tone: "blue" },
+  WARNING: { label: "Ogohlantirish", icon: "warning", tone: "amber" },
+  PAYMENT: { label: "To'lov", icon: "payments", tone: "emerald" },
+  LESSON: { label: "Dars", icon: "groups", tone: "violet" },
+  HOMEWORK: { label: "Uy vazifa", icon: "homework", tone: "violet" },
+  SYSTEM: { label: "Tizim", icon: "settings", tone: "slate" },
 };
 
 const TONE_CHIPS = {
-  blue: { dark: "bg-blue-500/15 text-blue-300", light: "bg-blue-50 text-blue-600" },
+  blue: { dark: "bg-accent-soft text-accent-soft-fg", light: "bg-accent-soft text-accent" },
   amber: {
-    dark: "bg-amber-500/15 text-amber-300",
-    light: "bg-amber-50 text-amber-600",
+    dark: "bg-warning-soft text-warning",
+    light: "bg-warning-soft text-warning",
   },
   emerald: {
-    dark: "bg-emerald-500/15 text-emerald-300",
-    light: "bg-emerald-50 text-emerald-600",
+    dark: "bg-success-soft text-success",
+    light: "bg-success-soft text-success",
   },
   violet: {
-    dark: "bg-violet-500/15 text-violet-300",
-    light: "bg-violet-50 text-violet-600",
+    dark: "bg-accent-soft text-accent-soft-fg",
+    light: "bg-accent-soft text-accent",
   },
   slate: {
-    dark: "bg-slate-500/15 text-slate-300",
-    light: "bg-slate-100 text-slate-600",
+    dark: "bg-surface-3 text-fg-muted",
+    light: "bg-surface-2 text-fg-muted",
   },
 };
 
@@ -370,7 +371,7 @@ export default function NotificationsSection({
       <div
         key={notification.id}
         className={`rounded-2xl border p-4 ${theme.rowBorder} ${
-          isUnread ? (darkMode ? "bg-slate-800/40" : "bg-violet-50/40") : ""
+          isUnread ? (darkMode ? "bg-surface-2" : "bg-accent-soft") : ""
         }`}
       >
         <div className="flex items-start gap-3">
@@ -388,7 +389,7 @@ export default function NotificationsSection({
                 {notification.title}
               </p>
               {isUnread && (
-                <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-violet-500 mt-2" />
+                <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-accent mt-2" />
               )}
             </div>
 
@@ -419,7 +420,7 @@ export default function NotificationsSection({
                 <button
                   type="button"
                   onClick={() => handleMarkAsRead(notification)}
-                  className={`px-3 py-1.5 rounded-xl border text-xs ${theme.rowBorder} ${theme.hover} ${theme.text}`}
+                  className={`px-2.5 py-1.5 rounded-md border text-xs ${theme.rowBorder} ${theme.hover} ${theme.text}`}
                 >
                   O'qildi
                 </button>
@@ -428,13 +429,9 @@ export default function NotificationsSection({
                 <button
                   type="button"
                   onClick={() => handleDelete(notification)}
-                  className={`px-3 py-1.5 rounded-xl border text-xs ${
-                    darkMode
-                      ? "border-slate-700 hover:bg-red-900/30 text-slate-300"
-                      : "border-slate-200 hover:bg-red-50 text-slate-600"
-                  }`}
+                  className={`px-2.5 py-1.5 rounded-md border text-xs border-line hover:bg-danger-soft text-fg-muted`}
                 >
-                  🗑️ O'chirish
+                  <Icon name="trash" size={14} className="inline align-[-0.1875em]" /> O'chirish
                 </button>
               )}
             </div>
@@ -459,7 +456,7 @@ export default function NotificationsSection({
               <button
                 type="button"
                 onClick={handleMarkAllAsRead}
-                className={`px-4 py-2.5 rounded-xl border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
+                className={`px-3.5 py-2 rounded-md border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
               >
                 Barchasini o'qildi
               </button>
@@ -468,7 +465,7 @@ export default function NotificationsSection({
               <button
                 type="button"
                 onClick={() => setShowForm((prev) => !prev)}
-                className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium"
+                className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md text-sm font-medium"
               >
                 {showForm ? "Yopish" : "+ Xabar yuborish"}
               </button>
@@ -495,14 +492,14 @@ export default function NotificationsSection({
               value={form.title}
               onChange={handleFormChange}
               placeholder="Sarlavha"
-              className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+              className={`w-full field`}
             />
 
             <select
               name="type"
               value={form.type}
               onChange={handleFormChange}
-              className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+              className={`w-full field`}
             >
               {Object.entries(TYPE_META).map(([value, meta]) => (
                 <option key={value} value={value}>
@@ -515,7 +512,7 @@ export default function NotificationsSection({
               name="audience"
               value={form.audience}
               onChange={handleFormChange}
-              className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+              className={`w-full field`}
             >
               {audienceOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -529,7 +526,7 @@ export default function NotificationsSection({
                 name="groupId"
                 value={form.groupId}
                 onChange={handleFormChange}
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                className={`w-full field`}
               >
                 <option value="">Guruhni tanlang</option>
                 {groups.map((group) => (
@@ -545,7 +542,7 @@ export default function NotificationsSection({
                 name="organizationId"
                 value={form.organizationId}
                 onChange={handleFormChange}
-                className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                className={`w-full field`}
               >
                 <option value="">
                   {directoryLoaded
@@ -568,7 +565,7 @@ export default function NotificationsSection({
                     name="recipientKind"
                     value={form.recipientKind}
                     onChange={handleFormChange}
-                    className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                    className={`w-full field`}
                   >
                     {RECIPIENT_KINDS.map((kind) => (
                       <option key={kind.value} value={kind.value}>
@@ -582,7 +579,7 @@ export default function NotificationsSection({
                   name="recipientId"
                   value={form.recipientId}
                   onChange={handleFormChange}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                  className={`w-full field`}
                 >
                   <option value="">
                     {directoryLoaded ? "Shaxsni tanlang" : "Yuklanmoqda..."}
@@ -612,7 +609,7 @@ export default function NotificationsSection({
               type="button"
               onClick={handleSend}
               disabled={sending}
-              className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium disabled:opacity-60"
+              className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white text-sm font-medium disabled:opacity-60"
             >
               {sending ? "Yuborilmoqda..." : "Yuborish"}
             </button>
@@ -625,7 +622,7 @@ export default function NotificationsSection({
           <button
             type="button"
             onClick={() => setActiveTab("mine")}
-            className={`px-4 py-2 rounded-xl border text-sm ${
+            className={`px-3 py-1.5 rounded-md border text-sm ${
               activeTab === "mine" ? theme.tabActive : theme.tab
             }`}
           >
@@ -634,7 +631,7 @@ export default function NotificationsSection({
           <button
             type="button"
             onClick={() => setActiveTab("sent")}
-            className={`px-4 py-2 rounded-xl border text-sm ${
+            className={`px-3 py-1.5 rounded-md border text-sm ${
               activeTab === "sent" ? theme.tabActive : theme.tab
             }`}
           >
@@ -643,7 +640,7 @@ export default function NotificationsSection({
         </div>
       )}
 
-      {error && <p className="text-sm text-rose-500 mb-4">{error}</p>}
+      {error && <p className="text-sm text-danger mb-4">{error}</p>}
 
       {loading ? (
         <p className={`text-sm ${theme.soft}`}>Yuklanmoqda...</p>

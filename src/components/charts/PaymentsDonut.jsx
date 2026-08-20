@@ -1,6 +1,6 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { useTheme } from "../../theme/themeContext";
-import { fullUzs, getChartColors } from "./chartTheme";
+import { fullUzs, getChartColors, getTooltipStyle } from "./chartTheme";
 
 /**
  * "To'lovlar statistikasi" — joriy oy uchun to'langan / qarzdorlik / kutilmoqda.
@@ -35,17 +35,22 @@ export default function PaymentsDonut({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6">
-      <div style={{ width: 180, height }}>
+    /*
+      `shrink-0` shart: tor ustunda (masalan uchdan bir kenglikdagi kartada)
+      flex konteyner aylanani siqib, uni yupqa chiziqqa aylantirib qo'yardi.
+      `flex-wrap` esa joy yetmasa legendani pastga tushiradi.
+    */
+    <div className="flex flex-wrap items-center justify-center gap-5">
+      <div className="shrink-0" style={{ width: 168, height }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={slices}
               dataKey="value"
               nameKey="name"
-              innerRadius="62%"
-              outerRadius="90%"
-              paddingAngle={2}
+              innerRadius="66%"
+              outerRadius="92%"
+              paddingAngle={1.5}
               stroke="none"
             >
               {slices.map((slice) => (
@@ -54,31 +59,28 @@ export default function PaymentsDonut({
             </Pie>
             <Tooltip
               formatter={(value, name) => [fullUzs(value), name]}
-              contentStyle={{
-                background: colors.tooltipBg,
-                border: `1px solid ${colors.tooltipBorder}`,
-                borderRadius: 12,
-                color: colors.tooltipText,
-              }}
+              {...getTooltipStyle(colors)}
             />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      <ul className="flex-1 space-y-3 w-full">
+      <ul className="min-w-40 flex-1 divide-y divide-line">
         {slices.map((slice) => {
           const percent = Math.round((slice.value / total) * 100);
 
           return (
-            <li key={slice.name} className="flex items-center gap-3">
+            <li key={slice.name} className="flex items-center gap-2.5 py-2">
               <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
+                className="h-2 w-2 shrink-0 rounded-xs"
                 style={{ background: slice.color }}
               />
               <span className={`text-sm flex-1 ${theme.soft}`}>
                 {slice.name}
               </span>
-              <span className={`text-sm font-semibold ${theme.text}`}>
+              <span
+                className={`text-sm font-medium tabular-nums ${theme.text}`}
+              >
                 {percent}%
               </span>
             </li>

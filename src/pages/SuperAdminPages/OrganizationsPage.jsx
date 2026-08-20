@@ -6,6 +6,7 @@ import StatCard from "../../components/ui/StatCard";
 import { organizationsApi } from "../../api/crmApi";
 import { formatUzDate } from "../../utils/date";
 import { useTheme } from "../../theme/themeContext";
+import Icon from "../../components/ui/Icon";
 
 const STATUS_FILTERS = [
   { value: "ALL", label: "Barchasi" },
@@ -22,16 +23,16 @@ const STATUS_LABELS = {
 
 const STATUS_TONES = {
   ACTIVE: {
-    dark: "bg-emerald-500/15 text-emerald-300",
-    light: "bg-emerald-50 text-emerald-600",
+    dark: "bg-success-soft text-success",
+    light: "bg-success-soft text-success",
   },
   INACTIVE: {
-    dark: "bg-slate-500/15 text-slate-300",
-    light: "bg-slate-100 text-slate-600",
+    dark: "bg-surface-3 text-fg-muted",
+    light: "bg-surface-2 text-fg-muted",
   },
   FREEZE: {
-    dark: "bg-amber-500/15 text-amber-300",
-    light: "bg-amber-50 text-amber-600",
+    dark: "bg-warning-soft text-warning",
+    light: "bg-warning-soft text-warning",
   },
 };
 
@@ -225,19 +226,19 @@ export default function OrganizationsPage() {
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <StatCard
-          icon="🏢"
+          icon="building"
           tone="violet"
           label="Jami tashkilotlar"
           value={loading ? "..." : stats.total}
         />
         <StatCard
-          icon="✅"
+          icon="checkCircle"
           tone="emerald"
           label="Faol tashkilotlar"
           value={loading ? "..." : stats.active}
         />
         <StatCard
-          icon="💎"
+          icon="plans"
           tone="blue"
           label="Faol obunali"
           value={loading ? "..." : stats.withSubscription}
@@ -252,7 +253,7 @@ export default function OrganizationsPage() {
             <button
               type="button"
               onClick={openAddDrawer}
-              className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium"
+              className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md text-sm font-medium"
             >
               + Tashkilot qo'shish
             </button>
@@ -265,7 +266,7 @@ export default function OrganizationsPage() {
               key={filter.value}
               type="button"
               onClick={() => setStatusFilter(filter.value)}
-              className={`px-4 py-2 rounded-xl border text-sm ${
+              className={`px-3 py-1.5 rounded-md border text-sm ${
                 statusFilter === filter.value ? theme.tabActive : theme.tab
               }`}
             >
@@ -275,7 +276,7 @@ export default function OrganizationsPage() {
         </div>
 
         {error && (
-          <p className="text-sm text-rose-500 mb-4">{error}</p>
+          <p className="text-sm text-danger mb-4">{error}</p>
         )}
 
         {loading ? (
@@ -302,7 +303,7 @@ export default function OrganizationsPage() {
                   </div>
 
                   <span
-                    className={`shrink-0 text-xs px-2.5 py-1 rounded-full ${statusBadge(
+                    className={`shrink-0 text-xs px-2 py-0.5 rounded-md ${statusBadge(
                       organization.status,
                     )}`}
                   >
@@ -311,16 +312,20 @@ export default function OrganizationsPage() {
                 </div>
 
                 <div className={`mt-4 space-y-1 text-sm ${theme.soft}`}>
-                  <p>📞 {organization.phone || "Telefon yo'q"}</p>
+                  <p><Icon name="phone" size={14} className="inline align-[-0.1875em]" /> {organization.phone || "Telefon yo'q"}</p>
                   <p>
-                    🔐{" "}
+                    <Icon
+                      name="security"
+                      size={14}
+                      className="inline align-[-0.1875em]"
+                    />{" "}
                     {organization.admin
                       ? `${organization.admin.fullName} · ${organization.admin.phone}`
                       : "Admin hisobi yo'q"}
                   </p>
-                  <p>📍 {organization.address || "Manzil ko'rsatilmagan"}</p>
+                  <p><Icon name="location" size={14} className="inline align-[-0.1875em]" /> {organization.address || "Manzil ko'rsatilmagan"}</p>
                   <p>
-                    🛟 {organization._count?.supportTickets || 0} murojaat ·{" "}
+                    <Icon name="support" size={14} className="inline align-[-0.1875em]" /> {organization._count?.supportTickets || 0} murojaat ·{" "}
                     {organization._count?.subscriptions || 0} obuna
                   </p>
                 </div>
@@ -352,18 +357,14 @@ export default function OrganizationsPage() {
                     onClick={() => openEditDrawer(organization)}
                     className={`flex-1 py-2.5 rounded-xl border text-sm ${theme.rowBorder} ${theme.hover} ${theme.text}`}
                   >
-                    ✏️ Tahrirlash
+                    Tahrirlash
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(organization)}
-                    className={`w-11 rounded-xl border flex items-center justify-center ${
-                      darkMode
-                        ? "border-slate-700 hover:bg-red-900/30"
-                        : "border-slate-200 hover:bg-red-50"
-                    }`}
+                    className={`w-11 rounded-xl border flex items-center justify-center border-line hover:bg-danger-soft`}
                   >
-                    🗑️
+                    <Icon name="trash" size={16} />
                   </button>
                 </div>
               </div>
@@ -377,14 +378,10 @@ export default function OrganizationsPage() {
           <div className="absolute inset-0" onClick={closeDrawer} />
 
           <div
-            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 ${
-              darkMode ? "bg-slate-900" : "bg-white"
-            }`}
+            className={`absolute inset-y-0 right-0 w-full sm:max-w-[430px] shadow-2xl overflow-y-auto z-10 bg-surface`}
           >
             <div
-              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex items-start justify-between gap-3 border-b border-line`}
             >
               <h2 className={`text-lg sm:text-xl font-bold ${theme.text}`}>
                 {editingId !== null
@@ -413,7 +410,7 @@ export default function OrganizationsPage() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Masalan: Najot Talim"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                  className={`w-full field`}
                 />
               </div>
 
@@ -421,7 +418,7 @@ export default function OrganizationsPage() {
                 className={`rounded-2xl border p-4 space-y-4 ${theme.rowBorder}`}
               >
                 <p className={`text-xs ${theme.soft}`}>
-                  🔐 Admin hisobi — tashkilot shu telefon va parol bilan tizimga
+                  Admin hisobi — tashkilot shu telefon va parol bilan tizimga
                   kiradi.
                 </p>
 
@@ -438,7 +435,7 @@ export default function OrganizationsPage() {
                     onChange={handleChange}
                     autoComplete="off"
                     placeholder="+998901234567"
-                    className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                    className={`w-full field`}
                   />
                 </div>
 
@@ -486,7 +483,7 @@ export default function OrganizationsPage() {
                     value={formData.adminName}
                     onChange={handleChange}
                     placeholder="Bo'sh bo'lsa rahbar ismi olinadi"
-                    className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                    className={`w-full field`}
                   />
                 </div>
               </div>
@@ -503,7 +500,7 @@ export default function OrganizationsPage() {
                   value={formData.directorName}
                   onChange={handleChange}
                   placeholder="F.I.O."
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                  className={`w-full field`}
                 />
               </div>
 
@@ -519,7 +516,7 @@ export default function OrganizationsPage() {
                   value={formData.address}
                   onChange={handleChange}
                   placeholder="Shahar, ko'cha"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.input}`}
+                  className={`w-full field`}
                 />
               </div>
 
@@ -535,7 +532,7 @@ export default function OrganizationsPage() {
                   onChange={handleChange}
                   rows={3}
                   placeholder="Qo'shimcha ma'lumot"
-                  className={`w-full rounded-xl border px-4 py-3 outline-none resize-none ${theme.input}`}
+                  className={`w-full field resize-none`}
                 />
               </div>
 
@@ -549,7 +546,7 @@ export default function OrganizationsPage() {
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className={`w-full rounded-xl border px-4 py-3 outline-none ${theme.select}`}
+                  className={`w-full field`}
                 >
                   <option value="ACTIVE">Faol</option>
                   <option value="INACTIVE">Nofaol</option>
@@ -559,18 +556,12 @@ export default function OrganizationsPage() {
             </div>
 
             <div
-              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t ${
-                darkMode ? "border-slate-800" : "border-slate-200"
-              }`}
+              className={`p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3 border-t border-line`}
             >
               <button
                 type="button"
                 onClick={closeDrawer}
-                className={`px-5 py-3 rounded-xl border ${
-                  darkMode
-                    ? "border-slate-700 text-slate-300"
-                    : "border-slate-200 text-slate-600"
-                }`}
+                className={`px-3.5 py-2 rounded-md border border-line text-fg-muted`}
               >
                 Bekor qilish
               </button>
@@ -578,7 +569,7 @@ export default function OrganizationsPage() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium disabled:opacity-60"
+                className="px-3.5 py-2 rounded-md bg-accent hover:bg-accent-hover text-white font-medium disabled:opacity-60"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>

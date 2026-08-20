@@ -44,7 +44,6 @@ const normalizeStatus = (status) => {
 
 export default function GroupsPage({
   theme,
-  darkMode,
   onOpenGroupDetails,
   currentUser,
   readOnly = false,
@@ -266,9 +265,7 @@ export default function GroupsPage({
       : "O'qituvchi yo'q");
 
   const columnCount = isReadonlyView ? 9 : 10;
-  const teacherActiveTabClass = darkMode
-    ? "bg-slate-800 text-slate-200 border-slate-700"
-    : "bg-slate-100 text-slate-700 border-slate-200";
+  const teacherActiveTabClass = "bg-surface-2 text-fg-muted border-line";
   const isTeacherActiveTab =
     currentUser?.role === "TEACHER" && activeTab === "ACTIVE";
 
@@ -276,18 +273,12 @@ export default function GroupsPage({
     const normalized = normalizeStatus(status);
 
     if (normalized === "FREEZE") {
-      return darkMode
-        ? "bg-amber-500/20 text-amber-300"
-        : "bg-amber-100 text-amber-700";
+      return "bg-warning-soft text-warning";
     }
     if (normalized === "INACTIVE") {
-      return darkMode
-        ? "bg-rose-500/20 text-rose-300"
-        : "bg-rose-100 text-rose-700";
+      return "bg-danger-soft text-danger";
     }
-    return darkMode
-      ? "bg-emerald-500/20 text-emerald-300"
-      : "bg-emerald-100 text-emerald-700";
+    return "bg-success-soft text-success";
   };
 
   const getStatusLabel = (status) => {
@@ -566,7 +557,7 @@ export default function GroupsPage({
             {!isReadonlyView && (
               <button
                 onClick={openAddDrawer}
-                className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl"
+                className="bg-accent hover:bg-accent-hover text-white px-3.5 py-2 rounded-md"
               >
                 + Guruh qo'shish
               </button>
@@ -597,7 +588,7 @@ export default function GroupsPage({
 
         <div className="overflow-x-auto overflow-y-visible rounded-2xl border">
           <table className="min-w-6xl w-full text-sm">
-            <thead className={darkMode ? "bg-slate-800" : "bg-slate-50"}>
+            <thead className={"bg-surface-2"}>
               <tr>
                 <th className={`text-left px-4 py-3 font-medium ${theme.soft}`}>
                   Status
@@ -674,14 +665,12 @@ export default function GroupsPage({
                       className={`border-t ${theme.rowBorder} ${
                         isGroupLocked
                           ? ""
-                          : darkMode
-                            ? "hover:bg-slate-800/30 cursor-pointer"
-                            : "hover:bg-slate-50 cursor-pointer"
+                          : "hover:bg-surface-2 cursor-pointer"
                       }`}
                     >
                       <td className="px-4 py-3">
                         <span
-                          className={`px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer ${getStatusBadgeClass(
+                          className={`px-2 py-0.5 rounded-md text-xs font-semibold cursor-pointer ${getStatusBadgeClass(
                             group.status,
                           )}`}
                         >
@@ -802,14 +791,14 @@ export default function GroupsPage({
                                       openEditDrawer(group);
                                       setOpenActionMenuId(null);
                                     }}
-                                    className={`w-full rounded-lg px-3 py-2 text-left text-xs ${theme.submenuText} hover:bg-slate-100/70 cursor-pointer`}
+                                    className={`w-full rounded-lg px-3 py-2 text-left text-xs ${theme.submenuText} hover:bg-surface-2 cursor-pointer`}
                                   >
                                     Tahrirlash
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => handleDelete(group.id)}
-                                    className="w-full rounded-lg px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50 cursor-pointer"
+                                    className="w-full rounded-lg px-3 py-2 text-left text-xs text-danger hover:bg-danger-soft cursor-pointer"
                                   >
                                     O‘chirish
                                   </button>
@@ -845,9 +834,7 @@ export default function GroupsPage({
         <div className={`fixed inset-0 z-50 ${theme.overlay}`}>
           <div className="absolute inset-0" onClick={closeDrawer} />
           <div
-            className={`absolute inset-y-0 right-0 w-full sm:max-w-108 overflow-y-auto p-6 ${
-              darkMode ? "bg-slate-900" : "bg-white"
-            }`}
+            className={`absolute inset-y-0 right-0 w-full sm:max-w-108 overflow-y-auto p-6 bg-surface`}
           >
             <h3 className={`text-xl font-bold mb-4 ${theme.text}`}>
               {editingGroupId !== null ? "Guruhni tahrirlash" : "Yangi guruh"}
@@ -1017,7 +1004,7 @@ export default function GroupsPage({
                       key={day}
                       type="button"
                       onClick={() => toggleWeekDay(day)}
-                      className={`px-3 py-1 rounded-full border text-sm ${
+                      className={`px-2 py-0.5 rounded-md border text-sm ${
                         formData.weekDays.includes(day)
                           ? theme.tabActive
                           : theme.tab
@@ -1040,7 +1027,7 @@ export default function GroupsPage({
               <button
                 disabled={saving}
                 onClick={handleSave}
-                className="px-4 py-2 rounded-xl bg-violet-600 text-white disabled:opacity-60"
+                className="px-3 py-1.5 rounded-md bg-accent text-white disabled:opacity-60"
               >
                 {saving ? "Saqlanmoqda..." : "Saqlash"}
               </button>
