@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import axiosInstance from '@/api/axiosInstance';
+import { QueryClient, QueryObserver } from '@tanstack/react-query';
 import {
   fetchTrainingEnrollment,
   fetchTrainingEnrollmentsPage,
@@ -7,6 +8,7 @@ import {
   fetchTrainingProgramsPage,
   fetchActiveTrainingPrograms,
   createTrainingEnrollment,
+  trainingProgramsPageQueryOptions,
 } from '@/features/training/api/trainingService';
 
 vi.mock('@/api/axiosInstance', () => ({
@@ -16,6 +18,67 @@ vi.mock('@/api/axiosInstance', () => ({
 beforeEach(() => vi.clearAllMocks());
 
 describe('training API', () => {
+  it('keeps a delayed old search response from replacing the current search', async () => {
+    let finishOld!: (value: unknown) => void;
+    const oldResponse = new Promise((resolve) => {
+      finishOld = resolve;
+    });
+    const response = (id: string) => ({
+      data: {
+        data: [{ id }],
+        meta: { total: 1, page: 1, limit: 20, totalPages: 1 },
+      },
+    });
+    vi.mocked(axiosInstance.get).mockImplementation((_url, config) =>
+      config?.params.search === 'old'
+        ? (oldResponse as never)
+        : Promise.resolve(response('new-result')),
+    );
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const observer = new QueryObserver(
+      client,
+      trainingProgramsPageQueryOptions({ search: 'old' }),
+    );
+    const unsubscribe = observer.subscribe(() => {});
+    observer.setOptions(trainingProgramsPageQueryOptions({ search: 'new' }));
+    await observer.refetch();
+    expect(observer.getCurrentResult().data?.data).toEqual([
+      { id: 'new-result' },
+    ]);
+    finishOld(response('old-result'));
+    await oldResponse;
+    expect(observer.getCurrentResult().data?.data).toEqual([
+      { id: 'new-result' },
+    ]);
+    expect(
+      vi.mocked(axiosInstance.get).mock.calls[0]?.[1]?.signal?.aborted,
+    ).toBe(true);
+    unsubscribe();
+    client.clear();
+  });
+
+  it('sends literal search and abort signal with distinct search cache keys', async () => {
+    vi.mocked(axiosInstance.get).mockResolvedValue({
+      data: { data: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } },
+    });
+    const signal = new AbortController().signal;
+    await fetchTrainingProgramsPage({ search: '  AVTO_%\\  ' }, signal);
+    expect(axiosInstance.get).toHaveBeenCalledWith(
+      '/training-programs',
+      expect.objectContaining({
+        params: expect.objectContaining({ search: '  AVTO_%\\  ' }),
+        signal,
+      }),
+    );
+    expect(
+      trainingProgramsPageQueryOptions({ search: 'first' }).queryKey,
+    ).not.toEqual(
+      trainingProgramsPageQueryOptions({ search: 'second' }).queryKey,
+    );
+  });
+
   it('loads approved programs with server-side filters', async () => {
     const program = { id: 'p1', name: 'B amaliyoti' };
     vi.mocked(axiosInstance.get).mockResolvedValue({
@@ -40,6 +103,7 @@ describe('training API', () => {
           branch_id: 'b1',
           category: 'B',
           is_active: true,
+          search: undefined,
           page: 1,
           limit: 20,
         },
@@ -138,6 +202,7 @@ describe('training API', () => {
           branch_id: 'b1',
           category: undefined,
           is_active: true,
+          search: undefined,
           page: 1,
           limit: 100,
         },
@@ -151,6 +216,7 @@ describe('training API', () => {
           branch_id: 'b1',
           category: undefined,
           is_active: true,
+          search: undefined,
           page: 2,
           limit: 100,
         },

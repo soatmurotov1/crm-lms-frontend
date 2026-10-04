@@ -27,6 +27,7 @@ export const fetchTrainingProgramsPage = async (
       branch_id: filters.branchId,
       category: filters.category,
       is_active: filters.active,
+      search: filters.search,
       page: filters.page ?? 1,
       limit: filters.limit ?? 20,
     },

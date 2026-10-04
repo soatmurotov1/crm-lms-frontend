@@ -1,5 +1,5 @@
 import { requestBranchId } from '@/lib/permissions';
-import { useMemo, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BookOpen, Plus } from '@phosphor-icons/react';
 import { toast } from 'sonner';
@@ -7,7 +7,6 @@ import { useBranches } from '@/features/branches/api/branchService';
 import { useAuthStore } from '@/store/authStore';
 import { useCan } from '@/hooks/useCan';
 import { useListQueryState } from '@/hooks/useListQueryState';
-import { matchesListQuery } from '@/lib/listQuery';
 import { ListSearchField } from '@/components/ui/ListSearchField';
 import {
   useCreateTrainingProgram,
@@ -248,21 +247,11 @@ const TrainingProgramsPage = () => {
         undefined),
     category: category || undefined,
     active: showInactive ? undefined : true,
+    search: debouncedSearch,
     page,
     limit: pageSize,
   });
-  const visiblePrograms = useMemo(
-    () =>
-      (programs.data?.data ?? []).filter((program) =>
-        matchesListQuery(
-          debouncedSearch,
-          program.name,
-          program.category,
-          program.course_type,
-        ),
-      ),
-    [programs.data, debouncedSearch],
-  );
+  const visiblePrograms = programs.data?.data ?? [];
   const branchName = (id: string) =>
     branches.find((branch) => branch.id === id)?.name ??
     (id === requestBranchId(user, useAuthStore.getState?.()?.activeBranchId)
@@ -407,8 +396,16 @@ const TrainingProgramsPage = () => {
         </>
       ) : (
         <EmptyState
-          title={t('training.empty_programs')}
-          description={t('training.empty_programs_desc')}
+          title={t(
+            debouncedSearch.trim()
+              ? 'common.no_data'
+              : 'training.empty_programs',
+          )}
+          description={
+            debouncedSearch.trim()
+              ? undefined
+              : t('training.empty_programs_desc')
+          }
         />
       )}
       {(editing ? canUpdate : canCreate) && dialogOpen && (

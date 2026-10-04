@@ -39,6 +39,7 @@ export interface TrainingEnrollment {
 }
 
 export interface TrainingProgramFilters {
+  search?: string;
   branchId?: string;
   category?: VehicleCategory;
   active?: boolean;
