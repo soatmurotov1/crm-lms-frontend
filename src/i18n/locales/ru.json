@@ -801,6 +801,8 @@
     "type_avto_maktab": "Автошкола",
     "price": "Цена",
     "duration": "Длительность",
+    "price_label": "Цена (сум)",
+    "duration_label": "Длительность (дни)",
     "duration_days_value": "{{count}} дн.",
     "not_found": "Курсы не найдены",
     "not_found_desc": "Добавьте новый курс.",

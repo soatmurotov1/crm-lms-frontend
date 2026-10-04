@@ -801,6 +801,8 @@
     "type_avto_maktab": "Driving school",
     "price": "Price",
     "duration": "Duration",
+    "price_label": "Price (UZS)",
+    "duration_label": "Duration (days)",
     "duration_days_value": "{{count}} days",
     "not_found": "No courses found",
     "not_found_desc": "Add a new course.",

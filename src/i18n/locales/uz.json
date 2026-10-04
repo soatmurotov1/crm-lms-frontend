@@ -801,6 +801,8 @@
     "type_avto_maktab": "Avto maktab",
     "price": "Narxi",
     "duration": "Davomiyligi",
+    "price_label": "Narxi (so'm)",
+    "duration_label": "Davomiyligi (kun)",
     "duration_days_value": "{{count}} kun",
     "not_found": "Kurslar topilmadi",
     "not_found_desc": "Yangi kurs qo'shing.",

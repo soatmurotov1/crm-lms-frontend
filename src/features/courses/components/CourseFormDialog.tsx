@@ -250,7 +250,7 @@ const CourseFormDialog = ({
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>{t('courses.price')}</FormLabel>
+                      <FormLabel required>{t('courses.price_label')}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -272,7 +272,9 @@ const CourseFormDialog = ({
                   name="durationDays"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>{t('courses.duration')}</FormLabel>
+                      <FormLabel required>
+                        {t('courses.duration_label')}
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
