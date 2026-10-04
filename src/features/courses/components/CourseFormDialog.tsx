@@ -280,6 +280,17 @@ const CourseFormDialog = ({
                           {...field}
                           type="number"
                           min={1}
+                          onInvalid={(event) => {
+                            if (
+                              event.currentTarget.validity.rangeUnderflow &&
+                              Number(event.currentTarget.value) <= 0
+                            ) {
+                              event.preventDefault();
+                              void form.trigger(undefined, {
+                                shouldFocus: true,
+                              });
+                            }
+                          }}
                           inputMode="numeric"
                           aria-required="true"
                           className="bg-secondary border-border"

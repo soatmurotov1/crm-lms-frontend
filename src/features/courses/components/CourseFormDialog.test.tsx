@@ -156,15 +156,21 @@ describe('CourseFormDialog units', () => {
     },
   );
 
-  it.each(['', '0'])(
-    'existing resolver rejects blank/zero price and duration (%s)',
-    async (value) => {
-      show(course);
+  it.each(
+    (['en', 'ru', 'uz'] as const).flatMap((locale) =>
+      [false, true].flatMap((edit) =>
+        ['', '0'].map((value) => ({ locale, edit, value })),
+      ),
+    ),
+  )(
+    'shows localized blank/zero errors via save: $locale edit=$edit value=$value',
+    async ({ locale, edit, value }) => {
+      state.locale = locale;
+      show(edit ? course : null);
+      if (!edit) await fill();
       fireEvent.change(input('price'), { target: { value } });
       fireEvent.change(input('durationDays'), { target: { value } });
-      // Submit the form directly to exercise RHF/Zod independently of the
-      // browser's native min validation; browser behavior is separate evidence.
-      fireEvent.submit(input('price').closest('form')!);
+      fireEvent.click(save());
       await waitFor(() =>
         expect(input('price')).toHaveAttribute('aria-invalid', 'true'),
       );
@@ -172,6 +178,40 @@ describe('CourseFormDialog units', () => {
       expect(screen.getAllByText(translate('common.required'))).toHaveLength(2);
       expect(state.create).not.toHaveBeenCalled();
       expect(state.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it('validates every field when native duration zero blocks submit', async () => {
+    show();
+    fireEvent.change(input('durationDays'), { target: { value: '0' } });
+    fireEvent.click(save());
+    await waitFor(() =>
+      expect(screen.getAllByText(translate('common.required'))).toHaveLength(4),
+    );
+    expect(state.create).not.toHaveBeenCalled();
+    expect(state.update).not.toHaveBeenCalled();
+    await fill();
+    fireEvent.click(save());
+    await waitFor(() => expect(state.create).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText(translate('common.required'))).toBeNull();
+  });
+
+  it.each(['0.5', '1.5'])(
+    'preserves native whole-day rejection and allows correction from %s',
+    async (value) => {
+      show(course);
+      fireEvent.change(input('durationDays'), { target: { value } });
+      const invalid = vi.fn();
+      input('durationDays').addEventListener('invalid', invalid);
+      fireEvent.click(save());
+      expect(invalid).toHaveBeenCalledTimes(1);
+      expect(invalid.mock.calls[0][0].defaultPrevented).toBe(false);
+      expect(input('durationDays').validity.stepMismatch).toBe(true);
+      expect(state.update).not.toHaveBeenCalled();
+      fireEvent.change(input('durationDays'), { target: { value: '1' } });
+      fireEvent.click(save());
+      await waitFor(() => expect(state.update).toHaveBeenCalledTimes(1));
+      expect(state.update.mock.calls[0][0].duration_days).toBe(1);
     },
   );
 
