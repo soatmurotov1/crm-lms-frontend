@@ -156,13 +156,30 @@ interface ExpenseFormDialogProps {
   onClose: () => void;
 }
 
-export const ExpenseFormDialog = ({
+export const ExpenseFormDialog = (props: ExpenseFormDialogProps) =>
+  props.open ? (
+    <ExpenseFormSession
+      key={`${props.mode ?? 'expense'}:${props.editExpense?.id ?? 'new'}`}
+      {...props}
+    />
+  ) : null;
+
+const ExpenseFormSession = ({
   open,
   branches,
   mode = 'expense',
   editExpense = null,
   onClose,
 }: ExpenseFormDialogProps) => {
+  const [originalExpense] = useState(() => editExpense);
+  const mountedRef = useRef(true);
+  const submittingRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
   const { t } = useTranslation();
   const canViewExpenses = useCan('viewExpenses');
   const canManageFinance = useCan('manageCompanyFinance');
@@ -190,6 +207,11 @@ export const ExpenseFormDialog = ({
     (editExpense.has_payment_history === true ||
       editExpense.paid_amount !== '0.00'),
   );
+
+  const liveGuardsRef = useRef({ financialFieldsLocked, isManager });
+  useEffect(() => {
+    liveGuardsRef.current = { financialFieldsLocked, isManager };
+  }, [financialFieldsLocked, isManager]);
 
   const expenseDefaults = (): ExpenseFormValues =>
     editExpense
@@ -297,6 +319,7 @@ export const ExpenseFormDialog = ({
     createSettlement.isPending ||
     updateExpense.isPending;
   const closeDialog = () => {
+    if (!mountedRef.current || submittingRef.current) return;
     setConflict(false);
     onClose();
   };
@@ -305,7 +328,8 @@ export const ExpenseFormDialog = ({
     useConfirmedClose(activeForm.formState.isDirty || isPending, closeDialog);
 
   const onExpenseSubmit = (values: ExpenseFormValues) => {
-    setConflict(false);
+    if (!mountedRef.current || submittingRef.current || isPending) return;
+    const guards = liveGuardsRef.current;
     const commonPayload = {
       category: values.category,
       title: values.title.trim(),
@@ -316,9 +340,10 @@ export const ExpenseFormDialog = ({
       note: values.note?.trim() || null,
     };
 
-    if (editExpense) {
+    if (originalExpense) {
+      submittingRef.current = true;
       const payload: UpdateExpensePayload = {
-        ...(financialFieldsLocked
+        ...(guards.financialFieldsLocked
           ? {}
           : {
               category: commonPayload.category,
@@ -329,12 +354,12 @@ export const ExpenseFormDialog = ({
         due_date: commonPayload.due_date,
         payee: commonPayload.payee,
         note: commonPayload.note,
-        expected_version: editExpense.version,
+        expected_version: originalExpense.version,
         ...(expenseForm.getFieldState('vehicleId').isDirty
           ? { vehicle_id: values.vehicleId || null }
           : {}),
-        ...(!isManager &&
-        !financialFieldsLocked &&
+        ...(!guards.isManager &&
+        !guards.financialFieldsLocked &&
         expenseForm.getFieldState('branchTarget').isDirty
           ? {
               branch_id:
@@ -343,13 +368,17 @@ export const ExpenseFormDialog = ({
           : {}),
       };
       updateExpense.mutate(
-        { id: editExpense.id, ...payload },
+        { id: originalExpense.id, ...payload },
         {
           onSuccess: () => {
+            submittingRef.current = false;
+            if (!mountedRef.current) return;
             toast.success(t('expenses.updated'));
             closeDialog();
           },
           onError: (error) => {
+            submittingRef.current = false;
+            if (!mountedRef.current) return;
             if (
               (error as { response?: { status?: number } }).response?.status ===
               409
@@ -366,7 +395,7 @@ export const ExpenseFormDialog = ({
 
     const payload = {
       ...commonPayload,
-      ...(isManager
+      ...(guards.isManager
         ? {}
         : {
             branch_id:
@@ -376,20 +405,29 @@ export const ExpenseFormDialog = ({
       ...(values.vehicleId ? { vehicle_id: values.vehicleId } : {}),
     };
 
-    const submitMutation = () =>
+    const submitMutation = () => {
+      if (!mountedRef.current || submittingRef.current) return;
+      submittingRef.current = true;
       createExpense.mutate(payload, {
         onSuccess: () => {
+          submittingRef.current = false;
+          if (!mountedRef.current) return;
           toast.success(t('expenses.created'));
           idempotencyKeyRef.current = newRequestId();
           closeDialog();
         },
-        onError: (error) => mutationErrorToast(error, t, submitMutation),
+        onError: (error) => {
+          submittingRef.current = false;
+          if (mountedRef.current) mutationErrorToast(error, t, submitMutation);
+        },
       });
+    };
 
     submitMutation();
   };
 
   const onSettlementSubmit = (values: SettlementFormValues) => {
+    if (!mountedRef.current || submittingRef.current || isPending) return;
     const payload = {
       teacher_id: values.teacherId,
       period_month: values.periodMonth,
@@ -401,15 +439,23 @@ export const ExpenseFormDialog = ({
       idempotency_key: getIdempotencyKey(),
     };
 
-    const submitMutation = () =>
+    const submitMutation = () => {
+      if (!mountedRef.current || submittingRef.current) return;
+      submittingRef.current = true;
       createSettlement.mutate(payload, {
         onSuccess: () => {
+          submittingRef.current = false;
+          if (!mountedRef.current) return;
           toast.success(t('expenses.settlement.created'));
           idempotencyKeyRef.current = newRequestId();
           closeDialog();
         },
-        onError: (error) => mutationErrorToast(error, t, submitMutation),
+        onError: (error) => {
+          submittingRef.current = false;
+          if (mountedRef.current) mutationErrorToast(error, t, submitMutation);
+        },
       });
+    };
 
     submitMutation();
   };
@@ -424,7 +470,12 @@ export const ExpenseFormDialog = ({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(next) => !next && attemptClose()}>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          if (!next && !submittingRef.current && !isPending) attemptClose();
+        }}
+      >
         <DialogContent className="glass-card border-border sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-heading">
@@ -624,7 +675,10 @@ export const ExpenseFormDialog = ({
                   <Button
                     variant="outline"
                     type="button"
-                    onClick={attemptClose}
+                    onClick={() => {
+                      if (!submittingRef.current && !isPending) attemptClose();
+                    }}
+                    disabled={isPending}
                   >
                     {t('common.cancel')}
                   </Button>
@@ -945,7 +999,10 @@ export const ExpenseFormDialog = ({
                   <Button
                     variant="outline"
                     type="button"
-                    onClick={attemptClose}
+                    onClick={() => {
+                      if (!submittingRef.current && !isPending) attemptClose();
+                    }}
+                    disabled={isPending}
                   >
                     {t('common.cancel')}
                   </Button>
@@ -973,7 +1030,10 @@ export const ExpenseFormDialog = ({
       <ConfirmDialog
         open={confirmOpen}
         onClose={cancelDiscard}
-        onConfirm={confirmDiscard}
+        onConfirm={() => {
+          if (!submittingRef.current && !isPending) confirmDiscard();
+        }}
+        loading={isPending}
         title={t('common.discard_changes_title')}
         confirmLabel={t('common.discard')}
         description={t('common.discard_changes_desc')}

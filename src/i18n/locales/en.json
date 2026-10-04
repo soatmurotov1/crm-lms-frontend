@@ -1225,7 +1225,7 @@
       "creating": "Creating...",
       "update_submit": "Save changes",
       "updating": "Saving...",
-      "update_conflict": "This expense changed elsewhere. Review the refreshed values and submit again.",
+      "update_conflict": "This expense changed elsewhere. Your draft is kept. Close and reopen the editor to load the latest values before making your changes again.",
       "invalid_amount": "Amount must be positive with two decimal places",
       "invalid_date": "Enter a valid date",
       "invalid_period_month": "Enter a valid month (YYYY-MM)"
@@ -1978,6 +1978,7 @@
     "pending_defect_inspections": "Damage awaiting review"
   },
   "fuel": {
+    "update_conflict": "This fuel record changed elsewhere. Your draft is kept. Return to the fuel list and reopen this record to load the latest values before making your changes again.",
     "title": "Fuel control",
     "page_volume": "Fuel volume on this page",
     "page_amount": "Amount on this page",

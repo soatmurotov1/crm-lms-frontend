@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
@@ -36,7 +36,50 @@ const blankLine = () => ({
   mxik: '',
 });
 
-export default function FuelForm({ row }: { row?: Fuel }) {
+interface FuelFormProps {
+  row?: Fuel;
+  onBusy?: (busy: boolean) => void;
+  disabled?: boolean;
+}
+
+export default function FuelForm({ row, onBusy, disabled }: FuelFormProps) {
+  return (
+    <FuelFormSession
+      key={row?.id ?? 'new'}
+      initialRow={row}
+      onBusy={onBusy}
+      disabled={disabled}
+    />
+  );
+}
+
+function FuelFormSession({
+  initialRow,
+  onBusy,
+  disabled,
+}: {
+  initialRow?: Fuel;
+  onBusy?: FuelFormProps['onBusy'];
+  disabled?: boolean;
+}) {
+  const [row] = useState(() => initialRow);
+  const [expectedVersion, setExpectedVersion] = useState(
+    () => initialRow?.version,
+  );
+  const mountedRef = useRef(true);
+  const disabledRef = useRef(disabled);
+  useEffect(() => {
+    disabledRef.current = disabled;
+  }, [disabled]);
+  const submittingRef = useRef(false);
+  const readingRef = useRef(false);
+  const [conflict, setConflict] = useState(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [requestId] = useState(() => row?.request_id ?? crypto.randomUUID());
@@ -77,12 +120,32 @@ export default function FuelForm({ row }: { row?: Fuel }) {
   });
   const lines = useFieldArray({ control: form.control, name: 'lines' });
   const mutation = useFuelMutation((values: Values) =>
-    saveFuel(values, requestId, row?.id, row?.version, reason),
+    saveFuel(values, requestId, row?.id, expectedVersion, reason),
   );
   const lookup = useFuelMutation(lookupReceipt);
+  useEffect(() => {
+    onBusy?.(
+      form.formState.isSubmitting || mutation.isPending || lookup.isPending,
+    );
+    return () => onBusy?.(false);
+  }, [
+    form.formState.isSubmitting,
+    mutation.isPending,
+    lookup.isPending,
+    onBusy,
+  ]);
   const read = async () => {
+    if (
+      !mountedRef.current ||
+      disabledRef.current ||
+      readingRef.current ||
+      submittingRef.current
+    )
+      return;
+    readingRef.current = true;
     try {
       const result = await lookup.mutateAsync(form.getValues('qr_url'));
+      if (!mountedRef.current) return;
       setScanMessage(result.status);
       if (result.lines?.length)
         lines.replace(
@@ -99,24 +162,48 @@ export default function FuelForm({ row }: { row?: Fuel }) {
           })),
         );
     } catch {
-      setScanMessage('manual_review');
+      if (mountedRef.current) setScanMessage('manual_review');
+    } finally {
+      readingRef.current = false;
     }
   };
 
   const hasErrors = Object.keys(form.formState.errors).length > 0;
 
-  return (
-    <form
-      className="glass-card space-y-5 p-5"
-      onSubmit={form.handleSubmit(async (values) => {
-        try {
-          const saved = await mutation.mutateAsync(values);
-          await navigate({ to: '/vehicle-fuel/$id', params: { id: saved.id } });
-        } catch {
-          /* retain draft on network errors */
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    void form.handleSubmit(async (values) => {
+      if (
+        !mountedRef.current ||
+        disabledRef.current ||
+        submittingRef.current ||
+        readingRef.current
+      )
+        return;
+      submittingRef.current = true;
+      try {
+        const saved = await mutation.mutateAsync(values);
+        if (mountedRef.current) {
+          if (row && saved.id === row.id) setExpectedVersion(saved.version);
+          setConflict(false);
+          await navigate({
+            to: '/vehicle-fuel/$id',
+            params: { id: saved.id },
+          });
         }
-      })}
-    >
+      } catch (error) {
+        if (
+          mountedRef.current &&
+          (error as { response?: { status?: number } }).response?.status === 409
+        )
+          setConflict(true);
+      } finally {
+        submittingRef.current = false;
+      }
+    })(event);
+  };
+
+  return (
+    <form className="glass-card space-y-5 p-5" onSubmit={handleFormSubmit}>
       {!row && (
         <div className="space-y-3">
           <label className="block space-y-1">
@@ -222,12 +309,13 @@ export default function FuelForm({ row }: { row?: Fuel }) {
             if (!file) return;
             try {
               const value = await decodeReceipt(file);
+              if (!mountedRef.current || submittingRef.current) return;
               if (value) {
                 form.setValue('qr_url', value);
                 setScanMessage('qr_found');
               } else setScanMessage('qr_fallback');
             } catch {
-              setScanMessage('qr_fallback');
+              if (mountedRef.current) setScanMessage('qr_fallback');
             }
           }}
         />
@@ -240,7 +328,7 @@ export default function FuelForm({ row }: { row?: Fuel }) {
           type="button"
           variant="outline"
           size="sm"
-          disabled={lookup.isPending}
+          disabled={disabled || lookup.isPending || mutation.isPending}
           onClick={() => void read()}
           className="gap-1.5"
         >
@@ -361,7 +449,11 @@ export default function FuelForm({ row }: { row?: Fuel }) {
             />
           </label>
         )}
-        <Button disabled={mutation.isPending} type="submit" className="gap-1.5">
+        <Button
+          disabled={disabled || mutation.isPending || lookup.isPending}
+          type="submit"
+          className="gap-1.5"
+        >
           {mutation.isPending && (
             <ArrowClockwise className="h-3.5 w-3.5 animate-spin" />
           )}
@@ -369,6 +461,11 @@ export default function FuelForm({ row }: { row?: Fuel }) {
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">{t('fuel.save_hint')}</p>
+      {conflict && (
+        <p role="alert" className="text-sm text-destructive">
+          {t('fuel.update_conflict')}
+        </p>
+      )}
     </form>
   );
 }

@@ -1225,7 +1225,7 @@
       "creating": "Yaratilmoqda...",
       "update_submit": "O'zgarishlarni saqlash",
       "updating": "Saqlanmoqda...",
-      "update_conflict": "Xarajat boshqa foydalanuvchi tomonidan o'zgartirildi. Yangilangan ma'lumotni tekshirib, qayta yuboring.",
+      "update_conflict": "Xarajat boshqa foydalanuvchi tomonidan o'zgartirildi. Kiritgan ma'lumotlaringiz saqlandi. Eng so'nggi ma'lumotlarni yuklash uchun shaklni yoping va qayta oching, so'ng o'zgartirishlarni qayta kiriting.",
       "invalid_amount": "Summa 0 dan katta va ikki kasrli bo'lishi kerak",
       "invalid_date": "To'g'ri sana kiriting",
       "invalid_period_month": "Oy formati YYYY-MM bo'lishi kerak"
@@ -1978,6 +1978,7 @@
     "pending_defect_inspections": "Shikast tekshiruvi kutilmoqda"
   },
   "fuel": {
+    "update_conflict": "Yoqilg'i yozuvi boshqa foydalanuvchi tomonidan o'zgartirildi. Kiritgan ma'lumotlaringiz saqlandi. Eng so'nggi ma'lumotlarni yuklash uchun yoqilg'i ro'yxatiga qayting va yozuvni qayta oching, so'ng o'zgartirishlarni qayta kiriting.",
     "title": "Yoqilg‘i nazorati",
     "page_volume": "Joriy sahifadagi yoqilg‘i hajmi",
     "page_amount": "Joriy sahifadagi summa",

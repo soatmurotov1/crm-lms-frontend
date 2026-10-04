@@ -1,5 +1,5 @@
 import { useCan } from '@/hooks/useCan';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -191,6 +191,15 @@ export default function FuelDetailPage() {
   const query = useFuel(id);
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState<string[]>([]);
+  const setEditorBusy = useCallback((value: boolean) => {
+    setBusy((old) =>
+      value
+        ? old.includes('editor')
+          ? old
+          : [...old, 'editor']
+        : old.filter((item) => item !== 'editor'),
+    );
+  }, []);
   const mutation = useFuelMutation(
     ({ action, body }: { action: string; body: unknown }) =>
       fuelAction(id, action, body),
@@ -375,7 +384,14 @@ export default function FuelDetailPage() {
           {t('fuel.selected_fuel')}
         </h2>
         {edit ? (
-          <FuelForm row={row} />
+          <FuelForm
+            key={row.id}
+            row={row}
+            onBusy={setEditorBusy}
+            disabled={
+              mutation.isPending || busy.some((item) => item !== 'editor')
+            }
+          />
         ) : (
           <div className="grid gap-3">
             {row.lines.map((line, i) => (
@@ -460,7 +476,9 @@ export default function FuelDetailPage() {
                 <Button
                   key={decision}
                   variant={decision === 'approve' ? 'default' : 'outline'}
-                  disabled={mutation.isPending || !reason.trim()}
+                  disabled={
+                    mutation.isPending || busy.length > 0 || !reason.trim()
+                  }
                   onClick={() =>
                     mutation.mutate({
                       action: 'review',
@@ -474,7 +492,9 @@ export default function FuelDetailPage() {
             {mayCancel && row.status !== 'cancelled' && (
               <Button
                 variant="outline"
-                disabled={mutation.isPending || !reason.trim()}
+                disabled={
+                  mutation.isPending || busy.length > 0 || !reason.trim()
+                }
                 onClick={() =>
                   mutation.mutate({ action: 'cancel', body: { reason } })
                 }
