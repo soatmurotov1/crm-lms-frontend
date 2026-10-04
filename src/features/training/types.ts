@@ -48,6 +48,8 @@ export interface TrainingProgramFilters {
 }
 
 export interface TrainingEnrollmentFilters {
+  search?: string;
+  searchLegacy?: boolean;
   branchId?: string;
   studentId?: string;
   status?: TrainingEnrollmentStatus;

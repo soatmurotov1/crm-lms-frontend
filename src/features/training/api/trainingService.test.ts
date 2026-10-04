@@ -9,6 +9,7 @@ import {
   fetchActiveTrainingPrograms,
   createTrainingEnrollment,
   trainingProgramsPageQueryOptions,
+  trainingEnrollmentsPageQueryOptions,
 } from '@/features/training/api/trainingService';
 
 vi.mock('@/api/axiosInstance', () => ({
@@ -151,12 +152,92 @@ describe('training API', () => {
           branch_id: 'b1',
           student_id: 's1',
           status: undefined,
+          search: undefined,
+          search_legacy: undefined,
           page: 2,
           limit: 10,
         },
       }),
     );
     await expect(fetchTrainingEnrollment('e1')).resolves.toEqual({ id: 'e1' });
+  });
+
+  it('sends enrollment search, scope, pagination and abort signal with separate cache keys', async () => {
+    vi.mocked(axiosInstance.get).mockResolvedValue({
+      data: { data: [], meta: { total: 0, page: 2, limit: 50, totalPages: 0 } },
+    });
+    const signal = new AbortController().signal;
+    const filters = {
+      search: '  100%_\\  ',
+      searchLegacy: true,
+      branchId: 'b1',
+      studentId: 's1',
+      status: 'completed' as const,
+      page: 2,
+      limit: 50,
+    };
+    await fetchTrainingEnrollmentsPage(filters, signal);
+    expect(axiosInstance.get).toHaveBeenCalledWith('/training-enrollments', {
+      params: {
+        search: filters.search,
+        search_legacy: true,
+        branch_id: 'b1',
+        student_id: 's1',
+        status: 'completed',
+        page: 2,
+        limit: 50,
+      },
+      signal,
+    });
+    expect(trainingEnrollmentsPageQueryOptions(filters).queryKey).not.toEqual(
+      trainingEnrollmentsPageQueryOptions({ ...filters, search: 'second' })
+        .queryKey,
+    );
+    expect(trainingEnrollmentsPageQueryOptions(filters).queryKey).not.toEqual(
+      trainingEnrollmentsPageQueryOptions({ ...filters, searchLegacy: false })
+        .queryKey,
+    );
+  });
+
+  it('aborts the obsolete enrollment search and ignores its delayed response', async () => {
+    let finishOld!: (value: unknown) => void;
+    const oldResponse = new Promise((resolve) => {
+      finishOld = resolve;
+    });
+    const response = (id: string) => ({
+      data: {
+        data: [{ id }],
+        meta: { total: 1, page: 1, limit: 20, totalPages: 1 },
+      },
+    });
+    vi.mocked(axiosInstance.get).mockImplementation((_url, config) =>
+      config?.params.search === 'old'
+        ? (oldResponse as never)
+        : Promise.resolve(response('new-enrollment')),
+    );
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const observer = new QueryObserver(
+      client,
+      trainingEnrollmentsPageQueryOptions({ search: 'old' }),
+    );
+    const unsubscribe = observer.subscribe(() => {});
+    observer.setOptions(trainingEnrollmentsPageQueryOptions({ search: 'new' }));
+    await observer.refetch();
+    expect(observer.getCurrentResult().data?.data).toEqual([
+      { id: 'new-enrollment' },
+    ]);
+    finishOld(response('old-enrollment'));
+    await oldResponse;
+    expect(observer.getCurrentResult().data?.data).toEqual([
+      { id: 'new-enrollment' },
+    ]);
+    expect(
+      vi.mocked(axiosInstance.get).mock.calls[0]?.[1]?.signal?.aborted,
+    ).toBe(true);
+    unsubscribe();
+    client.clear();
   });
 
   it('creates an enrollment without a branch override for managers', async () => {

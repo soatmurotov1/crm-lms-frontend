@@ -146,6 +146,8 @@ export const fetchTrainingEnrollmentsPage = async (
       branch_id: filters.branchId,
       student_id: filters.studentId,
       status: filters.status,
+      search: filters.search,
+      search_legacy: filters.searchLegacy,
       page: filters.page ?? 1,
       limit: filters.limit ?? 20,
     },

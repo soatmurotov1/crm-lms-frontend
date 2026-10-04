@@ -533,6 +533,10 @@ const TrainingEnrollmentsPage = () => {
   const enrollments = useTrainingEnrollmentsPage({
     branchId: effectiveBranch,
     status: status || undefined,
+    search: debouncedSearch,
+    searchLegacy:
+      Boolean(debouncedSearch.trim()) &&
+      matchesListQuery(debouncedSearch, t('training.legacy')),
     page,
     limit: pageSize,
   });
@@ -558,19 +562,7 @@ const TrainingEnrollmentsPage = () => {
     [programMap, t],
   );
 
-  const visibleEnrollments = useMemo(
-    () =>
-      (enrollments.data?.data ?? []).filter((enrollment) =>
-        matchesListQuery(
-          debouncedSearch,
-          enrollment.student.first_name,
-          enrollment.student.last_name,
-          enrollment.category ?? '',
-          programName(enrollment),
-        ),
-      ),
-    [enrollments.data, debouncedSearch, programName],
-  );
+  const visibleEnrollments = enrollments.data?.data ?? [];
 
   const branchName = useCallback(
     (id: string) =>
@@ -784,7 +776,7 @@ const TrainingEnrollmentsPage = () => {
         manualSorting={false}
         manualFiltering
         isInitialLoading={enrollments.isLoading}
-        isFetching={enrollments.isFetching}
+        isFetching={enrollments.isFetching || search !== debouncedSearch}
         labels={{
           table: t('training.enrollments'),
           loading: t('common.loading'),
