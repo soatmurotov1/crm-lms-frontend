@@ -100,6 +100,7 @@ export const createTrainingProgram = async (
   const { data } = await axiosInstance.post<unknown>(
     '/training-programs',
     request,
+    { headers: { 'X-Branch-Id': request.branch_id } },
   );
   return parseItemEnvelope<TrainingProgram>(data, 'training program');
 };

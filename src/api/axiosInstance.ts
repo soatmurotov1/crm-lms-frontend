@@ -17,8 +17,15 @@ axiosInstance.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  const explicitBranch = config.headers.get('X-Branch-Id');
+  const hasProgramCreateBranch =
+    config.method?.toLowerCase() === 'post' &&
+    config.url === '/training-programs' &&
+    typeof explicitBranch === 'string' &&
+    explicitBranch.trim().length > 0;
   if (
     activeBranchId &&
+    !hasProgramCreateBranch &&
     !/^\/(auth|permissions)(\/|$)|\/users\/[^/]+\/(access|delegation)$/.test(
       config.url ?? '',
     )

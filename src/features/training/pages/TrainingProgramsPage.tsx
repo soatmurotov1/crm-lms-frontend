@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useBranches } from '@/features/branches/api/branchService';
 import { useAuthStore } from '@/store/authStore';
 import { useCan } from '@/hooks/useCan';
+import { useWriteOptions } from '@/hooks/useWriteOptions';
 import { useListQueryState } from '@/hooks/useListQueryState';
 import { ListSearchField } from '@/components/ui/ListSearchField';
 import {
@@ -41,17 +42,46 @@ const ProgramDialog = ({
   open,
   program,
   branches,
+  branchesLoading,
+  branchesError,
+  retryBranches,
   onClose,
 }: {
   open: boolean;
   program: TrainingProgram | null;
   branches: Array<{ id: string; name: string }>;
+  branchesLoading: boolean;
+  branchesError: boolean;
+  retryBranches: () => void;
   onClose: () => void;
 }) => {
   const { t } = useTranslation();
   const create = useCreateTrainingProgram();
   const update = useUpdateTrainingProgram();
   const [branchId, setBranchId] = useState(program?.branch_id ?? '');
+  const options = useWriteOptions(
+    'training_programs',
+    'create',
+    branchId,
+    open && !program,
+  );
+  const branchChoices = options.scoped ? options.branches : branches;
+  const branchesPending = options.scoped ? options.isFetching : branchesLoading;
+  const branchLookupError = options.scoped ? options.isError : branchesError;
+  if (
+    !program &&
+    branchId &&
+    !branchChoices.some((branch) => branch.id === branchId)
+  )
+    setBranchId('');
+  else if (!program && !branchId && branchChoices.length === 1)
+    setBranchId(branchChoices[0].id);
+  const branchReady =
+    !branchesPending &&
+    !branchLookupError &&
+    branchChoices.some((branch) => branch.id === branchId) &&
+    (!options.scoped ||
+      options.data?.branches?.some((branch) => branch.id === branchId));
   const [name, setName] = useState(program?.name ?? '');
   const [courseType, setCourseType] = useState<CourseType>(
     program?.course_type ?? 'avto_maktab',
@@ -71,7 +101,7 @@ const ProgramDialog = ({
       !name.trim() ||
       !Number.isInteger(minutes) ||
       minutes < 1 ||
-      (!program && !branchId)
+      (!program && !branchReady)
     )
       return;
     const handlers = {
@@ -116,22 +146,48 @@ const ProgramDialog = ({
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           {!program && (
-            <label className="block space-y-1 text-sm">
-              <span>{t('common.branch')}</span>
-              <select
-                className={selectClass}
-                value={branchId}
-                onChange={(event) => setBranchId(event.target.value)}
-                required
-              >
-                <option value="">{t('common.select_placeholder')}</option>
-                {branches.map((branch) => (
-                  <option key={branch.id} value={branch.id}>
-                    {branch.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="space-y-1 text-sm">
+              <label className="block space-y-1">
+                <span>{t('common.branch')}</span>
+                <select
+                  className={selectClass}
+                  value={branchId}
+                  onChange={(event) => setBranchId(event.target.value)}
+                  required
+                  disabled={branchesPending || branchChoices.length === 0}
+                >
+                  <option value="">{t('common.select_placeholder')}</option>
+                  {branchChoices.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {branchesPending && (
+                <span role="status">{t('common.loading')}</span>
+              )}
+              {branchLookupError && (
+                <span className="block space-y-2" role="alert">
+                  <span>{t('common.error')}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      if (options.scoped) void options.refetch();
+                      else retryBranches();
+                    }}
+                  >
+                    {t('common.retry')}
+                  </Button>
+                </span>
+              )}
+              {!branchesPending &&
+                !branchLookupError &&
+                branchChoices.length === 0 && (
+                  <span role="status">{t('common.no_data')}</span>
+                )}
+            </div>
           )}
           <label className="block space-y-1 text-sm">
             <span>{t('training.program_name')}</span>
@@ -207,7 +263,11 @@ const ProgramDialog = ({
             </Button>
             <Button
               type="submit"
-              disabled={create.isPending || update.isPending}
+              disabled={
+                create.isPending ||
+                update.isPending ||
+                (!program && !branchReady)
+              }
             >
               {t('common.save')}
             </Button>
@@ -221,10 +281,11 @@ const ProgramDialog = ({
 const TrainingProgramsPage = () => {
   const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
-  const canCreate = useCan('training_programs.create');
+  const canCreate = useCan('training_programs.create', null);
   const canUpdate = useCan('training_programs.update');
   const canViewAll = useCan('viewAllBranches');
-  const { data: branches = [] } = useBranches(canViewAll);
+  const branchesQuery = useBranches(canViewAll);
+  const branches = branchesQuery.data ?? [];
   const [branchId, setBranchId] = useState('');
   const [category, setCategory] = useState<VehicleCategory | ''>('');
   const [showInactive, setShowInactive] = useState(false);
@@ -410,9 +471,13 @@ const TrainingProgramsPage = () => {
       )}
       {(editing ? canUpdate : canCreate) && dialogOpen && (
         <ProgramDialog
+          key={`${user?.id}:${user?.company_id}:${user?.access_version}:${editing?.id ?? 'create'}`}
           open={dialogOpen}
           program={editing}
           branches={branches}
+          branchesLoading={branchesQuery.isFetching}
+          branchesError={branchesQuery.isError}
+          retryBranches={() => void branchesQuery.refetch()}
           onClose={() => setDialogOpen(false)}
         />
       )}
