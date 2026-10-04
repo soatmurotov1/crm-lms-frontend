@@ -1,4 +1,5 @@
 import {
+  act,
   render,
   screen,
   fireEvent,
@@ -6,6 +7,8 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useCreateStudent } from '@/features/students/api/studentService';
 import { createInstance } from 'i18next';
 import StudentModal, {
   type CreateStudentPayload,
@@ -13,6 +16,15 @@ import StudentModal, {
 import uz from '@/i18n/locales/uz.json';
 import ru from '@/i18n/locales/ru.json';
 import en from '@/i18n/locales/en.json';
+
+const network = vi.hoisted(() => ({ post: vi.fn() }));
+vi.mock('@/api/axiosInstance', () => ({
+  default: {
+    post: network.post,
+    get: vi.fn(() => Promise.reject(new Error('Unexpected GET'))),
+  },
+}));
+vi.mock('@/lib/umami', () => ({ track: vi.fn() }));
 
 const translation = vi.hoisted(() => ({ t: (key: string) => key }));
 
@@ -49,7 +61,10 @@ vi.mock('@/features/courses/api/courseService', () => ({
 vi.mock('@/features/groups/api/groupService', () => ({
   useGroups: () => ({ data: [] }),
 }));
-vi.mock('@/features/students/api/studentService', () => ({
+vi.mock('@/features/students/api/studentService', async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import('@/features/students/api/studentService')
+  >()),
   useStudentsPage: () => ({ data: undefined }),
 }));
 
@@ -194,5 +209,59 @@ describe('StudentModal current group on edit', () => {
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
     expect(onSubmit.mock.calls[0][0]).toMatchObject({ group_id: 'g9' });
+  });
+});
+
+const ControlledCreateModal = ({ open }: { open: boolean }) => {
+  const create = useCreateStudent();
+  return (
+    <StudentModal
+      open={open}
+      courseType="tezkor"
+      onClose={vi.fn()}
+      onSubmit={vi.fn()}
+      onSaveAndAdd={(body) => create.mutateAsync(body)}
+      loading={create.isPending}
+    />
+  );
+};
+
+describe('StudentModal retired real mutation', () => {
+  it('does not wipe a fresh draft after a controlled close and reopen', async () => {
+    let resolve!: (value: unknown) => void;
+    network.post.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    const client = new QueryClient({
+      defaultOptions: { mutations: { retry: false } },
+    });
+    const modal = (open: boolean) => (
+      <QueryClientProvider client={client}>
+        <ControlledCreateModal open={open} />
+      </QueryClientProvider>
+    );
+    const view = render(modal(true));
+    for (const [name, value] of Object.entries({
+      last_name: 'Old synthetic',
+      first_name: 'Student',
+      phone: '901234567',
+      learner_password: 'synthetic123',
+    })) {
+      fireEvent.change(q(name), { target: { value } });
+    }
+    fireEvent.click(
+      screen.getByRole('button', { name: 'students.save_and_add' }),
+    );
+    await waitFor(() => expect(network.post).toHaveBeenCalledTimes(1));
+    view.rerender(modal(false));
+    view.rerender(modal(true));
+    fireEvent.change(q('last_name'), { target: { value: 'Fresh synthetic' } });
+    await act(async () => {
+      resolve({ data: { data: { id: 'old-student' } } });
+    });
+    expect(q('last_name')).toHaveValue('Fresh synthetic');
+    expect(network.post).toHaveBeenCalledTimes(1);
   });
 });

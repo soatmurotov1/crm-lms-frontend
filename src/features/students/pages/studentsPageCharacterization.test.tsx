@@ -1,5 +1,6 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import StudentsPage from '@/features/students/pages/StudentsPage';
 import { formatMoney } from '@/lib/money';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
@@ -15,8 +16,21 @@ import { renderWithRouter } from '@/test/utils/renderWithRouter';
 // They must pass unmodified before AND after the decomposition.
 
 const h = vi.hoisted(() => ({
-  user: { role: 'owner', branch_id: null as string | null },
+  user: { role: 'owner', branch_id: null } as {
+    role: string;
+    branch_id: string | null;
+    id?: string;
+  },
   useStudentsPage: vi.fn(),
+  post: vi.fn(),
+  courses: [] as {
+    id: string;
+    name: string;
+    branch_id: string;
+    course_type: string;
+    price: number;
+    is_active: boolean;
+  }[],
 }));
 
 const STUDENTS = [
@@ -56,6 +70,14 @@ const STUDENTS = [
   },
 ];
 
+vi.mock('@/api/axiosInstance', () => ({
+  default: {
+    post: h.post,
+    get: vi.fn(() => Promise.reject(new Error('Unexpected GET'))),
+  },
+}));
+vi.mock('@/lib/umami', () => ({ track: vi.fn() }));
+
 vi.mock('@/store/authStore', () => ({
   useAuthStore: (selector: (s: Record<string, unknown>) => unknown) =>
     selector({
@@ -73,7 +95,6 @@ vi.mock('@/features/students/api/studentService', async (importOriginal) => {
     ...actual,
     fetchAllStudents: vi.fn(),
     useStudentsPage: h.useStudentsPage,
-    useCreateStudent: () => ({ mutate: vi.fn(), isPending: false }),
     useCreateStudentWithPayment: () => ({
       mutate: vi.fn(),
       isPending: false,
@@ -92,15 +113,12 @@ vi.mock('@/features/staff/api/operatorService', () => ({
   useOperators: () => ({ data: [], isLoading: false }),
 }));
 
-vi.mock('@/features/students/api/StudentModal', () => ({
-  default: () => null,
-}));
 vi.mock('@/features/students/components/AddStudentDialog', () => ({
   default: () => null,
 }));
 
 vi.mock('@/features/courses/api/courseService', () => ({
-  useCourses: () => ({ data: [], isLoading: false }),
+  useCourses: () => ({ data: h.courses, isLoading: false }),
 }));
 
 vi.mock('@/features/groups/api/groupService', () => ({
@@ -108,10 +126,19 @@ vi.mock('@/features/groups/api/groupService', () => ({
 }));
 
 const renderPage = (initialEntry = '/students') =>
-  renderWithRouter(<StudentsPage />, {
-    initialEntry,
-    routePattern: '/students',
-  });
+  renderWithRouter(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { mutations: { retry: false } } })
+      }
+    >
+      <StudentsPage />
+    </QueryClientProvider>,
+    {
+      initialEntry,
+      routePattern: '/students',
+    },
+  );
 
 const pageOf = (students: typeof STUDENTS) => ({
   data: students,
@@ -119,6 +146,8 @@ const pageOf = (students: typeof STUDENTS) => ({
 });
 
 beforeEach(() => {
+  h.post.mockReset();
+  h.courses = [];
   h.user = { role: 'owner', branch_id: null };
   h.useStudentsPage.mockReset().mockReturnValue({
     data: pageOf([]),
@@ -340,5 +369,198 @@ describe('StudentsPage characterization', () => {
       const last = h.useStudentsPage.mock.calls.at(-1)!;
       expect(last[2]).toBe(1); // currentPage (3rd positional arg), clamped from 3
     });
+  });
+});
+
+const draftInput = (name: string) =>
+  document.querySelector(`input[name="${name}"]`) as HTMLInputElement;
+const fillDraft = () => {
+  for (const [name, value] of Object.entries({
+    last_name: 'Synthetic',
+    first_name: 'Student',
+    phone: '901234567',
+    learner_password: 'synthetic123',
+  })) {
+    fireEvent.change(draftInput(name), { target: { value } });
+  }
+};
+
+describe('Save-and-add real parent mutation wiring', () => {
+  it('retains the draft until the actual POST confirms success', async () => {
+    let resolve!: (value: unknown) => void;
+    h.post.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    h.user = { role: 'manager', branch_id: 'b1' };
+    await renderPage('/students?course_type=tezkor');
+    fireEvent.click(screen.getAllByRole('button', { name: 'students.add' })[0]);
+    fillDraft();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'students.save_and_add' }),
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'students.save_and_add' }),
+    );
+    fireEvent.submit(draftInput('last_name').closest('form')!);
+    await waitFor(() => expect(h.post).toHaveBeenCalledTimes(1));
+    expect(h.post.mock.calls[0][0]).toBe('/students');
+    expect(JSON.parse(JSON.stringify(h.post.mock.calls[0][1]))).toMatchObject({
+      last_name: 'Synthetic',
+      first_name: 'Student',
+      branch_id: 'b1',
+      course_type: 'tezkor',
+      phone: '+998901234567',
+    });
+    expect(draftInput('last_name')).toHaveValue('Synthetic');
+    const addButton = screen.getByRole('button', {
+      name: 'students.save_and_add',
+    });
+    expect(addButton).toBeDisabled();
+    expect(draftInput('last_name')).toBeDisabled();
+    expect(document.querySelector('#detailed-toggle')).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'common.cancel' }),
+    ).toBeDisabled();
+    fireEvent.click(addButton);
+    fireEvent.submit(draftInput('last_name').closest('form')!);
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+    expect(screen.queryByText('common.discard_changes_title')).toBeNull();
+    expect(h.post).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      resolve({ data: { data: { id: 'created' } } });
+    });
+    await waitFor(() => expect(draftInput('last_name')).toHaveValue(''));
+    expect(draftInput('last_name')).toHaveFocus();
+    expect(
+      screen.getByRole('button', { name: 'students.save_and_add' }),
+    ).toBeEnabled();
+  });
+  it('retains all submitted values on rejection and sends the same body on retry', async () => {
+    let reject!: (reason: Error) => void;
+    h.post.mockReturnValueOnce(
+      new Promise((_done, fail) => {
+        reject = fail;
+      }),
+    );
+    h.post.mockResolvedValue({ data: { data: { id: 'retry-created' } } });
+    h.user = { role: 'manager', branch_id: 'b1' };
+    h.courses = [
+      {
+        id: 'c1',
+        name: 'Synthetic course',
+        branch_id: 'b1',
+        course_type: 'tezkor',
+        price: 120000,
+        is_active: true,
+      },
+    ];
+    await renderPage('/students?course_type=tezkor');
+    fireEvent.click(screen.getAllByRole('button', { name: 'students.add' })[0]);
+    fillDraft();
+    fireEvent.change(draftInput('amount_paid'), { target: { value: '20000' } });
+    fireEvent.change(document.querySelector('textarea[name="notes"]')!, {
+      target: { value: 'Synthetic note' },
+    });
+    fireEvent.click(
+      screen.getByRole('button', { name: 'students.save_and_add' }),
+    );
+    await waitFor(() => expect(h.post).toHaveBeenCalledTimes(1));
+    const body = JSON.parse(JSON.stringify(h.post.mock.calls[0][1]));
+    expect(body).toMatchObject({
+      branch_id: 'b1',
+      total_price: 120000,
+      amount_paid: 20000,
+      payment_method: 'naqd',
+      notes: 'Synthetic note',
+    });
+    await act(async () => {
+      reject(new Error('Synthetic rejected request'));
+    });
+    expect(draftInput('last_name')).toHaveValue('Synthetic');
+    expect(draftInput('first_name')).toHaveValue('Student');
+    expect(draftInput('phone').value.replace(/\D/g, '')).toBe('998901234567');
+    expect(
+      screen.getByRole('combobox', { name: 'students.sections.course' }),
+    ).toHaveTextContent('Synthetic course');
+    expect(draftInput('learner_password')).toHaveValue('synthetic123');
+    expect(draftInput('amount_paid')).toHaveValue('20 000');
+    expect(draftInput('last_name')).toBeEnabled();
+    expect(document.querySelector('textarea[name="notes"]')).toHaveValue(
+      'Synthetic note',
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'students.save_and_add' }),
+    );
+    await waitFor(() => expect(h.post).toHaveBeenCalledTimes(2));
+    expect(JSON.parse(JSON.stringify(h.post.mock.calls[1][1]))).toEqual(body);
+    await waitFor(() => expect(draftInput('last_name')).toHaveValue(''));
+    expect(draftInput('amount_paid')).toHaveValue('');
+    expect(draftInput('total_price')).toHaveValue('120 000');
+    fillDraft();
+    fireEvent.submit(draftInput('last_name').closest('form')!);
+    await waitFor(() => expect(h.post).toHaveBeenCalledTimes(3));
+    expect(h.post.mock.calls[2][1]).toMatchObject({
+      branch_id: 'b1',
+      total_price: 120000,
+      amount_paid: 0,
+    });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  });
+
+  it('does not reset a fresh draft when the old request completes after actor and branch change', async () => {
+    let resolve!: (value: unknown) => void;
+    h.post.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    h.user = { id: 'actor-1', role: 'manager', branch_id: 'b1' };
+    const client = new QueryClient();
+    const view = await renderWithRouter(
+      <QueryClientProvider client={client}>
+        <StudentsPage />
+      </QueryClientProvider>,
+      {
+        initialEntry: '/students?course_type=tezkor',
+        routePattern: '/students',
+      },
+    );
+    fireEvent.click(screen.getAllByRole('button', { name: 'students.add' })[0]);
+    fillDraft();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'students.save_and_add' }),
+    );
+    await waitFor(() => expect(h.post).toHaveBeenCalledTimes(1));
+    h.user = { id: 'actor-2', role: 'operator', branch_id: 'b2' };
+    view.rerender(
+      <QueryClientProvider client={client}>
+        <StudentsPage />
+      </QueryClientProvider>,
+    );
+    fireEvent.change(draftInput('last_name'), {
+      target: { value: 'Fresh draft' },
+    });
+    await act(async () => {
+      resolve({ data: { data: { id: 'old-created' } } });
+    });
+    expect(draftInput('last_name')).toHaveValue('Fresh draft');
+  });
+
+  it('preserves dirty cancellation and starts a fresh draft when reopened', async () => {
+    h.user = { role: 'manager', branch_id: 'b1' };
+    await renderPage('/students?course_type=tezkor');
+    fireEvent.click(screen.getAllByRole('button', { name: 'students.add' })[0]);
+    fillDraft();
+    fireEvent.click(screen.getByRole('button', { name: 'common.cancel' }));
+    expect(
+      screen.getByText('common.discard_changes_title'),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'common.discard' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    fireEvent.click(screen.getAllByRole('button', { name: 'students.add' })[0]);
+    expect(draftInput('last_name')).toHaveValue('');
+    expect(h.post).not.toHaveBeenCalled();
   });
 });

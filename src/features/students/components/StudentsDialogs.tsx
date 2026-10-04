@@ -25,7 +25,7 @@ interface StudentsDialogsProps {
   setCreateFormDirty: (v: boolean) => void;
   onModalClose: () => void;
   onModalSubmit: (data: CreateStudentPayload) => void;
-  onSaveAndAdd: (data: CreateStudentPayload) => void;
+  onSaveAndAdd: (data: CreateStudentPayload) => Promise<unknown>;
   modalLoading: boolean;
 
   onAddFlowClose: () => void;
@@ -75,7 +75,7 @@ export const StudentsDialogs = ({
     >
       <Checkbox
         checked={detailed}
-        disabled={createFormDirty}
+        disabled={createFormDirty || modalLoading || addFlowLoading}
         onCheckedChange={(v) => setDetailed(!!v)}
         id="detailed-toggle"
       />

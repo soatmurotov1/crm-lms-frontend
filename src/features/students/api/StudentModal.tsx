@@ -74,7 +74,7 @@ interface StudentModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: CreateStudentPayload) => void;
-  onSaveAndAdd?: (data: CreateStudentPayload) => void;
+  onSaveAndAdd?: (data: CreateStudentPayload) => Promise<unknown>;
   loading?: boolean;
   student?: Student | null;
   courseType: CourseType;
@@ -105,6 +105,7 @@ const StudentModal = ({
   const { t } = useTranslation();
   const legacyCanAssignBranch = useCan('assignBranch');
   const user = useAuthStore((s) => s.user);
+  const authBranchId = useAuthStore((s) => s.activeBranchId);
   const canAssignBranch =
     user?.permissions !== undefined || legacyCanAssignBranch;
   const { data: branches } = useBranches();
@@ -133,8 +134,25 @@ const StudentModal = ({
     onDirtyChange?.(form.formState.isDirty);
   }, [form.formState.isDirty, onDirtyChange]);
 
-  // ponytail: ref tracks which submit button was clicked; defaults to 'close' so Enter → Save
-  const submitModeRef = useRef<'close' | 'add'>('close');
+  const submitPendingRef = useRef(false);
+  const draftSessionRef = useRef(0);
+  const focusNextRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      draftSessionRef.current += 1;
+    };
+  }, [
+    open,
+    student,
+    courseType,
+    defaultBranchId,
+    authBranchId,
+    user?.id,
+    user?.access_version,
+    user?.branch_id,
+    user?.role,
+  ]);
   // One key per edit session: a retried save must not record amount_paid twice.
   const idempotencyKeyRef = useRef('');
   const getIdempotencyKey = () =>
@@ -155,7 +173,7 @@ const StudentModal = ({
       registered_by: '',
       learner_password: '',
     });
-    form.setFocus('last_name');
+    focusNextRef.current = true;
   };
 
   // react-hooks/incompatible-library: form.watch() during render isn't
@@ -174,6 +192,12 @@ const StudentModal = ({
   const watchedRegisteredBy = useWatch({ control, name: 'registered_by' });
   const watchedLastName = useWatch({ control, name: 'last_name' });
   const watchedPhone = useWatch({ control, name: 'phone' });
+
+  useEffect(() => {
+    return () => {
+      draftSessionRef.current += 1;
+    };
+  }, [watchedBranchId, watchedCourseId]);
 
   // autodrive-553: create-time duplicate check -- phone primarily (once
   // enough digits are typed), last name secondarily. Debounced like
@@ -346,36 +370,60 @@ const StudentModal = ({
     }
   }, [form, groupList, operatorList, watchedGroupId, watchedRegisteredBy]);
 
-  const onFormValid = async (values: StudentFormValues) => {
+  const onFormValid = async (
+    values: StudentFormValues,
+    mode: 'close' | 'add',
+  ) => {
     const payload = toCreateStudentPayload(values, courseType, !!student);
     if (student) payload.idempotency_key = getIdempotencyKey();
 
-    const mode = submitModeRef.current;
-    submitModeRef.current = 'close'; // reset for next submission
-
     if (mode === 'add' && onSaveAndAdd) {
-      onSaveAndAdd(payload);
-      resetForNext();
+      const session = draftSessionRef.current;
+      try {
+        await onSaveAndAdd(payload);
+        if (draftSessionRef.current === session) resetForNext();
+      } catch {
+        // The parent reports the mutation error; retain the draft for correction.
+      }
     } else {
       await onSubmit(payload);
     }
   };
 
-  // react-hooks/refs (surfaced once the incompatible-library fix above let
-  // the compiler analyze further into this component): form.handleSubmit()
-  // was called directly in the render body, and onFormValid reads
-  // submitModeRef.current -- the compiler can't prove form.handleSubmit's
-  // argument isn't invoked synchronously during render, so it flags the
-  // ref read as reachable from render. Deferring the form.handleSubmit(...)
-  // call itself into a plain event-handler function (only ever actually
-  // invoked by the real submit event, never during render) resolves that
-  // without changing anything about when validation or submission happens.
+  const submitForm = async (
+    mode: 'close' | 'add',
+    event?: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event?.preventDefault();
+    if (loading || submitPendingRef.current) return;
+    submitPendingRef.current = true;
+    const session = draftSessionRef.current;
+    try {
+      await form.handleSubmit((values) => {
+        if (draftSessionRef.current === session)
+          return onFormValid(values, mode);
+      })(event);
+    } finally {
+      submitPendingRef.current = false;
+    }
+  };
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    form.handleSubmit(onFormValid)(event);
+    void submitForm('close', event);
   };
 
   const { attemptClose, confirmOpen, confirmDiscard, cancelDiscard } =
     useConfirmedClose(form.formState.isDirty || !!loading, onClose);
+
+  const pending = !!loading || form.formState.isSubmitting;
+  useEffect(() => {
+    if (!pending && focusNextRef.current) {
+      focusNextRef.current = false;
+      form.setFocus('last_name');
+    }
+  }, [pending, form]);
+  const attemptSafeClose = () => {
+    if (!loading && !submitPendingRef.current) attemptClose();
+  };
 
   const formatMoney = (n: number) => new Intl.NumberFormat('uz-UZ').format(n);
   // ponytail: plain digit-stripping parse, no masking lib — caret can jump
@@ -388,7 +436,7 @@ const StudentModal = ({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(o) => !o && attemptClose()}>
+      <Dialog open={open} onOpenChange={(o) => !o && attemptSafeClose()}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
           <DialogHeader>
             <DialogTitle className="font-heading text-lg font-semibold">
@@ -423,7 +471,7 @@ const StudentModal = ({
               <Form {...form}>
                 <form onSubmit={handleFormSubmit} className="space-y-4">
                   {/* Identity: who the student is + which branch they belong to. */}
-                  <div className="space-y-4">
+                  <fieldset disabled={pending} className="space-y-4">
                     <div>
                       <h3 className="text-sm font-semibold text-muted-foreground">
                         {t('students.sections.identity')}
@@ -564,10 +612,10 @@ const StudentModal = ({
                         )}
                       />
                     </div>
-                  </div>
+                  </fieldset>
 
                   {/* Course: which course/group, completion, and exam/enrollment outcome. */}
-                  <div className="space-y-4">
+                  <fieldset disabled={pending} className="space-y-4">
                     <div>
                       <h3 className="text-sm font-semibold text-muted-foreground">
                         {t('students.sections.course')}
@@ -780,10 +828,10 @@ const StudentModal = ({
                         />
                       )}
                     </div>
-                  </div>
+                  </fieldset>
 
                   {/* Payment: price, method, amounts paid, and the live debt readout. */}
-                  <div className="space-y-4">
+                  <fieldset disabled={pending} className="space-y-4">
                     <div>
                       <h3 className="text-sm font-semibold text-muted-foreground">
                         {t('students.sections.payment')}
@@ -1014,10 +1062,10 @@ const StudentModal = ({
                         )}
                       </>
                     )}
-                  </div>
+                  </fieldset>
 
                   {/* Meta/Other: paperwork, who registered them, and free-text notes. */}
-                  <div className="space-y-4">
+                  <fieldset disabled={pending} className="space-y-4">
                     <div>
                       <h3 className="text-sm font-semibold text-muted-foreground">
                         {t('students.sections.other')}
@@ -1136,7 +1184,7 @@ const StudentModal = ({
                         </FormItem>
                       )}
                     />
-                  </div>
+                  </fieldset>
 
                   {!student &&
                     dupMatches.length > 0 &&
@@ -1183,11 +1231,12 @@ const StudentModal = ({
                       </div>
                     )}
 
-                  <div className="flex justify-end gap-3 pt-2">
+                  <div className="flex flex-wrap justify-end gap-3 pt-2">
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={attemptClose}
+                      onClick={attemptSafeClose}
+                      disabled={pending}
                     >
                       {t('common.cancel')}
                     </Button>
@@ -1197,8 +1246,7 @@ const StudentModal = ({
                         variant="outline"
                         disabled={loading || form.formState.isSubmitting}
                         onClick={() => {
-                          submitModeRef.current = 'add';
-                          form.handleSubmit(onFormValid)();
+                          void submitForm('add');
                         }}
                       >
                         {t('students.save_and_add')}
@@ -1207,9 +1255,6 @@ const StudentModal = ({
                     <Button
                       type="submit"
                       disabled={loading || form.formState.isSubmitting}
-                      onClick={() => {
-                        submitModeRef.current = 'close';
-                      }}
                     >
                       {loading || form.formState.isSubmitting
                         ? t('common.saving')
@@ -1232,7 +1277,10 @@ const StudentModal = ({
       <ConfirmDialog
         open={confirmOpen}
         onClose={cancelDiscard}
-        onConfirm={confirmDiscard}
+        onConfirm={() => {
+          if (!loading && !submitPendingRef.current) confirmDiscard();
+        }}
+        loading={pending}
         title={t('common.discard_changes_title')}
         description={t('common.discard_changes_desc')}
         confirmLabel={t('common.discard')}

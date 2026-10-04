@@ -384,7 +384,7 @@ const StudentsPage = () => {
 
   // ponytail: separate handler — no closeModal, so the modal stays open for next entry
   const handleSaveAndAdd = (data: CreateStudentPayload) => {
-    createMutation.mutate(data, {
+    return createMutation.mutateAsync(data, {
       onSuccess: () => toast.success(t('students.added')),
       onError: (err) =>
         toast.error(extractErrorMessage(err, t('common.error'))),
