@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Exam, Plus } from '@phosphor-icons/react';
@@ -7,19 +7,18 @@ import { useCan } from '@/hooks/useCan';
 import { useBranches } from '@/features/branches/api/branchService';
 import { useQuestionsPage } from '@/features/questions/api/questionService';
 import { useListQueryState } from '@/hooks/useListQueryState';
-import { matchesListQuery } from '@/lib/listQuery';
 import { ListSearchField } from '@/components/ui/ListSearchField';
 import {
   QUESTION_TOPICS,
   activeQuestionVersion,
   localeContent,
-  type Question,
   type QuestionStatus,
   type QuestionTopic,
 } from '@/features/questions/types';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { DataCard } from '@/components/ui/DataCard';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Skeleton } from '@/components/ui/skeleton';
 import PaginationControls from '@/components/ui/PaginationControls';
 import { Button } from '@/components/ui/button';
 import { QuestionFormDialog } from '@/features/questions/components/QuestionFormDialog';
@@ -67,14 +66,9 @@ const QuestionsPage = () => {
     branchId: effectiveBranch,
     page,
     limit: pageSize,
+    search: debouncedSearch.trim() || undefined,
   });
-  const visibleQuestions = useMemo(
-    () =>
-      (questions.data?.data ?? []).filter((question) =>
-        matchesListQuery(debouncedSearch, ...questionSearchParts(question)),
-      ),
-    [questions.data, debouncedSearch],
-  );
+  const searchPending = search.trim() !== debouncedSearch.trim();
 
   return (
     <div className="space-y-4">
@@ -163,19 +157,30 @@ const QuestionsPage = () => {
         </select>
       </div>
 
-      {questions.isLoading ? (
-        <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+      {questions.isLoading || searchPending || questions.isFetching ? (
+        <div role="status" aria-live="polite" className="space-y-3">
+          <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+      ) : questions.isError ? (
+        <div role="alert" className="space-y-2">
+          <p>{t('common.error')}</p>
+          <Button onClick={() => void questions.refetch()}>
+            {t('common.retry')}
+          </Button>
+        </div>
       ) : !questions.data?.data.length ? (
         <EmptyState
           icon={Exam}
-          title={t('questions.empty')}
+          title={t(
+            debouncedSearch.trim() ? 'common.no_data' : 'questions.empty',
+          )}
           description={t('questions.empty_desc')}
         />
-      ) : visibleQuestions.length === 0 ? (
-        <EmptyState icon={Exam} title={t('common.no_data')} />
       ) : (
         <div className="grid gap-3">
-          {visibleQuestions.map((question) => (
+          {questions.data.data.map((question) => (
             <DataCard
               key={question.id}
               className="cursor-pointer"
@@ -206,7 +211,7 @@ const QuestionsPage = () => {
         </div>
       )}
 
-      {questions.data?.meta ? (
+      {questions.data?.meta && !questions.isError && !searchPending ? (
         <PaginationControls
           currentPage={questions.data.meta.page}
           totalPages={questions.data.meta.totalPages}
@@ -214,6 +219,7 @@ const QuestionsPage = () => {
           pageSize={pageSize}
           onPageSizeChange={setPageSize}
           totalItems={questions.data.meta.total}
+          disabled={questions.isFetching}
         />
       ) : null}
 
@@ -232,16 +238,6 @@ const QuestionsPage = () => {
       ) : null}
     </div>
   );
-};
-
-const questionSearchParts = (question: Question) => {
-  const versions = [question.draft_version, question.published_version];
-  const text = versions.flatMap(
-    (version) =>
-      version?.locales.flatMap((locale) => [locale.stem, locale.explanation]) ??
-      [],
-  );
-  return [question.topic, question.category, question.status, ...text];
 };
 
 export default QuestionsPage;

@@ -123,6 +123,7 @@ export interface UpdateQuestionDraftPayload {
 }
 
 export interface QuestionListFilters {
+  search?: string;
   visibility?: QuestionVisibility;
   status?: QuestionStatus;
   topic?: QuestionTopic;

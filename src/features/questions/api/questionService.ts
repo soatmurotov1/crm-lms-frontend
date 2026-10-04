@@ -23,6 +23,7 @@ export const fetchQuestionsPage = async (
 ): Promise<ListResponse<Question>> => {
   const { data } = await axiosInstance.get<unknown>('/questions', {
     params: {
+      search: filters.search?.trim() || undefined,
       visibility: filters.visibility,
       status: filters.status,
       topic: filters.topic,
@@ -35,12 +36,19 @@ export const fetchQuestionsPage = async (
   return parseListEnvelope<Question>(data, 'questions');
 };
 
-export const questionsPageQueryOptions = (filters: QuestionListFilters = {}) =>
-  queryOptions({
-    queryKey: questionKeys.page({ ...filters }),
-    queryFn: ({ signal }) => fetchQuestionsPage(filters, signal),
+export const questionsPageQueryOptions = (
+  filters: QuestionListFilters = {},
+) => {
+  const normalizedFilters = {
+    ...filters,
+    search: filters.search?.trim() || undefined,
+  };
+  return queryOptions({
+    queryKey: questionKeys.page(normalizedFilters),
+    queryFn: ({ signal }) => fetchQuestionsPage(normalizedFilters, signal),
     staleTime: 30_000,
   });
+};
 
 export const useQuestionsPage = (filters: QuestionListFilters = {}) =>
   useQuery(questionsPageQueryOptions(filters));
