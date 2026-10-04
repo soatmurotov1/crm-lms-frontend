@@ -14,6 +14,12 @@ const keys = [
   'common.select_branch',
   'training.find_student',
   'training.search_student_placeholder',
+  'training.selected_student',
+  'training.search_student_hint',
+  'training.student_lookup_truncated',
+  'training.student_lookup_failed',
+  'training.student_lookup_empty',
+  'training.student_lookup_forbidden',
   'training.select_program',
 ];
 

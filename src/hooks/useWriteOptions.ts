@@ -124,6 +124,11 @@ export const useWriteOptions = (
     ...(lookup?.course_type ? { course_type: lookup.course_type } : {}),
     ...(lookup?.limit ? { limit: lookup.limit } : {}),
   };
+  const canLoadOptions =
+    scoped &&
+    enabled &&
+    !!selectedBranchId &&
+    userCan(user, `${resource}.${action}`, selectedBranchId);
   const query = useQuery(
     {
       queryKey: [
@@ -134,11 +139,7 @@ export const useWriteOptions = (
         lookupParams,
         ...accessQueryScope(),
       ],
-      enabled:
-        scoped &&
-        enabled &&
-        !!selectedBranchId &&
-        userCan(user, `${resource}.${action}`, selectedBranchId),
+      enabled: canLoadOptions,
       queryFn: async ({ signal }) =>
         parseItemEnvelope<WriteOptions>(
           (
@@ -154,20 +155,23 @@ export const useWriteOptions = (
           ).data,
           'permission-options',
         ),
-      // Keep the current rows while a new search loads, but never show one
-      // branch's rows under another branch.
-      placeholderData: (previous, previousQuery) =>
-        previousQuery?.queryKey[3] === selectedBranchId ? previous : undefined,
     },
     client,
   );
   return {
     ...query,
+    // Disabling a query does not clear its cache. A revoked grant must not
+    // leave previously authorized choices available to a write form.
+    data: canLoadOptions ? query.data : undefined,
     isFetching: query.isFetching || catalogue.isFetching,
     isError: query.isError || catalogue.isError,
     refetch: catalogue.isError ? catalogue.refetch : query.refetch,
     scoped,
     selectedBranchId,
-    branches: catalogue.data ? branches : (query.data?.branches ?? []),
+    branches: catalogue.data
+      ? branches
+      : ((canLoadOptions ? query.data?.branches : undefined)?.filter((branch) =>
+          userCan(user, `${resource}.${action}`, branch.id),
+        ) ?? []),
   };
 };

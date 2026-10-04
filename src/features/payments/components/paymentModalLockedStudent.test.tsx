@@ -6,9 +6,10 @@ import {
   waitFor,
   within,
 } from '@testing-library/react';
-import { vi, describe, it, expect, afterEach } from 'vitest';
+import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { createInstance } from 'i18next';
 import PaymentModal from '@/features/payments/api/PaymentModal';
+import { useAuthStore } from '@/store/authStore';
 import type { Student } from '@/features/students/types';
 import uz from '@/i18n/locales/uz.json';
 import ru from '@/i18n/locales/ru.json';
@@ -75,8 +76,16 @@ vi.mock('@/features/students/api/studentService', () => ({
 
 const noop = () => {};
 
+beforeEach(() => {
+  useAuthStore.setState({
+    user: { id: 'demo-owner', email: 'owner@example.test', role: 'owner' },
+    activeBranchId: null,
+  });
+});
+
 afterEach(() => {
   cleanup();
+  useAuthStore.setState({ user: null, activeBranchId: null });
   picker.students = [];
   translation.t = (key) => key;
 });

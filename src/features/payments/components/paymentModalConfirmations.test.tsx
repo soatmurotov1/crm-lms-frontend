@@ -5,9 +5,10 @@ import {
   cleanup,
   waitFor,
 } from '@testing-library/react';
-import { vi, describe, it, expect, afterEach } from 'vitest';
+import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 import PaymentModal from '@/features/payments/api/PaymentModal';
 import type { Payment } from '@/features/payments/types';
+import { useAuthStore } from '@/store/authStore';
 
 // Same mocking style as paymentModalLockedStudent.test.tsx: the picker is
 // never opened in these tests (locked-student / edit-mode both hide it), so
@@ -20,7 +21,16 @@ vi.mock('@/features/students/api/studentService', () => ({
   }),
 }));
 
-afterEach(cleanup);
+beforeEach(() => {
+  useAuthStore.setState({
+    user: { id: 'demo-owner', email: 'owner@example.test', role: 'owner' },
+    activeBranchId: null,
+  });
+});
+afterEach(() => {
+  cleanup();
+  useAuthStore.setState({ user: null, activeBranchId: null });
+});
 
 const fillAmount = (value: string) => {
   const input = screen.getByPlaceholderText('0') as HTMLInputElement;

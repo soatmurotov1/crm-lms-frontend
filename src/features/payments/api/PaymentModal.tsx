@@ -30,6 +30,8 @@ import { CaretUpDown, Check, CircleNotch } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { formatMoney, groupDigits } from '@/lib/money';
 import { newRequestId } from '@/lib/idempotencyKey';
+import { userCan } from '@/lib/permissions';
+import type { User } from '@/features/staff/types';
 import { formatPhone } from '@/lib/phoneFormater';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -64,6 +66,7 @@ interface Student {
   last_name: string;
   phone?: string;
   phone_last4?: string | null;
+  branch_id?: string;
   branch_name?: string;
   group_name?: string | null;
   debt?: number;
@@ -119,7 +122,35 @@ const paymentSchema = z.object({
 type PaymentFormInput = z.input<typeof paymentSchema>;
 type PaymentFormValues = z.infer<typeof paymentSchema>;
 
-const PaymentModal = ({
+const paymentAccessScope = (user: User | null, activeBranchId: string | null) =>
+  JSON.stringify([
+    activeBranchId,
+    user?.id,
+    user?.company_id,
+    user?.access_version,
+    user?.role,
+    user?.branch_id,
+    user?.branch_ids,
+    user?.permissions,
+  ]);
+
+// A draft belongs to one open session and one access/filter context. Remounting
+// retires the form, cached student and both confirmations together.
+const PaymentModal = (props: PaymentModalProps) => {
+  const user = useAuthStore((state) => state.user);
+  const activeBranchId = useAuthStore((state) => state.activeBranchId);
+  const sessionKey = JSON.stringify([
+    props.open,
+    props.branchId,
+    props.courseType,
+    props.lockedStudentId,
+    props.payment,
+    paymentAccessScope(user, props.branchId ?? activeBranchId),
+  ]);
+  return <PaymentModalSession key={sessionKey} {...props} />;
+};
+
+const PaymentModalSession = ({
   open,
   onClose,
   onSubmit,
@@ -134,18 +165,25 @@ const PaymentModal = ({
   submitError,
 }: PaymentModalProps) => {
   const { t } = useTranslation();
-  const scopedUser = useAuthStore(
-    (state) => state.user?.permissions !== undefined,
-  );
+  const user = useAuthStore((state) => state.user);
+  const scopedUser = user?.permissions !== undefined;
   const activeBranchId = useAuthStore((state) => state.activeBranchId);
+  const accessScope = paymentAccessScope(user, branchId ?? activeBranchId);
+  const sessionActiveRef = useRef(true);
+  useEffect(() => {
+    sessionActiveRef.current = true;
+    return () => {
+      sessionActiveRef.current = false;
+    };
+  }, []);
   const isEdit = !!payment;
   const [lookupBranchId, setLookupBranchId] = useState<string | undefined>();
   const form = useForm<PaymentFormInput, unknown, PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      student_id: '',
-      amount: 0,
-      payment_method: 'naqd',
+      student_id: payment?.student_id ?? lockedStudentId ?? '',
+      amount: payment?.amount_paid ?? 0,
+      payment_method: payment?.payment_method ?? 'naqd',
     },
   });
 
@@ -157,8 +195,7 @@ const PaymentModal = ({
   const debouncedStudentSearch = useDebounce(studentSearch, 300);
   // ponytail (M1): stable per modal-open, so a retried/double-clicked submit
   // reuses the same key; reopening the modal for a new payment gets a fresh one.
-  // Lazy useState, not useRef(crypto.randomUUID()) — a useRef argument is
-  // re-evaluated every render, and the bare call throws on a non-secure origin.
+  // Generate lazily on submit; resetting the session starts a fresh key.
   const idempotencyKeyRef = useRef('');
   const getIdempotencyKey = () =>
     (idempotencyKeyRef.current ||= newRequestId());
@@ -188,37 +225,6 @@ const PaymentModal = ({
     sortOrder: 'asc',
   });
 
-  useEffect(() => {
-    if (open) {
-      form.reset({
-        student_id: payment?.student_id ?? lockedStudentId ?? '',
-        amount: payment?.amount_paid ?? 0,
-        payment_method: payment?.payment_method ?? 'naqd',
-      });
-      idempotencyKeyRef.current = newRequestId();
-    }
-    // `payment` is captured once by the caller at "open edit" time (same
-    // convention as StudentsPage's editStudent state) so its identity is
-    // stable for the whole open session -- safe as an effect dep here
-    // without regenerating idempotencyKeyRef on every parent re-render.
-  }, [open, form, lockedStudentId, payment]);
-
-  const [pickerResetKey, setPickerResetKey] = useState({
-    open,
-    lockedStudentId,
-    payment,
-  });
-  if (
-    pickerResetKey.open !== open ||
-    pickerResetKey.lockedStudentId !== lockedStudentId ||
-    pickerResetKey.payment !== payment
-  ) {
-    setPickerResetKey({ open, lockedStudentId, payment });
-    setStudentSearch('');
-    setSelectedStudentCache(undefined);
-    setStudentPopoverOpen(false);
-  }
-
   // react-hooks/incompatible-library: form.watch() during render isn't
   // compiler-safe; useWatch({ control }) is RHF's own drop-in replacement.
   const studentId = useWatch({ control: form.control, name: 'student_id' });
@@ -233,9 +239,9 @@ const PaymentModal = ({
       limit: STUDENT_LOOKUP_LIMIT,
     },
   );
-  const isStudentsFetching = options.scoped
-    ? options.isFetching
-    : legacyStudentsFetching;
+  const isStudentsFetching =
+    studentSearch !== debouncedStudentSearch ||
+    (options.scoped ? options.isFetching : legacyStudentsFetching);
   const isStudentsError = options.scoped
     ? options.isError
     : legacyStudentsError;
@@ -268,6 +274,31 @@ const PaymentModal = ({
     : (selectedStudent?.debt ??
       (lockedStudentId ? lockedStudentDebt : undefined));
 
+  const canSubmit = userCan(
+    user,
+    isEdit ? 'payments.update' : 'payments.create',
+    payment?.branch_id ??
+      selectedStudent?.branch_id ??
+      options.selectedBranchId,
+  );
+
+  const isCurrentSubmission = (values: PaymentFormValues) => {
+    const current = useAuthStore.getState();
+    return (
+      open &&
+      sessionActiveRef.current &&
+      accessScope ===
+        paymentAccessScope(current.user, branchId ?? current.activeBranchId) &&
+      canSubmit &&
+      values.student_id === form.getValues('student_id') &&
+      values.amount === Number(form.getValues('amount')) &&
+      values.payment_method === form.getValues('payment_method') &&
+      (effectiveLockedId
+        ? values.student_id === effectiveLockedId
+        : selectedStudentCache?.id === values.student_id)
+    );
+  };
+
   useEffect(() => {
     const mutationSettled = wasLoadingRef.current && !loading;
     wasLoadingRef.current = !!loading;
@@ -281,7 +312,7 @@ const PaymentModal = ({
   }, [loading, open, submitError]);
 
   const doSubmit = (values: PaymentFormValues) => {
-    if (submitLockedRef.current) return;
+    if (submitLockedRef.current || !isCurrentSubmission(values)) return;
 
     submitLockedRef.current = true;
     setSubmitLocked(true);
@@ -307,6 +338,7 @@ const PaymentModal = ({
   // validation or submission happens.
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     form.handleSubmit((values) => {
+      if (!isCurrentSubmission(values)) return;
       if (effectiveDebt !== undefined && values.amount > effectiveDebt) {
         setPendingValues(values);
         setExceedsDebtOpen(true);
@@ -337,7 +369,9 @@ const PaymentModal = ({
     <>
       <Dialog
         open={open}
-        onOpenChange={(o) => !o && !loading && attemptClose()}
+        onOpenChange={(o) =>
+          !o && !loading && !submitLockedRef.current && attemptClose()
+        }
       >
         <DialogContent className="max-w-md bg-card border-border">
           <DialogHeader>
@@ -368,6 +402,8 @@ const PaymentModal = ({
                         form.setValue('student_id', '');
                         setSelectedStudentCache(undefined);
                         setStudentSearch('');
+                        setPendingValues(null);
+                        setExceedsDebtOpen(false);
                       }}
                     >
                       <option value="">{t('common.select_branch')}</option>
@@ -431,7 +467,11 @@ const PaymentModal = ({
                               placeholder={t('payments.search_placeholder')}
                               aria-label={t('payments.search_placeholder')}
                               value={studentSearch}
-                              onValueChange={setStudentSearch}
+                              onValueChange={(search) => {
+                                setStudentSearch(search);
+                                setPendingValues(null);
+                                setExceedsDebtOpen(false);
+                              }}
                             />
                             <CommandList>
                               {isStudentsFetching ? (
@@ -647,14 +687,17 @@ const PaymentModal = ({
                   type="button"
                   variant="outline"
                   onClick={attemptClose}
-                  disabled={loading}
+                  disabled={loading || submitLocked}
                 >
                   {t('common.cancel')}
                 </Button>
                 <Button
                   type="submit"
                   disabled={
-                    loading || submitLocked || form.formState.isSubmitting
+                    loading ||
+                    submitLocked ||
+                    form.formState.isSubmitting ||
+                    !canSubmit
                   }
                 >
                   {loading

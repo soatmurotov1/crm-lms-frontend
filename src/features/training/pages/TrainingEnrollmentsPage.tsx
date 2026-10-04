@@ -1,6 +1,14 @@
-import { requestBranchId } from '@/lib/permissions';
+import { requestBranchId, userCan } from '@/lib/permissions';
 import { useWriteOptions } from '@/hooks/useWriteOptions';
-import { useMemo, useState, useCallback, type FormEvent } from 'react';
+import {
+  useMemo,
+  useState,
+  useCallback,
+  useId,
+  useEffect,
+  useRef,
+  type FormEvent,
+} from 'react';
 import { usePermissionQuery as useQuery } from '@/hooks/usePermissionQuery';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -44,28 +52,50 @@ const selectClass =
 
 const enrollmentColumnHelper = createDataGridColumnHelper<TrainingEnrollment>();
 
-const EnrollmentDialog = ({
-  open,
-  branches,
-  ownBranchId,
-  canViewAll,
-  onClose,
-}: {
+type EnrollmentDialogProps = {
   open: boolean;
   branches: Array<{ id: string; name: string }>;
   ownBranchId?: string;
   canViewAll: boolean;
   onClose: () => void;
-}) => {
+  returnFocus: () => void;
+};
+
+const EnrollmentDialogForm = ({
+  open,
+  branches,
+  ownBranchId,
+  canViewAll,
+  onClose,
+  returnFocus,
+}: EnrollmentDialogProps) => {
   const { t } = useTranslation();
+  const user = useAuthStore((state) => state.user);
   const create = useCreateTrainingEnrollment();
+  const submitting = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  const listboxId = useId();
   const [branchId, setBranchId] = useState(ownBranchId ?? '');
   const [studentSearch, setStudentSearch] = useState('');
   const [studentId, setStudentId] = useState('');
   const [programId, setProgramId] = useState('');
+  const [programLabel, setProgramLabel] = useState('');
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const debouncedSearch = useDebounce(studentSearch, 300);
-
   const effectiveBranchId = canViewAll ? branchId : (ownBranchId ?? '');
+  const canCreate =
+    Boolean(effectiveBranchId) &&
+    userCan(user, 'training_enrollments.create', effectiveBranchId);
+  const scoped = user?.permissions !== undefined;
+  const hasSearch = studentSearch.trim().length >= 2;
+  const searchSettled = studentSearch === debouncedSearch;
 
   const studentsQuery = useQuery({
     queryKey: studentKeys.list({
@@ -73,20 +103,18 @@ const EnrollmentDialog = ({
       search: debouncedSearch,
     }),
     queryFn: ({ signal }) => searchStudents(debouncedSearch, signal),
-    enabled: open && debouncedSearch.trim().length >= 2,
+    enabled: open && canCreate && !scoped && debouncedSearch.trim().length >= 2,
     staleTime: 30_000,
   });
-
   const programs = useActiveTrainingPrograms(
     effectiveBranchId,
-    Boolean(effectiveBranchId),
+    open && canCreate && !scoped,
   );
-
   const options = useWriteOptions(
     'training_enrollments',
     'create',
     effectiveBranchId,
-    open,
+    open && canCreate,
     { search: debouncedSearch, limit: 50 },
   );
   const studentChoices = options.scoped
@@ -95,30 +123,125 @@ const EnrollmentDialog = ({
   const programChoices = options.scoped
     ? (options.data?.programs ?? [])
     : (programs.data ?? []);
+  const lookup = options.scoped ? options : studentsQuery;
+  const loading = !searchSettled || lookup.isFetching;
+  const ready =
+    open &&
+    canCreate &&
+    hasSearch &&
+    searchSettled &&
+    !lookup.isFetching &&
+    !lookup.isError &&
+    !lookup.isPlaceholderData;
+  const selectedStudent =
+    canCreate && searchSettled && !lookup.isError
+      ? studentChoices.find((student) => student.id === studentId)
+      : undefined;
+  const selectedProgram = programChoices.find(
+    (program) => program.id === programId,
+  );
+  const canSubmit =
+    ready &&
+    !!selectedStudent &&
+    !!selectedProgram &&
+    !create.isPending &&
+    (options.scoped || (!programs.isFetching && !programs.isError));
+  const showChoices = popupOpen && ready && studentChoices.length > 0;
+  const activeOptionId =
+    showChoices && activeIndex >= 0 && activeIndex < studentChoices.length
+      ? `${listboxId}-${studentChoices[activeIndex].id}`
+      : undefined;
+  useEffect(() => {
+    if (activeOptionId) {
+      document
+        .getElementById(activeOptionId)
+        ?.scrollIntoView?.({ block: 'nearest' });
+    }
+  }, [activeOptionId]);
+  const studentTotal = options.scoped
+    ? options.data?.students_total
+    : undefined;
+  const studentDetails = (student: (typeof studentChoices)[number]) => {
+    const last4 =
+      'phone_last4' in student
+        ? student.phone_last4
+        : 'phone' in student
+          ? student.phone.replace(/\D/g, '').slice(-4)
+          : undefined;
+    return [last4 ? `•• ${last4}` : '', student.group_name]
+      .filter(Boolean)
+      .join(' · ');
+  };
+  const studentLabel = (student: (typeof studentChoices)[number]) => {
+    const details = studentDetails(student);
+    const duplicate = studentChoices.some(
+      (other) =>
+        other.id !== student.id &&
+        other.first_name === student.first_name &&
+        other.last_name === student.last_name &&
+        studentDetails(other) === details,
+    );
+    return `${student.last_name} ${student.first_name}${details ? ` · ${details}` : ''}${duplicate ? ` · ${student.id}` : ''}`;
+  };
+  const selectStudent = (student: (typeof studentChoices)[number]) => {
+    if (!ready) return;
+    setStudentId(student.id);
+    setPopupOpen(false);
+    setActiveIndex(-1);
+  };
+  const handleClose = () => {
+    if (create.isPending || submitting.current) return;
+    setStudentSearch('');
+    setStudentId('');
+    setProgramId('');
+    setProgramLabel('');
+    setPopupOpen(false);
+    setActiveIndex(-1);
+    onClose();
+  };
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (!studentId || !programId) return;
-
+    if (
+      !canSubmit ||
+      submitting.current ||
+      !selectedStudent ||
+      !selectedProgram
+    )
+      return;
+    submitting.current = true;
     create.mutate(
-      {
-        student_id: studentId,
-        program_id: programId,
-      },
+      { student_id: selectedStudent.id, program_id: selectedProgram.id },
       {
         onSuccess: () => {
           toast.success(t('training.enrollment_created'));
-          onClose();
+          submitting.current = false;
+          if (mounted.current) handleClose();
         },
-        onError: (err) => {
-          toast.error(extractErrorMessage(err));
+        onError: (err) =>
+          toast.error(extractErrorMessage(err, t('common.error'))),
+        onSettled: () => {
+          submitting.current = false;
         },
       },
     );
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="max-w-md">
+    <Dialog open={open} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent
+        className="max-w-md"
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          returnFocus();
+        }}
+        onEscapeKeyDown={(event) => {
+          if (popupOpen) {
+            event.preventDefault();
+            setPopupOpen(false);
+            setActiveIndex(-1);
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{t('training.add_enrollment')}</DialogTitle>
           <DialogDescription>
@@ -138,10 +261,15 @@ const EnrollmentDialog = ({
                 id="enrollment-branch"
                 className={selectClass}
                 value={branchId}
+                disabled={create.isPending}
                 onChange={(event) => {
                   setBranchId(event.target.value);
+                  setStudentSearch('');
                   setStudentId('');
                   setProgramId('');
+                  setProgramLabel('');
+                  setPopupOpen(false);
+                  setActiveIndex(-1);
                 }}
                 required
               >
@@ -155,7 +283,7 @@ const EnrollmentDialog = ({
             </div>
           )}
 
-          <div>
+          <div className="relative">
             <label
               htmlFor="student-search-input"
               className="mb-1 block text-sm font-medium"
@@ -164,44 +292,146 @@ const EnrollmentDialog = ({
             </label>
             <Input
               id="student-search-input"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={showChoices}
+              aria-controls={showChoices ? listboxId : undefined}
+              aria-activedescendant={activeOptionId}
+              aria-describedby={`${listboxId}-status`}
               value={studentSearch}
-              onChange={(event) => setStudentSearch(event.target.value)}
+              disabled={!canCreate || create.isPending}
+              onFocus={() => setPopupOpen(true)}
+              onClick={() => setPopupOpen(true)}
+              onBlur={(event) => {
+                if (
+                  !event.relatedTarget ||
+                  !document
+                    .getElementById(listboxId)
+                    ?.contains(event.relatedTarget as Node)
+                )
+                  setPopupOpen(false);
+              }}
+              onChange={(event) => {
+                setStudentSearch(event.target.value);
+                setStudentId('');
+                setPopupOpen(true);
+                setActiveIndex(-1);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  if (
+                    showChoices &&
+                    activeIndex >= 0 &&
+                    studentChoices[activeIndex]
+                  ) {
+                    selectStudent(studentChoices[activeIndex]);
+                  }
+                } else if (
+                  (event.key === 'ArrowDown' || event.key === 'ArrowUp') &&
+                  ready &&
+                  studentChoices.length
+                ) {
+                  event.preventDefault();
+                  setPopupOpen(true);
+                  setActiveIndex((index) =>
+                    event.key === 'ArrowDown'
+                      ? (popupOpen ? index + 1 : 0) % studentChoices.length
+                      : (popupOpen && index >= 0
+                          ? index - 1 + studentChoices.length
+                          : studentChoices.length - 1) % studentChoices.length,
+                  );
+                }
+              }}
               placeholder={t('training.search_student_placeholder')}
               autoComplete="off"
             />
-            {studentChoices.length > 0 && (
+            <div
+              id={`${listboxId}-status`}
+              role="status"
+              className="mt-1 text-xs text-muted-foreground"
+            >
+              {!canCreate
+                ? t('training.student_lookup_forbidden')
+                : !hasSearch
+                  ? t('training.search_student_hint')
+                  : loading
+                    ? t('common.loading')
+                    : lookup.isError
+                      ? t('training.student_lookup_failed')
+                      : ready && studentChoices.length === 0
+                        ? t('training.student_lookup_empty')
+                        : ready &&
+                            studentTotal !== undefined &&
+                            studentTotal > studentChoices.length
+                          ? t('training.student_lookup_truncated', {
+                              shown: studentChoices.length,
+                              total: studentTotal,
+                            })
+                          : null}
+            </div>
+            {canCreate && lookup.isError && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void lookup.refetch()}
+              >
+                {t('common.retry')}
+              </Button>
+            )}
+            {showChoices && (
               <div
+                id={listboxId}
                 role="listbox"
                 aria-label={t('training.find_student')}
-                className="mt-1 max-h-40 overflow-y-auto rounded-md border bg-popover p-1 text-sm shadow-md"
+                className="absolute inset-x-0 z-50 mt-1 max-h-40 overflow-y-auto rounded-md border bg-popover p-1 text-sm shadow-md"
               >
-                {studentChoices.map((student) => (
+                {studentChoices.map((student, index) => (
                   <button
+                    id={`${listboxId}-${student.id}`}
                     key={student.id}
                     type="button"
                     role="option"
+                    tabIndex={index === Math.max(0, activeIndex) ? 0 : -1}
                     aria-selected={studentId === student.id}
-                    className={`w-full rounded px-2 py-1 text-left hover:bg-accent hover:text-accent-foreground ${
-                      studentId === student.id
+                    className={`min-h-11 w-full rounded px-2 py-2 text-left hover:bg-accent hover:text-accent-foreground ${
+                      activeIndex === index || studentId === student.id
                         ? 'bg-accent font-medium text-accent-foreground'
                         : ''
                     }`}
-                    onClick={() => {
-                      setStudentId(student.id);
-                      setStudentSearch(
-                        `${student.last_name} ${student.first_name}`,
-                      );
+                    onKeyDown={(event) => {
+                      if (event.key === ' ' || event.key === 'Enter') {
+                        event.preventDefault();
+                        document
+                          .getElementById('student-search-input')
+                          ?.focus();
+                        selectStudent(student);
+                      }
                     }}
+                    onFocus={() => setActiveIndex(index)}
+                    onBlur={(event) => {
+                      if (
+                        !document
+                          .getElementById(listboxId)
+                          ?.contains(event.relatedTarget as Node)
+                      )
+                        setPopupOpen(false);
+                    }}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => selectStudent(student)}
                   >
-                    {student.last_name} {student.first_name}
-                    {'phone' in student && typeof student.phone === 'string'
-                      ? ` (${student.phone})`
-                      : 'phone_last4' in student && student.phone_last4
-                        ? ` (•• ${student.phone_last4})`
-                        : ''}
+                    {studentLabel(student)}
                   </button>
                 ))}
               </div>
+            )}
+            {selectedStudent && (
+              <p className="mt-2 rounded-md bg-muted p-2 text-sm" role="status">
+                <span className="font-medium">
+                  {t('training.selected_student')}:{' '}
+                </span>
+                {studentLabel(selectedStudent)}
+              </p>
             )}
           </div>
 
@@ -216,10 +446,19 @@ const EnrollmentDialog = ({
               id="training-program-select"
               className={selectClass}
               value={programId}
-              onChange={(event) => setProgramId(event.target.value)}
+              disabled={!canCreate || create.isPending}
+              onChange={(event) => {
+                setProgramId(event.target.value);
+                setProgramLabel(event.target.selectedOptions[0]?.text ?? '');
+              }}
               required
             >
               <option value="">{t('training.select_program')}</option>
+              {programId && !selectedProgram && (loading || lookup.isError) && (
+                <option value={programId} disabled>
+                  {programLabel}
+                </option>
+              )}
               {programChoices.map((prog) => (
                 <option key={prog.id} value={prog.id}>
                   {prog.name} ({prog.category ?? ''} ·{' '}
@@ -230,13 +469,15 @@ const EnrollmentDialog = ({
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={create.isPending}
+              onClick={handleClose}
+            >
               {t('common.cancel')}
             </Button>
-            <Button
-              type="submit"
-              disabled={create.isPending || !studentId || !programId}
-            >
+            <Button type="submit" disabled={!canSubmit}>
               {create.isPending ? t('common.saving') : t('common.save')}
             </Button>
           </div>
@@ -246,16 +487,37 @@ const EnrollmentDialog = ({
   );
 };
 
+const EnrollmentDialog = (props: EnrollmentDialogProps) => {
+  const user = useAuthStore((state) => state.user);
+  const activeBranchId = useAuthStore((state) => state.activeBranchId);
+  // A new dialog session or authorization context must never reuse an identity.
+  const context = JSON.stringify([
+    props.open,
+    props.ownBranchId,
+    props.canViewAll,
+    activeBranchId,
+    user?.id,
+    user?.company_id,
+    user?.role,
+    user?.access_version,
+    user?.permissions,
+    user?.branch_ids,
+  ]);
+  return <EnrollmentDialogForm key={context} {...props} />;
+};
+
 const TrainingEnrollmentsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const activeBranchId = useAuthStore((state) => state.activeBranchId);
   const canViewAll = useCan('viewAllBranches');
   const canCreate = useCan('createTrainingEnrollment');
   const { data: branches = [] } = useBranches(canViewAll);
   const [branchId, setBranchId] = useState('');
   const [status, setStatus] = useState<TrainingEnrollmentStatus | ''>('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const enrollmentTrigger = useRef<HTMLButtonElement>(null);
   const {
     page,
     pageSize,
@@ -267,9 +529,7 @@ const TrainingEnrollmentsPage = () => {
   } = useListQueryState();
   const effectiveBranch = canViewAll
     ? branchId || undefined
-    : (useAuthStore.getState?.()?.activeBranchId ??
-      user?.branch_id ??
-      undefined);
+    : (activeBranchId ?? user?.branch_id ?? undefined);
   const enrollments = useTrainingEnrollmentsPage({
     branchId: effectiveBranch,
     status: status || undefined,
@@ -449,7 +709,11 @@ const TrainingEnrollmentsPage = () => {
         icon={<GraduationCap className="h-3.5 w-3.5" />}
         actions={
           canCreate && (
-            <Button onClick={() => setDialogOpen(true)}>
+            <Button
+              ref={enrollmentTrigger}
+              aria-expanded={dialogOpen}
+              onClick={() => setDialogOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               {t('training.add_enrollment')}
             </Button>
@@ -579,12 +843,15 @@ const TrainingEnrollmentsPage = () => {
       <EnrollmentDialog
         open={dialogOpen}
         branches={branches}
-        ownBranchId={
-          useAuthStore.getState?.()?.activeBranchId ??
-          user?.branch_id ??
-          undefined
-        }
+        ownBranchId={activeBranchId ?? user?.branch_id ?? undefined}
         canViewAll={canViewAll}
+        returnFocus={() => {
+          // Context remounts keep the dialog open; only dismissal restores focus.
+          if (
+            enrollmentTrigger.current?.getAttribute('aria-expanded') === 'false'
+          )
+            enrollmentTrigger.current.focus();
+        }}
         onClose={() => setDialogOpen(false)}
       />
     </div>
