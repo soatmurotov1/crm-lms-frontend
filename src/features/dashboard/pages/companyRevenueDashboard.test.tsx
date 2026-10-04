@@ -32,6 +32,14 @@ const auth = vi.hoisted(() => ({
   },
 }));
 
+const language = vi.hoisted(() => ({ value: 'uz' }));
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { resolvedLanguage: language.value },
+  }),
+}));
+
 const overview = vi.hoisted(() => ({
   data: {
     timezone: 'Asia/Tashkent',
@@ -876,4 +884,132 @@ describe('CompanyRevenueDashboard staff block (autodrive-sgf.4)', () => {
       .closest('[role="button"]');
     expect(card?.innerHTML).toContain('bg-warning');
   });
+});
+
+describe('dashboard business date ranges', () => {
+  it.each([
+    [
+      'uz',
+      '2026-09-30T19:00:00.000Z',
+      '2026-10-03T18:59:59.999Z',
+      '01 — 03 OKT 2026',
+    ],
+    [
+      'uz',
+      '2026-12-30T19:00:00.000Z',
+      '2027-01-02T18:59:59.999Z',
+      '31.12.2026 — 02.01.2027',
+    ],
+    ['uz', '2024-02-29', '2024-02-29', '29 — 29 FEV 2024'],
+    [
+      'en',
+      '2026-12-30T19:00:00.000Z',
+      '2027-01-02T18:59:59.999Z',
+      'Dec 31, 2026 — Jan 2, 2027',
+    ],
+    [
+      'ru',
+      '2026-12-30T19:00:00.000Z',
+      '2027-01-02T18:59:59.999Z',
+      '31 дек. 2026 г. — 2 янв. 2027 г.',
+    ],
+  ])(
+    'shows the full business range for %s %s',
+    async (locale, from, to, expected) => {
+      const original = structuredClone(overview.data);
+      language.value = locale;
+      overview.data.filters = { from, to, granularity: 'week' };
+      Object.assign(overview.data.kpis.revenue, { period_to_inclusive: to });
+      try {
+        await renderDashboard(
+          '/dashboard?from=2026-10-01&to=2026-10-03&granularity=week',
+        );
+        expect(
+          screen.getByText(`${expected} · DASHBOARD.V2.WEEKLY`),
+        ).toBeInTheDocument();
+      } finally {
+        overview.data = original;
+        language.value = 'uz';
+      }
+    },
+  );
+
+  it.each([true, false])(
+    'uses previous inclusive end or exclusive fallback (inclusive=%s)',
+    async (inclusive) => {
+      const original = structuredClone(overview.data);
+      Object.assign(overview.data.kpis.revenue, {
+        previous_period_from: '2026-09-27T19:00:00.000Z',
+        previous_period_to: '2026-09-30T19:00:00.000Z',
+        ...(inclusive
+          ? { previous_period_to_inclusive: '2026-09-30T18:59:59.999Z' }
+          : {}),
+        period_to_inclusive: '2026-10-03T18:59:59.999Z',
+      });
+      overview.data.filters = {
+        from: '2026-09-30T19:00:00.000Z',
+        to: '2026-10-03T19:00:00.000Z',
+        granularity: 'day',
+      };
+      try {
+        await renderDashboard();
+        expect(
+          screen.getByText(/28\.09\.2026 — 30\.09\.2026/),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('01 — 03 OKT 2026 · DASHBOARD.V2.DAILY'),
+        ).toBeInTheDocument();
+      } finally {
+        overview.data = original;
+      }
+    },
+  );
+});
+
+describe('current business period end compatibility', () => {
+  it.each([
+    [
+      'inclusive',
+      {
+        period_to_inclusive: '2026-10-03T19:00:00.000Z',
+        period_to: '2026-10-03T19:00:00.000Z',
+      },
+      '2026-10-03T19:00:00.000Z',
+      '04',
+    ],
+    [
+      'period_to',
+      { period_to: '2026-10-03T19:00:00.000Z' },
+      '2026-10-04T19:00:00.000Z',
+      '03',
+    ],
+    ['filters.to instant', {}, '2026-10-03T19:00:00.000Z', '03'],
+    ['filters.to calendar date', {}, '2026-10-03', '03'],
+  ])(
+    'uses %s without changing filters or amounts',
+    async (_source, metadata, to, endDay) => {
+      const original = structuredClone(overview.data);
+      overview.data.filters = {
+        from: '2026-09-30T19:00:00.000Z',
+        to,
+        granularity: 'day',
+      };
+      Object.assign(overview.data.kpis.revenue, metadata);
+      const fixture = structuredClone(overview.data);
+      try {
+        await renderDashboard(
+          '/dashboard?from=2026-10-01&to=2026-10-03&granularity=day',
+        );
+        expect(
+          screen.getByText(`01 — ${endDay} OKT 2026 · DASHBOARD.V2.DAILY`),
+        ).toBeInTheDocument();
+        expect(overview.data).toEqual(fixture);
+        expect(
+          screen.getByText('dashboard.v2.previous_period'),
+        ).toBeInTheDocument();
+      } finally {
+        overview.data = original;
+      }
+    },
+  );
 });

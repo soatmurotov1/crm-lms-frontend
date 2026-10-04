@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import {
   Area,
@@ -13,12 +12,15 @@ import {
   YAxis,
 } from 'recharts';
 import type { CompanyOverview } from '@/features/dashboard/api/dashboardService';
+import { formatTashkentDate, isoToParts } from '@/lib/calendarDateTime';
 import { cn } from '@/lib/utils';
 import { formatMoney, groupDigits } from '@/lib/money';
 
-const formatDate = (value: string | Date) => format(new Date(value), 'dd.MM');
-const formatShortDate = (value: string | Date) =>
-  format(new Date(value), 'dd.MM.yyyy');
+const formatAxisDate = (value: string) => {
+  const date = value.length === 10 ? value : isoToParts(value).date;
+  const [, month, day] = date.split('-');
+  return `${day}.${month}`;
+};
 
 const AXIS_PROPS = {
   stroke: 'hsl(var(--muted-foreground))',
@@ -33,15 +35,16 @@ const RevenueTrendChart = ({
 }: {
   data: CompanyOverview['revenue_trend'];
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage || i18n.language || 'uz';
   const [visibleMetrics, setVisibleMetrics] = useState({
     amount: true,
     payment_count: true,
   });
   const chartData = data.map((item) => ({
     ...item,
-    label: formatDate(item.period_start),
-    tooltipLabel: formatShortDate(item.period_start),
+    label: formatAxisDate(item.period_start),
+    tooltipLabel: formatTashkentDate(item.period_start, locale),
   }));
   const total = data.reduce((sum, item) => sum + item.amount, 0);
   const paymentCount = data.reduce((sum, item) => sum + item.payment_count, 0);
@@ -149,7 +152,7 @@ const RevenueTrendChart = ({
             {t('dashboard.v2.trend_peak', 'Eng yuqori kun')}
           </p>
           <p className="mt-1 font-heading text-lg font-bold tabular-nums">
-            {peak ? formatDate(peak.period_start) : '—'}
+            {peak ? formatTashkentDate(peak.period_start, locale) : '—'}
           </p>
         </div>
       </div>
@@ -334,7 +337,9 @@ const RevenueTrendChart = ({
                 key={item.period_start}
                 className="border-b border-border/60 last:border-0"
               >
-                <td className="py-2">{formatDate(item.period_start)}</td>
+                <td className="py-2">
+                  {formatTashkentDate(item.period_start, locale)}
+                </td>
                 <td className="py-2 text-right tabular-nums">
                   {formatMoney(item.amount)}
                 </td>

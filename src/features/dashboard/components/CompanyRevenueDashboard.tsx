@@ -2,7 +2,6 @@ import { lazy, Suspense, useMemo, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useUrlParams } from '@/hooks/useUrlParams';
 import { useTranslation } from 'react-i18next';
-import { format } from 'date-fns';
 import {
   Warning,
   ArrowDownRight,
@@ -48,7 +47,11 @@ import { useCan } from '@/hooks/useCan';
 import { isCrossTenantRole, requestBranchId } from '@/lib/permissions';
 import { CourseType } from '@/features/students/types';
 import { cn } from '@/lib/utils';
-import { nowTashkentParts } from '@/lib/calendarDateTime';
+import {
+  formatTashkentDate,
+  isoToParts,
+  nowTashkentParts,
+} from '@/lib/calendarDateTime';
 import { formatMoney, groupDigits } from '@/lib/money';
 import { FinanceSummarySection } from '@/features/dashboard/components/FinanceSummarySection';
 
@@ -79,19 +82,6 @@ const formatFreshnessTimestamp = (value: string | Date) => {
   return `${part('day')}.${part('month')}.${part('year')} ${part('hour')}:${part('minute')}`;
 };
 
-// uz-UZ Intl month:'short' renders as an unresolved skeleton (e.g. "M07 1")
-// in some browsers — build the date-fns dd.MM(.yyyy)(HH:mm) convention
-// instead of Intl.DateTimeFormat's month name.
-const formatDate = (
-  value: string | Date,
-  options?: Intl.DateTimeFormatOptions,
-) => {
-  let pattern = 'dd.MM';
-  if (options?.year) pattern += '.yyyy';
-  if (options?.hour) pattern += ' HH:mm';
-  return format(new Date(value), pattern);
-};
-
 // Keep the v2 chunk independent from the legacy DashboardPage module.
 const greetingKey = () => {
   const h = Number(nowTashkentParts().time.slice(0, 2));
@@ -100,11 +90,7 @@ const greetingKey = () => {
   return 'dashboard.greeting_evening';
 };
 
-// Uzbek month abbreviation — a static table, NOT Intl month:'short'. The
-// dd.MM formatDate() helper above documents 'uz-UZ' + month:'short'
-// rendering an unresolved skeleton (e.g. "M07 1") in some browsers; testing
-// this build in an actual browser shows bare 'uz' (no region) hits the
-// exact same bug ("M07 18"), so there's no Intl locale tag that's safe here.
+// Uzbek Intl short month names are unreliable in some browsers.
 const UZ_MONTH_ABBR = [
   'YAN',
   'FEV',
@@ -119,10 +105,9 @@ const UZ_MONTH_ABBR = [
   'NOY',
   'DEK',
 ];
-/** {day, month (uz abbr), year} for `value`, in Asia/Tashkent — built off the
- *  already-reliable numeric uzDateFormatter above, not Intl month names. */
-const uzDateParts = (value: string | Date) => {
-  const [year, month, day] = uzDateFormatter.format(new Date(value)).split('-');
+const uzDateParts = (value: string) => {
+  const date = value.length === 10 ? value : isoToParts(value).date;
+  const [year, month, day] = date.split('-');
   return { day, month: UZ_MONTH_ABBR[Number(month) - 1], year };
 };
 
@@ -706,7 +691,8 @@ const DashboardChrome = ({
 };
 
 const CompanyRevenueDashboard = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage || i18n.language || 'uz';
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const activeBranchId = useAuthStore((state) => state.activeBranchId);
@@ -817,17 +803,33 @@ const CompanyRevenueDashboard = () => {
     date_from: query.from,
     date_to: query.to,
   };
+  // API interval ends are exclusive; inclusive metadata is already final.
+  const previousEnd =
+    kpis.revenue.previous_period_to_inclusive ||
+    (kpis.revenue.previous_period_to
+      ? new Date(
+          new Date(kpis.revenue.previous_period_to).getTime() - 1,
+        ).toISOString()
+      : undefined);
   const comparisonRange =
-    kpis.revenue.previous_period_from &&
-    (kpis.revenue.previous_period_to_inclusive ||
-      kpis.revenue.previous_period_to)
-      ? `${formatDate(kpis.revenue.previous_period_from)} — ${formatDate(kpis.revenue.previous_period_to_inclusive || kpis.revenue.previous_period_to!)}`
+    kpis.revenue.previous_period_from && previousEnd
+      ? `${formatTashkentDate(kpis.revenue.previous_period_from, locale)} — ${formatTashkentDate(previousEnd, locale)}`
       : t('dashboard.v2.previous_period', 'Oldingi davr');
-  // "01 — 18 IYUL 2026 · KUNLIK" — start day, end day+month(uz)+year, then
-  // granularity, all uppercase per the mock's mono caption.
-  const trendPeriodTo = kpis.revenue.period_to_inclusive || data.filters.to;
+  const trendExclusiveEnd = kpis.revenue.period_to || data.filters.to;
+  const trendPeriodTo =
+    kpis.revenue.period_to_inclusive ||
+    (trendExclusiveEnd.length === 10
+      ? trendExclusiveEnd
+      : new Date(new Date(trendExclusiveEnd).getTime() - 1).toISOString());
+  const trendStart = uzDateParts(data.filters.from);
   const trendEnd = uzDateParts(trendPeriodTo);
-  const trendRangeCaption = `${format(new Date(data.filters.from), 'dd')} — ${trendEnd.day} ${trendEnd.month} ${trendEnd.year} · ${t(data.filters.granularity === 'week' ? 'dashboard.v2.weekly' : 'dashboard.v2.daily').toUpperCase()}`;
+  const trendRange =
+    locale.startsWith('uz') &&
+    trendStart.month === trendEnd.month &&
+    trendStart.year === trendEnd.year
+      ? `${trendStart.day} — ${trendEnd.day} ${trendEnd.month} ${trendEnd.year}`
+      : `${formatTashkentDate(data.filters.from, locale)} — ${formatTashkentDate(trendPeriodTo, locale)}`;
+  const trendRangeCaption = `${trendRange} · ${t(data.filters.granularity === 'week' ? 'dashboard.v2.weekly' : 'dashboard.v2.daily').toUpperCase()}`;
   const debtAgingTotal = Object.values(kpis.debt_aging).reduce(
     (sum, value) => sum + value,
     0,
