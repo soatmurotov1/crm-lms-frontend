@@ -352,6 +352,8 @@
       "trend_peak": "Peak day",
       "overdue_days": "{{count}} days overdue",
       "view_all_debtors": "All debtors",
+      "debtors_access_unavailable": "You do not have access to this student list.",
+      "debtors_scope_mismatch": "Select the same active branch to open this debtor list.",
       "coverage_short": "Paid",
       "active_short": "Active",
       "analysis_title": "Detailed analysis",

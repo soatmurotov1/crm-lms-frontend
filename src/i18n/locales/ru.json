@@ -352,6 +352,8 @@
       "trend_peak": "Пиковый день",
       "overdue_days": "просрочка {{count}} дн.",
       "view_all_debtors": "Все должники",
+      "debtors_access_unavailable": "У вас нет доступа к этому списку учеников.",
+      "debtors_scope_mismatch": "Выберите этот филиал как активный, чтобы открыть список должников.",
       "coverage_short": "Оплачено",
       "active_short": "Активные",
       "analysis_title": "Подробный анализ",

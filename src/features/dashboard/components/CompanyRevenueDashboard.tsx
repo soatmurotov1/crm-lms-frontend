@@ -45,6 +45,7 @@ import type {
 } from '@/features/dashboard/api/dashboardService';
 import { useAuthStore } from '@/store/authStore';
 import { useCan } from '@/hooks/useCan';
+import { isCrossTenantRole, requestBranchId } from '@/lib/permissions';
 import { CourseType } from '@/features/students/types';
 import { cn } from '@/lib/utils';
 import { nowTashkentParts } from '@/lib/calendarDateTime';
@@ -708,6 +709,7 @@ const CompanyRevenueDashboard = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const activeBranchId = useAuthStore((state) => state.activeBranchId);
   const canViewAllBranches = useCan('viewAllBranches');
   const { searchParams: params, setSearchParams: setParams } = useUrlParams();
   const [branchSort, setBranchSort] = useState<
@@ -722,12 +724,14 @@ const CompanyRevenueDashboard = () => {
       getSearchQuery(
         params,
         canViewAllBranches ? params.get('branch_id') || undefined : undefined,
-        useAuthStore.getState?.()?.activeBranchId ??
-          user?.branch_id ??
-          undefined,
+        activeBranchId ?? user?.branch_id ?? undefined,
       ),
-    [canViewAllBranches, params, user],
+    [activeBranchId, canViewAllBranches, params, user],
   );
+  const canReadDebtors = useCan('students.read', query.branchId ?? null);
+  const debtorScopeMatches =
+    isCrossTenantRole(user?.role) ||
+    query.branchId === requestBranchId(user, activeBranchId);
   const { data, isLoading, isFetching, isError, refetch } =
     useCompanyOverview(query);
   const showFinanceSummary = user?.role === 'owner' || user?.role === 'manager';
@@ -1130,16 +1134,30 @@ const CompanyRevenueDashboard = () => {
           ) : (
             <EmptyData />
           )}
-          {data.recovery_queue.length > 0 && (
-            <Link
-              to="/payments"
-              search={listSearch}
-              className="mt-3 inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-md px-2 text-sm font-medium text-info transition-[background-color,scale] hover:bg-info/10 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-10"
-            >
-              {t('dashboard.v2.view_all_debtors', 'Barcha qarzdorlar')}
-              <CaretRight className="h-3 w-3" aria-hidden="true" />
-            </Link>
-          )}
+          {data.recovery_queue.length > 0 &&
+            (canReadDebtors && debtorScopeMatches ? (
+              <Link
+                to="/students"
+                search={{
+                  branch_id: query.branchId,
+                  course_type: query.courseType,
+                  status: 'active',
+                  has_debt: true,
+                }}
+                className="mt-3 inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-md px-2 text-sm font-medium text-info transition-[background-color,scale] hover:bg-info/10 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-10"
+              >
+                {t('dashboard.v2.view_all_debtors', 'Barcha qarzdorlar')}
+                <CaretRight className="h-3 w-3" aria-hidden="true" />
+              </Link>
+            ) : (
+              <p className="mt-3 px-2 text-sm text-muted-foreground">
+                {t(
+                  canReadDebtors
+                    ? 'dashboard.v2.debtors_scope_mismatch'
+                    : 'dashboard.v2.debtors_access_unavailable',
+                )}
+              </p>
+            ))}
         </DashboardCard>
         <DashboardCard
           title={t('dashboard.v2.operations', 'Bugungi vazifalar')}

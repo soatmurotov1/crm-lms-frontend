@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import StudentsPage from '@/features/students/pages/StudentsPage';
 import { formatMoney } from '@/lib/money';
@@ -181,6 +181,54 @@ describe('StudentsPage characterization', () => {
     // avto_maktab course type switches the desktop table columns.
     expect(screen.getByText('students.contract_number')).toBeInTheDocument();
     expect(screen.getByText('students.o83')).toBeInTheDocument();
+  });
+
+  it('renders the authoritative current debtor pages without applying a creation-date cutoff', async () => {
+    const neverPaid = {
+      ...STUDENTS[0],
+      id: 'never-paid',
+      last_name: 'OLDDEBTOR',
+      first_name: 'never',
+      created_at: '2025-01-01T00:00:00.000Z',
+      amount_paid: 0,
+      debt: 3000000,
+    };
+    const partial = {
+      ...STUDENTS[0],
+      id: 'partial',
+      last_name: 'PARTIALDEBTOR',
+      first_name: 'partial',
+    };
+    // These are server-authoritative pages, not evidence of backend filtering.
+    h.useStudentsPage.mockImplementation((_course, _branch, page) => ({
+      data: {
+        data: page === 2 ? [partial] : [neverPaid],
+        meta: { total: 2, totalPages: 2 },
+      },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    }));
+    await renderPage(
+      '/students?branch_id=b1&course_type=tezkor&status=active&has_debt=true&limit=10',
+    );
+    const last = h.useStudentsPage.mock.calls.at(-1)!;
+    expect(last[5]).toMatchObject({ status: 'active', hasDebt: true });
+    expect(last[5].dateFrom).toBeUndefined();
+    expect(last[5].dateTo).toBeUndefined();
+    expect(
+      screen.getByTestId('active-filter-chip-has_debt'),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('active-filter-chip-status')).toBeInTheDocument();
+    expect(screen.getByText('Never Olddebtor')).toBeInTheDocument();
+    expect(screen.queryByText('Malika Rahimova')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'common.next' }));
+    await waitFor(() =>
+      expect(screen.getByText('Partial Partialdebtor')).toBeInTheDocument(),
+    );
+    expect(screen.queryByText('Never Olddebtor')).toBeNull();
+    expect(h.useStudentsPage.mock.calls.at(-1)![2]).toBe(2);
   });
 
   it('scopes a manager to their own branch while preserving authorized operator filters', async () => {

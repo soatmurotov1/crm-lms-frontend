@@ -352,6 +352,8 @@
       "trend_peak": "Eng yuqori kun",
       "overdue_days": "{{count}} kun kechikkan",
       "view_all_debtors": "Barcha qarzdorlar",
+      "debtors_access_unavailable": "Sizda bu talabalar ro‘yxatiga kirish huquqi yo‘q.",
+      "debtors_scope_mismatch": "Qarzdorlar ro‘yxatini ochish uchun shu filialni faol filial sifatida tanlang.",
       "coverage_short": "To‘liq",
       "active_short": "Faol",
       "analysis_title": "Batafsil tahlil",

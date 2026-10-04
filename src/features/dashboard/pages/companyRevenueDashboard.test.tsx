@@ -1,6 +1,16 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import CompanyRevenueDashboard from '@/features/dashboard/components/CompanyRevenueDashboard';
+import { useAuthStore } from '@/store/authStore';
+import { requireCapability } from '@/app/routeGuards';
+import { userCan } from '@/lib/permissions';
+import type { User } from '@/features/staff/types';
 import { formatMoney } from '@/lib/money';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 import { greetingKey as sharedGreetingKey } from '@/features/dashboard/lib/dashboardCards';
@@ -133,13 +143,6 @@ const overview = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('@/store/authStore', () => ({
-  useAuthStore: (selector: (state: typeof auth) => unknown) => selector(auth),
-}));
-vi.mock('@/hooks/useCan', () => ({
-  useCan: (capability: string) =>
-    capability === 'viewAllBranches' ? auth.user.role === 'owner' : true,
-}));
 vi.mock('@/features/branches/api/branchService', () => ({
   useBranches: () => ({ data: [{ id: 'branch-1', name: 'Chorsu' }] }),
 }));
@@ -234,11 +237,16 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const renderDashboard = (initialEntry = '/dashboard') =>
-  renderWithRouter(<CompanyRevenueDashboard />, {
+const renderDashboard = (initialEntry = '/dashboard') => {
+  useAuthStore.setState({
+    user: auth.user as User,
+    activeBranchId: auth.user.branch_id ?? null,
+  });
+  return renderWithRouter(<CompanyRevenueDashboard />, {
     initialEntry,
     routePattern: '/dashboard',
   });
+};
 
 describe('CompanyRevenueDashboard', () => {
   it.each([
@@ -539,6 +547,179 @@ const todayInUz = () =>
   );
 
 describe('CompanyRevenueDashboard navigation (autodrive-ls5)', () => {
+  it.each(
+    [undefined, 'branch-a', 'branch-b'].flatMap((branch) =>
+      ['tezkor', 'avto_maktab'].map((course) => [branch, course] as const),
+    ),
+  )(
+    'all debtors retains %s/%s and omits dashboard dates',
+    async (branch, course) => {
+      const search = new URLSearchParams({
+        course_type: course,
+        from: '2026-07-01',
+        to: '2026-07-10',
+      });
+      if (branch) search.set('branch_id', branch);
+      const { router } = await renderDashboard(`/dashboard?${search}`);
+      fireEvent.click(
+        screen.getByRole('link', { name: 'dashboard.v2.view_all_debtors' }),
+      );
+      await waitFor(() =>
+        expect(router.state.location.pathname).toBe('/students'),
+      );
+      expect(
+        Object.fromEntries(
+          new URLSearchParams(router.state.location.searchStr),
+        ),
+      ).toEqual({
+        ...(branch ? { branch_id: branch } : {}),
+        course_type: course,
+        status: 'active',
+        has_debt: 'true',
+      });
+    },
+  );
+
+  it('updates the effective branch while mounted without changing user or URL', async () => {
+    auth.user = {
+      name: 'Demo Manager',
+      role: 'manager',
+      branch_id: 'branch-a',
+    };
+    await renderDashboard();
+    expect(
+      screen.getByRole('link', { name: 'dashboard.v2.view_all_debtors' }),
+    ).toHaveAttribute('href', expect.stringContaining('branch_id=branch-a'));
+    act(() => useAuthStore.setState({ activeBranchId: 'branch-b' }));
+    expect(
+      screen.getByRole('link', { name: 'dashboard.v2.view_all_debtors' }),
+    ).toHaveAttribute('href', expect.stringContaining('branch_id=branch-b'));
+  });
+
+  it('uses the effective restricted manager branch despite a hostile URL', async () => {
+    auth.user = {
+      name: 'Demo Manager',
+      role: 'manager',
+      branch_id: 'branch-a',
+    };
+    await renderDashboard('/dashboard?branch_id=branch-b');
+    expect(
+      screen.getByRole('link', { name: 'dashboard.v2.view_all_debtors' }),
+    ).toHaveAttribute('href', expect.stringContaining('branch_id=branch-a'));
+  });
+
+  it('characterizes the existing destination guard scope for an explicitly granted dashboard branch', async () => {
+    await renderDashboard('/dashboard?branch_id=branch-b');
+    const user = {
+      ...useAuthStore.getState().user!,
+      role: 'manager',
+      branch_ids: ['branch-a', 'branch-b'],
+      permissions: [
+        { permission: 'branches.read', scope: 'company', branch_id: null },
+        { permission: 'students.read', scope: 'branch', branch_id: 'branch-b' },
+      ],
+    } as User;
+    act(() =>
+      useAuthStore.setState({
+        user,
+        activeBranchId: 'branch-a',
+        hasHydrated: true,
+        isAuthenticated: true,
+      }),
+    );
+    expect(userCan(user, 'students.read', 'branch-b')).toBe(true);
+    expect(() =>
+      requireCapability(
+        { pathname: '/students', searchStr: '?branch_id=branch-b' },
+        'accessOperations',
+      ),
+    ).toThrow();
+    expect(
+      screen.queryByRole('link', { name: 'dashboard.v2.view_all_debtors' }),
+    ).toBeNull();
+    expect(
+      screen.getByText('dashboard.v2.debtors_scope_mismatch'),
+    ).toBeInTheDocument();
+    act(() => useAuthStore.setState({ activeBranchId: 'branch-b' }));
+    expect(
+      screen.getByRole('link', { name: 'dashboard.v2.view_all_debtors' }),
+    ).toHaveAttribute('href', expect.stringContaining('branch_id=branch-b'));
+    expect(() =>
+      requireCapability(
+        { pathname: '/students', searchStr: '?branch_id=branch-b' },
+        'accessOperations',
+      ),
+    ).not.toThrow();
+  });
+
+  it.each([
+    [{ permission: 'students.read', scope: 'branch', branch_id: 'branch-a' }],
+    [{ permission: 'students.read', scope: 'company', branch_id: null }],
+  ])(
+    'denies the CTA for a branch outside the actor branch_ids',
+    async (permissions) => {
+      await renderDashboard('/dashboard?branch_id=branch-b');
+      act(() =>
+        useAuthStore.setState({
+          user: {
+            ...useAuthStore.getState().user!,
+            role: 'manager',
+            branch_ids: ['branch-a'],
+            permissions: [
+              {
+                permission: 'branches.read',
+                scope: 'company',
+                branch_id: null,
+              },
+              permissions,
+            ],
+          } as User,
+          activeBranchId: 'branch-b',
+        }),
+      );
+      expect(
+        screen.queryByRole('link', { name: 'dashboard.v2.view_all_debtors' }),
+      ).toBeNull();
+      expect(
+        screen.getByText('dashboard.v2.debtors_access_unavailable'),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it('removes the actionable CTA when the scoped students grant is revoked', async () => {
+    await renderDashboard('/dashboard?branch_id=branch-a');
+    act(() =>
+      useAuthStore.setState({
+        user: {
+          ...useAuthStore.getState().user!,
+          role: 'manager',
+          branch_ids: ['branch-a'],
+          permissions: [
+            {
+              permission: 'students.read',
+              scope: 'branch',
+              branch_id: 'branch-a',
+            },
+          ],
+        } as unknown as User,
+      }),
+    );
+    expect(
+      screen.getByRole('link', { name: 'dashboard.v2.view_all_debtors' }),
+    ).toBeInTheDocument();
+    act(() =>
+      useAuthStore.setState({
+        user: { ...useAuthStore.getState().user!, permissions: [] },
+      }),
+    );
+    expect(
+      screen.queryByRole('link', { name: 'dashboard.v2.view_all_debtors' }),
+    ).toBeNull();
+    expect(
+      screen.getByText('dashboard.v2.debtors_access_unavailable'),
+    ).toBeInTheDocument();
+  });
+
   it('today-revenue KPI navigates to /payments, not /tolovlar', async () => {
     const { router } = await renderDashboard();
     fireEvent.click(screen.getByText('dashboard.v2.today_revenue'));
