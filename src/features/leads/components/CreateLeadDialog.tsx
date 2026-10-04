@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -90,8 +90,22 @@ export const CreateLeadDialog = ({
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const { data: branches = [] } = useBranches();
-  const { data: stages = [] } = useLeadStagesQuery();
+  const stageQuery = useLeadStagesQuery();
+  const { data: stages = [] } = stageQuery;
+  const initialStages = stages.filter(
+    (stage) => stage.isActive === true && stage.kind === 'WORK',
+  );
+  const stagesUnsettled =
+    stageQuery.isPending ||
+    stageQuery.isFetching ||
+    stageQuery.isError ||
+    stageQuery.data === undefined;
   const createMutation = useCreateLeadMutation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const inFlight = useRef(false);
+  const [openCycle, setOpenCycle] = useState({ open });
+  const activeCycle = useRef(openCycle);
+  const openRef = useRef(open);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -105,9 +119,24 @@ export const CreateLeadDialog = ({
     '';
 
   const [selectedStageId, setSelectedStageId] = useState<string | null>(null);
-  const stageId = selectedStageId ?? defaultStageId ?? stages[0]?.id ?? '';
+  const stageId =
+    selectedStageId !== null
+      ? stagesUnsettled
+        ? selectedStageId
+        : (initialStages.find((stage) => stage.id === selectedStageId)?.id ??
+          '')
+      : (initialStages.find((stage) => stage.id === defaultStageId)?.id ??
+        initialStages[0]?.id ??
+        '');
+  if (
+    !stagesUnsettled &&
+    selectedStageId &&
+    !initialStages.some((stage) => stage.id === selectedStageId)
+  ) {
+    setSelectedStageId('');
+  }
 
-  const [source, setSource] = useState<LeadSource>('telegram');
+  const [source, setSource] = useState<LeadSource | ''>('');
   const [sourceOther, setSourceOther] = useState('');
   const [courseType, setCourseType] = useState<CourseType | ''>('');
   const [category, setCategory] = useState<Category | ''>('');
@@ -181,16 +210,87 @@ export const CreateLeadDialog = ({
     return () => clearTimeout(timer);
   }, [phone, branchId]);
 
+  const resetForm = () => {
+    setFirstName('');
+    setLastName('');
+    setPhone('+998');
+    setSelectedBranchId(null);
+    setSelectedStageId(null);
+    setSource('');
+    setSourceOther('');
+    setCourseType('');
+    setCategory('');
+    setNote('');
+    setReferrerType('none');
+    setReferrerStudentId(undefined);
+    setReferrerStaffId(undefined);
+    setStudentSearch('');
+    setDuplicateResult(null);
+    setAcknowledgedDuplicate(false);
+    setStudentPickerOpen(false);
+    setIsSubmitting(false);
+  };
+
+  // Adjust only this local draft when the controlled dialog starts a new cycle.
+  if (openCycle.open !== open) {
+    setOpenCycle({ open });
+    resetForm();
+  }
+  useEffect(() => {
+    activeCycle.current = openCycle;
+    openRef.current = open;
+    inFlight.current = false;
+  }, [openCycle, open]);
+
+  const closeDialog = () => {
+    setOpenCycle({ open: false });
+    inFlight.current = false;
+    resetForm();
+    onOpenChange(false);
+  };
+  const handleOpenChange = (value: boolean) => {
+    if (!value) {
+      if (createMutation.isPending || inFlight.current) return;
+      closeDialog();
+    } else onOpenChange(value);
+  };
+  const canSubmit =
+    open &&
+    !createMutation.isPending &&
+    !isSubmitting &&
+    !!firstName.trim() &&
+    !!phone.trim() &&
+    !!branchId &&
+    !!source &&
+    !stagesUnsettled &&
+    !!stageId &&
+    !(duplicateResult?.hasDuplicate && !acknowledgedDuplicate);
+  const stageMessage = stageQuery.isError
+    ? t('leads.initial_stages_error')
+    : stageQuery.isPending || stageQuery.data === undefined
+      ? t('leads.initial_stages_loading')
+      : stageQuery.isFetching
+        ? t('leads.initial_stages_refreshing')
+        : initialStages.length === 0
+          ? t('leads.initial_stages_empty')
+          : !stageId
+            ? t('leads.initial_stage_reselect')
+            : undefined;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!firstName.trim() || !phone.trim() || !branchId) {
+    if (!open || createMutation.isPending || inFlight.current) return;
+    if (!source || !canSubmit) {
       toast.error(
         t('leads.fill_required', 'Iltimos, majburiy maydonlarni to‘ldiring'),
       );
       return;
     }
 
+    const cycle = openCycle;
+    inFlight.current = true;
+    setIsSubmitting(true);
     createMutation.mutate(
       {
         firstName: firstName.trim(),
@@ -208,14 +308,17 @@ export const CreateLeadDialog = ({
       },
       {
         onSuccess: (created) => {
+          if (cycle !== activeCycle.current || !openRef.current) return;
           toast.success(
             t('leads.created_success', 'Yangi lid muvaffaqiyatli qo‘shildi'),
           );
-          onOpenChange(false);
-          resetForm();
+          closeDialog();
           onCreated?.(created.id);
         },
         onError: (err) => {
+          if (cycle !== activeCycle.current || !openRef.current) return;
+          inFlight.current = false;
+          setIsSubmitting(false);
           toast.error(
             (err as Error).message ||
               t('leads.create_error', 'Lid qo‘shishda xatolik yuz berdi'),
@@ -225,33 +328,8 @@ export const CreateLeadDialog = ({
     );
   };
 
-  const resetForm = () => {
-    setFirstName('');
-    setLastName('');
-    setPhone('+998');
-    setSelectedBranchId(null);
-    setSelectedStageId(null);
-    setSource('telegram');
-    setSourceOther('');
-    setCourseType('');
-    setCategory('');
-    setNote('');
-    setReferrerType('none');
-    setReferrerStudentId(undefined);
-    setReferrerStaffId(undefined);
-    setStudentSearch('');
-    setDuplicateResult(null);
-    setAcknowledgedDuplicate(false);
-  };
-
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(val) => {
-        onOpenChange(val);
-        if (!val) resetForm();
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -399,17 +477,35 @@ export const CreateLeadDialog = ({
             {/* Stage & Source */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="lead-stage">
+                <Label htmlFor="lead-stage" required>
                   {t('leads.stage', 'Bosqich')}
                 </Label>
-                <Select value={stageId} onValueChange={setSelectedStageId}>
-                  <SelectTrigger id="lead-stage" className="w-full">
+                <Select
+                  value={stageId}
+                  onValueChange={(value) => {
+                    if (
+                      !stagesUnsettled &&
+                      initialStages.some((stage) => stage.id === value)
+                    ) {
+                      setSelectedStageId(value);
+                    }
+                  }}
+                  disabled={stagesUnsettled || initialStages.length === 0}
+                >
+                  <SelectTrigger
+                    id="lead-stage"
+                    className="w-full"
+                    aria-required="true"
+                    aria-describedby={
+                      stageMessage ? 'lead-stage-status' : undefined
+                    }
+                  >
                     <SelectValue
                       placeholder={t('leads.select_stage', 'Bosqichni tanlang')}
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {stages.map((s) => (
+                    {initialStages.map((s) => (
                       <SelectItem key={s.id} value={s.id}>
                         <div className="flex items-center gap-2">
                           <span
@@ -422,6 +518,26 @@ export const CreateLeadDialog = ({
                     ))}
                   </SelectContent>
                 </Select>
+                {stageMessage && (
+                  <p
+                    id="lead-stage-status"
+                    role={stageQuery.isError ? 'alert' : 'status'}
+                    className="text-xs text-muted-foreground"
+                  >
+                    {stageMessage}
+                  </p>
+                )}
+                {stageQuery.isError && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={stageQuery.isFetching}
+                    onClick={() => void stageQuery.refetch()}
+                  >
+                    {t('common.retry')}
+                  </Button>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -433,7 +549,11 @@ export const CreateLeadDialog = ({
                   value={source}
                   onValueChange={(val) => setSource(val as LeadSource)}
                 >
-                  <SelectTrigger id="lead-source" className="w-full">
+                  <SelectTrigger
+                    id="lead-source"
+                    className="w-full"
+                    aria-required="true"
+                  >
                     <SelectValue
                       placeholder={t('leads.select_source', 'Manbani tanlang')}
                     />
@@ -703,22 +823,13 @@ export const CreateLeadDialog = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={createMutation.isPending}
+              onClick={() => handleOpenChange(false)}
+              disabled={createMutation.isPending || isSubmitting}
             >
               {t('common.cancel', 'Bekor qilish')}
             </Button>
-            <Button
-              type="submit"
-              disabled={
-                createMutation.isPending ||
-                !firstName.trim() ||
-                !phone.trim() ||
-                !branchId ||
-                (duplicateResult?.hasDuplicate && !acknowledgedDuplicate)
-              }
-            >
-              {createMutation.isPending ? (
+            <Button type="submit" disabled={!canSubmit}>
+              {createMutation.isPending || isSubmitting ? (
                 <>
                   <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                   <span>{t('common.saving', 'Saqlanmoqda...')}</span>

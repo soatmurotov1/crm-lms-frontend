@@ -171,6 +171,49 @@ describe('leadsApi', () => {
     expect(result.id).toBe('new-lead-1');
   });
 
+  it.each([
+    ['telegram', 'telegram'],
+    ['instagram', 'instagram'],
+    ['referral', 'referral'],
+    ['directory_map', 'directory_map'],
+    ['olx', 'olx'],
+    ['walk_in', 'walk_in'],
+    ['other', 'other'],
+    ['website', 'other'],
+    ['banner', 'other'],
+    ['recommendation', 'referral'],
+  ] as const)(
+    'preserves the actual create wire body for %s',
+    async (source, wireSource) => {
+      const payload = {
+        firstName: 'Synthetic lead',
+        lastName: 'Example',
+        phone: '+998901112233',
+        branchId: 'branch-1',
+        stageId: 'active-work-1',
+        source,
+        sourceOther: source === 'other' ? 'Community fair' : undefined,
+        courseType: 'tezkor' as const,
+        category: 'B' as const,
+        note: 'Synthetic note',
+        referrerStudentId: 'student-1',
+        referrerStaffId: undefined,
+      };
+      const original = { ...payload };
+      vi.mocked(axiosInstance.post).mockResolvedValueOnce({
+        data: { data: { id: 'created-1', ...payload } },
+      });
+      const created = await leadsApi.createLead(payload);
+      expect(axiosInstance.post).toHaveBeenCalledTimes(1);
+      expect(axiosInstance.post).toHaveBeenCalledWith('/leads', {
+        ...payload,
+        source: wireSource,
+      });
+      expect(payload).toEqual(original);
+      expect(created.id).toBe('created-1');
+    },
+  );
+
   it('transitions lead stage', async () => {
     const payload = {
       stageId: 's-won',
