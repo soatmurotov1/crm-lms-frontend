@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ClipboardText, Plus } from '@phosphor-icons/react';
@@ -7,13 +7,13 @@ import { useCan } from '@/hooks/useCan';
 import { useBranches } from '@/features/branches/api/branchService';
 import { useTestTemplatesPage } from '@/features/school-tests/api/schoolTestService';
 import { useListQueryState } from '@/hooks/useListQueryState';
-import { matchesListQuery } from '@/lib/listQuery';
 import { ListSearchField } from '@/components/ui/ListSearchField';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { DataCard } from '@/components/ui/DataCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import PaginationControls from '@/components/ui/PaginationControls';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TestTemplateFormDialog } from '@/features/school-tests/components/TestTemplateFormDialog';
 
 const SchoolTestsPage = () => {
@@ -33,19 +33,15 @@ const SchoolTestsPage = () => {
     setPageSize,
     setSearch,
   } = useListQueryState();
-  const templates = useTestTemplatesPage({ page, limit: pageSize });
-  const visibleTemplates = useMemo(
-    () =>
-      (templates.data?.data ?? []).filter((template) =>
-        matchesListQuery(
-          debouncedSearch,
-          template.title,
-          template.description,
-          template.category,
-        ),
-      ),
-    [templates.data, debouncedSearch],
-  );
+  const querySearch = debouncedSearch.trim() || undefined;
+  const templates = useTestTemplatesPage({
+    page,
+    limit: pageSize,
+    search: querySearch,
+  });
+  const isSearchPending = search.trim() !== debouncedSearch.trim();
+  const isPending =
+    isSearchPending || templates.isLoading || templates.isFetching;
 
   return (
     <div className="space-y-4">
@@ -63,25 +59,44 @@ const SchoolTestsPage = () => {
         }
       />
 
-      <ListSearchField value={search} onChange={setSearch} />
+      <ListSearchField
+        value={search}
+        onChange={(value) => setSearch(value.slice(0, 200))}
+      />
 
       <p className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
         {t('school_tests.not_official_exam')}
       </p>
 
-      {templates.isLoading ? (
-        <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+      {isPending ? (
+        <div
+          role="status"
+          aria-label={t('common.loading')}
+          className="space-y-3"
+        >
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      ) : templates.isError ? (
+        <div role="alert">
+          <EmptyState
+            icon={ClipboardText}
+            title={t('common.error')}
+            action={{
+              label: t('common.retry'),
+              onClick: () => void templates.refetch(),
+            }}
+          />
+        </div>
       ) : !templates.data?.data.length ? (
         <EmptyState
           icon={ClipboardText}
-          title={t('school_tests.empty')}
-          description={t('school_tests.empty_desc')}
+          title={querySearch ? t('common.no_data') : t('school_tests.empty')}
+          description={querySearch ? undefined : t('school_tests.empty_desc')}
         />
-      ) : visibleTemplates.length === 0 ? (
-        <EmptyState icon={ClipboardText} title={t('common.no_data')} />
       ) : (
         <div className="grid gap-3">
-          {visibleTemplates.map((template) => (
+          {templates.data.data.map((template) => (
             <DataCard
               key={template.id}
               className="cursor-pointer"
@@ -111,7 +126,7 @@ const SchoolTestsPage = () => {
         </div>
       )}
 
-      {templates.data?.meta ? (
+      {!isPending && !templates.isError && templates.data?.meta ? (
         <PaginationControls
           currentPage={templates.data.meta.page}
           totalPages={templates.data.meta.totalPages}

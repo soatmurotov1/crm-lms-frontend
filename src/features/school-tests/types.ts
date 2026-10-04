@@ -85,6 +85,7 @@ export interface AssignTestPayload {
 }
 
 export interface TestTemplateListFilters {
+  search?: string;
   page?: number;
   limit?: number;
 }

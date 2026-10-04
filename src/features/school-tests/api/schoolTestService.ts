@@ -25,6 +25,7 @@ export const fetchTestTemplatesPage = async (
     params: {
       page: filters.page ?? 1,
       limit: filters.limit ?? 20,
+      search: filters.search?.trim() || undefined,
     },
     signal,
   });
@@ -33,12 +34,17 @@ export const fetchTestTemplatesPage = async (
 
 export const testTemplatesPageQueryOptions = (
   filters: TestTemplateListFilters = {},
-) =>
-  queryOptions({
-    queryKey: schoolTestKeys.page({ ...filters }),
-    queryFn: ({ signal }) => fetchTestTemplatesPage(filters, signal),
+) => {
+  const normalizedFilters = {
+    ...filters,
+    search: filters.search?.trim() || undefined,
+  };
+  return queryOptions({
+    queryKey: schoolTestKeys.page(normalizedFilters),
+    queryFn: ({ signal }) => fetchTestTemplatesPage(normalizedFilters, signal),
     staleTime: 30_000,
   });
+};
 
 export const useTestTemplatesPage = (filters: TestTemplateListFilters = {}) =>
   useQuery(testTemplatesPageQueryOptions(filters));
