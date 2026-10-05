@@ -138,6 +138,10 @@ export const toCreateStudentPayload = (
     notes: values.notes || undefined,
     status: values.status || 'active',
     registered_by: values.registered_by || undefined,
+    // #342: the Course picker is create-only. Send the selected catalog
+    // course so the student keeps that association; total_price above stays
+    // the separately negotiated snapshot. Edit never re-links the course.
+    ...(!isEditing && values.course_id ? { course_id: values.course_id } : {}),
   };
 
   if (courseType === 'tezkor') {

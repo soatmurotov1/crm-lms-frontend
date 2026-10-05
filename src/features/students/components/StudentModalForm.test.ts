@@ -75,4 +75,75 @@ describe('StudentModal create/edit form mapping', () => {
       amount_paid: 500_000,
     });
   });
+
+  describe('course_id (#342)', () => {
+    const createValues = (courseType: 'tezkor' | 'avto_maktab') => ({
+      ...getCreateStudentFormValues({
+        courseType,
+        canAssignBranch: false,
+        userBranchId: 'branch-1',
+      }),
+      first_name: 'Synthetic',
+      last_name: 'Student',
+      phone: '90 000 00 01',
+      learner_password: 'synthetic1',
+      // Negotiated price differs from any catalog price on purpose.
+      total_price: 2_000_000,
+      amount_paid: 300_000,
+      initial_payment: 700_000,
+    });
+
+    it.each(['tezkor', 'avto_maktab'] as const)(
+      'sends the selected course on %s create without changing any amount',
+      (courseType) => {
+        const values = createValues(courseType);
+        const withoutCourse = toCreateStudentPayload(values, courseType, false);
+        const withCourse = toCreateStudentPayload(
+          { ...values, course_id: 'course-1' },
+          courseType,
+          false,
+        );
+
+        expect(withCourse.course_id).toBe('course-1');
+        // The only difference is the association; money fields are identical.
+        expect(withCourse).toEqual({ ...withoutCourse, course_id: 'course-1' });
+        expect(withCourse.total_price).toBe(2_000_000);
+        if (courseType === 'tezkor') {
+          expect(withCourse.amount_paid).toBe(300_000);
+          expect(withCourse).not.toHaveProperty('initial_payment');
+        } else {
+          expect(withCourse.initial_payment).toBe(700_000);
+          expect(withCourse).not.toHaveProperty('amount_paid');
+        }
+      },
+    );
+
+    it('omits course_id when no course is selected', () => {
+      const payload = toCreateStudentPayload(
+        createValues('tezkor'),
+        'tezkor',
+        false,
+      );
+      expect(payload).not.toHaveProperty('course_id');
+      expect(JSON.parse(JSON.stringify(payload))).not.toHaveProperty(
+        'course_id',
+      );
+    });
+
+    it.each(['tezkor', 'avto_maktab'] as const)(
+      'never sends course_id while editing a %s student',
+      (courseType) => {
+        const payload = toCreateStudentPayload(
+          {
+            ...getEditStudentFormValues(STUDENT),
+            total_price: 4_000_000,
+            course_id: 'course-1',
+          },
+          courseType,
+          true,
+        );
+        expect(payload).not.toHaveProperty('course_id');
+      },
+    );
+  });
 });

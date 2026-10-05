@@ -259,7 +259,12 @@ const StudentModal = ({
     courseType,
   });
   const courses = options.scoped ? options.data?.courses : readCourses;
-  const activeCourseList = (courses || []).filter((c) => c.is_active);
+  // Scoped write options return every course in the branch, so filter by the
+  // form's course_type too (like groups below); a course of the other type
+  // must never be offered, auto-selected or sent (#342).
+  const activeCourseList = (courses || []).filter(
+    (c) => c.is_active && c.course_type === courseType,
+  );
 
   useEffect(() => {
     if (student) return; // course picker/pre-fill is create-flow only
@@ -374,7 +379,18 @@ const StudentModal = ({
     values: StudentFormValues,
     mode: 'close' | 'add',
   ) => {
-    const payload = toCreateStudentPayload(values, courseType, !!student);
+    // Only a course from the currently offered list may be sent; a stale
+    // selection (e.g. from before options changed) is dropped, not trusted.
+    const offeredCourseId = activeCourseList.some(
+      (c) => c.id === values.course_id,
+    )
+      ? values.course_id
+      : '';
+    const payload = toCreateStudentPayload(
+      { ...values, course_id: offeredCourseId },
+      courseType,
+      !!student,
+    );
     if (student) payload.idempotency_key = getIdempotencyKey();
 
     if (mode === 'add' && onSaveAndAdd) {
