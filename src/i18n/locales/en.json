@@ -2137,7 +2137,16 @@
     "odometer_simple_hint": "Enter the odometer reading from the dashboard and attach a photo.",
     "manual_add_line": "Add line",
     "receipt_details_hint": "Verify fuel volume, unit price, and station.",
-    "distance_travelled": "Distance travelled"
+    "distance_travelled": "Distance travelled",
+    "receipt_required": "Upload a receipt photo or enter the fiscal QR link.",
+    "odometer_required": "Enter the odometer reading.",
+    "submit_error": "Could not submit for review. Please try again.",
+    "save_draft": "Save as draft",
+    "no_receipt_image": "No receipt photo attached",
+    "no_odometer_image": "No odometer photo attached",
+    "full_review_hint": "Check the details, then submit for review.",
+    "odometer_required_for_submit": "An odometer photo is required to submit for review.",
+    "submit_evidence_required": "Submitting for review needs both the receipt and odometer photos. “Save as draft” keeps what you entered."
   },
   "operations": {
     "unavailable_description": "The operational radar is not connected to data sources yet. View actual data in the schedule, attendance, and fuel sections.",

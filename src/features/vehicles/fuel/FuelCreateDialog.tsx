@@ -442,6 +442,11 @@ export default function FuelCreateDialog({
     }
   };
 
+  // #348-A: the backend rejects submit unless both evidence slots exist, so
+  // the final path is preflighted here. Save draft stays available.
+  const evidenceComplete = Boolean(receiptFile && odometerFile);
+  const submitBlockedByEvidence = step === 5 && !evidenceComplete;
+
   const handleNext = () => {
     if (step === 1) {
       if (!selectedVehicleId) {
@@ -550,6 +555,7 @@ export default function FuelCreateDialog({
       !stationId ||
       !odometerKm ||
       lines.length === 0 ||
+      !evidenceComplete ||
       isSubmitting
     ) {
       return;
@@ -1285,7 +1291,9 @@ export default function FuelCreateDialog({
                     : t('fuel.odometer_photo_label')}
                 </Button>
                 <p className="text-[11px] text-muted-foreground">
-                  {t('fuel.odometer_attached')}
+                  {odometerFile
+                    ? t('fuel.odometer_attached')
+                    : t('fuel.odometer_required_for_submit')}
                 </p>
               </div>
             </div>
@@ -1386,6 +1394,23 @@ export default function FuelCreateDialog({
               </div>
             </div>
 
+            {/* Missing evidence: explain why submit is unavailable */}
+            {submitBlockedByEvidence && (
+              <div
+                id="fuel-submit-evidence-hint"
+                className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs text-foreground"
+              >
+                <Warning className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+                <div className="space-y-1">
+                  <ul className="list-disc space-y-0.5 pl-4 font-semibold">
+                    {!receiptFile && <li>{t('fuel.no_receipt_image')}</li>}
+                    {!odometerFile && <li>{t('fuel.no_odometer_image')}</li>}
+                  </ul>
+                  <p>{t('fuel.submit_evidence_required')}</p>
+                </div>
+              </div>
+            )}
+
             {/* Submitting progress */}
             {submitProgress && (
               <div className="rounded-xl border bg-muted/30 p-3 space-y-2 text-xs">
@@ -1462,7 +1487,15 @@ export default function FuelCreateDialog({
                 size="sm"
                 onClick={() => void handleSubmitComplete()}
                 disabled={!canContinue() || isSubmitting}
-                className="gap-1.5 bg-primary text-primary-foreground font-semibold"
+                // Missing evidence uses aria-disabled rather than disabled so
+                // the button stays keyboard-focusable and announces why.
+                aria-disabled={submitBlockedByEvidence || undefined}
+                aria-describedby={
+                  submitBlockedByEvidence
+                    ? 'fuel-submit-evidence-hint'
+                    : undefined
+                }
+                className="gap-1.5 bg-primary text-primary-foreground font-semibold aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>

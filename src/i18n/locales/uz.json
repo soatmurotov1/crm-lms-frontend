@@ -2137,7 +2137,16 @@
     "odometer_simple_hint": "Avtomobil asboblar panelidagi ko'rsatkichni kiriting va suratini ilova qiling.",
     "manual_add_line": "Yana qator qo'shish",
     "receipt_details_hint": "Yoqilg'i miqdori, narxi va shoxobchani tekshiring.",
-    "distance_travelled": "Bosib o'tilgan masofa"
+    "distance_travelled": "Bosib o'tilgan masofa",
+    "receipt_required": "Chek suratini yuklang yoki fiskal QR havolasini kiriting.",
+    "odometer_required": "Odometr ko‘rsatkichini kiriting.",
+    "submit_error": "Tekshiruvga yuborib bo‘lmadi. Qayta urinib ko‘ring.",
+    "save_draft": "Qoralama sifatida saqlash",
+    "no_receipt_image": "Chek surati biriktirilmagan",
+    "no_odometer_image": "Odometr surati biriktirilmagan",
+    "full_review_hint": "Ma’lumotlarni tekshiring va tekshiruvga yuboring.",
+    "odometer_required_for_submit": "Tekshiruvga yuborish uchun odometr surati majburiy.",
+    "submit_evidence_required": "Tekshiruvga yuborish uchun chek va odometr suratlari kerak. “Qoralama sifatida saqlash” kiritilgan ma’lumotlarni saqlab qoladi."
   },
   "operations": {
     "unavailable_description": "Operatsion radar hali ma’lumot manbalariga ulanmagan. Haqiqiy ma’lumotlarni jadval, davomat va yoqilg‘i bo‘limlaridan ko‘ring.",
