@@ -5,7 +5,12 @@
   "app": {
     "title": "Auto Maktab"
   },
+  "design_system": {
+    "title": "Дизайн-система",
+    "description": "Токены, правила и компоненты интерфейса"
+  },
   "nav": {
+    "design_system": "Дизайн-система",
     "dashboard": "Панель",
     "branches": "Филиалы",
     "branches_all": "Все филиалы",
@@ -356,6 +361,7 @@
       "debtors_scope_mismatch": "Выберите этот филиал как активный, чтобы открыть список должников.",
       "coverage_short": "Оплачено",
       "active_short": "Активные",
+      "stale_data": "Данные старше 24 часов. Нажмите кнопку обновления.",
       "analysis_title": "Подробный анализ",
       "analysis_subtitle": "Выберите направление, чтобы понять причины результата.",
       "analysis_tabs_label": "Направление анализа",

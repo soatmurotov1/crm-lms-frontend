@@ -1,3 +1,5 @@
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
 import { requestBranchId } from '@/lib/permissions';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -340,7 +342,7 @@ const TrainingProgramsPage = () => {
         }
       />
       <ListSearchField value={search} onChange={setSearch} />
-      <div className="glass-card grid gap-3 p-4 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3">
         {canViewAll ? (
           <select
             aria-label={t('common.branch')}
@@ -392,19 +394,25 @@ const TrainingProgramsPage = () => {
         </label>
       </div>
       {programs.isLoading ? (
-        <p>{t('common.loading')}</p>
+        <Card role="status" aria-label={t('common.loading')}>
+          <Skeleton className="h-24 w-full" />
+        </Card>
       ) : programs.isError ? (
-        <EmptyState
-          title={t('common.error')}
-          action={{
-            label: t('common.retry'),
-            onClick: () => void programs.refetch(),
-          }}
-        />
+        <Card>
+          <EmptyState
+            title={t('common.error')}
+            action={{
+              label: t('common.retry'),
+              onClick: () => void programs.refetch(),
+            }}
+          />
+        </Card>
       ) : programs.data?.data.length ? (
         <>
           {visiblePrograms.length === 0 ? (
-            <EmptyState title={t('common.no_data')} />
+            <Card>
+              <EmptyState title={t('common.no_data')} />
+            </Card>
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {visiblePrograms.map((program) => (
@@ -456,18 +464,20 @@ const TrainingProgramsPage = () => {
           />
         </>
       ) : (
-        <EmptyState
-          title={t(
-            debouncedSearch.trim()
-              ? 'common.no_data'
-              : 'training.empty_programs',
-          )}
-          description={
-            debouncedSearch.trim()
-              ? undefined
-              : t('training.empty_programs_desc')
-          }
-        />
+        <Card>
+          <EmptyState
+            title={t(
+              debouncedSearch.trim()
+                ? 'common.no_data'
+                : 'training.empty_programs',
+            )}
+            description={
+              debouncedSearch.trim()
+                ? undefined
+                : t('training.empty_programs_desc')
+            }
+          />
+        </Card>
       )}
       {(editing ? canUpdate : canCreate) && dialogOpen && (
         <ProgramDialog

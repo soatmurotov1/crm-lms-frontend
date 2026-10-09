@@ -1,7 +1,8 @@
+import { StatCard } from '@/components/ui/StatCard';
 import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ClipboardText } from '@phosphor-icons/react';
+import { ClipboardText } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useCan } from '@/hooks/useCan';
 import { useBranches } from '@/features/branches/api/branchService';
@@ -14,9 +15,11 @@ import {
   assignmentWindowStatus,
   type AssignmentWindowStatus,
 } from '@/features/school-tests/types';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { EntityDetailShell } from '@/components/ui/EntityDetailShell';
 import { Button } from '@/components/ui/button';
 import { DataCard } from '@/components/ui/DataCard';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { extractErrorMessage } from '@/lib/errors';
 import { formatTashkentDateTime } from '@/lib/calendarDateTime';
@@ -46,8 +49,8 @@ const PreviewQuestion = ({ questionId }: { questionId: string }) => {
 };
 
 const windowTone = (status: AssignmentWindowStatus) => {
-  if (status === 'open') return 'text-emerald-600';
-  if (status === 'scheduled') return 'text-amber-600';
+  if (status === 'open') return 'text-success';
+  if (status === 'scheduled') return 'text-warning';
   return 'text-muted-foreground';
 };
 
@@ -66,14 +69,15 @@ const SchoolTestDetailPage = () => {
   const [assignOpen, setAssignOpen] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
 
-  if (isLoading) {
+  if (isLoading || !template) {
     return (
-      <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-    );
-  }
-  if (!template) {
-    return (
-      <p className="text-sm text-muted-foreground">{t('common.not_found')}</p>
+      <EntityDetailShell
+        onBack={() => void navigate({ to: '/school-tests' })}
+        backLabel={t('school_tests.back')}
+        isLoading={isLoading}
+        isError={!template}
+        errorTitle={t('common.not_found')}
+      />
     );
   }
 
@@ -81,85 +85,69 @@ const SchoolTestDetailPage = () => {
   const canAssign = mayAssign && template.status === 'published';
 
   return (
-    <div className="space-y-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate({ to: '/school-tests' })}
-      >
-        <ArrowLeft className="mr-1.5 h-4 w-4" />
-        {t('school_tests.back')}
-      </Button>
-
-      <PageHeader
-        eyebrow={t('school_tests.title')}
-        title={template.title}
-        description={`${t(`school_tests.status.${template.status}`)} · ${t(
-          'school_tests.not_official_exam',
-        )}`}
-        icon={<ClipboardText className="h-3.5 w-3.5" />}
-        actions={
-          canManage || canPublish || canAssign ? (
-            <div className="flex flex-wrap gap-2">
-              {canManage && (
-                <Button variant="outline" onClick={() => setEditOpen(true)}>
-                  {t('school_tests.edit')}
-                </Button>
-              )}
-              {canPublish ? (
-                <Button
-                  onClick={() =>
-                    publish.mutate(template.id, {
-                      onSuccess: () =>
-                        toast.success(t('school_tests.published')),
-                      onError: (e: Error) =>
-                        toast.error(extractErrorMessage(e, t('common.error'))),
-                    })
-                  }
-                  disabled={publish.isPending}
-                >
-                  {t('school_tests.publish')}
-                </Button>
-              ) : null}
-              {canAssign ? (
-                <Button onClick={() => setAssignOpen(true)}>
-                  {t('school_tests.assign')}
-                </Button>
-              ) : null}
-            </div>
-          ) : null
-        }
-      />
-
-      <div className="glass-card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <div className="text-xs text-muted-foreground">
-            {t('school_tests.question_count')}
+    <EntityDetailShell
+      onBack={() => void navigate({ to: '/school-tests' })}
+      backLabel={t('school_tests.back')}
+      isLoading={false}
+      isError={false}
+      title={template.title}
+      description={`${t(`school_tests.status.${template.status}`)} · ${t(
+        'school_tests.not_official_exam',
+      )}`}
+      meta={
+        <>
+          <ClipboardText className="h-3.5 w-3.5" />
+          {t('school_tests.title')}
+        </>
+      }
+      actions={
+        canManage || canPublish || canAssign ? (
+          <div className="flex flex-wrap gap-2">
+            {canManage && (
+              <Button variant="outline" onClick={() => setEditOpen(true)}>
+                {t('school_tests.edit')}
+              </Button>
+            )}
+            {canPublish ? (
+              <Button
+                onClick={() =>
+                  publish.mutate(template.id, {
+                    onSuccess: () => toast.success(t('school_tests.published')),
+                    onError: (e: Error) =>
+                      toast.error(extractErrorMessage(e, t('common.error'))),
+                  })
+                }
+                disabled={publish.isPending}
+              >
+                {t('school_tests.publish')}
+              </Button>
+            ) : null}
+            {canAssign ? (
+              <Button onClick={() => setAssignOpen(true)}>
+                {t('school_tests.assign')}
+              </Button>
+            ) : null}
           </div>
-          <div className="font-medium">{template.question_count}</div>
-        </div>
-        <div>
-          <div className="text-xs text-muted-foreground">
-            {t('school_tests.time_limit_seconds')}
-          </div>
-          <div className="font-medium">{template.time_limit_seconds}</div>
-        </div>
-        <div>
-          <div className="text-xs text-muted-foreground">
-            {t('school_tests.passing_percent')}
-          </div>
-          <div className="font-medium">
-            {template.passing_threshold_percent}%
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-muted-foreground">
-            {t('school_tests.review_timing')}
-          </div>
-          <div className="font-medium">
-            {t(`school_tests.review.${template.answer_review_timing}`)}
-          </div>
-        </div>
+        ) : null
+      }
+    >
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label={t('school_tests.question_count')}
+          value={template.question_count}
+        />
+        <StatCard
+          label={t('school_tests.time_limit_seconds')}
+          value={template.time_limit_seconds}
+        />
+        <StatCard
+          label={t('school_tests.passing_percent')}
+          value={`${template.passing_threshold_percent}%`}
+        />
+        <StatCard
+          label={t('school_tests.review_timing')}
+          value={t(`school_tests.review.${template.answer_review_timing}`)}
+        />
       </div>
 
       <section className="space-y-3">
@@ -188,17 +176,25 @@ const SchoolTestDetailPage = () => {
         <h2 className="font-heading text-lg font-semibold">
           {t('school_tests.assignments_outcomes')}
         </h2>
-        <p className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        <p className="rounded-md bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
           {t('school_tests.outcomes_separate_from_exams')}
         </p>
         {assignments.isLoading ? (
-          <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+          <Card>
+            <div className="space-y-3" role="status" aria-busy="true">
+              <span className="sr-only">{t('common.loading')}</span>
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          </Card>
         ) : !assignments.data?.length ? (
-          <EmptyState
-            icon={ClipboardText}
-            title={t('school_tests.no_assignments')}
-            description={t('school_tests.no_assignments_desc')}
-          />
+          <Card>
+            <EmptyState
+              icon={ClipboardText}
+              title={t('school_tests.no_assignments')}
+              description={t('school_tests.no_assignments_desc')}
+            />
+          </Card>
         ) : (
           <div className="grid gap-3">
             {assignments.data.map((assignment) => {
@@ -267,7 +263,7 @@ const SchoolTestDetailPage = () => {
           onClose={() => setAssignOpen(false)}
         />
       ) : null}
-    </div>
+    </EntityDetailShell>
   );
 };
 

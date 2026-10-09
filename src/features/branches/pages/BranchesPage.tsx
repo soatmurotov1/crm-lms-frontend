@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
@@ -113,7 +114,12 @@ const BranchesPage = () => {
     setSearch,
   } = useListQueryState();
 
-  const { data: branches, isLoading } = useBranches(
+  const {
+    data: branches,
+    isLoading,
+    isError,
+    refetch,
+  } = useBranches(
     true,
     // Defensive even though the toggle only renders for an owner: never let
     // a stray true reach the request for anyone else (403 on the wire).
@@ -486,6 +492,19 @@ const BranchesPage = () => {
           previousPage: t('common.previous'),
           nextPage: t('common.next'),
         }}
+        errorState={
+          isError ? (
+            <EmptyState
+              role="alert"
+              title={t('common.error')}
+              action={{
+                label: t('common.retry'),
+                onClick: () => void refetch(),
+              }}
+            />
+          ) : undefined
+        }
+        loadingState={<Skeleton className="h-5 w-full" />}
         emptyState={
           <EmptyState
             icon={Buildings}

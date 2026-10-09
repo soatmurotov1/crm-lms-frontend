@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -26,7 +27,7 @@ import {
 } from '@/features/expenses/api/expenseService';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { SummaryCard } from '@/components/ui/SummaryCard';
+import { StatCard } from '@/components/ui/StatCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { toLocalDateStr } from '@/features/students/api/studentService';
 import { parseCalendarDate } from '@/lib/calendarDate';
@@ -232,19 +233,19 @@ const ExpenseDailyBrief = ({
       </p>
 
       {isError ? (
-        <div className="glass-card">
+        <Card className="">
           <EmptyState
             icon={Warning}
             title={t('expenses.daily_brief.load_error')}
             action={{ label: t('common.retry'), onClick: handleRetry }}
           />
-        </div>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((metric) => (
-            <SummaryCard
+            <StatCard
               key={metric.title}
-              title={metric.title}
+              label={metric.title}
               value={metric.value}
               icon={metric.icon}
               isLoading={isLoading || !counts}
@@ -633,28 +634,26 @@ const ExpensesPage = () => {
 
       <div className="relative">
         {!attentionFilter && isFetching && !isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/60 backdrop-blur-[2px]">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/60 backdrop-blur-[2px]">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-transparent" />
           </div>
         )}
 
         {attentionFilter ? (
-          <div className="glass-card overflow-hidden">
-            <ExpenseOverdueSweep
-              expenses={visibleOverdueExpenses}
-              isLoading={isSweepLoading}
-              isFetching={isSweepFetching}
-              isError={isSweepError}
-              onRetry={() => void refetchSweep()}
-              returnContext={{
-                return_attention: 'overdue',
-                return_branch_id: expenseFilters.branchId,
-                return_scope: expenseFilters.branchId
-                  ? undefined
-                  : expenseFilters.scope,
-              }}
-            />
-          </div>
+          <ExpenseOverdueSweep
+            expenses={visibleOverdueExpenses}
+            isLoading={isSweepLoading}
+            isFetching={isSweepFetching}
+            isError={isSweepError}
+            onRetry={() => void refetchSweep()}
+            returnContext={{
+              return_attention: 'overdue',
+              return_branch_id: expenseFilters.branchId,
+              return_scope: expenseFilters.branchId
+                ? undefined
+                : expenseFilters.scope,
+            }}
+          />
         ) : (
           <ExpensesTable
             expenses={visibleExpenses}

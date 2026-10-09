@@ -1205,7 +1205,7 @@ const StudentModal = ({
                   {!student &&
                     dupMatches.length > 0 &&
                     !dupWarningDismissed && (
-                      <div className="flex items-start justify-between gap-2 rounded-md border border-warning/30 bg-warning/10 p-3 text-sm">
+                      <div className="flex items-start justify-between gap-2 rounded-md border border-border bg-warning/10 p-3 text-sm">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 font-medium text-warning">
                             <Warning className="h-4 w-4 shrink-0" />

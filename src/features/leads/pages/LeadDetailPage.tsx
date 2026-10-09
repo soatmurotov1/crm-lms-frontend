@@ -3,14 +3,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import {
-  ArrowLeft,
-  PencilSimple,
-  Trash,
-  Student,
-  CircleNotch,
-} from '@phosphor-icons/react';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PencilSimple, Trash, Student } from '@phosphor-icons/react';
+import { EntityDetailShell } from '@/components/ui/EntityDetailShell';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
@@ -58,30 +52,15 @@ export const LeadDetailPage = () => {
     null,
   );
 
-  if (leadLoading) {
+  if (leadLoading || !lead) {
     return (
-      <div className="flex h-64 items-center justify-center text-muted-foreground">
-        <CircleNotch className="mr-2 h-5 w-5 animate-spin" />
-        <span>{t('common.loading', 'Yuklanmoqda...')}</span>
-      </div>
-    );
-  }
-
-  if (!lead) {
-    return (
-      <div className="flex h-64 flex-col items-center justify-center gap-3">
-        <p className="text-muted-foreground">
-          {t('leads.not_found', 'Lid topilmadi')}
-        </p>
-        <Button
-          variant="outline"
-          aria-label={t('common.back', 'Orqaga')}
-          onClick={() => void navigate({ to: '/leads' })}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          <span>{t('common.back', 'Orqaga')}</span>
-        </Button>
-      </div>
+      <EntityDetailShell
+        onBack={() => void navigate({ to: '/leads' })}
+        backLabel={t('common.back')}
+        isLoading={leadLoading}
+        isError={!lead}
+        errorTitle={t('leads.not_found', 'Lid topilmadi')}
+      />
     );
   }
 
@@ -172,109 +151,100 @@ export const LeadDetailPage = () => {
   const isConverted = !!lead.studentId;
 
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6">
-      <PageHeader
-        title={`${lead.firstName} ${lead.lastName || ''}`.trim()}
-        description={[
-          lead.category
-            ? `${t('vehicles.category', 'Toifa')}: ${lead.category}`
-            : null,
-          lead.branchName,
-          new Date(lead.createdAt).toLocaleDateString(),
-        ]
-          .filter(Boolean)
-          .join(' • ')}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
+    <EntityDetailShell
+      onBack={() => void navigate({ to: '/leads' })}
+      backLabel={t('common.back')}
+      isLoading={false}
+      isError={false}
+      title={`${lead.firstName} ${lead.lastName || ''}`.trim()}
+      description={[
+        lead.category
+          ? `${t('vehicles.category', 'Toifa')}: ${lead.category}`
+          : null,
+        lead.branchName,
+        new Date(lead.createdAt).toLocaleDateString(),
+      ]
+        .filter(Boolean)
+        .join(' • ')}
+      actions={
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Stage Selector */}
+          <div className="w-40">
+            <Select
+              value={lead.stageId}
+              onValueChange={handleStageSelect}
+              disabled={!mayUpdate || transitionMutation.isPending}
+            >
+              <SelectTrigger
+                aria-label={t('leads.stage', 'Bosqich')}
+                className="h-8 text-xs font-medium"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {stages.map((st) => (
+                  <SelectItem key={st.id} value={st.id}>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2 w-2 rounded-full shrink-0"
+                        style={{ backgroundColor: st.color }}
+                      />
+                      <span>{st.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Convert to Student Button */}
+          {mayConvert && mayUpdate && !isConverted && (
+            <Button
+              size="sm"
+              aria-label={t(
+                'leads.convert_to_student',
+                'O‘quvchiga aylantirish',
+              )}
+              onClick={() => setIsConvertOpen(true)}
+              className="h-8 gap-1.5 text-xs bg-success hover:bg-success/90 text-success-foreground"
+            >
+              <Student className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">
+                {t('leads.convert_to_student', 'O‘quvchiga aylantirish')}
+              </span>
+            </Button>
+          )}
+
+          {/* Edit Lead Button */}
+          {mayUpdate && (
             <Button
               variant="outline"
-              size="sm"
-              aria-label={t('common.back', 'Orqaga')}
-              onClick={() => void navigate({ to: '/leads' })}
-              className="h-8 gap-1 text-xs"
+              size="icon"
+              aria-label={t('leads.edit_lead', 'Lidni tahrirlash')}
+              onClick={() => setIsEditOpen(true)}
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>{t('common.back', 'Orqaga')}</span>
+              <PencilSimple className="h-3.5 w-3.5" />
             </Button>
+          )}
 
-            {/* Stage Selector */}
-            <div className="w-40">
-              <Select
-                value={lead.stageId}
-                onValueChange={handleStageSelect}
-                disabled={!mayUpdate || transitionMutation.isPending}
-              >
-                <SelectTrigger
-                  aria-label={t('leads.stage', 'Bosqich')}
-                  className="h-8 text-xs font-medium"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {stages.map((st) => (
-                    <SelectItem key={st.id} value={st.id}>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="h-2 w-2 rounded-full shrink-0"
-                          style={{ backgroundColor: st.color }}
-                        />
-                        <span>{st.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Convert to Student Button */}
-            {mayConvert && mayUpdate && !isConverted && (
-              <Button
-                size="sm"
-                aria-label={t(
-                  'leads.convert_to_student',
-                  'O‘quvchiga aylantirish',
-                )}
-                onClick={() => setIsConvertOpen(true)}
-                className="h-8 gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-              >
-                <Student className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">
-                  {t('leads.convert_to_student', 'O‘quvchiga aylantirish')}
-                </span>
-              </Button>
-            )}
-
-            {/* Edit Lead Button */}
-            {mayUpdate && (
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label={t('leads.edit_lead', 'Lidni tahrirlash')}
-                onClick={() => setIsEditOpen(true)}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              >
-                <PencilSimple className="h-3.5 w-3.5" />
-              </Button>
-            )}
-
-            {/* Delete Lead Button */}
-            {mayDelete && (
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label={t('leads.delete_lead', 'Lidni o‘chirish')}
-                onClick={() => setIsDeleteOpen(true)}
-                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-              >
-                <Trash className="h-3.5 w-3.5" />
-              </Button>
-            )}
-          </div>
-        }
-      />
-
+          {/* Delete Lead Button */}
+          {mayDelete && (
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={t('leads.delete_lead', 'Lidni o‘chirish')}
+              onClick={() => setIsDeleteOpen(true)}
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            >
+              <Trash className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
+      }
+    >
       {/* Main 2-Column Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         {/* Left Column: Lead Info Card */}
         <div className="lg:col-span-1">
           <LeadInfoCard lead={lead} />
@@ -323,7 +293,7 @@ export const LeadDetailPage = () => {
           'Haqiqatan ham bu lidni o‘chirmoqchimisiz? Bu amalni ortga qaytarib bo‘lmaydi.',
         )}
       />
-    </div>
+    </EntityDetailShell>
   );
 };
 

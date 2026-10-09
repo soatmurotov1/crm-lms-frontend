@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -402,12 +403,10 @@ export const LeadStagesSettingsDialog = ({
 
                   <div className="space-y-2">
                     {workStages.map((stage, index) => (
-                      <div
+                      <Card
                         key={stage.tempKey}
-                        className={`flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border p-3 transition-colors ${
-                          stage.isActive
-                            ? 'border-border bg-card'
-                            : 'border-border/60 bg-muted/20 opacity-70'
+                        className={`flex flex-col sm:flex-row sm:items-center gap-3 transition-colors ${
+                          stage.isActive ? ' ' : ' bg-muted/20 opacity-70'
                         }`}
                         data-testid={`stage-item-${index}`}
                       >
@@ -460,7 +459,7 @@ export const LeadStagesSettingsDialog = ({
                               data-testid={`stage-color-trigger-${index}`}
                             >
                               <span
-                                className="h-5 w-5 rounded-full shadow-xs border border-black/10 dark:border-white/10"
+                                className="h-5 w-5 rounded-full  border border-black/10 dark:border-white/10"
                                 style={{ backgroundColor: stage.color }}
                               />
                             </button>
@@ -503,7 +502,7 @@ export const LeadStagesSettingsDialog = ({
                                   >
                                     {isSelected ? (
                                       <Check
-                                        className="h-3.5 w-3.5 text-white drop-shadow-xs"
+                                        className="h-3.5 w-3.5 text-white "
                                         weight="bold"
                                       />
                                     ) : null}
@@ -516,7 +515,7 @@ export const LeadStagesSettingsDialog = ({
                             <div className="pt-2 border-t border-border/60 flex items-center gap-2">
                               <label
                                 htmlFor={`color-native-${index}`}
-                                className="relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-border overflow-hidden shrink-0 hover:border-primary/50 transition-colors"
+                                className="relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-border overflow-hidden shrink-0 hover:border-border transition-colors"
                                 title={t(
                                   'leads.custom_color',
                                   'Rang palitrasi',
@@ -585,15 +584,15 @@ export const LeadStagesSettingsDialog = ({
                             </Button>
                           ) : null}
                         </div>
-                      </div>
+                      </Card>
                     ))}
                   </div>
                 </div>
 
                 {/* Lead reassignment fallback when deactivating existing stage */}
                 {hasDeactivatedExisting ? (
-                  <div className="rounded-lg border border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 p-4 space-y-2">
-                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-medium text-sm">
+                  <div className="rounded-lg border border-border bg-warning/10 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-warning font-medium text-sm">
                       <Info className="h-4 w-4" />
                       <span>
                         {t(
@@ -634,7 +633,7 @@ export const LeadStagesSettingsDialog = ({
                 {/* System terminal stages (WON and LOST) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   {wonStage ? (
-                    <div className="rounded-lg border border-dashed border-emerald-500/40 bg-emerald-50/30 dark:bg-emerald-950/10 p-3 flex items-center justify-between">
+                    <div className="rounded-lg border border-dashed border-border bg-success/10 p-3 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span
                           className="h-3 w-3 rounded-full flex-shrink-0"
@@ -656,7 +655,7 @@ export const LeadStagesSettingsDialog = ({
                   ) : null}
 
                   {lostStage ? (
-                    <div className="rounded-lg border border-dashed border-rose-500/40 bg-rose-50/30 dark:bg-rose-950/10 p-3 flex items-center justify-between">
+                    <div className="rounded-lg border border-dashed border-border bg-destructive/10 p-3 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span
                           className="h-3 w-3 rounded-full flex-shrink-0"

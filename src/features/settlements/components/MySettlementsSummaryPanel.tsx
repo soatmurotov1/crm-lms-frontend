@@ -1,3 +1,4 @@
+import { StatCard } from '@/components/ui/StatCard';
 import { useTranslation } from 'react-i18next';
 import type { Expense } from '@/features/expenses/types';
 import { formatMoney } from '@/lib/money';
@@ -28,33 +29,22 @@ export const MySettlementsSummaryPanel = ({
       aria-busy={isLoading}
       className="grid gap-3 sm:grid-cols-3"
     >
-      <div className="glass-card p-4">
-        <p
-          id="my-settlements-summary-title"
-          className="text-xs uppercase tracking-wide text-muted-foreground"
-        >
-          {t('my_settlements.summary.total')}
-        </p>
-        <p className="mt-1 font-heading text-xl font-semibold tabular-nums">
-          {isLoading ? '—' : total}
-        </p>
-      </div>
-      <div className="glass-card p-4">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-          {t('my_settlements.summary.open')}
-        </p>
-        <p className="mt-1 font-heading text-xl font-semibold tabular-nums">
-          {isLoading ? '—' : openCount}
-        </p>
-      </div>
-      <div className="glass-card p-4">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-          {t('my_settlements.summary.remaining')}
-        </p>
-        <p className="mt-1 font-heading text-xl font-semibold tabular-nums">
-          {isLoading ? '—' : formatMoney(remainingTotal)}
-        </p>
-      </div>
+      <StatCard
+        label={
+          <span id="my-settlements-summary-title">
+            {t('my_settlements.summary.total')}
+          </span>
+        }
+        value={isLoading ? '—' : total}
+      />
+      <StatCard
+        label={t('my_settlements.summary.open')}
+        value={isLoading ? '—' : openCount}
+      />
+      <StatCard
+        label={t('my_settlements.summary.remaining')}
+        value={isLoading ? '—' : formatMoney(remainingTotal)}
+      />
     </section>
   );
 };

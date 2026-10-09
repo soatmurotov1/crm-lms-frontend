@@ -56,3 +56,23 @@ describe('CoursesGrid client sorting', () => {
     expect(rows[1]).toHaveTextContent('Zebra kursi');
   });
 });
+
+it('shows query errors with a retry action instead of an empty catalog', () => {
+  const retry = vi.fn();
+  render(
+    <CoursesGrid
+      courses={[]}
+      isLoading={false}
+      isFetching={false}
+      isError
+      onRetry={retry}
+      onNavigate={vi.fn()}
+      onCreate={vi.fn()}
+      onEdit={vi.fn()}
+      onDelete={vi.fn()}
+    />,
+  );
+  expect(screen.queryByText('courses.not_found')).not.toBeInTheDocument();
+  fireEvent.click(screen.getAllByRole('button', { name: 'common.retry' })[0]);
+  expect(retry).toHaveBeenCalledOnce();
+});

@@ -65,7 +65,7 @@ export function StudentLearnerLoginDialog({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && close()}>
       <DialogContent
-        className="glass-card border-border sm:max-w-md"
+        className=" border-border sm:max-w-md"
         onEscapeKeyDown={(event) => upsert.isPending && event.preventDefault()}
         onPointerDownOutside={(event) =>
           upsert.isPending && event.preventDefault()

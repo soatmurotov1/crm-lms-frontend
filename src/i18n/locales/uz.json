@@ -5,7 +5,12 @@
   "app": {
     "title": "Auto Maktab"
   },
+  "design_system": {
+    "title": "Dizayn tizimi",
+    "description": "Interfeys ranglari, qoidalari va komponentlari"
+  },
   "nav": {
+    "design_system": "Dizayn tizimi",
     "dashboard": "Bosh sahifa",
     "branches": "Filiallar",
     "branches_all": "Barcha filiallar",
@@ -356,6 +361,7 @@
       "debtors_scope_mismatch": "Qarzdorlar ro‘yxatini ochish uchun shu filialni faol filial sifatida tanlang.",
       "coverage_short": "To‘liq",
       "active_short": "Faol",
+      "stale_data": "Maʼlumotlar sanasi 24 soatdan eski. Yangilash tugmasini bosing.",
       "analysis_title": "Batafsil tahlil",
       "analysis_subtitle": "Yo‘nalishni tanlab, natija ortidagi sabablarni ko‘ring.",
       "analysis_tabs_label": "Tahlil yo‘nalishi",

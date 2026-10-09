@@ -52,7 +52,7 @@ export const ExpenseLifecycleDialog = ({
         if (!next && !loading) onClose();
       }}
     >
-      <DialogContent className="glass-card border-border sm:max-w-md">
+      <DialogContent className=" border-border sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-heading">
             {t(

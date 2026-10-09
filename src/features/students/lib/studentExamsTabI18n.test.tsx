@@ -41,6 +41,10 @@ describe('StudentExamsTab i18n', () => {
   it('renders headings and pass/fail status via t(), not hardcoded Uzbek', () => {
     render(<StudentExamsTab student={{ id: 's1' } as unknown as Student} />);
 
+    expect(screen.getByRole('table').parentElement).toHaveClass(
+      'overflow-x-auto',
+    );
+    expect(screen.getByRole('table').parentElement).not.toHaveClass('border');
     expect(screen.getByText('exams.history_title')).toBeTruthy();
     expect(screen.getByText('exams.add_title')).toBeTruthy();
     expect(screen.getByText('exams.status_passed')).toBeTruthy();

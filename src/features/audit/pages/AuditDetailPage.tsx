@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useLocation, useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, Warning } from '@phosphor-icons/react';
@@ -52,7 +53,7 @@ const AuditChangesView = (
             {t('audit.no_changes')}
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-md border border-border">
+          <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30 text-xs text-muted-foreground">
@@ -69,10 +70,7 @@ const AuditChangesView = (
               </thead>
               <tbody>
                 {changedKeys.map((k) => (
-                  <tr
-                    key={k}
-                    className="border-b border-border/50 last:border-0"
-                  >
+                  <tr key={k} className="border-b border-border last:border-0">
                     <td className="px-3 py-2 font-medium">{k}</td>
                     <td className="px-3 py-2 text-destructive">
                       {String(before[k] ?? t('audit.field_no'))}
@@ -102,7 +100,7 @@ const AuditChangesView = (
             ? t('audit.deleted_data')
             : t('audit.changes')}
       </p>
-      <div className="overflow-x-auto rounded-md border border-border">
+      <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30 text-xs text-muted-foreground">
@@ -137,7 +135,7 @@ const AuditChangesView = (
                 ? (val as { from: unknown; to: unknown })
                 : null;
               return (
-                <tr key={k} className="border-b border-border/50 last:border-0">
+                <tr key={k} className="border-b border-border last:border-0">
                   <td className="px-3 py-2 font-medium">{k}</td>
                   {action === 'UPDATE' ? (
                     fromTo ? (
@@ -214,26 +212,24 @@ const AuditDetailPage = () => {
       backLabel={t('audit.title')}
       isLoading={false}
       isError={false}
-      header={
-        <div className="glass-card flex flex-wrap items-start justify-between gap-4 p-5">
-          <div className="space-y-2">
-            <h1 className="font-heading text-2xl font-bold flex items-center gap-2 flex-wrap text-balance">
-              <span
-                className={cn(
-                  'text-xs font-semibold px-2 py-0.5 rounded-full',
-                  auditActionBg(log.action),
-                )}
-              >
-                {formatAuditAction(log.action, t)}
-              </span>
-              <span>{formatAuditEntity(log.entity, t)}</span>
-            </h1>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <span>{log.user_name || t('common.na')}</span>
-              <span>·</span>
-              <span>{formatAuditDate(log.created_at)}</span>
-            </div>
-          </div>
+      title={
+        <span className="flex flex-wrap items-center gap-2">
+          <span
+            className={cn(
+              'text-xs font-semibold px-2 py-0.5 rounded-full',
+              auditActionBg(log.action),
+            )}
+          >
+            {formatAuditAction(log.action, t)}
+          </span>
+          <span>{formatAuditEntity(log.entity, t)}</span>
+        </span>
+      }
+      description={
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>{log.user_name || t('common.na')}</span>
+          <span>·</span>
+          <span>{formatAuditDate(log.created_at)}</span>
         </div>
       }
     >
@@ -244,69 +240,71 @@ const AuditDetailPage = () => {
         </TabsList>
 
         <TabsContent value="info">
-          <dl className="glass-card grid grid-cols-1 gap-x-8 gap-y-3 p-5 text-sm sm:grid-cols-2">
-            <Field
-              label={t('audit.table_user')}
-              value={log.user_name || t('common.na')}
-            />
-            <Field
-              label={t('users.detail.role')}
-              value={formatAuditRole(log.user_role, t)}
-            />
-            <Field
-              label={t('audit.table_action')}
-              value={formatAuditAction(log.action, t)}
-            />
-            <Field
-              label={t('audit.table_entity')}
-              value={formatAuditEntity(log.entity, t)}
-            />
-            <Field
-              label={t('audit.entity_id')}
-              value={
-                entityLink ? (
-                  <button
-                    onClick={() => {
-                      if (log.entity === 'student') {
-                        void navigate({
-                          to: '/students/$id',
-                          params: { id: log.entity_id },
-                        });
-                      } else if (log.entity === 'branch') {
-                        void navigate({
-                          to: '/branches/$id',
-                          params: { id: log.entity_id },
-                        });
-                      } else if (log.entity === 'group') {
-                        void navigate({
-                          to: '/groups/$id',
-                          params: { id: log.entity_id },
-                        });
-                      } else if (log.entity === 'user') {
-                        void navigate({
-                          to: '/users/$id',
-                          params: { id: log.entity_id },
-                        });
-                      }
-                    }}
-                    className="font-mono text-xs text-primary hover:underline"
-                  >
-                    {log.entity_id}
-                  </button>
-                ) : (
-                  <span className="font-mono text-xs">{log.entity_id}</span>
-                )
-              }
-            />
-            <Field
-              label={t('audit.table_time')}
-              value={formatAuditDate(log.created_at)}
-            />
-          </dl>
+          <Card asChild>
+            <dl className=" grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+              <Field
+                label={t('audit.table_user')}
+                value={log.user_name || t('common.na')}
+              />
+              <Field
+                label={t('users.detail.role')}
+                value={formatAuditRole(log.user_role, t)}
+              />
+              <Field
+                label={t('audit.table_action')}
+                value={formatAuditAction(log.action, t)}
+              />
+              <Field
+                label={t('audit.table_entity')}
+                value={formatAuditEntity(log.entity, t)}
+              />
+              <Field
+                label={t('audit.entity_id')}
+                value={
+                  entityLink ? (
+                    <button
+                      onClick={() => {
+                        if (log.entity === 'student') {
+                          void navigate({
+                            to: '/students/$id',
+                            params: { id: log.entity_id },
+                          });
+                        } else if (log.entity === 'branch') {
+                          void navigate({
+                            to: '/branches/$id',
+                            params: { id: log.entity_id },
+                          });
+                        } else if (log.entity === 'group') {
+                          void navigate({
+                            to: '/groups/$id',
+                            params: { id: log.entity_id },
+                          });
+                        } else if (log.entity === 'user') {
+                          void navigate({
+                            to: '/users/$id',
+                            params: { id: log.entity_id },
+                          });
+                        }
+                      }}
+                      className="font-mono text-xs text-primary hover:underline"
+                    >
+                      {log.entity_id}
+                    </button>
+                  ) : (
+                    <span className="font-mono text-xs">{log.entity_id}</span>
+                  )
+                }
+              />
+              <Field
+                label={t('audit.table_time')}
+                value={formatAuditDate(log.created_at)}
+              />
+            </dl>
+          </Card>
         </TabsContent>
 
         <TabsContent value="changes">
-          <div className="glass-card p-5">
+          <Card className=" ">
             {log.changes ? (
               AuditChangesView({ changes: log.changes, action: log.action }, t)
             ) : (
@@ -314,7 +312,7 @@ const AuditDetailPage = () => {
                 {t('audit.no_details')}
               </p>
             )}
-          </div>
+          </Card>
         </TabsContent>
       </Tabs>
     </EntityDetailShell>

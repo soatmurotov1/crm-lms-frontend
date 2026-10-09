@@ -476,7 +476,7 @@ const ExpenseFormSession = ({
           if (!next && !submittingRef.current && !isPending) attemptClose();
         }}
       >
-        <DialogContent className="glass-card border-border sm:max-w-lg">
+        <DialogContent className=" border-border sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-heading">
               {isSettlement

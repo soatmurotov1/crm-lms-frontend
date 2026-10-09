@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { Card } from './card';
 import { cn } from '@/lib/utils';
 
 export interface DataCardField {
@@ -32,13 +33,14 @@ export const DataCard = ({
 }: DataCardProps) => {
   const interactive = !!onClick;
   return (
-    <div
+    <Card
       onClick={onClick}
       {...(interactive
         ? {
             role: 'button',
             tabIndex: 0,
             onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+              if (e.defaultPrevented || e.target !== e.currentTarget) return;
               if (e.key === 'Enter') onClick?.(e);
               if (e.key === ' ') {
                 e.preventDefault();
@@ -48,10 +50,9 @@ export const DataCard = ({
           }
         : {})}
       className={cn(
-        'relative overflow-hidden rounded-lg border border-border bg-card p-4 transition-colors motion-reduce:transition-none [contain-intrinsic-size:auto_180px] [content-visibility:auto]',
-        accent && 'pl-5',
+        'relative overflow-hidden transition-colors motion-reduce:transition-none [contain-intrinsic-size:auto_180px] [content-visibility:auto]',
         interactive &&
-          'cursor-pointer motion-safe:transition-colors hover:border-primary/50 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          'cursor-pointer motion-safe:transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         className,
       )}
     >
@@ -74,7 +75,12 @@ export const DataCard = ({
           )}
         </div>
         {actions && (
-          <div className="flex shrink-0 items-center gap-2">{actions}</div>
+          <div
+            className="flex shrink-0 items-center gap-2"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {actions}
+          </div>
         )}
       </div>
       {fields && fields.length > 0 && (
@@ -91,6 +97,6 @@ export const DataCard = ({
           ))}
         </dl>
       )}
-    </div>
+    </Card>
   );
 };

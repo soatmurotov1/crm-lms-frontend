@@ -74,17 +74,17 @@ const RevenueTrendChart = ({
         { total: formatMoney(total), count: paymentCount },
       )}
     >
-      <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-md bg-border sm:grid-cols-4">
         <button
           type="button"
           data-testid="chart-metric-revenue"
           aria-pressed={visibleMetrics.amount}
           onClick={() => toggleMetric('amount')}
           className={cn(
-            'min-h-16 cursor-pointer border-b-2 bg-card px-3 py-2.5 text-left transition-[background-color,border-color,color,opacity] duration-150 ease-out active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+            'min-h-16 cursor-pointer border-b-2 border-border px-3 py-2.5 text-left transition-[background-color,color] duration-150 ease-out active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
             visibleMetrics.amount
-              ? 'border-info bg-info/[8%]'
-              : 'border-transparent opacity-65 hover:bg-muted/70 hover:opacity-100',
+              ? 'bg-accent text-accent-foreground'
+              : 'bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground',
           )}
         >
           <span className="flex items-center gap-2 text-[11px] text-muted-foreground">
@@ -97,7 +97,7 @@ const RevenueTrendChart = ({
               className={cn(
                 'ml-auto h-2 w-2 rounded-full transition-[background-color,box-shadow]',
                 visibleMetrics.amount
-                  ? 'bg-info shadow-[0_0_0_3px_hsl(var(--info)/0.14)]'
+                  ? 'bg-info ring-[3px] ring-info/15'
                   : 'bg-muted-foreground/25',
               )}
               aria-hidden="true"
@@ -113,10 +113,10 @@ const RevenueTrendChart = ({
           aria-pressed={visibleMetrics.payment_count}
           onClick={() => toggleMetric('payment_count')}
           className={cn(
-            'min-h-16 cursor-pointer border-b-2 bg-card px-3 py-2.5 text-left transition-[background-color,border-color,color,opacity] duration-150 ease-out active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+            'min-h-16 cursor-pointer border-b-2 border-border px-3 py-2.5 text-left transition-[background-color,color] duration-150 ease-out active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
             visibleMetrics.payment_count
-              ? 'border-primary bg-primary/[8%]'
-              : 'border-transparent opacity-65 hover:bg-muted/70 hover:opacity-100',
+              ? 'bg-accent text-accent-foreground'
+              : 'bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground',
           )}
         >
           <span className="flex items-center gap-2 text-[11px] text-muted-foreground">
@@ -129,7 +129,7 @@ const RevenueTrendChart = ({
               className={cn(
                 'ml-auto h-2 w-2 rounded-full transition-[background-color,box-shadow]',
                 visibleMetrics.payment_count
-                  ? 'bg-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.14)]'
+                  ? 'bg-primary ring-[3px] ring-primary/15'
                   : 'bg-muted-foreground/25',
               )}
               aria-hidden="true"
@@ -190,7 +190,7 @@ const RevenueTrendChart = ({
               </linearGradient>
             </defs>
             <CartesianGrid
-              stroke="hsl(var(--hair))"
+              stroke="hsl(var(--border))"
               vertical={false}
               horizontal
             />

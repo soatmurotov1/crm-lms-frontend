@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { requestBranchId } from '@/lib/permissions';
 import { useCan } from '@/hooks/useCan';
 import { useExpenseBranchOptions } from '@/features/expenses/api/expenseService';
@@ -60,96 +61,98 @@ function StationEditor({
       : axios.post('/fuel-stations', { ...body, branch_id: branchId });
   });
   return (
-    <form
-      aria-label={t(station ? 'common.edit' : 'fuel.add_station')}
-      className="glass-card space-y-3 p-4"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        try {
-          await mutation.mutateAsync(undefined);
-          onDone();
-        } catch {
-          /* service handles error */
-        }
-      }}
-    >
-      <h2 className="font-heading text-base font-semibold">
-        {t(station ? 'common.edit' : 'fuel.add_station')}
-      </h2>
-      {!station && (
-        <label className="block space-y-1">
-          <span className="text-xs font-medium">{t('common.branch')}</span>
-          <select
-            required
-            className={selectClass}
-            value={branchId}
-            onChange={(e) => setBranchId(e.target.value)}
-          >
-            <option value="">{t('fuel.choose')}</option>
-            {requestBranchId(
-              user,
-              useAuthStore.getState?.()?.activeBranchId,
-            ) && (
-              <option
-                value={
-                  useAuthStore.getState?.()?.activeBranchId ??
-                  user?.branch_id ??
-                  ''
-                }
-              >
-                {user?.branch_name ?? user?.branch_id}
-              </option>
-            )}
-            {branches.data
-              ?.filter(
-                (b) =>
-                  b.id !==
-                  (useAuthStore.getState?.()?.activeBranchId ??
-                    user?.branch_id),
-              )
-              .map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
+    <div>
+      <form
+        aria-label={t(station ? 'common.edit' : 'fuel.add_station')}
+        className="space-y-3 border-t border-border pt-4"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            await mutation.mutateAsync(undefined);
+            onDone();
+          } catch {
+            /* service handles error */
+          }
+        }}
+      >
+        <h2 className="font-heading text-base font-semibold">
+          {t(station ? 'common.edit' : 'fuel.add_station')}
+        </h2>
+        {!station && (
+          <label className="block space-y-1">
+            <span className="text-xs font-medium">{t('common.branch')}</span>
+            <select
+              required
+              className={selectClass}
+              value={branchId}
+              onChange={(e) => setBranchId(e.target.value)}
+            >
+              <option value="">{t('fuel.choose')}</option>
+              {requestBranchId(
+                user,
+                useAuthStore.getState?.()?.activeBranchId,
+              ) && (
+                <option
+                  value={
+                    useAuthStore.getState?.()?.activeBranchId ??
+                    user?.branch_id ??
+                    ''
+                  }
+                >
+                  {user?.branch_name ?? user?.branch_id}
                 </option>
-              ))}
-          </select>
-        </label>
-      )}
-      <div className="grid gap-3 sm:grid-cols-2">
-        {[
-          [name, setName, 'name', true],
-          [taxId, setTaxId, 'tax_id', false],
-          [address, setAddress, 'address', false],
-          [contact, setContact, 'contact', false],
-        ].map(([value, setter, key, required]) => (
-          <label className="block space-y-1" key={String(key)}>
-            <span className="text-xs font-medium">{t(`fuel.${key}`)}</span>
-            <Input
-              required={required as boolean}
-              maxLength={300}
-              value={value as string}
-              onChange={(e) =>
-                (setter as (value: string) => void)(e.target.value)
-              }
-            />
+              )}
+              {branches.data
+                ?.filter(
+                  (b) =>
+                    b.id !==
+                    (useAuthStore.getState?.()?.activeBranchId ??
+                      user?.branch_id),
+                )
+                .map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+            </select>
           </label>
-        ))}
-      </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={active}
-          onChange={(e) => setActive(e.target.checked)}
-          className="rounded"
-        />
-        {t('fuel.active')}
-      </label>
-      <div className="flex justify-end">
-        <Button disabled={mutation.isPending} type="submit" size="sm">
-          {t('common.save')}
-        </Button>
-      </div>
-    </form>
+        )}
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[
+            [name, setName, 'name', true],
+            [taxId, setTaxId, 'tax_id', false],
+            [address, setAddress, 'address', false],
+            [contact, setContact, 'contact', false],
+          ].map(([value, setter, key, required]) => (
+            <label className="block space-y-1" key={String(key)}>
+              <span className="text-xs font-medium">{t(`fuel.${key}`)}</span>
+              <Input
+                required={required as boolean}
+                maxLength={300}
+                value={value as string}
+                onChange={(e) =>
+                  (setter as (value: string) => void)(e.target.value)
+                }
+              />
+            </label>
+          ))}
+        </div>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => setActive(e.target.checked)}
+            className="rounded"
+          />
+          {t('fuel.active')}
+        </label>
+        <div className="flex justify-end">
+          <Button disabled={mutation.isPending} type="submit" size="sm">
+            {t('common.save')}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -226,7 +229,7 @@ function StationAccounts({ id }: { id: string }) {
         {t('fuel.expense_link')}
       </Link>
       <form
-        className="space-y-3 rounded-lg border p-4"
+        className="space-y-3 rounded-md bg-muted/40 p-3"
         onSubmit={(e) => {
           e.preventDefault();
           mutation.mutate(undefined, {
@@ -360,7 +363,9 @@ export default function StationsPage() {
 
       {create && (
         <div id="fuel-station-create-form">
-          <StationEditor onDone={() => setCreate(false)} />
+          <Card>
+            <StationEditor onDone={() => setCreate(false)} />
+          </Card>
         </div>
       )}
 
@@ -390,13 +395,15 @@ export default function StationsPage() {
       </div>
 
       {query.isLoading ? (
-        <div className="space-y-3" aria-label={t('common.loading')}>
-          {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} className="h-32 rounded-lg" />
-          ))}
-        </div>
+        <Card asChild>
+          <div className="space-y-3" aria-label={t('common.loading')}>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-32 rounded-lg" />
+            ))}
+          </div>
+        </Card>
       ) : query.isError ? (
-        <div className="glass-card">
+        <Card className="">
           <EmptyState
             icon={Buildings}
             title={t('common.error')}
@@ -405,118 +412,121 @@ export default function StationsPage() {
               onClick: () => void query.refetch(),
             }}
           />
-        </div>
+        </Card>
       ) : query.data?.data.length === 0 && debouncedSearch ? (
-        <EmptyState
-          icon={Buildings}
-          title={t('fuel.no_station_search_results')}
-          description={t('fuel.no_station_search_results_desc')}
-          action={{
-            label: t('common.clear'),
-            onClick: () => {
-              setSearch('');
-              setPage(1);
-            },
-          }}
-        />
+        <Card>
+          <EmptyState
+            icon={Buildings}
+            title={t('fuel.no_station_search_results')}
+            description={t('fuel.no_station_search_results_desc')}
+            action={{
+              label: t('common.clear'),
+              onClick: () => {
+                setSearch('');
+                setPage(1);
+              },
+            }}
+          />
+        </Card>
       ) : query.data?.data.length === 0 ? (
-        <EmptyState
-          icon={Buildings}
-          title={t('fuel.no_stations')}
-          description={t('fuel.no_stations_description')}
-          action={
-            mayCreate
-              ? {
-                  label: t('fuel.add_station'),
-                  onClick: () => setCreate(true),
-                }
-              : undefined
-          }
-        />
-      ) : (
-        <div className="grid gap-4">
-          {query.data?.data.map((station) => (
-            <section
-              key={station.id}
-              className="glass-card space-y-4 p-5 [contain-intrinsic-size:auto_200px] [content-visibility:auto]"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <h2 className="font-heading text-base font-semibold flex items-center gap-2">
-                    <Buildings className="h-4 w-4 text-primary" />
-                    {station.name}
-                  </h2>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    {station.stir && (
-                      <span className="tabular-nums">{station.stir}</span>
-                    )}
-                    {station.address && <span>· {station.address}</span>}
-                    {station.contact && <span>· {station.contact}</span>}
-                  </div>
-                </div>
-                <Badge
-                  variant="outline"
-                  className={
-                    station.active
-                      ? 'gap-1 border-emerald-300 text-emerald-700 dark:text-emerald-300'
-                      : 'gap-1 border-rose-300 text-rose-700 dark:text-rose-300'
+        <Card>
+          <EmptyState
+            icon={Buildings}
+            title={t('fuel.no_stations')}
+            description={t('fuel.no_stations_description')}
+            action={
+              mayCreate
+                ? {
+                    label: t('fuel.add_station'),
+                    onClick: () => setCreate(true),
                   }
-                >
-                  {station.active ? (
-                    <CheckCircle className="h-3 w-3" weight="fill" />
-                  ) : (
-                    <XCircle className="h-3 w-3" weight="fill" />
+                : undefined
+            }
+          />
+        </Card>
+      ) : (
+        <div className="grid gap-3">
+          {query.data?.data.map((station) => (
+            <Card key={station.id} asChild>
+              <section className=" space-y-4 [contain-intrinsic-size:auto_200px] [content-visibility:auto]">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <h2 className="font-heading text-base font-semibold flex items-center gap-2">
+                      <Buildings className="h-4 w-4 text-primary" />
+                      {station.name}
+                    </h2>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      {station.stir && (
+                        <span className="tabular-nums">{station.stir}</span>
+                      )}
+                      {station.address && <span>· {station.address}</span>}
+                      {station.contact && <span>· {station.contact}</span>}
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={
+                      station.active
+                        ? 'gap-1 border-border text-success'
+                        : 'gap-1 border-border text-destructive'
+                    }
+                  >
+                    {station.active ? (
+                      <CheckCircle className="h-3 w-3" weight="fill" />
+                    ) : (
+                      <XCircle className="h-3 w-3" weight="fill" />
+                    )}
+                    {station.active ? t('fuel.active') : t('fuel.inactive')}
+                  </Badge>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {mayUpdate && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="min-h-11"
+                      aria-expanded={editing === station.id}
+                      aria-controls={`fuel-station-edit-${station.id}`}
+                      onClick={() =>
+                        setEditing(editing === station.id ? '' : station.id)
+                      }
+                    >
+                      {t('common.edit')}
+                    </Button>
                   )}
-                  {station.active ? t('fuel.active') : t('fuel.inactive')}
-                </Badge>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {mayUpdate && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="min-h-11"
-                    aria-expanded={editing === station.id}
-                    aria-controls={`fuel-station-edit-${station.id}`}
-                    onClick={() =>
-                      setEditing(editing === station.id ? '' : station.id)
-                    }
-                  >
-                    {t('common.edit')}
-                  </Button>
-                )}
-                {mayUpdate && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="min-h-11"
-                    aria-expanded={selected === station.id}
-                    aria-controls={`fuel-station-balance-${station.id}`}
-                    onClick={() =>
-                      setSelected(selected === station.id ? '' : station.id)
-                    }
-                  >
-                    <Wallet className="mr-1.5 h-3.5 w-3.5" />
-                    {t('fuel.balance')}
-                  </Button>
-                )}
-              </div>
-
-              {editing === station.id && (
-                <div id={`fuel-station-edit-${station.id}`}>
-                  <StationEditor
-                    station={station}
-                    onDone={() => setEditing('')}
-                  />
+                  {mayUpdate && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="min-h-11"
+                      aria-expanded={selected === station.id}
+                      aria-controls={`fuel-station-balance-${station.id}`}
+                      onClick={() =>
+                        setSelected(selected === station.id ? '' : station.id)
+                      }
+                    >
+                      <Wallet className="mr-1.5 h-3.5 w-3.5" />
+                      {t('fuel.balance')}
+                    </Button>
+                  )}
                 </div>
-              )}
-              {selected === station.id && (
-                <div id={`fuel-station-balance-${station.id}`}>
-                  <StationAccounts id={station.id} />
-                </div>
-              )}
-            </section>
+
+                {editing === station.id && (
+                  <div id={`fuel-station-edit-${station.id}`}>
+                    <StationEditor
+                      station={station}
+                      onDone={() => setEditing('')}
+                    />
+                  </div>
+                )}
+                {selected === station.id && (
+                  <div id={`fuel-station-balance-${station.id}`}>
+                    <StationAccounts id={station.id} />
+                  </div>
+                )}
+              </section>
+            </Card>
           ))}
         </div>
       )}

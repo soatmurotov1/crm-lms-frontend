@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import type { ReactNode } from 'react';
 import { CaretDown, CaretUpDown, CaretUp } from '@phosphor-icons/react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -33,7 +34,7 @@ export interface DataTableProps<T> {
   sortField?: string;
   sortDir?: 'asc' | 'desc';
   onToggleSort?: (field: string) => void;
-  /** Extra classes for the outer wrapper (e.g. "glass-card overflow-hidden"). */
+  /** Extra classes for the outer wrapper (e.g. "transition-opacity"). */
   className?: string;
   rowHoverClassName?: string;
   /** Extra classes per row (autodrive-cg9: muting a soft-deleted row). */
@@ -97,7 +98,7 @@ export function DataTable<T>({
   const colSpan = columns.length;
 
   return (
-    <div className={cn('hidden md:block', className)}>
+    <Card edgeToEdge className={cn('hidden md:block', className)}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -220,6 +221,6 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 }

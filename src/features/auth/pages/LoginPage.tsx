@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useLocation, useRouter } from '@tanstack/react-router';
@@ -241,7 +242,7 @@ const LoginPage = () => {
           </p>
         </section>
 
-        <div className="mx-auto w-full max-w-md rounded-lg border border-border bg-card p-6 sm:p-8">
+        <Card className="mx-auto w-full max-w-md ">
           <div className="mb-6">
             <h1
               id="login-title"
@@ -348,7 +349,7 @@ const LoginPage = () => {
             {formError && (
               <Alert
                 variant="destructive"
-                className="border-destructive/25 bg-destructive/5 px-3.5 py-3 text-sm leading-relaxed dark:border-destructive/25"
+                className="border-border bg-destructive/5 px-3.5 py-3 text-sm leading-relaxed dark:border-border"
               >
                 {formError}
               </Alert>
@@ -370,7 +371,7 @@ const LoginPage = () => {
               {demoIntentFailed && (
                 <Alert
                   variant="destructive"
-                  className="mb-3 border-destructive/25 bg-destructive/5 px-3.5 py-3 text-sm leading-relaxed dark:border-destructive/25"
+                  className="mb-3 border-border bg-destructive/5 px-3.5 py-3 text-sm leading-relaxed dark:border-border"
                 >
                   {copy.demoAutoError}
                 </Alert>
@@ -389,7 +390,7 @@ const LoginPage = () => {
               </p>
             </div>
           </form>
-        </div>
+        </Card>
       </main>
     </div>
   );

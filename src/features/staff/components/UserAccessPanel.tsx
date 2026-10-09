@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { Link, useBlocker } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -61,15 +62,17 @@ export default function UserAccessPanel({ user }: { user: User }) {
 
   if (protectedRole)
     return (
-      <p className="glass-card p-5 text-sm text-muted-foreground">
-        {t('access.protected_role')}
-      </p>
+      <Card asChild>
+        <p className=" text-sm text-muted-foreground">
+          {t('access.protected_role')}
+        </p>
+      </Card>
     );
   if (catalogue.isLoading || access.isLoading)
     return <Skeleton className="h-64 w-full" />;
   if (catalogue.isError || access.isError || !catalogue.data || !access.data)
     return (
-      <div className="glass-card space-y-3 p-5" role="alert">
+      <Card className=" space-y-3 " role="alert">
         <p>{t('common.error')}</p>
         <Button
           variant="outline"
@@ -80,7 +83,7 @@ export default function UserAccessPanel({ user }: { user: User }) {
         >
           {t('access.reload')}
         </Button>
-      </div>
+      </Card>
     );
 
   const branches = catalogue.data.branches;
@@ -196,7 +199,7 @@ export default function UserAccessPanel({ user }: { user: User }) {
   };
 
   return (
-    <div className="glass-card space-y-5 p-5">
+    <Card className=" space-y-4 ">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <h2 className="font-heading text-lg font-semibold">
@@ -233,7 +236,7 @@ export default function UserAccessPanel({ user }: { user: User }) {
         </div>
       )}
       {!delegation && (
-        <fieldset className="space-y-2 rounded-md border border-border p-3">
+        <fieldset className="space-y-2 rounded-md bg-muted/40 p-3">
           <legend className="px-1 text-sm font-medium">
             {t('access.membership')}
           </legend>
@@ -325,10 +328,7 @@ export default function UserAccessPanel({ user }: { user: User }) {
         </label>
       </div>
       {templateSkipped > 0 && (
-        <p
-          role="status"
-          className="rounded-md border border-border bg-muted p-3 text-sm"
-        >
+        <p role="status" className="rounded-md bg-muted/40 p-3 text-sm">
           {t('access.template_limited', { count: templateSkipped })}
         </p>
       )}
@@ -356,7 +356,7 @@ export default function UserAccessPanel({ user }: { user: User }) {
       {conflict && (
         <div
           role="alert"
-          className="space-y-2 rounded-md border border-destructive p-3"
+          className="space-y-2 rounded-md border border-border bg-warning/10 p-3"
         >
           <p>{t('access.conflict')}</p>
           <Button variant="outline" onClick={() => setReloadOpen(true)}>
@@ -475,6 +475,6 @@ export default function UserAccessPanel({ user }: { user: User }) {
         description={t('access.discard_help')}
         confirmLabel={t('access.reload')}
       />
-    </div>
+    </Card>
   );
 }

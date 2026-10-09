@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -64,36 +65,42 @@ const SchoolTestsPage = () => {
         onChange={(value) => setSearch(value.slice(0, 200))}
       />
 
-      <p className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+      <p className="rounded-md bg-muted/40 p-3 text-sm text-muted-foreground">
         {t('school_tests.not_official_exam')}
       </p>
 
       {isPending ? (
-        <div
-          role="status"
-          aria-label={t('common.loading')}
-          className="space-y-3"
-        >
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
+        <Card asChild>
+          <div
+            role="status"
+            aria-label={t('common.loading')}
+            className="space-y-3"
+          >
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </Card>
       ) : templates.isError ? (
         <div role="alert">
-          <EmptyState
-            icon={ClipboardText}
-            title={t('common.error')}
-            action={{
-              label: t('common.retry'),
-              onClick: () => void templates.refetch(),
-            }}
-          />
+          <Card>
+            <EmptyState
+              icon={ClipboardText}
+              title={t('common.error')}
+              action={{
+                label: t('common.retry'),
+                onClick: () => void templates.refetch(),
+              }}
+            />
+          </Card>
         </div>
       ) : !templates.data?.data.length ? (
-        <EmptyState
-          icon={ClipboardText}
-          title={querySearch ? t('common.no_data') : t('school_tests.empty')}
-          description={querySearch ? undefined : t('school_tests.empty_desc')}
-        />
+        <Card>
+          <EmptyState
+            icon={ClipboardText}
+            title={querySearch ? t('common.no_data') : t('school_tests.empty')}
+            description={querySearch ? undefined : t('school_tests.empty_desc')}
+          />
+        </Card>
       ) : (
         <div className="grid gap-3">
           {templates.data.data.map((template) => (

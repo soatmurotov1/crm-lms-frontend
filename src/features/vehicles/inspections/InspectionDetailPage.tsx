@@ -1,10 +1,12 @@
+import { EntityDetailShell } from '@/components/ui/EntityDetailShell';
+import { Card } from '@/components/ui/card';
 import { useCan } from '@/hooks/useCan';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axios from '@/api/axiosInstance';
-import { useParams, Link } from '@tanstack/react-router';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -175,29 +177,31 @@ function DraftCorrection({
       }),
   );
   return (
-    <form
-      className="glass-card space-y-3 p-4"
-      onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
-    >
-      <label>
-        {t('inspections.odometer_km')}
-        <Input
-          {...form.register('odometer')}
-          inputMode="numeric"
-          aria-invalid={!!form.formState.errors.odometer}
-        />
-      </label>
-      {form.formState.errors.odometer && (
-        <p role="alert">{t('common.required')}</p>
-      )}
-      <label>
-        {t('inspections.notes')}
-        <Input {...form.register('notes')} />
-      </label>
-      <Button disabled={mutation.isPending} type="submit">
-        {t('common.save')}
-      </Button>
-    </form>
+    <Card asChild>
+      <form
+        className=" space-y-3 "
+        onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+      >
+        <label>
+          {t('inspections.odometer_km')}
+          <Input
+            {...form.register('odometer')}
+            inputMode="numeric"
+            aria-invalid={!!form.formState.errors.odometer}
+          />
+        </label>
+        {form.formState.errors.odometer && (
+          <p role="alert">{t('common.required')}</p>
+        )}
+        <label>
+          {t('inspections.notes')}
+          <Input {...form.register('notes')} />
+        </label>
+        <Button disabled={mutation.isPending} type="submit">
+          {t('common.save')}
+        </Button>
+      </form>
+    </Card>
   );
 }
 function DefectCard({
@@ -213,30 +217,32 @@ function DefectCard({
     axios.post(`/vehicle-defects/${row.id}/resolve`, { resolution_note: note }),
   );
   return (
-    <article className="glass-card space-y-3 p-4">
-      <p>
-        {row.description} · {t(`inspections.defect_${row.status}`)}
-      </p>
-      <EvidenceImage id="" evidenceId={row.id} alt={row.description} defect />
-      {row.resolution_note && <p>{row.resolution_note}</p>}
-      {manager && row.status === 'open' && (
-        <>
-          <Input
-            aria-label={t('inspections.resolution_note')}
-            placeholder={t('inspections.resolution_note')}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            maxLength={2000}
-          />
-          <Button
-            disabled={!note.trim() || action.isPending}
-            onClick={() => action.mutate(undefined)}
-          >
-            {t('inspections.resolve_defect')}
-          </Button>
-        </>
-      )}
-    </article>
+    <Card asChild>
+      <article className=" space-y-3 ">
+        <p>
+          {row.description} · {t(`inspections.defect_${row.status}`)}
+        </p>
+        <EvidenceImage id="" evidenceId={row.id} alt={row.description} defect />
+        {row.resolution_note && <p>{row.resolution_note}</p>}
+        {manager && row.status === 'open' && (
+          <>
+            <Input
+              aria-label={t('inspections.resolution_note')}
+              placeholder={t('inspections.resolution_note')}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              maxLength={2000}
+            />
+            <Button
+              disabled={!note.trim() || action.isPending}
+              onClick={() => action.mutate(undefined)}
+            >
+              {t('inspections.resolve_defect')}
+            </Button>
+          </>
+        )}
+      </article>
+    </Card>
   );
 }
 function VehicleDefects({
@@ -272,6 +278,7 @@ function VehicleDefects({
 }
 export default function InspectionDetailPage() {
   const { id } = useParams({ strict: false }) as { id: string };
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const mayUpdate = useCan('vehicle_inspections.update');
@@ -283,11 +290,21 @@ export default function InspectionDetailPage() {
     ({ action, body }: { action: 'submit' | 'review'; body: unknown }) =>
       inspectionAction(id, action, body),
   );
-  if (query.isLoading) return <Skeleton className="h-64" />;
-  if (!query.data)
+  if (query.isLoading || !query.data) {
     return (
-      <Button onClick={() => void query.refetch()}>{t('common.retry')}</Button>
+      <EntityDetailShell
+        backHref="/vehicle-inspections"
+        onBack={() => void navigate({ to: '/vehicle-inspections' })}
+        backLabel={t('inspections.title')}
+        isLoading={query.isLoading}
+        isError={!query.data}
+        errorTitle={t('common.error')}
+        onRetry={() => void query.refetch()}
+        retryLabel={t('common.retry')}
+      />
     );
+  }
+
   const row = query.data;
   const manager = inspectionManager(user?.role);
   const editable =
@@ -302,17 +319,28 @@ export default function InspectionDetailPage() {
         : { override_reason: reason || undefined },
     });
   return (
-    <div className="space-y-5">
-      <Link to="/vehicle-inspections">{t('inspections.title')}</Link>
-      <h1 className="text-2xl font-semibold">
-        {row.vehicle.plate_number} · {t(`inspections.${row.kind}`)}
-      </h1>
-      <p>
-        {t(`inspections.${row.status}`)} · {row.odometer_km} km
-      </p>
-      <p>
-        {row.author.name} → {row.receiver.name}
-      </p>
+    <EntityDetailShell
+      backHref="/vehicle-inspections"
+      onBack={() => void navigate({ to: '/vehicle-inspections' })}
+      backLabel={t('inspections.title')}
+      isLoading={false}
+      isError={false}
+      title={
+        <>
+          {row.vehicle.plate_number} · {t(`inspections.${row.kind}`)}
+        </>
+      }
+      description={
+        <>
+          {row.author.name} → {row.receiver.name}
+        </>
+      }
+      meta={
+        <span>
+          {t(`inspections.${row.status}`)} · {row.odometer_km} km
+        </span>
+      }
+    >
       {row.notes && <p>{row.notes}</p>}
       {editable && (
         <DraftCorrection id={id} odometer={row.odometer_km} notes={row.notes} />
@@ -320,39 +348,41 @@ export default function InspectionDetailPage() {
       <p className="text-sm text-muted-foreground">
         {t('inspections.camera_hint')}
       </p>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         {([...requiredSlots, 'defect'] as Slot[]).map((slot) => (
-          <section className="glass-card space-y-3 p-4" key={slot}>
-            <h2 className="font-medium">{t(`inspections.${slot}`)}</h2>
-            {row.evidence
-              .filter((e) => e.slot === slot)
-              .map((e) => (
-                <div key={e.id}>
-                  <EvidenceImage
-                    id={id}
-                    evidenceId={e.id}
-                    alt={t(`inspections.${slot}`)}
-                  />
-                  {e.note && <p>{e.note}</p>}
-                </div>
-              ))}
-            {editable && (
-              <EvidenceUpload
-                id={id}
-                slot={slot}
-                onBusy={(busy) =>
-                  setBusySlots((old) =>
-                    busy ? [...old, slot] : old.filter((s) => s !== slot),
-                  )
-                }
-              />
-            )}
-          </section>
+          <Card key={slot} asChild>
+            <section className=" space-y-3 ">
+              <h2 className="font-medium">{t(`inspections.${slot}`)}</h2>
+              {row.evidence
+                .filter((e) => e.slot === slot)
+                .map((e) => (
+                  <div key={e.id}>
+                    <EvidenceImage
+                      id={id}
+                      evidenceId={e.id}
+                      alt={t(`inspections.${slot}`)}
+                    />
+                    {e.note && <p>{e.note}</p>}
+                  </div>
+                ))}
+              {editable && (
+                <EvidenceUpload
+                  id={id}
+                  slot={slot}
+                  onBusy={(busy) =>
+                    setBusySlots((old) =>
+                      busy ? [...old, slot] : old.filter((s) => s !== slot),
+                    )
+                  }
+                />
+              )}
+            </section>
+          </Card>
         ))}
       </div>
       {(maySubmit ||
         (mayApprove && canReviewInspection(row, user?.role, user?.id))) && (
-        <div className="glass-card space-y-3 p-4">
+        <Card className=" space-y-3 ">
           <label className="block">
             {t('inspections.reason')}
             <Input value={reason} onChange={(e) => setReason(e.target.value)} />
@@ -405,7 +435,7 @@ export default function InspectionDetailPage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       )}
       <VehicleDefects vehicleId={row.vehicle_id} manager={manager} />
       {row.override_reason && (
@@ -419,6 +449,6 @@ export default function InspectionDetailPage() {
           {new Date(review.created_at).toLocaleString()}
         </p>
       ))}
-    </div>
+    </EntityDetailShell>
   );
 }

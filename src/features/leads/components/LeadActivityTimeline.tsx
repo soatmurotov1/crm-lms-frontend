@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -125,9 +126,9 @@ export const LeadActivityTimeline = ({
   );
 
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn('space-y-4', className)}>
       {/* Quick Add Card */}
-      <div className="rounded-2xl border bg-card p-4 shadow-xs">
+      <Card className=" ">
         <form onSubmit={handleCreate} className="space-y-3">
           <div className="flex items-center gap-1.5">
             {QUICK_KINDS.map(({ kind, icon: Icon }) => (
@@ -201,10 +202,10 @@ export const LeadActivityTimeline = ({
             </Button>
           </div>
         </form>
-      </div>
+      </Card>
 
       {/* Activities Timeline */}
-      <div className="rounded-2xl border bg-card p-5 shadow-xs">
+      <Card className=" ">
         <h3 className="mb-4 font-semibold text-sm text-foreground">
           {t('leads.timeline', 'Harakatlar tarixi va vazifalar')}
         </h3>
@@ -214,7 +215,7 @@ export const LeadActivityTimeline = ({
             {t('leads.no_activities', 'Hozircha harakatlar mavjud emas')}
           </div>
         ) : (
-          <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
+          <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
             {sortedActivities.map((act) => {
               const isTask = act.kind === 'TASK';
               const isDone = !!act.doneAt;
@@ -229,15 +230,13 @@ export const LeadActivityTimeline = ({
                   {/* Timeline Node Icon */}
                   <div
                     className={cn(
-                      'absolute -left-6 top-0.5 flex h-5 w-5 items-center justify-center rounded-full border bg-background shadow-2xs',
-                      act.kind === 'NOTE' && 'border-blue-400 text-blue-600',
-                      act.kind === 'CALL' &&
-                        'border-emerald-400 text-emerald-600',
-                      act.kind === 'TASK' && 'border-amber-400 text-amber-600',
-                      act.kind === 'STAGE_CHANGE' &&
-                        'border-purple-400 text-purple-600',
+                      'absolute -left-6 top-0.5 flex h-5 w-5 items-center justify-center rounded-full border bg-background',
+                      act.kind === 'NOTE' && 'border-border text-info',
+                      act.kind === 'CALL' && 'border-border text-success',
+                      act.kind === 'TASK' && 'border-border text-warning',
+                      act.kind === 'STAGE_CHANGE' && 'border-border text-info',
                       act.kind === 'SYSTEM' &&
-                        'border-slate-300 text-slate-500',
+                        'border-border text-muted-foreground',
                     )}
                   >
                     {act.kind === 'NOTE' && <NotePencil className="h-3 w-3" />}
@@ -249,7 +248,7 @@ export const LeadActivityTimeline = ({
                     {act.kind === 'SYSTEM' && <Gear className="h-3 w-3" />}
                   </div>
 
-                  <div className="rounded-xl border bg-muted/30 p-3.5 space-y-1.5 transition hover:bg-muted/50">
+                  <div className="rounded-md bg-muted/40 p-3 space-y-1.5 transition hover:bg-muted/50">
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 font-medium">
                         <span className="text-foreground">
@@ -339,7 +338,7 @@ export const LeadActivityTimeline = ({
             })}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

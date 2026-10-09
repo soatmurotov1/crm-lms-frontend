@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
@@ -23,32 +24,34 @@ export default function FuelTypes({
     await qc.invalidateQueries({ queryKey: vehicleKeys.all });
   });
   return (
-    <section className="glass-card space-y-3 p-4">
-      <h2>{t('fuel.allowed_types')}</h2>
-      <div className="flex flex-wrap gap-4">
-        {fuelTypes.map((type) => (
-          <label key={type} className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={selected.includes(type)}
-              onChange={(e) =>
-                setSelected((old) =>
-                  e.target.checked
-                    ? [...old, type]
-                    : old.filter((v) => v !== type),
-                )
-              }
-            />
-            {t(`fuel.${type}`)}
-          </label>
-        ))}
-      </div>
-      <Button
-        disabled={mutation.isPending || !selected.length}
-        onClick={() => mutation.mutate(undefined)}
-      >
-        {t('common.save')}
-      </Button>
-    </section>
+    <Card asChild>
+      <section className=" space-y-3 ">
+        <h2>{t('fuel.allowed_types')}</h2>
+        <div className="flex flex-wrap gap-4">
+          {fuelTypes.map((type) => (
+            <label key={type} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={selected.includes(type)}
+                onChange={(e) =>
+                  setSelected((old) =>
+                    e.target.checked
+                      ? [...old, type]
+                      : old.filter((v) => v !== type),
+                  )
+                }
+              />
+              {t(`fuel.${type}`)}
+            </label>
+          ))}
+        </div>
+        <Button
+          disabled={mutation.isPending || !selected.length}
+          onClick={() => mutation.mutate(undefined)}
+        >
+          {t('common.save')}
+        </Button>
+      </section>
+    </Card>
   );
 }

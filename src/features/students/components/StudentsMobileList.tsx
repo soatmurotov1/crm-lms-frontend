@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useAuthStore } from '@/store/authStore';
 import { userCan } from '@/lib/permissions';
 import { useCan } from '@/hooks/useCan';
@@ -71,17 +72,22 @@ export const StudentsMobileList = ({
   const localizedResultLabels = resultLabels(t);
 
   return (
-    <div className="grid gap-3 md:hidden p-3">
+    <div className="grid gap-3 md:hidden">
       {isLoading ? (
-        [...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-28 w-full rounded-lg" />
-        ))
+        <Card className="space-y-3" role="status" aria-busy="true">
+          <span className="sr-only">{t('common.loading')}</span>
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-5 w-full" />
+          ))}
+        </Card>
       ) : isError ? (
-        <EmptyState
-          icon={Warning}
-          title={t('common.error')}
-          action={{ label: t('common.retry'), onClick: onRetry }}
-        />
+        <Card>
+          <EmptyState
+            icon={Warning}
+            title={t('common.error')}
+            action={{ label: t('common.retry'), onClick: onRetry }}
+          />
+        </Card>
       ) : students.length > 0 ? (
         students.map((s) => {
           const fields = [
@@ -211,18 +217,20 @@ export const StudentsMobileList = ({
           );
         })
       ) : (
-        <EmptyState
-          icon={GraduationCap}
-          title={t('students.not_found')}
-          description={t('students.not_found_desc')}
-          action={
-            canCreate ? (
-              <Button size="sm" className="gap-2" onClick={onCreate}>
-                <Plus className="h-4 w-4" /> {t('students.add')}
-              </Button>
-            ) : undefined
-          }
-        />
+        <Card>
+          <EmptyState
+            icon={GraduationCap}
+            title={t('students.not_found')}
+            description={t('students.not_found_desc')}
+            action={
+              canCreate ? (
+                <Button size="sm" className="gap-2" onClick={onCreate}>
+                  <Plus className="h-4 w-4" /> {t('students.add')}
+                </Button>
+              ) : undefined
+            }
+          />
+        </Card>
       )}
     </div>
   );

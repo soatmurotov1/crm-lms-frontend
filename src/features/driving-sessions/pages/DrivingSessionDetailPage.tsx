@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -240,115 +241,118 @@ const DrivingSessionDetailPage = () => {
       backLabel={t('driving.title')}
       isLoading={false}
       isError={false}
-      header={
-        <div className="glass-card space-y-4 p-5">
-          <div>
-            <h1 className="font-heading text-2xl font-bold">{name}</h1>
-            <p className="text-sm text-muted-foreground">
-              {formatDate(session.starts_at)}–{formatDate(session.ends_at)} ·{' '}
-              {session.vehicle.plate_number}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {maySubmit && (
-              <Button onClick={() => setAction('submit')}>
-                {t('driving.actions.submit')}
-              </Button>
-            )}
-            {mayReview && (
-              <>
-                <Button onClick={() => setAction('approve')}>
-                  {t('driving.actions.approve')}
-                </Button>
-                <Button variant="outline" onClick={() => setAction('reject')}>
-                  {t('driving.actions.reject')}
-                </Button>
-              </>
-            )}
-            {mayCorrect && (
-              <Button variant="outline" onClick={() => setAction('correct')}>
-                {t('driving.actions.correct')}
-              </Button>
-            )}
-            {mayCancel && (
-              <Button variant="destructive" onClick={() => setAction('cancel')}>
-                {t('driving.actions.cancel')}
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate({
-                  to: '/training-enrollments/$id',
-                  params: { id: session.enrollment_id },
-                })
-              }
-            >
-              {t('driving.view_report')}
+      title={<span>{name}</span>}
+      description={
+        <p>
+          {formatDate(session.starts_at)}–{formatDate(session.ends_at)} ·{' '}
+          {session.vehicle.plate_number}
+        </p>
+      }
+      actions={
+        <div className="flex flex-wrap gap-2">
+          {maySubmit && (
+            <Button onClick={() => setAction('submit')}>
+              {t('driving.actions.submit')}
             </Button>
-          </div>
+          )}
+          {mayReview && (
+            <>
+              <Button onClick={() => setAction('approve')}>
+                {t('driving.actions.approve')}
+              </Button>
+              <Button variant="outline" onClick={() => setAction('reject')}>
+                {t('driving.actions.reject')}
+              </Button>
+            </>
+          )}
+          {mayCorrect && (
+            <Button variant="outline" onClick={() => setAction('correct')}>
+              {t('driving.actions.correct')}
+            </Button>
+          )}
+          {mayCancel && (
+            <Button variant="destructive" onClick={() => setAction('cancel')}>
+              {t('driving.actions.cancel')}
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            onClick={() =>
+              navigate({
+                to: '/training-enrollments/$id',
+                params: { id: session.enrollment_id },
+              })
+            }
+          >
+            {t('driving.view_report')}
+          </Button>
         </div>
       }
     >
-      <section className="glass-card space-y-4 p-5">
-        <h2 className="font-heading text-lg font-semibold">
-          {t('driving.session_details')}
-        </h2>
-        <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          {(
-            [
-              ['status', t(`driving.status.${session.status}`)],
-              ['planned', `${session.planned_minutes} ${t('driving.minutes')}`],
+      <Card asChild>
+        <section className=" space-y-4 ">
+          <h2 className="font-heading text-lg font-semibold">
+            {t('driving.session_details')}
+          </h2>
+          <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            {(
               [
-                'entered',
-                session.actual_minutes === null
-                  ? t('common.na')
-                  : `${session.actual_minutes} ${t('driving.minutes')}`,
-              ],
-              [
-                'approved',
-                `${session.approved_minutes} ${t('driving.minutes')}`,
-              ],
-              ['vehicle', session.vehicle.plate_number],
-              ['instructor', session.instructor.name],
-            ] as const
-          ).map(([key, value]) => (
-            <div key={key}>
-              <dt className="text-muted-foreground">
-                {t(key === 'status' ? 'common.status' : `driving.${key}`)}
-              </dt>
-              <dd className="mt-1 font-medium">{value}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="text-sm text-muted-foreground">
-          {t('driving.instructor_confirmation_notice')}
-        </p>
-        {session.gps_exception_reason && (
-          <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
-            <strong>{t('driving.gps_exception_reason')}:</strong>{' '}
-            {session.gps_exception_reason}
+                ['status', t(`driving.status.${session.status}`)],
+                [
+                  'planned',
+                  `${session.planned_minutes} ${t('driving.minutes')}`,
+                ],
+                [
+                  'entered',
+                  session.actual_minutes === null
+                    ? t('common.na')
+                    : `${session.actual_minutes} ${t('driving.minutes')}`,
+                ],
+                [
+                  'approved',
+                  `${session.approved_minutes} ${t('driving.minutes')}`,
+                ],
+                ['vehicle', session.vehicle.plate_number],
+                ['instructor', session.instructor.name],
+              ] as const
+            ).map(([key, value]) => (
+              <div key={key}>
+                <dt className="text-muted-foreground">
+                  {t(key === 'status' ? 'common.status' : `driving.${key}`)}
+                </dt>
+                <dd className="mt-1 font-medium">{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="text-sm text-muted-foreground">
+            {t('driving.instructor_confirmation_notice')}
           </p>
-        )}
-        {session.rejection_reason && (
-          <p className="text-sm">
-            <strong>{t('driving.rejection_reason')}:</strong>{' '}
-            {session.rejection_reason}
-          </p>
-        )}
-        {session.cancellation_reason && (
-          <p className="text-sm">
-            <strong>{t('driving.cancellation_reason')}:</strong>{' '}
-            {session.cancellation_reason}
-          </p>
-        )}
-        {session.last_correction_reason && (
-          <p className="text-sm">
-            <strong>{t('driving.correction_reason')}:</strong>{' '}
-            {session.last_correction_reason}
-          </p>
-        )}
-      </section>
+          {session.gps_exception_reason && (
+            <p className="rounded-md bg-muted/40 p-3 text-sm text-warning">
+              <strong>{t('driving.gps_exception_reason')}:</strong>{' '}
+              {session.gps_exception_reason}
+            </p>
+          )}
+          {session.rejection_reason && (
+            <p className="text-sm">
+              <strong>{t('driving.rejection_reason')}:</strong>{' '}
+              {session.rejection_reason}
+            </p>
+          )}
+          {session.cancellation_reason && (
+            <p className="text-sm">
+              <strong>{t('driving.cancellation_reason')}:</strong>{' '}
+              {session.cancellation_reason}
+            </p>
+          )}
+          {session.last_correction_reason && (
+            <p className="text-sm">
+              <strong>{t('driving.correction_reason')}:</strong>{' '}
+              {session.last_correction_reason}
+            </p>
+          )}
+        </section>
+      </Card>
       {action && (
         <SessionActionDialog
           key={action}

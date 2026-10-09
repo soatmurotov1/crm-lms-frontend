@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
@@ -84,15 +85,15 @@ export const LeadInfoCard = ({ lead, className }: LeadInfoCardProps) => {
     <div className={cn('space-y-4', className)}>
       {/* Converted Student Banner */}
       {lead.studentId && (
-        <div className="rounded-2xl border border-emerald-300 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/40 p-4 text-xs text-emerald-900 dark:text-emerald-200">
+        <div className="rounded-md bg-muted/40 p-3 text-xs text-success">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <CheckCircle className="h-5 w-5 text-success shrink-0" />
               <div>
                 <p className="font-semibold text-sm">
                   {t('leads.converted_to_student', 'O‘quvchiga aylantirilgan')}
                 </p>
-                <p className="text-[11px] text-emerald-800/80 dark:text-emerald-300/80">
+                <p className="text-[11px] text-success">
                   {t(
                     'leads.student_created_desc',
                     'Ushbu lid o‘quvchi sifatida ro‘yxatdan o‘tgan',
@@ -103,7 +104,7 @@ export const LeadInfoCard = ({ lead, className }: LeadInfoCardProps) => {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 gap-1 border-emerald-400/60 text-xs bg-background hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
+              className="h-8 gap-1 border-border text-xs bg-background hover:bg-success/10"
               onClick={() =>
                 void navigate({
                   to: '/students/$id',
@@ -120,18 +121,16 @@ export const LeadInfoCard = ({ lead, className }: LeadInfoCardProps) => {
 
       {/* Lost Reason Banner */}
       {lead.lostReason && (
-        <div className="rounded-2xl border border-rose-300 bg-rose-50 dark:border-rose-900/60 dark:bg-rose-950/40 p-4 text-xs text-rose-900 dark:text-rose-200">
+        <div className="rounded-md bg-muted/40 p-3 text-xs text-destructive">
           <div className="flex items-start gap-2">
-            <WarningCircle className="h-5 w-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+            <WarningCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p className="font-semibold text-sm">
                 {t('leads.lost_reason', 'Yo‘qotish sababi')}:{' '}
                 {t(`leads.lost_reasons.${lead.lostReason}`, lead.lostReason)}
               </p>
               {lead.lostReasonOther && (
-                <p className="text-rose-800/90 dark:text-rose-300/90">
-                  {lead.lostReasonOther}
-                </p>
+                <p className="text-destructive">{lead.lostReasonOther}</p>
               )}
             </div>
           </div>
@@ -139,7 +138,7 @@ export const LeadInfoCard = ({ lead, className }: LeadInfoCardProps) => {
       )}
 
       {/* Main Details Card */}
-      <div className="rounded-2xl border bg-card p-5 shadow-xs space-y-4">
+      <Card className=" space-y-4">
         <h3 className="font-semibold text-sm text-foreground">
           {t('leads.lead_details', 'Lid parametrlari')}
         </h3>
@@ -361,7 +360,7 @@ export const LeadInfoCard = ({ lead, className }: LeadInfoCardProps) => {
             )}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

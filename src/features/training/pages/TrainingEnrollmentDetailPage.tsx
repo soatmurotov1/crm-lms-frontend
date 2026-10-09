@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useWriteOptions } from '@/hooks/useWriteOptions';
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
@@ -318,179 +319,186 @@ const TrainingEnrollmentDetailPage = () => {
       backLabel={t('training.enrollments')}
       isLoading={false}
       isError={false}
-      header={
-        <div className="glass-card flex flex-wrap items-start justify-between gap-3 p-5 print:hidden">
-          <div>
-            <h1 className="font-heading text-2xl font-bold">{name}</h1>
-            <p className="text-sm text-muted-foreground">
-              {program?.name ?? t('training.program')} ·{' '}
-              {enrollment.category ?? t('training.legacy')}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {drivingSessionsEnabled &&
-              canSchedule &&
-              enrollment.status === 'active' &&
-              enrollment.program_id && (
-                <Button onClick={() => setScheduleOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t('driving.schedule')}
-                </Button>
-              )}
-            {drivingSessionsEnabled && canViewSummary && (
-              <Button
-                variant="outline"
-                onClick={() => window.print()}
-                disabled={!reportReady}
-              >
-                <Printer className="mr-2 h-4 w-4" />
-                {t('driving.print_report')}
+      title={<span className="print:hidden">{name}</span>}
+      description={
+        <p className="print:hidden">
+          {program?.name ?? t('training.program')} ·{' '}
+          {enrollment.category ?? t('training.legacy')}
+        </p>
+      }
+      actions={
+        <div className="flex flex-wrap gap-2 print:hidden">
+          {drivingSessionsEnabled &&
+            canSchedule &&
+            enrollment.status === 'active' &&
+            enrollment.program_id && (
+              <Button onClick={() => setScheduleOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t('driving.schedule')}
               </Button>
             )}
-          </div>
+          {drivingSessionsEnabled && canViewSummary && (
+            <Button
+              variant="outline"
+              onClick={() => window.print()}
+              disabled={!reportReady}
+            >
+              <Printer className="mr-2 h-4 w-4" />
+              {t('driving.print_report')}
+            </Button>
+          )}
         </div>
       }
     >
       {reportId ? (
-        <section
-          className="learner-print-report glass-card space-y-5 p-5 print:border-0 print:p-0 print:shadow-none"
-          aria-label={t('driving.report_title')}
-        >
-          <style>
-            {'@media print { @page { size: A4 landscape; margin: 12mm; } }'}
-          </style>
-          <div>
-            <h2 className="font-heading text-xl font-semibold">
-              {t('driving.report_title')}
-            </h2>
-            <p className="text-sm">
-              {name} · {program?.name ?? enrollment.category} ·{' '}
-              {t('training.status.' + enrollment.status)}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t('driving.instructor_confirmation_notice')}
-            </p>
-          </div>
-          {summary.isError || sessions.isError ? (
-            <EmptyState
-              title={t('common.error')}
-              action={{
-                label: t('common.retry'),
-                onClick: () => {
-                  void summary.refetch();
-                  void sessions.refetch();
-                },
-              }}
-            />
-          ) : !reportReady ? (
-            <p>{t('common.loading')}</p>
-          ) : (
-            <>
-              <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                {(
-                  [
-                    ['required', summary.data.required_minutes],
-                    ['planned', summary.data.planned_minutes],
-                    ['entered', summary.data.entered_minutes],
-                    ['approved', summary.data.approved_minutes],
-                    ['exception', summary.data.exception_minutes],
-                    ['remaining', summary.data.remaining_minutes],
-                  ] as const
-                ).map(([key, minutes]) => (
-                  <div key={key} className="rounded-md border p-3">
-                    <dt className="text-muted-foreground">
-                      {t(`driving.${key}`)}
-                    </dt>
-                    <dd className="mt-1 text-lg font-semibold tabular-nums">
-                      {minutes === null
-                        ? t('common.na')
-                        : `${minutes} ${t('driving.minutes')}`}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[820px] text-left text-sm print:min-w-0 print:text-xs">
-                  <thead>
-                    <tr className="border-b">
-                      <th scope="col" className="p-2">
-                        {t('common.date')}
-                      </th>
-                      <th scope="col" className="p-2">
-                        {t('driving.vehicle')}
-                      </th>
-                      <th scope="col" className="p-2">
-                        {t('driving.instructor')}
-                      </th>
-                      <th scope="col" className="p-2">
-                        {t('common.status')}
-                      </th>
-                      <th scope="col" className="p-2">
-                        {t('driving.planned')}
-                      </th>
-                      <th scope="col" className="p-2">
-                        {t('driving.entered')}
-                      </th>
-                      <th scope="col" className="p-2">
-                        {t('driving.approved')}
-                      </th>
-                      <th scope="col" className="p-2">
-                        {t('driving.exception')}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sessions.data.map((session) => (
-                      <tr key={session.id} className="border-b">
-                        <td className="p-2">
-                          <button
-                            type="button"
-                            className="text-left text-primary hover:underline print:text-foreground"
-                            onClick={() =>
-                              navigate({
-                                to: '/driving-sessions/$id',
-                                params: { id: session.id },
-                              })
-                            }
-                          >
-                            {formatDate(session.starts_at)}
-                          </button>
-                        </td>
-                        <td className="p-2">{session.vehicle.plate_number}</td>
-                        <td className="p-2">{session.instructor.name}</td>
-                        <td className="p-2">
-                          {t(`driving.status.${session.status}`)}
-                        </td>
-                        <td className="p-2 tabular-nums">
-                          {session.planned_minutes}
-                        </td>
-                        <td className="p-2 tabular-nums">
-                          {session.actual_minutes ?? '—'}
-                        </td>
-                        <td className="p-2 tabular-nums">
-                          {session.approved_minutes}
-                        </td>
-                        <td className="p-2 tabular-nums">
-                          {session.gps_exception_reason
-                            ? session.approved_minutes
-                            : 0}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {sessions.data.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  {t('driving.empty_sessions')}
-                </p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                {t('driving.report_disclaimer')}
+        <Card asChild>
+          <section
+            className="learner-print-report space-y-4 print:space-y-5 print:border-0 print:p-0 print:shadow-none"
+            aria-label={t('driving.report_title')}
+          >
+            <style>
+              {
+                '@media print { @page { size: A4 landscape; margin: 12mm; } header:has(+ .learner-print-report) { display: none; } }'
+              }
+            </style>
+            <div>
+              <h2 className="font-heading text-xl font-semibold">
+                {t('driving.report_title')}
+              </h2>
+              <p className="text-sm">
+                {name} · {program?.name ?? enrollment.category} ·{' '}
+                {t('training.status.' + enrollment.status)}
               </p>
-            </>
-          )}
-        </section>
+              <p className="text-xs text-muted-foreground">
+                {t('driving.instructor_confirmation_notice')}
+              </p>
+            </div>
+            {summary.isError || sessions.isError ? (
+              <EmptyState
+                title={t('common.error')}
+                action={{
+                  label: t('common.retry'),
+                  onClick: () => {
+                    void summary.refetch();
+                    void sessions.refetch();
+                  },
+                }}
+              />
+            ) : !reportReady ? (
+              <p>{t('common.loading')}</p>
+            ) : (
+              <>
+                <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                  {(
+                    [
+                      ['required', summary.data.required_minutes],
+                      ['planned', summary.data.planned_minutes],
+                      ['entered', summary.data.entered_minutes],
+                      ['approved', summary.data.approved_minutes],
+                      ['exception', summary.data.exception_minutes],
+                      ['remaining', summary.data.remaining_minutes],
+                    ] as const
+                  ).map(([key, minutes]) => (
+                    <div
+                      key={key}
+                      className="rounded-md bg-muted/40 p-3 print:border print:bg-transparent"
+                    >
+                      <dt className="text-muted-foreground">
+                        {t(`driving.${key}`)}
+                      </dt>
+                      <dd className="mt-1 text-lg font-semibold tabular-nums">
+                        {minutes === null
+                          ? t('common.na')
+                          : `${minutes} ${t('driving.minutes')}`}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[820px] text-left text-sm print:min-w-0 print:text-xs">
+                    <thead>
+                      <tr className="border-b">
+                        <th scope="col" className="p-2">
+                          {t('common.date')}
+                        </th>
+                        <th scope="col" className="p-2">
+                          {t('driving.vehicle')}
+                        </th>
+                        <th scope="col" className="p-2">
+                          {t('driving.instructor')}
+                        </th>
+                        <th scope="col" className="p-2">
+                          {t('common.status')}
+                        </th>
+                        <th scope="col" className="p-2">
+                          {t('driving.planned')}
+                        </th>
+                        <th scope="col" className="p-2">
+                          {t('driving.entered')}
+                        </th>
+                        <th scope="col" className="p-2">
+                          {t('driving.approved')}
+                        </th>
+                        <th scope="col" className="p-2">
+                          {t('driving.exception')}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sessions.data.map((session) => (
+                        <tr key={session.id} className="border-b">
+                          <td className="p-2">
+                            <button
+                              type="button"
+                              className="text-left text-primary hover:underline print:text-foreground"
+                              onClick={() =>
+                                navigate({
+                                  to: '/driving-sessions/$id',
+                                  params: { id: session.id },
+                                })
+                              }
+                            >
+                              {formatDate(session.starts_at)}
+                            </button>
+                          </td>
+                          <td className="p-2">
+                            {session.vehicle.plate_number}
+                          </td>
+                          <td className="p-2">{session.instructor.name}</td>
+                          <td className="p-2">
+                            {t(`driving.status.${session.status}`)}
+                          </td>
+                          <td className="p-2 tabular-nums">
+                            {session.planned_minutes}
+                          </td>
+                          <td className="p-2 tabular-nums">
+                            {session.actual_minutes ?? '—'}
+                          </td>
+                          <td className="p-2 tabular-nums">
+                            {session.approved_minutes}
+                          </td>
+                          <td className="p-2 tabular-nums">
+                            {session.gps_exception_reason
+                              ? session.approved_minutes
+                              : 0}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {sessions.data.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {t('driving.empty_sessions')}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {t('driving.report_disclaimer')}
+                </p>
+              </>
+            )}
+          </section>
+        </Card>
       ) : (
         <EmptyState
           title={t(

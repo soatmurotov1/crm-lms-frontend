@@ -1,3 +1,5 @@
+import { StatCard } from '@/components/ui/StatCard';
+import { Card } from '@/components/ui/card';
 import { useWriteOptions } from '@/hooks/useWriteOptions';
 import { useCan } from '@/hooks/useCan';
 import { useState } from 'react';
@@ -164,7 +166,7 @@ export default function InspectionsPage() {
   const summary = useInspectionSummary(inspectionManager(user?.role));
   const mutation = useInspectionMutation(createInspection);
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={t('vehicles.title')}
         title={t('inspections.title')}
@@ -182,7 +184,7 @@ export default function InspectionsPage() {
         }
       />
       <div className="space-y-2">
-        <div className="glass-card grid gap-3 p-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           {user?.role === 'owner' && (
             <select
               className={selectClass}
@@ -225,323 +227,326 @@ export default function InspectionsPage() {
         </div>
       )}
       {summary.isError && (
-        <div
-          role="alert"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-4"
-        >
-          <p className="text-sm text-destructive">{t('common.error')}</p>
-          <Button variant="outline" onClick={() => void summary.refetch()}>
-            {t('common.retry')}
-          </Button>
-        </div>
+        <Card role="alert">
+          <EmptyState
+            title={t('common.error')}
+            action={{
+              label: t('common.retry'),
+              onClick: () => void summary.refetch(),
+            }}
+          />
+        </Card>
       )}
       {summary.data && (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {Object.entries(summary.data).map(([key, value]) => (
-            <div className="glass-card p-4" key={key}>
-              <p className="text-sm text-muted-foreground">
-                {t(`inspections.${key}`)}
-              </p>
-              <strong className="mt-1 block text-2xl tabular-nums">
-                {value}
-              </strong>
-            </div>
+            <StatCard key={key} label={t(`inspections.${key}`)} value={value} />
           ))}
         </div>
       )}
       {create && mayCreate && (
         <Form {...form}>
-          <form
-            id="inspection-create-form"
-            className="glass-card space-y-4 p-4"
-            onSubmit={form.handleSubmit(async (values) => {
-              try {
-                const result = await mutation.mutateAsync({
-                  ...values,
-                  request_id: requestId,
-                  odometer_km: Number(values.odometer_km),
-                });
-                await navigate({
-                  to: '/vehicle-inspections/$id',
-                  params: { id: (result as { id: string }).id },
-                });
-              } catch {
-                /* service reports error */
-              }
-            })}
-          >
-            {options.scoped &&
-              !branchId &&
-              !activeBranchId &&
-              options.branches.length > 1 && (
-                <label className="block space-y-2">
-                  <span className="text-sm font-medium">
-                    {t('common.select_branch')}
-                  </span>
-                  <select
-                    className={selectClass}
-                    value={options.selectedBranchId ?? ''}
-                    onChange={(event) => {
-                      setLookupBranchId(event.target.value);
-                      form.setValue('vehicle_id', '');
-                      form.setValue('receiver_id', '');
-                    }}
+          <Card asChild>
+            <form
+              id="inspection-create-form"
+              className=" space-y-4 "
+              onSubmit={form.handleSubmit(async (values) => {
+                try {
+                  const result = await mutation.mutateAsync({
+                    ...values,
+                    request_id: requestId,
+                    odometer_km: Number(values.odometer_km),
+                  });
+                  await navigate({
+                    to: '/vehicle-inspections/$id',
+                    params: { id: (result as { id: string }).id },
+                  });
+                } catch {
+                  /* service reports error */
+                }
+              })}
+            >
+              {options.scoped &&
+                !branchId &&
+                !activeBranchId &&
+                options.branches.length > 1 && (
+                  <label className="block space-y-2">
+                    <span className="text-sm font-medium">
+                      {t('common.select_branch')}
+                    </span>
+                    <select
+                      className={selectClass}
+                      value={options.selectedBranchId ?? ''}
+                      onChange={(event) => {
+                        setLookupBranchId(event.target.value);
+                        form.setValue('vehicle_id', '');
+                        form.setValue('receiver_id', '');
+                      }}
+                    >
+                      <option value="">{t('common.select_branch')}</option>
+                      {options.branches.map((branch) => (
+                        <option key={branch.id} value={branch.id}>
+                          {branch.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              {options.scoped && options.isFetching && (
+                <p role="status">{t('common.loading')}</p>
+              )}
+              {options.scoped && options.isError && (
+                <p role="alert">
+                  {t('common.error')}{' '}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => void options.refetch()}
                   >
-                    <option value="">{t('common.select_branch')}</option>
-                    {options.branches.map((branch) => (
-                      <option key={branch.id} value={branch.id}>
-                        {branch.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-            {options.scoped && options.isFetching && (
-              <p role="status">{t('common.loading')}</p>
-            )}
-            {options.scoped && options.isError && (
-              <p role="alert">
-                {t('common.error')}{' '}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void options.refetch()}
-                >
-                  {t('common.retry')}
-                </Button>
-              </p>
-            )}
-            {options.scoped &&
-              options.selectedBranchId &&
-              !options.isFetching &&
-              !options.isError &&
-              vehicleChoices.length === 0 &&
-              ((options.data?.vehicles ?? []).length === 0 ? (
-                <div className="rounded-md border border-dashed p-3 text-sm">
-                  <p className="font-medium">{t('vehicles.no_eligible')}</p>
-                  <p className="text-muted-foreground">
-                    {t('vehicles.no_eligible_desc')}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {t('vehicles.no_filter_results')}
+                    {t('common.retry')}
+                  </Button>
                 </p>
-              ))}
-            <Input
-              aria-label={t('inspections.vehicle_search')}
-              placeholder={t('inspections.vehicle_search')}
-              value={vehicleSearch}
-              onChange={(e) => {
-                setVehicleSearch(e.target.value);
-                setVehiclePage(1);
-              }}
-            />
-            <FormField
-              control={form.control}
-              name="vehicle_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('inspections.vehicle')}</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className={selectClass}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        form.setValue('receiver_id', '');
-                        setReceiverPage(1);
-                      }}
-                    >
-                      <option value="">{t('inspections.choose')}</option>
-                      {vehicleChoices.map((v) => (
-                        <option value={v.id} key={v.id}>
-                          {v.plate_number} {'make' in v ? String(v.make) : ''}{' '}
-                          {v.model}
-                        </option>
-                      ))}
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
               )}
-            />
-            {!options.scoped && (
-              <PaginationControls
-                currentPage={vehiclePage}
-                totalPages={vehicles.data?.meta.totalPages ?? 1}
-                onPageChange={setVehiclePage}
-              />
-            )}
-            <Input
-              aria-label={t('inspections.receiver_search')}
-              placeholder={t('inspections.receiver_search')}
-              disabled={!vehicleId}
-              value={receiverSearch}
-              onChange={(e) => {
-                setReceiverSearch(e.target.value);
-                setReceiverPage(1);
-              }}
-            />
-            <FormField
-              control={form.control}
-              name="receiver_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('inspections.receiver')}</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className={selectClass}
-                      disabled={!vehicleId}
-                      aria-describedby={
-                        vehicleId ? undefined : 'inspection-receiver-hint'
-                      }
-                    >
-                      <option value="">{t('inspections.choose')}</option>
-                      {receivers.data?.data
-                        .filter((u) => u.id !== user?.id)
-                        .map((u) => (
-                          <option value={u.id} key={u.id}>
-                            {u.name}
-                          </option>
-                        ))}
-                    </select>
-                  </FormControl>
-                  {!vehicleId && (
-                    <p
-                      id="inspection-receiver-hint"
-                      className="text-xs text-muted-foreground"
-                    >
-                      {t('inspections.receiver_needs_vehicle')}
+              {options.scoped &&
+                options.selectedBranchId &&
+                !options.isFetching &&
+                !options.isError &&
+                vehicleChoices.length === 0 &&
+                ((options.data?.vehicles ?? []).length === 0 ? (
+                  <div className="rounded-md border border-dashed p-3 text-sm">
+                    <p className="font-medium">{t('vehicles.no_eligible')}</p>
+                    <p className="text-muted-foreground">
+                      {t('vehicles.no_eligible_desc')}
                     </p>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <PaginationControls
-              currentPage={receiverPage}
-              totalPages={receivers.data?.meta.totalPages ?? 1}
-              onPageChange={setReceiverPage}
-            />
-            <FormField
-              control={form.control}
-              name="kind"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('inspections.kind')}</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className={selectClass}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        form.setValue('receiver_id', '');
-                        setReceiverPage(1);
-                      }}
-                    >
-                      {['acceptance', 'return'].map((kind) => (
-                        <option key={kind} value={kind}>
-                          {t(`inspections.${kind}`)}
-                        </option>
-                      ))}
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {(['odometer_km', 'notes'] as const).map((name) => (
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {t('vehicles.no_filter_results')}
+                  </p>
+                ))}
+              <Input
+                aria-label={t('inspections.vehicle_search')}
+                placeholder={t('inspections.vehicle_search')}
+                value={vehicleSearch}
+                onChange={(e) => {
+                  setVehicleSearch(e.target.value);
+                  setVehiclePage(1);
+                }}
+              />
               <FormField
-                key={name}
                 control={form.control}
-                name={name}
+                name="vehicle_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t(`inspections.${name}`)}</FormLabel>
+                    <FormLabel>{t('inspections.vehicle')}</FormLabel>
                     <FormControl>
-                      <Input
+                      <select
                         {...field}
-                        inputMode={
-                          name === 'odometer_km' ? 'numeric' : undefined
-                        }
-                      />
+                        className={selectClass}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          form.setValue('receiver_id', '');
+                          setReceiverPage(1);
+                        }}
+                      >
+                        <option value="">{t('inspections.choose')}</option>
+                        {vehicleChoices.map((v) => (
+                          <option value={v.id} key={v.id}>
+                            {v.plate_number} {'make' in v ? String(v.make) : ''}{' '}
+                            {v.model}
+                          </option>
+                        ))}
+                      </select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            ))}
-            <Button type="submit" disabled={mutation.isPending}>
-              {t('inspections.create')}
-            </Button>
-          </form>
+              {!options.scoped && (
+                <PaginationControls
+                  currentPage={vehiclePage}
+                  totalPages={vehicles.data?.meta.totalPages ?? 1}
+                  onPageChange={setVehiclePage}
+                />
+              )}
+              <Input
+                aria-label={t('inspections.receiver_search')}
+                placeholder={t('inspections.receiver_search')}
+                disabled={!vehicleId}
+                value={receiverSearch}
+                onChange={(e) => {
+                  setReceiverSearch(e.target.value);
+                  setReceiverPage(1);
+                }}
+              />
+              <FormField
+                control={form.control}
+                name="receiver_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('inspections.receiver')}</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className={selectClass}
+                        disabled={!vehicleId}
+                        aria-describedby={
+                          vehicleId ? undefined : 'inspection-receiver-hint'
+                        }
+                      >
+                        <option value="">{t('inspections.choose')}</option>
+                        {receivers.data?.data
+                          .filter((u) => u.id !== user?.id)
+                          .map((u) => (
+                            <option value={u.id} key={u.id}>
+                              {u.name}
+                            </option>
+                          ))}
+                      </select>
+                    </FormControl>
+                    {!vehicleId && (
+                      <p
+                        id="inspection-receiver-hint"
+                        className="text-xs text-muted-foreground"
+                      >
+                        {t('inspections.receiver_needs_vehicle')}
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <PaginationControls
+                currentPage={receiverPage}
+                totalPages={receivers.data?.meta.totalPages ?? 1}
+                onPageChange={setReceiverPage}
+              />
+              <FormField
+                control={form.control}
+                name="kind"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('inspections.kind')}</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className={selectClass}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          form.setValue('receiver_id', '');
+                          setReceiverPage(1);
+                        }}
+                      >
+                        {['acceptance', 'return'].map((kind) => (
+                          <option key={kind} value={kind}>
+                            {t(`inspections.${kind}`)}
+                          </option>
+                        ))}
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {(['odometer_km', 'notes'] as const).map((name) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t(`inspections.${name}`)}</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          inputMode={
+                            name === 'odometer_km' ? 'numeric' : undefined
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+              <Button type="submit" disabled={mutation.isPending}>
+                {t('inspections.create')}
+              </Button>
+            </form>
+          </Card>
         </Form>
       )}
       {rows.isLoading ? (
-        <div className="space-y-3" aria-label={t('common.loading')}>
-          {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} className="h-24 rounded-lg" />
-          ))}
-        </div>
+        <Card asChild>
+          <div className="space-y-3" aria-label={t('common.loading')}>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-24 rounded-lg" />
+            ))}
+          </div>
+        </Card>
       ) : rows.isError ? (
-        <EmptyState
-          title={t('common.error')}
-          description={t('inspections.load_error_desc')}
-          action={{
-            label: t('common.retry'),
-            onClick: () => void rows.refetch(),
-          }}
-        />
+        <Card>
+          <EmptyState
+            title={t('common.error')}
+            description={t('inspections.load_error_desc')}
+            action={{
+              label: t('common.retry'),
+              onClick: () => void rows.refetch(),
+            }}
+          />
+        </Card>
       ) : rows.data?.data.length ? (
         <div className="grid gap-3">
           {rows.data.data.map((row) => (
-            <Link
-              className="glass-card block space-y-2 rounded-lg p-4 transition-colors hover:border-primary/40 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              key={row.id}
-              to="/vehicle-inspections/$id"
-              params={{ id: row.id }}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <strong className="text-foreground">
-                  {row.vehicle.plate_number} · {t(`inspections.${row.kind}`)}
-                </strong>
-                <Badge variant="outline">
-                  {t(`inspections.${row.status}`)}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {row.author.name} → {row.receiver.name}
-              </p>
-              <p className="text-sm tabular-nums text-muted-foreground">
-                {row.odometer_km.toLocaleString(i18n.language)} km ·{' '}
-                <time dateTime={row.created_at}>
-                  {new Intl.DateTimeFormat(i18n.language, {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                    timeZone: 'Asia/Tashkent',
-                  }).format(new Date(row.created_at))}
-                </time>
-              </p>
-            </Link>
+            <Card key={row.id} asChild>
+              <Link
+                className=" block space-y-2 rounded-lg transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+
+                to="/vehicle-inspections/$id"
+                params={{ id: row.id }}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <strong className="text-foreground">
+                    {row.vehicle.plate_number} · {t(`inspections.${row.kind}`)}
+                  </strong>
+                  <Badge variant="outline">
+                    {t(`inspections.${row.status}`)}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {row.author.name} → {row.receiver.name}
+                </p>
+                <p className="text-sm tabular-nums text-muted-foreground">
+                  {row.odometer_km.toLocaleString(i18n.language)} km ·{' '}
+                  <time dateTime={row.created_at}>
+                    {new Intl.DateTimeFormat(i18n.language, {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                      timeZone: 'Asia/Tashkent',
+                    }).format(new Date(row.created_at))}
+                  </time>
+                </p>
+              </Link>
+            </Card>
           ))}
         </div>
       ) : (
-        <EmptyState
-          title={t('inspections.empty')}
-          description={t(
-            status ? 'inspections.no_results_desc' : 'inspections.empty_desc',
-          )}
-          action={
-            status || branchId
-              ? {
-                  label: t('common.clear'),
-                  onClick: clearFilters,
-                }
-              : undefined
-          }
-        />
+        <Card>
+          <EmptyState
+            title={t('inspections.empty')}
+            description={t(
+              status ? 'inspections.no_results_desc' : 'inspections.empty_desc',
+            )}
+            action={
+              status || branchId
+                ? {
+                    label: t('common.clear'),
+                    onClick: clearFilters,
+                  }
+                : undefined
+            }
+          />
+        </Card>
       )}
       <PaginationControls
         currentPage={page}

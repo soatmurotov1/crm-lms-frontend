@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import { requestBranchId } from '@/lib/permissions';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
@@ -309,7 +310,7 @@ const VehiclesPage = () => {
           <Link to="/vehicle-inspections">{t('inspections.title')}</Link>
         </Button>
       )}
-      <div className="glass-card space-y-3 p-4">
+      <div className="space-y-3">
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <SearchWithHotkey
             aria-label={t('common.search')}
@@ -459,6 +460,7 @@ const VehiclesPage = () => {
             />
           ) : undefined
         }
+        loadingState={<Skeleton className="h-5 w-full" />}
         emptyState={
           <EmptyState
             icon={Car}

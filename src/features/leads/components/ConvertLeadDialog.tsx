@@ -118,7 +118,7 @@ export const ConvertLeadDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
             <Student className="h-6 w-6" />
           </div>
           <DialogTitle className="text-center">
@@ -134,7 +134,7 @@ export const ConvertLeadDialog = ({
 
         <div className="space-y-4 py-2">
           {/* Lead Summary */}
-          <div className="rounded-xl border bg-muted/40 p-3.5 text-xs space-y-1.5">
+          <div className="rounded-lg border bg-muted/40 p-3.5 text-xs space-y-1.5">
             <div className="flex justify-between font-medium">
               <span className="text-muted-foreground">
                 {t('common.name', 'F.I.SH')}:
@@ -173,9 +173,9 @@ export const ConvertLeadDialog = ({
 
           {/* Duplicate Conflict Warning */}
           {duplicateWarning && (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/40 p-3.5 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+            <div className="rounded-lg border border-border bg-warning/10 p-3.5 text-xs text-warning space-y-2">
               <div className="flex items-start gap-2">
-                <Warning className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <Warning className="h-4 w-4 shrink-0 text-warning mt-0.5" />
                 <p className="font-medium">{duplicateWarning}</p>
               </div>
               <label
@@ -188,7 +188,7 @@ export const ConvertLeadDialog = ({
                   type="checkbox"
                   checked={force}
                   onChange={(e) => setForce(e.target.checked)}
-                  className="rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+                  className="rounded border-border text-warning focus:ring-ring"
                 />
                 <span>
                   {t('leads.force_convert', 'Mavjud o‘quvchiga bog‘lash')}

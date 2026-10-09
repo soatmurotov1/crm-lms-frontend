@@ -141,11 +141,30 @@ afterEach(() => {
 });
 
 describe('ExpensesPage', () => {
+  it('renders overdue records without a parent bordered surface', async () => {
+    useOverdueExpenseSweepMock.mockReturnValue({
+      data: [{ ...EXPENSES[0], overdue_days: 5 }],
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    const { container } = await renderPage('/expenses?attention=overdue');
+    const record = screen
+      .getByRole('link', { name: /Ofis ijarasi/ })
+      .closest('[data-surface="card"]');
+    expect(record).not.toBeNull();
+    expect(record?.parentElement?.closest('[data-surface="card"]')).toBeNull();
+    expect(
+      container.querySelector('[data-surface="card"] [data-surface="card"]'),
+    ).toBeNull();
+  });
+
   it('keeps pagination outside the expenses table card', async () => {
     await renderPage();
     const tableCard = screen
       .getByRole('table', { name: 'expenses.title' })
-      .closest('.glass-card');
+      .closest('[data-surface="card"]');
     expect(tableCard).not.toContainElement(
       screen.getByRole('navigation', { name: 'expenses.title' }),
     );

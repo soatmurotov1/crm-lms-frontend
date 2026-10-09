@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { requestBranchId } from '@/lib/permissions';
 import { useState } from 'react';
 import FuelTypes from '../fuel/FuelTypes';
@@ -82,60 +83,36 @@ const VehicleDetailPage = () => {
       backLabel={t('vehicles.title')}
       isLoading={false}
       isError={false}
-      header={
-        <div className="glass-card space-y-3 p-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="font-heading text-2xl font-bold">
-                {vehicle.plate_number}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {vehicle.make} {vehicle.model} · {branchName(vehicle.branch_id)}
-              </p>
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                {vehicle.current_custodian ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 px-2.5 py-1 font-medium text-secondary-foreground">
-                    <User className="h-3.5 w-3.5 text-primary" />
-                    <span>{t('vehicles.current_custodian')}:</span>
-                    <strong className="text-foreground">
-                      {vehicle.current_custodian.name}
-                    </strong>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-muted-foreground">
-                    <User className="h-3.5 w-3.5 opacity-60" />
-                    <span>{t('vehicles.current_custodian')}:</span>
-                    <span>{t('vehicles.no_custodian')}</span>
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {canCreateFuel && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFuelOpen(true)}
-                >
-                  <GasPump className="mr-1.5 h-4 w-4 text-primary" />
-                  {t('fuel.create')}
-                </Button>
-              )}
-              {canManage && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setEditOpen(true)}
-                >
-                  {t('common.edit')}
-                </Button>
-              )}
-            </div>
+      title={vehicle.plate_number}
+      description={
+        <>
+          {vehicle.make} {vehicle.model} · {branchName(vehicle.branch_id)}
+        </>
+      }
+      meta={
+        <div className="space-y-2">
+          {' '}
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+            {vehicle.current_custodian ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 px-2.5 py-1 font-medium text-secondary-foreground">
+                <User className="h-3.5 w-3.5 text-primary" />
+                <span>{t('vehicles.current_custodian')}:</span>
+                <strong className="text-foreground">
+                  {vehicle.current_custodian.name}
+                </strong>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-muted-foreground">
+                <User className="h-3.5 w-3.5 opacity-60" />
+                <span>{t('vehicles.current_custodian')}:</span>
+                <span>{t('vehicles.no_custodian')}</span>
+              </span>
+            )}
           </div>
           <p
             className={
               vehicle.available_for_booking
-                ? 'text-sm text-emerald-700 dark:text-emerald-400'
+                ? 'text-sm text-success'
                 : 'text-sm text-destructive'
             }
           >
@@ -157,6 +134,29 @@ const VehicleDetailPage = () => {
             )}
         </div>
       }
+      actions={
+        <div className="flex flex-wrap items-center gap-2">
+          {canCreateFuel && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setFuelOpen(true)}
+            >
+              <GasPump className="mr-1.5 h-4 w-4 text-primary" />
+              {t('fuel.create')}
+            </Button>
+          )}
+          {canManage && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditOpen(true)}
+            >
+              {t('common.edit')}
+            </Button>
+          )}
+        </div>
+      }
     >
       {['owner', 'manager'].includes(user?.role ?? '') && (
         <FuelTypes
@@ -176,28 +176,30 @@ const VehicleDetailPage = () => {
           <TabsTrigger value="transfers">{t('vehicles.transfers')}</TabsTrigger>
         </TabsList>
         <TabsContent value="info">
-          <dl className="glass-card grid gap-4 p-5 text-sm sm:grid-cols-2">
-            {[
-              [t('common.branch'), branchName(vehicle.branch_id)],
-              [
-                t('vehicles.current_custodian'),
-                vehicle.current_custodian?.name ?? t('vehicles.no_custodian'),
-              ],
-              [t('vehicles.vin'), vehicle.vin || t('common.na')],
-              [t('vehicles.year'), String(vehicle.manufacture_year)],
-              [t('vehicles.categories'), vehicle.categories.join(', ')],
-              [
-                t('vehicles.odometer'),
-                `${new Intl.NumberFormat(i18n.language).format(vehicle.odometer_km)} km`,
-              ],
-              [t('common.status'), t(`vehicles.status.${vehicle.status}`)],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <dt className="text-muted-foreground">{label}</dt>
-                <dd className="mt-1 font-medium">{value}</dd>
-              </div>
-            ))}
-          </dl>
+          <Card asChild>
+            <dl className=" grid gap-4 text-sm sm:grid-cols-2">
+              {[
+                [t('common.branch'), branchName(vehicle.branch_id)],
+                [
+                  t('vehicles.current_custodian'),
+                  vehicle.current_custodian?.name ?? t('vehicles.no_custodian'),
+                ],
+                [t('vehicles.vin'), vehicle.vin || t('common.na')],
+                [t('vehicles.year'), String(vehicle.manufacture_year)],
+                [t('vehicles.categories'), vehicle.categories.join(', ')],
+                [
+                  t('vehicles.odometer'),
+                  `${new Intl.NumberFormat(i18n.language).format(vehicle.odometer_km)} km`,
+                ],
+                [t('common.status'), t(`vehicles.status.${vehicle.status}`)],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-muted-foreground">{label}</dt>
+                  <dd className="mt-1 font-medium">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </Card>
         </TabsContent>
         <TabsContent value="sessions">
           <VehicleSessionsTab vehicleId={vehicle.id} />
@@ -213,36 +215,38 @@ const VehicleDetailPage = () => {
           {vehicle.documents.length ? (
             <div className="grid gap-3 md:grid-cols-2">
               {vehicle.documents.map((document) => (
-                <article key={document.id} className="glass-card p-4">
-                  <h2 className="font-semibold">{document.label}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {t(`vehicles.document_types.${document.type}`)}
-                  </p>
-                  <dl className="mt-3 grid gap-2 text-sm">
-                    <div>
-                      <dt className="text-muted-foreground">
-                        {t('vehicles.expires_on')}
-                      </dt>
-                      <dd>{formatDate(document.expires_on)}</dd>
-                    </div>
-                    {document.reference && (
+                <Card key={document.id} asChild>
+                  <article className=" ">
+                    <h2 className="font-semibold">{document.label}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {t(`vehicles.document_types.${document.type}`)}
+                    </p>
+                    <dl className="mt-3 grid gap-2 text-sm">
                       <div>
                         <dt className="text-muted-foreground">
-                          {t('vehicles.reference')}
+                          {t('vehicles.expires_on')}
                         </dt>
-                        <dd>{document.reference}</dd>
+                        <dd>{formatDate(document.expires_on)}</dd>
                       </div>
+                      {document.reference && (
+                        <div>
+                          <dt className="text-muted-foreground">
+                            {t('vehicles.reference')}
+                          </dt>
+                          <dd>{document.reference}</dd>
+                        </div>
+                      )}
+                    </dl>
+                    {canUpdateDocument && (
+                      <VehicleOperations
+                        kind="editDocument"
+                        vehicle={vehicle}
+                        branches={branches}
+                        document={document}
+                      />
                     )}
-                  </dl>
-                  {canUpdateDocument && (
-                    <VehicleOperations
-                      kind="editDocument"
-                      vehicle={vehicle}
-                      branches={branches}
-                      document={document}
-                    />
-                  )}
-                </article>
+                  </article>
+                </Card>
               ))}
             </div>
           ) : (
@@ -260,33 +264,36 @@ const VehicleDetailPage = () => {
           {vehicle.maintenance.length ? (
             <div className="grid gap-3 md:grid-cols-2">
               {vehicle.maintenance.map((record) => (
-                <article key={record.id} className="glass-card p-4">
-                  <h2 className="font-semibold">{record.description}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {t('vehicles.started_at')}: {formatDate(record.started_at)}
-                  </p>
-                  <p className="mt-2 text-sm">
-                    {record.completed_at
-                      ? `${t('vehicles.completed_at')}: ${formatDate(record.completed_at)}`
-                      : t('vehicles.maintenance_open')}
-                  </p>
-                  <p className="text-sm">
-                    {t('vehicles.next_due_on')}:{' '}
-                    {formatDate(record.next_due_on)}
-                  </p>
-                  <p className="text-sm">
-                    {t('vehicles.next_due_odometer')}:{' '}
-                    {record.next_due_odometer_km ?? t('common.na')}
-                  </p>
-                  {canUpdateMaintenance && (
-                    <VehicleOperations
-                      kind="editMaintenance"
-                      vehicle={vehicle}
-                      branches={branches}
-                      maintenance={record}
-                    />
-                  )}
-                </article>
+                <Card key={record.id} asChild>
+                  <article className=" ">
+                    <h2 className="font-semibold">{record.description}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {t('vehicles.started_at')}:{' '}
+                      {formatDate(record.started_at)}
+                    </p>
+                    <p className="mt-2 text-sm">
+                      {record.completed_at
+                        ? `${t('vehicles.completed_at')}: ${formatDate(record.completed_at)}`
+                        : t('vehicles.maintenance_open')}
+                    </p>
+                    <p className="text-sm">
+                      {t('vehicles.next_due_on')}:{' '}
+                      {formatDate(record.next_due_on)}
+                    </p>
+                    <p className="text-sm">
+                      {t('vehicles.next_due_odometer')}:{' '}
+                      {record.next_due_odometer_km ?? t('common.na')}
+                    </p>
+                    {canUpdateMaintenance && (
+                      <VehicleOperations
+                        kind="editMaintenance"
+                        vehicle={vehicle}
+                        branches={branches}
+                        maintenance={record}
+                      />
+                    )}
+                  </article>
+                </Card>
               ))}
             </div>
           ) : (
@@ -304,15 +311,17 @@ const VehicleDetailPage = () => {
           {vehicle.transfers.length ? (
             <ol className="space-y-3">
               {vehicle.transfers.map((transfer) => (
-                <li key={transfer.id} className="glass-card p-4 text-sm">
-                  <div className="font-medium">
-                    {branchName(transfer.from_branch_id)} →{' '}
-                    {branchName(transfer.to_branch_id)}
-                  </div>
-                  <p className="mt-1 text-muted-foreground">
-                    {formatDate(transfer.transferred_at)} · {transfer.reason}
-                  </p>
-                </li>
+                <Card key={transfer.id} asChild>
+                  <li className=" text-sm">
+                    <div className="font-medium">
+                      {branchName(transfer.from_branch_id)} →{' '}
+                      {branchName(transfer.to_branch_id)}
+                    </div>
+                    <p className="mt-1 text-muted-foreground">
+                      {formatDate(transfer.transferred_at)} · {transfer.reason}
+                    </p>
+                  </li>
+                </Card>
               ))}
             </ol>
           ) : (

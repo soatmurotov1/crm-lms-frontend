@@ -39,6 +39,8 @@ const CoursesPage = () => {
     data: courses,
     isLoading,
     isFetching,
+    isError,
+    refetch,
   } = useCourses({
     search: debouncedSearch.trim() || undefined,
   });
@@ -97,13 +99,13 @@ const CoursesPage = () => {
 
       <div className="relative">
         {isFetching && !isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/60 backdrop-blur-[2px]">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/60 backdrop-blur-[2px]">
             <CircleNotch className="h-6 w-6 animate-spin text-primary" />
           </div>
         )}
         <div
           className={cn(
-            'glass-card overflow-hidden transition-opacity duration-200',
+            'transition-opacity duration-200',
             isFetching && !isLoading && 'opacity-50',
           )}
         >
@@ -111,6 +113,8 @@ const CoursesPage = () => {
             courses={visibleCourses}
             isLoading={isLoading}
             isFetching={isFetching}
+            isError={isError}
+            onRetry={() => void refetch()}
             onNavigate={(course) =>
               navigate({ to: '/courses/$id', params: { id: course.id } })
             }

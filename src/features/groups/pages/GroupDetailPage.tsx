@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -96,26 +97,22 @@ const GroupDetailPage = () => {
       backLabel={t('groups.title')}
       isLoading={false}
       isError={false}
-      header={
-        <div className="glass-card flex flex-wrap items-start justify-between gap-4 p-5">
-          <div className="space-y-2">
-            <h1 className="font-heading text-2xl font-bold text-balance">
-              {group.name}
-            </h1>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <span>{group.branch_name ?? t('common.na')}</span>
-              <span>·</span>
-              <span>{courseLabel}</span>
-              <span>·</span>
-              <span>
-                {t('groups.teacher')}: {group.teacher_name ?? t('common.na')}
-              </span>
-            </div>
-            <Badge variant={group.is_active ? 'secondary' : 'destructive'}>
-              {group.is_active ? t('common.active') : t('common.inactive')}
-            </Badge>
-          </div>
+      title={group.name}
+      description={
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>{group.branch_name ?? t('common.na')}</span>
+          <span>·</span>
+          <span>{courseLabel}</span>
+          <span>·</span>
+          <span>
+            {t('groups.teacher')}: {group.teacher_name ?? t('common.na')}
+          </span>
         </div>
+      }
+      meta={
+        <Badge variant={group.is_active ? 'secondary' : 'destructive'}>
+          {group.is_active ? t('common.active') : t('common.inactive')}
+        </Badge>
       }
     >
       <Tabs value={tab} onValueChange={setTab}>
@@ -128,21 +125,23 @@ const GroupDetailPage = () => {
         </TabsList>
 
         <TabsContent value="info">
-          <dl className="glass-card grid grid-cols-1 gap-x-8 gap-y-3 p-5 text-sm sm:grid-cols-2">
-            <Field
-              label={t('groups.teacher')}
-              value={group.teacher_name ?? t('common.na')}
-            />
-            <Field label={t('groups.course_type')} value={courseLabel} />
-            <Field
-              label={t('common.branch')}
-              value={group.branch_name ?? t('common.na')}
-            />
-            <Field
-              label={t('groups.student_count')}
-              value={String(group.active_students)}
-            />
-          </dl>
+          <Card asChild>
+            <dl className=" grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+              <Field
+                label={t('groups.teacher')}
+                value={group.teacher_name ?? t('common.na')}
+              />
+              <Field label={t('groups.course_type')} value={courseLabel} />
+              <Field
+                label={t('common.branch')}
+                value={group.branch_name ?? t('common.na')}
+              />
+              <Field
+                label={t('groups.student_count')}
+                value={String(group.active_students)}
+              />
+            </dl>
+          </Card>
         </TabsContent>
 
         <TabsContent value="students">
@@ -228,7 +227,7 @@ const GroupDetailPage = () => {
           {group.schedule.length === 0 ? (
             <EmptyState title={t('groups.detail.no_schedule')} />
           ) : (
-            <div className="glass-card divide-y divide-border">
+            <Card className=" divide-y divide-border">
               {group.schedule.map((entry) => (
                 <div
                   key={entry.id}
@@ -249,7 +248,7 @@ const GroupDetailPage = () => {
                   </span>
                 </div>
               ))}
-            </div>
+            </Card>
           )}
         </TabsContent>
       </Tabs>

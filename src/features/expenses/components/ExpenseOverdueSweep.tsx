@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useEffect, useId, useRef } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Warning, Wallet } from '@phosphor-icons/react';
@@ -141,23 +142,27 @@ export const ExpenseOverdueSweep = ({
         </p>
       )}
       {isLoading ? (
-        <div className="space-y-3">
+        <Card className="space-y-3">
           {Array.from({ length: 4 }, (_, index) => (
             <Skeleton key={index} className="h-24 w-full" />
           ))}
-        </div>
+        </Card>
       ) : isError ? (
-        <EmptyState
-          icon={Warning}
-          title={t('expenses.overdue_sweep.load_error')}
-          action={{ label: t('common.retry'), onClick: handleRetry }}
-        />
+        <Card>
+          <EmptyState
+            icon={Warning}
+            title={t('expenses.overdue_sweep.load_error')}
+            action={{ label: t('common.retry'), onClick: handleRetry }}
+          />
+        </Card>
       ) : expenses.length === 0 ? (
-        <EmptyState
-          icon={Wallet}
-          title={t('expenses.overdue_sweep.empty')}
-          description={t('expenses.overdue_sweep.empty_desc')}
-        />
+        <Card>
+          <EmptyState
+            icon={Wallet}
+            title={t('expenses.overdue_sweep.empty')}
+            description={t('expenses.overdue_sweep.empty_desc')}
+          />
+        </Card>
       ) : (
         buckets.map((bucket) => {
           const bucketExpenses = expenses.filter((expense) =>
@@ -177,59 +182,61 @@ export const ExpenseOverdueSweep = ({
               <ul role="list" aria-labelledby={headingId} className="space-y-3">
                 {bucketExpenses.map((expense) => (
                   <li key={expense.id}>
-                    <Link
-                      to="/expenses/$id"
-                      params={{ id: expense.id }}
-                      search={returnContext}
-                      data-overdue-shortcut
-                      className="block min-h-10 rounded-xl border border-border bg-card p-4 text-card-foreground transition-colors hover:border-primary/40 hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <span className="font-heading font-semibold">
-                          {expense.title}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {expense.branch_name ??
-                            t('expenses.form.company_wide')}
-                        </span>
-                      </div>
-                      <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">
-                        <div>
-                          <dt className="text-xs text-muted-foreground">
-                            {t('expenses.table.category')}
-                          </dt>
-                          <dd className="mt-0.5 font-medium">
-                            {t(`expenses.category.${expense.category}`)}
-                          </dd>
+                    <Card asChild>
+                      <Link
+                        to="/expenses/$id"
+                        params={{ id: expense.id }}
+                        search={returnContext}
+                        data-overdue-shortcut
+                        className="block min-h-10 text-card-foreground transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <span className="font-heading font-semibold">
+                            {expense.title}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {expense.branch_name ??
+                              t('expenses.form.company_wide')}
+                          </span>
                         </div>
-                        <div>
-                          <dt className="text-xs text-muted-foreground">
-                            {t('expenses.form.due_date')}
-                          </dt>
-                          <dd className="mt-0.5 font-medium tabular-nums">
-                            {expense.due_date
-                              ? formatDate(expense.due_date)
-                              : t('common.na')}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs text-muted-foreground">
-                            {t('expenses.overdue_sweep.overdue_days')}
-                          </dt>
-                          <dd className="mt-0.5 font-medium tabular-nums text-destructive">
-                            {expense.overdue_days}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs text-muted-foreground">
-                            {t('expenses.table.remaining')}
-                          </dt>
-                          <dd className="mt-0.5 font-mono font-medium tabular-nums">
-                            {formatMoney(expense.remaining_amount)}
-                          </dd>
-                        </div>
-                      </dl>
-                    </Link>
+                        <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">
+                          <div>
+                            <dt className="text-xs text-muted-foreground">
+                              {t('expenses.table.category')}
+                            </dt>
+                            <dd className="mt-0.5 font-medium">
+                              {t(`expenses.category.${expense.category}`)}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-xs text-muted-foreground">
+                              {t('expenses.form.due_date')}
+                            </dt>
+                            <dd className="mt-0.5 font-medium tabular-nums">
+                              {expense.due_date
+                                ? formatDate(expense.due_date)
+                                : t('common.na')}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-xs text-muted-foreground">
+                              {t('expenses.overdue_sweep.overdue_days')}
+                            </dt>
+                            <dd className="mt-0.5 font-medium tabular-nums text-destructive">
+                              {expense.overdue_days}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-xs text-muted-foreground">
+                              {t('expenses.table.remaining')}
+                            </dt>
+                            <dd className="mt-0.5 font-mono font-medium tabular-nums">
+                              {formatMoney(expense.remaining_amount)}
+                            </dd>
+                          </div>
+                        </dl>
+                      </Link>
+                    </Card>
                   </li>
                 ))}
               </ul>

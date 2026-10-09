@@ -29,3 +29,8 @@ describe('EmptyState action prop', () => {
     expect(screen.getByRole('link', { name: 'Go to students' })).toBeTruthy();
   });
 });
+
+it('announces an error when the optional alert role is supplied', () => {
+  render(<EmptyState role="alert" title="Unable to load" />);
+  expect(screen.getByRole('alert')).toHaveTextContent('Unable to load');
+});

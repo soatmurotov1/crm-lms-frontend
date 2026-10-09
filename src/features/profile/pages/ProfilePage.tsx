@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -200,7 +201,7 @@ const ProfilePage = () => {
   return (
     <div className="space-y-6 max-w-2xl">
       {user?.must_change_password && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-600">
+        <div className="rounded-lg border border-border bg-warning/10 px-4 py-3 text-sm text-warning">
           {t('profile.must_change_password_notice')}
         </div>
       )}
@@ -211,10 +212,10 @@ const ProfilePage = () => {
         <p className="text-sm text-muted-foreground">{t('profile.subtitle')}</p>
       </div>
 
-      <div className="glass-card p-6 space-y-6">
+      <Card className=" space-y-6">
         {/* Avatar */}
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <User className="h-8 w-8" />
           </div>
           <div>
@@ -313,10 +314,10 @@ const ProfilePage = () => {
             </Button>
           </form>
         </Form>
-      </div>
+      </Card>
 
       {(user?.company_slug || companyStatusKey) && (
-        <div className="glass-card space-y-3 p-6">
+        <Card className=" space-y-3 ">
           <h3 className="font-heading font-semibold text-balance">
             {t('profile.company')}
           </h3>
@@ -349,10 +350,10 @@ const ProfilePage = () => {
               <Link to="/branches">{t('profile.branches_link')}</Link>
             </Button>
           ) : null}
-        </div>
+        </Card>
       )}
 
-      <div id="preferences" className="glass-card space-y-4 p-6">
+      <Card id="preferences" className=" space-y-4 ">
         <h3 className="font-heading font-semibold text-balance">
           {t('profile.preferences')}
         </h3>
@@ -360,10 +361,10 @@ const ProfilePage = () => {
           <LanguageSwitcher />
           <ThemeToggle />
         </div>
-      </div>
+      </Card>
 
       {/* Telegram */}
-      <div className="glass-card p-6 space-y-4">
+      <Card className=" space-y-4">
         <h3 className="font-heading font-semibold text-balance">
           {t('profile.telegram.title')}
         </h3>
@@ -413,7 +414,7 @@ const ProfilePage = () => {
             </div>
           </>
         )}
-      </div>
+      </Card>
 
       <ConfirmDialog
         open={unlinkConfirmOpen}
@@ -427,7 +428,7 @@ const ProfilePage = () => {
       {/* Change password */}
       <Form {...pwForm}>
         <form onSubmit={pwForm.handleSubmit(onPwValid)}>
-          <div id="password" className="glass-card space-y-4 p-6">
+          <Card id="password" className=" space-y-4 ">
             <h3 className="font-heading font-semibold text-balance">
               {t('profile.change_password')}
             </h3>
@@ -474,7 +475,7 @@ const ProfilePage = () => {
             >
               {t('profile.update_password')}
             </Button>
-          </div>
+          </Card>
         </form>
       </Form>
     </div>

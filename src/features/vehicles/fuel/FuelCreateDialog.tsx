@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useWriteOptions } from '@/hooks/useWriteOptions';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -782,7 +783,7 @@ export default function FuelCreateDialog({
               </label>
 
               {selectedVehicle && (
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2">
+                <div className="rounded-lg border border-border bg-primary/5 p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-base font-bold tracking-wider text-foreground">
                       {selectedVehicle.plate_number}
@@ -800,7 +801,7 @@ export default function FuelCreateDialog({
                     </div>
                   </div>
                   {lastFuelQuery.data?.odometer_km && (
-                    <div className="text-xs text-muted-foreground flex items-center gap-1.5 pt-1 border-t border-primary/10">
+                    <div className="text-xs text-muted-foreground flex items-center gap-1.5 pt-1 border-t border-border">
                       <Speedometer className="h-3.5 w-3.5 text-primary" />
                       <span>{t('fuel.last_odometer')}:</span>
                       <span className="font-semibold text-foreground">
@@ -843,7 +844,7 @@ export default function FuelCreateDialog({
             />
 
             {/* Clean, distraction-free receipt action card */}
-            <div className="rounded-2xl border-2 border-dashed border-border bg-card p-6 text-center space-y-4 shadow-sm hover:border-primary/50 transition-colors">
+            <Card className=" -dashed text-center space-y-4 transition-colors">
               <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                 <Receipt className="h-7 w-7" />
               </div>
@@ -869,7 +870,7 @@ export default function FuelCreateDialog({
                   ? t('fuel.change_photo')
                   : t('fuel.scan_receipt_btn')}
               </Button>
-            </div>
+            </Card>
 
             {/* Scanning / decoding feedback */}
             {qrStatus === 'decoding' && (
@@ -888,11 +889,11 @@ export default function FuelCreateDialog({
 
             {/* Verified Soliq Card */}
             {lookupData && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/20 p-4 space-y-2">
+              <div className="rounded-lg border border-border bg-success/10 p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <CheckCircle
-                      className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+                      className="h-5 w-5 text-success"
                       weight="fill"
                     />
                     <div>
@@ -908,7 +909,7 @@ export default function FuelCreateDialog({
                   </div>
                   <Badge
                     variant="secondary"
-                    className="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200"
+                    className="text-xs bg-background text-success"
                   >
                     {t(`fuel.${lookupData.status}`)}
                   </Badge>
@@ -920,7 +921,7 @@ export default function FuelCreateDialog({
             {qrStatus === 'too-large' && (
               <p
                 role="alert"
-                className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive"
+                className="rounded-lg border border-border bg-destructive/5 p-3 text-xs text-destructive"
               >
                 {t('fuel.qr_too_large')}
               </p>
@@ -930,7 +931,7 @@ export default function FuelCreateDialog({
             {(qrStatus === 'decode-failed' || qrStatus === 'lookup-failed') && (
               <div
                 role="alert"
-                className="space-y-3 rounded-xl border border-warning/40 bg-warning/10 p-3.5"
+                className="space-y-3 rounded-lg border border-border bg-warning/10 p-3.5"
               >
                 <div className="flex items-start gap-2.5 text-xs text-foreground">
                   <Warning className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
@@ -957,7 +958,7 @@ export default function FuelCreateDialog({
 
             {/* Manual QR Link Input */}
             {showManualQrInput && (
-              <div className="rounded-xl border p-3 space-y-2 bg-muted/20">
+              <div className="rounded-lg border p-3 space-y-2 bg-muted/20">
                 <label
                   htmlFor="fuel-manual-qr"
                   className="block text-xs font-medium"
@@ -1093,10 +1094,7 @@ export default function FuelCreateDialog({
               </div>
 
               {lines.map((l, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-border bg-card p-3 space-y-2.5 text-xs shadow-sm"
-                >
+                <Card key={idx} className=" space-y-2.5 text-xs ">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-muted-foreground text-[11px]">
                       #{idx + 1}
@@ -1181,11 +1179,11 @@ export default function FuelCreateDialog({
                       />
                     </label>
                   </div>
-                </div>
+                </Card>
               ))}
 
               {/* Total Calculation Banner */}
-              <div className="flex items-center justify-between rounded-xl bg-primary/10 border border-primary/20 p-3.5 text-xs sm:text-sm font-semibold">
+              <div className="flex items-center justify-between rounded-lg bg-primary/10 border border-border p-3.5 text-xs sm:text-sm font-semibold">
                 <span className="text-foreground">
                   {t('fuel.total_amount')}:
                 </span>
@@ -1233,7 +1231,7 @@ export default function FuelCreateDialog({
               </label>
 
               {lastFuelQuery.data?.odometer_km ? (
-                <div className="text-xs space-y-1 rounded-xl border p-3 bg-muted/30">
+                <div className="text-xs space-y-1 rounded-lg border p-3 bg-muted/30">
                   <div className="text-muted-foreground">
                     {t('fuel.last_odometer')}:{' '}
                     <span className="font-semibold text-foreground">
@@ -1242,7 +1240,7 @@ export default function FuelCreateDialog({
                   </div>
                   {odometerKm &&
                     parseFloat(odometerKm) > lastFuelQuery.data.odometer_km && (
-                      <div className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                      <div className="text-success font-semibold flex items-center gap-1">
                         <CheckFat className="h-3.5 w-3.5" />+
                         {(
                           parseFloat(odometerKm) -
@@ -1317,7 +1315,7 @@ export default function FuelCreateDialog({
 
             {/* Evidence previews */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border bg-muted/20 p-2.5 space-y-1.5 text-center">
+              <div className="rounded-lg border bg-muted/20 p-2.5 space-y-1.5 text-center">
                 <span className="text-[11px] font-semibold text-muted-foreground block">
                   {t('fuel.receipt')}
                 </span>
@@ -1334,7 +1332,7 @@ export default function FuelCreateDialog({
                 )}
               </div>
 
-              <div className="rounded-xl border bg-muted/20 p-2.5 space-y-1.5 text-center">
+              <div className="rounded-lg border bg-muted/20 p-2.5 space-y-1.5 text-center">
                 <span className="text-[11px] font-semibold text-muted-foreground block">
                   {t('fuel.odometer')}
                 </span>
@@ -1353,7 +1351,7 @@ export default function FuelCreateDialog({
             </div>
 
             {/* Full Summary Ledger */}
-            <div className="rounded-xl border p-4 space-y-2.5 text-xs bg-card shadow-sm">
+            <Card className=" space-y-2.5 text-xs ">
               <div className="flex justify-between border-b pb-2">
                 <span className="text-muted-foreground">
                   {t('fuel.vehicle')}:
@@ -1392,13 +1390,13 @@ export default function FuelCreateDialog({
                   {totalCalculatedAmount.toLocaleString()} UZS
                 </span>
               </div>
-            </div>
+            </Card>
 
             {/* Missing evidence: explain why submit is unavailable */}
             {submitBlockedByEvidence && (
               <div
                 id="fuel-submit-evidence-hint"
-                className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs text-foreground"
+                className="flex items-start gap-2 rounded-lg border border-border bg-warning/10 p-3 text-xs text-foreground"
               >
                 <Warning className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
                 <div className="space-y-1">
@@ -1413,7 +1411,7 @@ export default function FuelCreateDialog({
 
             {/* Submitting progress */}
             {submitProgress && (
-              <div className="rounded-xl border bg-muted/30 p-3 space-y-2 text-xs">
+              <div className="rounded-lg border bg-muted/30 p-3 space-y-2 text-xs">
                 <div className="flex items-center gap-2 font-medium">
                   <ArrowClockwise className="h-4 w-4 animate-spin text-primary" />
                   <span>{t(submitProgress.messageKey)}</span>

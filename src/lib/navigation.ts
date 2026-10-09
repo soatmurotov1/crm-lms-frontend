@@ -54,6 +54,7 @@ export type AppRoutePath =
   | '/teachers'
   | '/users'
   | '/audit'
+  | '/design-system'
   | '/profile';
 
 export type NavItem = {
@@ -264,6 +265,13 @@ const allNavItems: NavItem[] = [
     icon: ShieldCheck,
     section: 'system',
     cap: 'viewAudit',
+  },
+  {
+    path: '/design-system',
+    labelKey: 'nav.design_system',
+    icon: SquaresFour,
+    section: 'system',
+    cap: 'manageUsers',
   },
   {
     path: '/profile',

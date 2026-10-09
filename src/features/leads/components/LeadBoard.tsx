@@ -210,9 +210,8 @@ export const LeadBoard = ({
                 onDragLeave={(e) => handleDragLeave(e, column.stage.id)}
                 onDrop={(e) => handleDrop(e, column.stage)}
                 className={cn(
-                  'flex w-80 max-w-full shrink-0 flex-col rounded-2xl border border-border bg-card/60 p-3 transition-colors max-h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  isDropActive &&
-                    'border-primary ring-2 ring-primary/20 bg-primary/5',
+                  'rounded-lg bg-muted/40 p-4 flex w-80 max-w-full shrink-0 flex-col transition-colors max-h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  isDropActive && ' ring-2 ring-primary/20 bg-primary/5',
                 )}
                 data-testid={`kanban-column-${column.stage.id}`}
               >
@@ -252,8 +251,8 @@ export const LeadBoard = ({
                   {column.leads.length === 0 ? (
                     <div
                       className={cn(
-                        'flex flex-1 items-center justify-center rounded-xl border border-dashed border-border/80 p-6 text-center text-xs text-muted-foreground select-none',
-                        isDropActive && 'border-primary text-primary',
+                        'flex flex-1 items-center justify-center rounded-md bg-muted/40 p-4 text-center text-xs text-muted-foreground select-none',
+                        isDropActive && 'border-border text-primary',
                       )}
                     >
                       {isDropActive

@@ -1,3 +1,5 @@
+import { Card } from '@/components/ui/card';
+import { StatCard } from '@/components/ui/StatCard';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
@@ -30,8 +32,6 @@ import {
   CHART_STYLE,
   formatNumber,
   greetingKey,
-  KpiCard,
-  SectionCard,
 } from '@/features/dashboard/lib/dashboardCards';
 
 // autodrive-vh0.6: extracted out of DashboardPage.tsx (was an inline
@@ -126,15 +126,18 @@ const TeacherDashboard = () => {
   // and DebtStatusBadge for the same convention.
   const owingStudentsCount = owingStudentsPage?.meta.total ?? 0;
 
-  if (
-    analyticsLoading ||
-    lessonsLoading ||
-    studentsLoading ||
-    !analytics ||
-    analyticsError
-  ) {
+  if (analyticsError) {
     return (
-      <div className="space-y-6">
+      <Card>
+        <EmptyState role="alert" title={t('dashboard.v2.error_title')} />
+      </Card>
+    );
+  }
+
+  if (analyticsLoading || lessonsLoading || studentsLoading || !analytics) {
+    return (
+      <Card className="space-y-6" role="status" aria-busy="true">
+        <span className="sr-only">{t('common.loading')}</span>
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-48" />
         </div>
@@ -145,7 +148,7 @@ const TeacherDashboard = () => {
         </div>
         <Skeleton className="h-64 rounded-lg" />
         <Skeleton className="h-72 rounded-lg" />
-      </div>
+      </Card>
     );
   }
 
@@ -171,7 +174,7 @@ const TeacherDashboard = () => {
       <div>
         <div className="inline-flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
           <span
-            className="h-[7px] w-[7px] shrink-0 rounded-full bg-success shadow-[0_0_0_3px_hsl(var(--success)/0.2)]"
+            className="h-[7px] w-[7px] shrink-0 rounded-full bg-success "
             aria-hidden="true"
           />
           {t('dashboard.live_label')} ·{' '}
@@ -188,33 +191,34 @@ const TeacherDashboard = () => {
       </div>
 
       {noGroups ? (
-        <EmptyState
-          title={t('dashboard.teacher.no_groups_title')}
-          description={t('dashboard.teacher.no_groups_desc')}
-        />
+        <Card>
+          <EmptyState
+            title={t('dashboard.teacher.no_groups_title')}
+            description={t('dashboard.teacher.no_groups_desc')}
+          />
+        </Card>
       ) : (
         <>
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-[1.7fr_1fr_1fr_1fr]">
-            <KpiCard
+            <StatCard
               label={t('dashboard.teacher.kpi_my_groups')}
               value={formatNumber(analytics.active_groups)}
               icon={<UsersThree className="h-4 w-4" />}
               tone="info"
-              lead
             />
-            <KpiCard
+            <StatCard
               label={t('dashboard.teacher.kpi_my_students')}
               value={formatNumber(analytics.total_students)}
               icon={<GraduationCap className="h-4 w-4" />}
               tone="primary"
             />
-            <KpiCard
+            <StatCard
               label={t('dashboard.teacher.kpi_owing_students')}
               value={formatNumber(owingStudentsCount)}
               icon={<Warning className="h-4 w-4" />}
               tone="warning"
             />
-            <KpiCard
+            <StatCard
               label={t('dashboard.teacher.kpi_today_lessons')}
               value={formatNumber(todayLessonsCount)}
               icon={<CalendarDot className="h-4 w-4" />}
@@ -222,9 +226,9 @@ const TeacherDashboard = () => {
             />
           </section>
 
-          <SectionCard
-            title={t('dashboard.teacher.upcoming_title')}
-            subtitle={t('dashboard.teacher.upcoming_subtitle')}
+          <Card
+            heading={t('dashboard.teacher.upcoming_title')}
+            description={t('dashboard.teacher.upcoming_subtitle')}
             className="cv-auto"
           >
             {upcomingLessons.length === 0 ? (
@@ -263,9 +267,9 @@ const TeacherDashboard = () => {
                   ))}
               </ul>
             )}
-          </SectionCard>
+          </Card>
 
-          <SectionCard title={t('dashboard.result_title')} className="cv-auto">
+          <Card heading={t('dashboard.result_title')} className="cv-auto">
             <ResponsiveContainer width="100%" height={240}>
               <BarChart
                 accessibilityLayer={false}
@@ -296,7 +300,7 @@ const TeacherDashboard = () => {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </SectionCard>
+          </Card>
         </>
       )}
     </div>

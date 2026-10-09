@@ -11,7 +11,7 @@ export const DemoSessionBanner = () => {
   return (
     <p
       role="status"
-      className="border-b border-warning/30 bg-warning px-4 py-2 text-center text-xs font-medium leading-snug text-warning-foreground sm:text-sm"
+      className="border-b border-border bg-warning px-4 py-2 text-center text-xs font-medium leading-snug text-warning-foreground sm:text-sm"
     >
       {t('common.demo_banner')}
     </p>

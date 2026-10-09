@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useWriteOptions } from '@/hooks/useWriteOptions';
 import { useState, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
@@ -80,8 +81,8 @@ const formatTime = (iso: string) => {
 // tone, kept as full static strings (not `bg-${tone}`) since Tailwind's
 // scanner only picks up literal class text.
 const typeCellClass: Record<LessonType, string> = {
-  theory: 'bg-primary/[14%] border-primary/[32%] hover:bg-primary/[20%]',
-  practice: 'bg-info/[14%] border-info/[32%] hover:bg-info/[20%]',
+  theory: 'bg-primary/[14%] hover:bg-primary/[20%]',
+  practice: 'bg-info/[14%] hover:bg-info/[20%]',
 };
 const typeTagTextClass: Record<LessonType, string> = {
   theory: 'text-primary',
@@ -107,7 +108,7 @@ const LessonCard = ({ lesson, typeLabel, onOpen }: LessonCardProps) => {
       type="button"
       onClick={onOpen}
       className={cn(
-        'flex min-h-[80px] w-full flex-col gap-0.5 rounded-[11px] border p-[10px] text-left motion-safe:transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'flex min-h-[80px] w-full flex-col gap-0.5 rounded-md p-3 text-left motion-safe:transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         typeCellClass[lesson.lesson_type],
       )}
     >
@@ -403,7 +404,7 @@ const SchedulePage = () => {
   const thisWeek = () => setWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={t('schedule.title')}
         title={t('schedule.title')}
@@ -434,7 +435,7 @@ const SchedulePage = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="calendar" className="space-y-6">
+        <TabsContent value="calendar" className="space-y-4">
           {/* Calendar navigation */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
@@ -464,11 +465,11 @@ const SchedulePage = () => {
             </div>
             <div className="flex items-center gap-4 font-mono text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <span className="h-[13px] w-[13px] rounded-[4px] border border-primary/[40%] bg-primary/[16%]" />
+                <span className="h-[13px] w-[13px] rounded-[4px] border border-border bg-primary/[16%]" />
                 {t('schedule.legend_theory')}
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-[13px] w-[13px] rounded-[4px] border border-info/[40%] bg-info/[16%]" />
+                <span className="h-[13px] w-[13px] rounded-[4px] border border-border bg-info/[16%]" />
                 {t('schedule.legend_practice')}
               </span>
             </div>
@@ -481,28 +482,35 @@ const SchedulePage = () => {
               per-day list of cards inside a scrollable 7-col shell rather
               than a literal time x day matrix. */}
           {lessonsLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-32 w-full" />
-              ))}
-            </div>
+            <Card asChild>
+              <div className="space-y-3" role="status" aria-busy="true">
+                <span className="sr-only">{t('common.loading')}</span>
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-32 w-full" />
+                ))}
+              </div>
+            </Card>
           ) : lessonsError ? (
-            <EmptyState
-              title={t('common.error')}
-              action={{
-                label: t('common.retry'),
-                onClick: () => void refetchLessons(),
-              }}
-            />
+            <Card>
+              <EmptyState
+                title={t('common.error')}
+                action={{
+                  label: t('common.retry'),
+                  onClick: () => void refetchLessons(),
+                }}
+              />
+            </Card>
           ) : !lessons?.length ? (
-            <EmptyState
-              icon={Calendar}
-              title={t('schedule.week_empty')}
-              description={t('schedule.week_empty_desc')}
-              action={{ label: t('schedule.next_week'), onClick: nextWeek }}
-            />
+            <Card>
+              <EmptyState
+                icon={Calendar}
+                title={t('schedule.week_empty')}
+                description={t('schedule.week_empty_desc')}
+                action={{ label: t('schedule.next_week'), onClick: nextWeek }}
+              />
+            </Card>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border bg-card p-[18px]">
+            <Card className="overflow-x-auto ">
               <div className="grid min-w-[840px] grid-cols-7 gap-3">
                 {weekDays.map((day) => {
                   const key = format(day, 'yyyy-MM-dd');
@@ -514,7 +522,7 @@ const SchedulePage = () => {
                         className={cn(
                           'border-b pb-1.5 text-[14px] font-bold uppercase tracking-wide',
                           isToday
-                            ? 'border-primary/[32%] text-primary'
+                            ? 'border-border text-primary'
                             : 'border-hair text-muted-foreground',
                         )}
                       >
@@ -529,7 +537,7 @@ const SchedulePage = () => {
                         </span>
                       </div>
                       {dayLessons.length === 0 ? (
-                        <div className="flex min-h-[80px] items-center justify-center rounded-[11px] border border-dashed border-hair text-xs text-muted-foreground/[50%]">
+                        <div className="flex min-h-[80px] items-center justify-center rounded-md bg-muted/40 text-xs text-muted-foreground/[50%]">
                           —
                         </div>
                       ) : (
@@ -546,14 +554,14 @@ const SchedulePage = () => {
                   );
                 })}
               </div>
-            </div>
+            </Card>
           )}
         </TabsContent>
 
         <TabsContent value="templates">
           {/* Templates section */}
-          <div className="rounded-lg border bg-card">
-            <div className="flex items-center justify-between border-b px-4 py-3">
+          <Card edgeToEdge>
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h2 className="font-semibold">{t('schedule.templates')}</h2>
               <span className="text-sm text-muted-foreground">
                 {templatesLoading
@@ -565,7 +573,8 @@ const SchedulePage = () => {
               </span>
             </div>
             {templatesLoading ? (
-              <div className="space-y-2 p-4">
+              <div className="space-y-2 p-4" role="status" aria-busy="true">
+                <span className="sr-only">{t('common.loading')}</span>
                 {[1, 2, 3].map((i) => (
                   <Skeleton key={i} className="h-10 w-full" />
                 ))}
@@ -633,7 +642,7 @@ const SchedulePage = () => {
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         </TabsContent>
       </Tabs>
 

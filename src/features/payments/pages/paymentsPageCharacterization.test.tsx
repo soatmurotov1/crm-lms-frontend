@@ -208,7 +208,7 @@ describe('PaymentsPage characterization', () => {
     await renderPage();
     const tableCard = screen
       .getByRole('table', { name: 'payments.payment_list' })
-      .closest('.glass-card');
+      .closest('[data-surface="card"]');
     expect(tableCard).not.toContainElement(
       screen.getByRole('navigation', { name: 'payments.payment_list' }),
     );

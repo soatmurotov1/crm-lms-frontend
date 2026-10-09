@@ -181,7 +181,7 @@ export const DeletedExpenseHistoryDialog = ({
                     {Array.from({ length: 4 }).map((_, index) => (
                       <Skeleton
                         key={index}
-                        className="h-20 w-full rounded-xl"
+                        className="h-20 w-full rounded-lg"
                       />
                     ))}
                   </div>
@@ -210,7 +210,7 @@ export const DeletedExpenseHistoryDialog = ({
                           type="button"
                           onClick={() => selectRecord(record)}
                           className={cn(
-                            'w-full rounded-xl border border-border bg-card/70 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                            'w-full rounded-lg border border-border bg-card/70 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                             selectedId === record.id &&
                               'border-primary bg-primary/5 ring-1 ring-primary/30',
                           )}

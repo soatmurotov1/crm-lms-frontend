@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
@@ -184,7 +185,7 @@ export const LeadsTable = ({
           }
           if (nextDate >= todayStart && nextDate <= todayEnd) {
             return (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-warning">
                 <Clock className="h-3.5 w-3.5 shrink-0" />
                 <span>{formatDateTime(nextStep)}</span>
               </span>
@@ -265,7 +266,7 @@ export const LeadsTable = ({
         nextPage: t('common.next', 'Keyingi'),
       }}
       loadingState={
-        <div className="grid gap-3 p-4">
+        <div className="grid gap-3">
           {Array.from({ length: 5 }, (_, index) => (
             <Skeleton key={index} className="h-6 w-full" />
           ))}
@@ -290,18 +291,19 @@ export const LeadsTable = ({
       renderMobileRow={({ row }) => {
         const leadName = `${row.firstName} ${row.lastName || ''}`.trim() || '-';
         return (
-          <div
+          <Card
             role="button"
             tabIndex={0}
             aria-label={`${leadName}, ${row.phone}`}
             onClick={() => handleOpenLead(row)}
             onKeyDown={(e) => {
+              if (e.defaultPrevented || e.target !== e.currentTarget) return;
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 handleOpenLead(row);
               }
             }}
-            className="cursor-pointer space-y-2 rounded-lg border bg-card p-3 shadow-xs transition hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cursor-pointer space-y-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <div className="flex items-center justify-between">
               <div className="font-medium text-sm text-foreground">
@@ -335,7 +337,7 @@ export const LeadsTable = ({
                 </span>
               )}
             </div>
-          </div>
+          </Card>
         );
       }}
       onRowActivate={(lead) => handleOpenLead(lead)}
@@ -344,7 +346,7 @@ export const LeadsTable = ({
       }
       rowClassName={() => 'cursor-pointer hover:bg-muted/50 transition-colors'}
       className={cn(
-        'overflow-hidden rounded-xl border bg-card transition-opacity duration-200',
+        'transition-opacity duration-200',
         isFetching && !isLoading && 'opacity-50',
         className,
       )}

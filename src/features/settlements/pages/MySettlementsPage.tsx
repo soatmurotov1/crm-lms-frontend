@@ -1,3 +1,5 @@
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
 import { Wallet, Warning } from '@phosphor-icons/react';
 import { useNavigate } from '@tanstack/react-router';
 import { useMemo } from 'react';
@@ -128,7 +130,7 @@ const MySettlementsPage = () => {
         isLoading={query.isLoading}
       />
 
-      <div className="glass-card overflow-hidden">
+      <Card edgeToEdge className=" overflow-hidden">
         {query.isLoading ? (
           <div
             className="space-y-3 p-4"
@@ -136,10 +138,7 @@ const MySettlementsPage = () => {
             aria-label={t('my_settlements.loading')}
           >
             {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-16 animate-pulse rounded-lg bg-muted"
-              />
+              <Skeleton key={index} className="h-16" />
             ))}
           </div>
         ) : query.isError ? (
@@ -171,7 +170,7 @@ const MySettlementsPage = () => {
             ))}
           </div>
         )}
-      </div>
+      </Card>
 
       <PaginationControls
         currentPage={currentPage}

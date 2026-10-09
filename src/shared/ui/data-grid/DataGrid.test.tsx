@@ -67,6 +67,48 @@ beforeEach(() => {
 });
 
 describe('DataGrid', () => {
+  it.each([false, true])(
+    'announces initial loading with textless skeletons (mobile: %s)',
+    (isMobile) => {
+      viewport.isMobile = isMobile;
+      render(
+        <DataGrid
+          {...baseProps}
+          data={[]}
+          isInitialLoading
+          loadingState={<div aria-hidden="true" />}
+          renderMobileRow={({ row }) => <span>{row.name}</span>}
+        />,
+      );
+      expect(screen.getByRole('status')).toHaveTextContent(labels.loading);
+    },
+  );
+
+  it.each([false, true])(
+    'announces errors without nesting alerts (mobile: %s)',
+    (isMobile) => {
+      viewport.isMobile = isMobile;
+      const { rerender } = render(
+        <DataGrid
+          {...baseProps}
+          data={[]}
+          errorState={<p>Unable to load</p>}
+          renderMobileRow={({ row }) => <span>{row.name}</span>}
+        />,
+      );
+      expect(screen.getByRole('alert')).toHaveTextContent('Unable to load');
+      rerender(
+        <DataGrid
+          {...baseProps}
+          data={[]}
+          errorState={<p role="alert">Unable to load</p>}
+          renderMobileRow={({ row }) => <span>{row.name}</span>}
+        />,
+      );
+      expect(screen.getAllByRole('alert')).toHaveLength(1);
+    },
+  );
+
   it('renders the supplied current-page rows through TanStack column definitions', () => {
     render(<DataGrid {...baseProps} data={people} />);
 
@@ -80,7 +122,7 @@ describe('DataGrid', () => {
       <DataGrid
         {...baseProps}
         data={people}
-        className="glass-card"
+        className="overflow-hidden"
         pagination={{ pageIndex: 0, pageSize: 25, rowCount: 100, pageCount: 4 }}
         onPageSizeChange={vi.fn()}
       />,
@@ -88,7 +130,7 @@ describe('DataGrid', () => {
 
     const card = screen
       .getByRole('table', { name: 'People' })
-      .closest('.glass-card');
+      .closest('[data-surface="card"]');
     const navigation = screen.getByRole('navigation');
     if (!card) throw new Error('Table card missing');
     expect(card).not.toContainElement(navigation);
@@ -236,6 +278,10 @@ describe('DataGrid', () => {
     const body = container.querySelector('tbody');
     expect(body).toHaveAttribute('data-virtualized-row-count', '100');
     expect(body).toHaveStyle({ height: '2000px' });
+    const scroller = body?.closest('[data-surface="card"]');
+    expect(scroller).toHaveClass('overflow-auto');
+    expect(scroller).not.toHaveClass('overflow-hidden');
+    expect(scroller).toHaveStyle({ maxHeight: '80px' });
 
     const table = screen.getByRole('table', { name: 'People' });
     await waitFor(() =>

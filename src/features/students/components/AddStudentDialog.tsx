@@ -689,7 +689,7 @@ const AddStudentDialog = ({
                         className={cn(
                           'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium transition-colors',
                           isDone
-                            ? 'bg-green-600 text-white dark:bg-green-500'
+                            ? 'bg-success text-success-foreground'
                             : isActive
                               ? 'bg-primary text-primary-foreground'
                               : 'bg-muted text-muted-foreground',

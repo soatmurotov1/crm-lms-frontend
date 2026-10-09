@@ -347,9 +347,9 @@ export const CreateLeadDialog = ({
           <div className="space-y-4 py-4">
             {/* Duplicate Alert Banner */}
             {duplicateResult?.hasDuplicate && (
-              <div className="rounded-xl border border-amber-300 bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/40 p-3.5 text-xs text-amber-900 dark:text-amber-200">
+              <div className="rounded-lg border border-border bg-warning/10 p-3.5 text-xs text-warning">
                 <div className="flex items-start gap-2.5">
-                  <Warning className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                  <Warning className="h-5 w-5 shrink-0 text-warning mt-0.5" />
                   <div className="flex-1 space-y-1.5">
                     <p className="font-semibold text-sm">
                       {t('leads.duplicate_detected', 'Dublikat topildi!')}
@@ -384,7 +384,7 @@ export const CreateLeadDialog = ({
                           onChange={(e) =>
                             setAcknowledgedDuplicate(e.target.checked)
                           }
-                          className="rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+                          className="rounded border-border text-warning focus:ring-ring"
                         />
                         <span>
                           {t('leads.proceed_anyway', 'Baribir davom etish')}

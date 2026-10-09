@@ -132,6 +132,14 @@ describe('staff access management visibility', () => {
       await screen.findByRole('heading', { name: USER.name }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole('heading', { name: USER.name }).closest('header'),
+    ).not.toBeNull();
+    expect(
+      screen
+        .getByRole('heading', { name: USER.name })
+        .closest('[data-surface]'),
+    ).toBeNull();
+    expect(
       screen.queryByRole('tab', { name: 'access.title' }),
     ).not.toBeInTheDocument();
     expect(screen.queryByText('Permission editor')).not.toBeInTheDocument();

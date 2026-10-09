@@ -25,6 +25,7 @@ globalThis.ResizeObserver =
 
 const paymentQueries = vi.hoisted(() => ({
   usePaymentsPage: vi.fn(),
+  isLoading: false,
 }));
 
 vi.mock('@/store/authStore', () => ({
@@ -93,7 +94,7 @@ vi.mock('@/features/dashboard/api/dashboardService', () => ({
       monthly_revenue: [{ month: '2026-07', amount: 100000 }],
       branch_stats: [],
     },
-    isLoading: false,
+    isLoading: paymentQueries.isLoading,
   }),
 }));
 
@@ -112,7 +113,17 @@ describe('LegacyMainDashboard relative-time refresh', () => {
   afterEach(() => {
     vi.useRealTimers();
     paymentQueries.usePaymentsPage.mockClear();
+    paymentQueries.isLoading = false;
     cleanup();
+  });
+
+  it('announces loading inside a Card', async () => {
+    paymentQueries.isLoading = true;
+    await renderDashboard();
+    const status = screen.getByRole('status');
+    expect(status).toHaveAttribute('aria-busy', 'true');
+    expect(status).toHaveTextContent('common.loading');
+    expect(status.closest('[data-surface="card"]')).not.toBeNull();
   });
 
   it('renders KPIs from the widened studentsSpark memo dependency without crashing', async () => {

@@ -1,9 +1,10 @@
+import { EntityDetailShell } from '@/components/ui/EntityDetailShell';
+import { Card } from '@/components/ui/card';
 import { useCan } from '@/hooks/useCan';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from '@tanstack/react-router';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowLeft,
   Car,
   Buildings,
   Speedometer,
@@ -16,8 +17,8 @@ import {
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 import {
   useFuel,
   useFuelMutation,
@@ -33,18 +34,15 @@ const STATUS_CONFIG: Record<
 > = {
   approved: {
     icon: CheckCircle,
-    className:
-      'gap-1 border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
+    className: 'gap-1 border-border bg-success/10 text-success',
   },
   submitted: {
     icon: Clock,
-    className:
-      'gap-1 border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
+    className: 'gap-1 border-border bg-warning/10 text-warning',
   },
   rejected: {
     icon: XCircle,
-    className:
-      'gap-1 border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300',
+    className: 'gap-1 border-border bg-destructive/10 text-destructive',
   },
 };
 
@@ -181,6 +179,7 @@ function Upload({
 
 export default function FuelDetailPage() {
   const { id } = useParams({ strict: false }) as { id: string };
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const mayUpdate = useCan('fuel.update');
@@ -205,23 +204,18 @@ export default function FuelDetailPage() {
       fuelAction(id, action, body),
   );
 
-  if (query.isLoading) {
+  if (query.isLoading || !query.data) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 rounded-xl" />
-      </div>
-    );
-  }
-
-  if (!query.data) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-12">
-        <p className="text-sm text-muted-foreground">{t('common.error')}</p>
-        <Button variant="outline" onClick={() => void query.refetch()}>
-          {t('common.retry')}
-        </Button>
-      </div>
+      <EntityDetailShell
+        backHref="/vehicle-fuel"
+        onBack={() => void navigate({ to: '/vehicle-fuel' })}
+        backLabel={t('fuel.title')}
+        isLoading={query.isLoading}
+        isError={!query.data}
+        errorTitle={t('common.error')}
+        onRetry={() => void query.refetch()}
+        retryLabel={t('common.retry')}
+      />
     );
   }
 
@@ -233,43 +227,40 @@ export default function FuelDetailPage() {
   const reviewer = mayReview;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          to="/vehicle-fuel"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('fuel.title')}
-        </Link>
-        <StatusBadge status={row.status} />
-      </div>
-
-      <div className="glass-card space-y-4 p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary tracking-wide">
-                <Car className="h-3.5 w-3.5" />
-                {row.vehicle_plate}
-              </span>
-              {row.source_status === 'source_verified' && (
-                <Badge
-                  variant="outline"
-                  className="text-[10px] gap-0.5 text-emerald-600 border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40"
-                >
-                  <Receipt className="h-2.5 w-2.5" />
-                  {t('fuel.tax_verified')}
-                </Badge>
-              )}
-            </div>
-            <h1 className="font-heading text-xl font-bold text-foreground flex items-center gap-2">
-              <Buildings className="h-5 w-5 text-muted-foreground" />
-              {row.station_name}
-            </h1>
+    <EntityDetailShell
+      backHref="/vehicle-fuel"
+      onBack={() => void navigate({ to: '/vehicle-fuel' })}
+      backLabel={t('fuel.title')}
+      isLoading={false}
+      isError={false}
+      title={
+        <span className="inline-flex items-center gap-2">
+          <Buildings className="h-5 w-5 text-muted-foreground" />
+          {row.station_name}
+        </span>
+      }
+      meta={
+        <>
+          <StatusBadge status={row.status} />{' '}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary tracking-wide">
+              <Car className="h-3.5 w-3.5" />
+              {row.vehicle_plate}
+            </span>
+            {row.source_status === 'source_verified' && (
+              <Badge
+                variant="outline"
+                className="text-[10px] gap-0.5 text-success border-border bg-success/10"
+              >
+                <Receipt className="h-2.5 w-2.5" />
+                {t('fuel.tax_verified')}
+              </Badge>
+            )}
           </div>
-        </div>
-
+        </>
+      }
+    >
+      <Card>
         <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           <div>
             <dt className="text-xs text-muted-foreground">
@@ -307,76 +298,85 @@ export default function FuelDetailPage() {
             <dd className="font-medium">{t(`fuel.${row.source_status}`)}</dd>
           </div>
         </dl>
-      </div>
+      </Card>
 
       {row.source_data && (
-        <section
-          aria-label={t('fuel.original_receipt')}
-          className="glass-card space-y-3 p-5"
-        >
-          <h2 className="font-heading text-base font-semibold">
-            {t('fuel.original_receipt')}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t('fuel.source_comparison_hint')}
-          </p>
-          {row.source_data.seller_name && (
-            <p className="text-sm font-medium">{row.source_data.seller_name}</p>
-          )}
-          {row.source_data.seller_tin && (
-            <p className="text-sm">
-              {t('fuel.tax_id')}:{' '}
-              <span className="font-medium tabular-nums">
-                {row.source_data.seller_tin}
-              </span>
+        <Card asChild>
+          <section
+            aria-label={t('fuel.original_receipt')}
+            className=" space-y-3 "
+          >
+            <h2 className="font-heading text-base font-semibold">
+              {t('fuel.original_receipt')}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t('fuel.source_comparison_hint')}
             </p>
-          )}
-          {row.source_data.total && (
-            <p className="text-sm">
-              {t('fuel.receipt_total')}:{' '}
-              <strong className="tabular-nums">{row.source_data.total}</strong>
-            </p>
-          )}
-          {row.source_data.reason && (
-            <p role="status" className="text-sm">
-              {t(`fuel.source_reasons.${row.source_data.reason}`, {
-                defaultValue: t('fuel.manual_review'),
-              })}
-            </p>
-          )}
-          {row.source_data.warnings?.map((warning) => (
-            <p
-              className="text-sm font-medium text-destructive"
-              role="alert"
-              key={warning}
-            >
-              <Warning className="mr-1 inline h-3.5 w-3.5" />
-              {t(`fuel.source_reasons.${warning}`, {
-                defaultValue: t('fuel.manual_review'),
-              })}
-            </p>
-          ))}
-          {row.source_data.lines?.map((line) => (
-            <div key={line.index} className="rounded-lg border p-3 text-sm">
-              <p className="font-medium">{line.name}</p>
-              <p className="text-muted-foreground">
-                {t('fuel.quantity')}: {line.quantity}{' '}
-                {line.unit ?? t('common.na')} · {t('fuel.line_total')}:{' '}
-                <span className="tabular-nums">{line.line_total}</span>
+            {row.source_data.seller_name && (
+              <p className="text-sm font-medium">
+                {row.source_data.seller_name}
               </p>
-              <p className="text-muted-foreground">
-                {t('fuel.mxik')}: {line.mxik || t('common.na')}
+            )}
+            {row.source_data.seller_tin && (
+              <p className="text-sm">
+                {t('fuel.tax_id')}:{' '}
+                <span className="font-medium tabular-nums">
+                  {row.source_data.seller_tin}
+                </span>
               </p>
-            </div>
-          ))}
-        </section>
+            )}
+            {row.source_data.total && (
+              <p className="text-sm">
+                {t('fuel.receipt_total')}:{' '}
+                <strong className="tabular-nums">
+                  {row.source_data.total}
+                </strong>
+              </p>
+            )}
+            {row.source_data.reason && (
+              <p role="status" className="text-sm">
+                {t(`fuel.source_reasons.${row.source_data.reason}`, {
+                  defaultValue: t('fuel.manual_review'),
+                })}
+              </p>
+            )}
+            {row.source_data.warnings?.map((warning) => (
+              <p
+                className="text-sm font-medium text-destructive"
+                role="alert"
+                key={warning}
+              >
+                <Warning className="mr-1 inline h-3.5 w-3.5" />
+                {t(`fuel.source_reasons.${warning}`, {
+                  defaultValue: t('fuel.manual_review'),
+                })}
+              </p>
+            ))}
+            {row.source_data.lines?.map((line) => (
+              <div
+                key={line.index}
+                className="rounded-md bg-muted/40 p-3 text-sm"
+              >
+                <p className="font-medium">{line.name}</p>
+                <p className="text-muted-foreground">
+                  {t('fuel.quantity')}: {line.quantity}{' '}
+                  {line.unit ?? t('common.na')} · {t('fuel.line_total')}:{' '}
+                  <span className="tabular-nums">{line.line_total}</span>
+                </p>
+                <p className="text-muted-foreground">
+                  {t('fuel.mxik')}: {line.mxik || t('common.na')}
+                </p>
+              </div>
+            ))}
+          </section>
+        </Card>
       )}
       {!row.source_data && (
-        <div className="glass-card p-5">
+        <Card className=" ">
           <p className="text-sm text-muted-foreground">
             {t('fuel.manual_review')}
           </p>
-        </div>
+        </Card>
       )}
 
       <section className="space-y-3">
@@ -395,10 +395,7 @@ export default function FuelDetailPage() {
         ) : (
           <div className="grid gap-3">
             {row.lines.map((line, i) => (
-              <div
-                className="glass-card flex items-center justify-between p-4"
-                key={i}
-              >
+              <Card className=" flex items-center justify-between " key={i}>
                 <div className="space-y-0.5">
                   <span className="text-sm font-medium">
                     {line.name || t(`fuel.${line.fuel_type}`)}
@@ -413,97 +410,104 @@ export default function FuelDetailPage() {
                   {Number(line.line_total).toLocaleString()}{' '}
                   {t('common.currency')}
                 </span>
-              </div>
+              </Card>
             ))}
           </div>
         )}
       </section>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         {['receipt', 'odometer'].map((slot) => (
-          <section className="glass-card space-y-3 p-5" key={slot}>
-            <h2 className="font-heading text-sm font-semibold">
-              {t(`fuel.${slot}`)}
-            </h2>
-            {row.evidence
-              .filter((e) => e.slot === slot)
-              .map((e) => (
-                <Evidence key={e.id} id={id} evidenceId={e.id} slot={slot} />
-              ))}
-            {edit && (
-              <Upload
-                id={id}
-                slot={slot}
-                busy={(value) =>
-                  setBusy((old) =>
-                    value ? [...old, slot] : old.filter((v) => v !== slot),
-                  )
-                }
-              />
-            )}
-          </section>
+          <Card key={slot} asChild>
+            <section className=" space-y-3 ">
+              <h2 className="font-heading text-sm font-semibold">
+                {t(`fuel.${slot}`)}
+              </h2>
+              {row.evidence
+                .filter((e) => e.slot === slot)
+                .map((e) => (
+                  <Evidence key={e.id} id={id} evidenceId={e.id} slot={slot} />
+                ))}
+              {edit && (
+                <Upload
+                  id={id}
+                  slot={slot}
+                  busy={(value) =>
+                    setBusy((old) =>
+                      value ? [...old, slot] : old.filter((v) => v !== slot),
+                    )
+                  }
+                />
+              )}
+            </section>
+          </Card>
         ))}
       </div>
 
       {(edit || reviewer || maySubmit || mayCancel) && (
-        <section className="glass-card space-y-4 p-5">
-          <label className="block space-y-1.5">
-            <span className="text-sm font-medium">{t('fuel.reason')}</span>
-            <Input value={reason} onChange={(e) => setReason(e.target.value)} />
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {maySubmit &&
-              row.author_id === user?.id &&
-              row.status === 'draft' && (
+        <Card asChild>
+          <section className=" space-y-4 ">
+            <label className="block space-y-1.5">
+              <span className="text-sm font-medium">{t('fuel.reason')}</span>
+              <Input
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {maySubmit &&
+                row.author_id === user?.id &&
+                row.status === 'draft' && (
+                  <Button
+                    disabled={
+                      mutation.isPending ||
+                      busy.length > 0 ||
+                      !['receipt', 'odometer'].every((s) =>
+                        row.evidence.some((e) => e.slot === s),
+                      )
+                    }
+                    onClick={() =>
+                      mutation.mutate({ action: 'submit', body: {} })
+                    }
+                  >
+                    {t('fuel.submit')}
+                  </Button>
+                )}
+              {reviewer &&
+                row.status === 'submitted' &&
+                ['approve', 'reject'].map((decision) => (
+                  <Button
+                    key={decision}
+                    variant={decision === 'approve' ? 'default' : 'outline'}
+                    disabled={
+                      mutation.isPending || busy.length > 0 || !reason.trim()
+                    }
+                    onClick={() =>
+                      mutation.mutate({
+                        action: 'review',
+                        body: { decision, reason },
+                      })
+                    }
+                  >
+                    {t(`fuel.${decision}`)}
+                  </Button>
+                ))}
+              {mayCancel && row.status !== 'cancelled' && (
                 <Button
-                  disabled={
-                    mutation.isPending ||
-                    busy.length > 0 ||
-                    !['receipt', 'odometer'].every((s) =>
-                      row.evidence.some((e) => e.slot === s),
-                    )
-                  }
-                  onClick={() =>
-                    mutation.mutate({ action: 'submit', body: {} })
-                  }
-                >
-                  {t('fuel.submit')}
-                </Button>
-              )}
-            {reviewer &&
-              row.status === 'submitted' &&
-              ['approve', 'reject'].map((decision) => (
-                <Button
-                  key={decision}
-                  variant={decision === 'approve' ? 'default' : 'outline'}
+                  variant="outline"
                   disabled={
                     mutation.isPending || busy.length > 0 || !reason.trim()
                   }
                   onClick={() =>
-                    mutation.mutate({
-                      action: 'review',
-                      body: { decision, reason },
-                    })
+                    mutation.mutate({ action: 'cancel', body: { reason } })
                   }
                 >
-                  {t(`fuel.${decision}`)}
+                  {t('fuel.cancel')}
                 </Button>
-              ))}
-            {mayCancel && row.status !== 'cancelled' && (
-              <Button
-                variant="outline"
-                disabled={
-                  mutation.isPending || busy.length > 0 || !reason.trim()
-                }
-                onClick={() =>
-                  mutation.mutate({ action: 'cancel', body: { reason } })
-                }
-              >
-                {t('fuel.cancel')}
-              </Button>
-            )}
-          </div>
-        </section>
+              )}
+            </div>
+          </section>
+        </Card>
       )}
 
       {row.expense_id && mayReadExpense && (
@@ -522,7 +526,7 @@ export default function FuelDetailPage() {
             {t('fuel.history')}
           </h2>
           {row.history.map((review) => (
-            <div key={review.id} className="glass-card space-y-2 p-4">
+            <Card key={review.id} className=" space-y-2 ">
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <Badge variant="outline" className="text-xs">
                   {t(`fuel.${review.action}`)}
@@ -577,7 +581,7 @@ export default function FuelDetailPage() {
                             {describe(before)}
                           </span>
                           {' → '}
-                          <span className="text-emerald-600">
+                          <span className="text-success">
                             {describe(after)}
                           </span>
                         </dd>
@@ -586,10 +590,10 @@ export default function FuelDetailPage() {
                   })}
                 </dl>
               )}
-            </div>
+            </Card>
           ))}
         </section>
       )}
-    </div>
+    </EntityDetailShell>
   );
 }

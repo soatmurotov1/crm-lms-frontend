@@ -1,7 +1,8 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
 import Page from './FuelDetailPage';
 const state = vi.hoisted(() => ({
+  navigate: vi.fn(),
   source: {
     status: 'source_verified',
     seller_name: 'Station seller',
@@ -29,6 +30,7 @@ const state = vi.hoisted(() => ({
   } as Record<string, unknown>,
 }));
 vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => state.navigate,
   useParams: () => ({ id: 'f' }),
   Link: ({ children }: { children: React.ReactNode }) => <a>{children}</a>,
 }));
@@ -92,4 +94,12 @@ it('shows manual source failure reason without claiming source verification', ()
       screen.getByRole('region', { name: 'fuel.original_receipt' }),
     ).getByText('fuel.source_reasons.source_unavailable'),
   ).toBeInTheDocument();
+});
+
+it('returns to the fuel list through the detail shell', () => {
+  render(<Page />);
+  const back = screen.getByRole('link', { name: 'fuel.title' });
+  expect(back).toHaveAttribute('href', '/vehicle-fuel');
+  fireEvent.click(back);
+  expect(state.navigate).toHaveBeenCalledWith({ to: '/vehicle-fuel' });
 });

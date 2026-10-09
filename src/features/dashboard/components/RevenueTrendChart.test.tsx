@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import RevenueTrendChart from './RevenueTrendChart';
 
@@ -88,4 +88,18 @@ describe('RevenueTrendChart business dates', () => {
       );
     },
   );
+});
+
+it('keeps both metric tiles opaque in every pressed state', () => {
+  render(<RevenueTrendChart data={[]} />);
+  for (const id of ['chart-metric-revenue', 'chart-metric-payments']) {
+    const tile = screen.getByTestId(id);
+    expect(tile).toHaveAttribute('aria-pressed', 'true');
+    expect(tile).toHaveClass('bg-accent', 'text-accent-foreground');
+    fireEvent.click(tile);
+    expect(tile).toHaveAttribute('aria-pressed', 'false');
+    expect(tile).toHaveClass('bg-card', 'text-card-foreground');
+    expect(tile.className).not.toMatch(/opacity-|bg-\w+\//);
+    fireEvent.click(tile);
+  }
 });

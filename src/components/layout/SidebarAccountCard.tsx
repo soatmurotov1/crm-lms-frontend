@@ -81,7 +81,7 @@ export function SidebarAccountCard({
         className={cn(
           'flex w-full items-center gap-2 text-left transition-[background-color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring',
           expanded
-            ? 'rounded-xl bg-sidebar-accent/80 p-2 shadow-[0_1px_2px_hsl(var(--foreground)/0.05)] hover:bg-sidebar-accent'
+            ? 'rounded-lg bg-sidebar-accent/80 p-2 shadow-[0_1px_2px_hsl(var(--foreground)/0.05)] hover:bg-sidebar-accent'
             : 'justify-center rounded-[10px] p-1 hover:bg-sidebar-accent',
         )}
       >

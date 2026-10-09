@@ -1,6 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import FinanceDashboard from '@/features/dashboard/components/FinanceDashboard';
+import { FinanceSummarySection } from '@/features/dashboard/components/FinanceSummarySection';
 import { formatMoney } from '@/lib/money';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
@@ -129,6 +130,11 @@ describe('FinanceDashboard', () => {
       'data-state',
       'loading',
     );
+    expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent('common.loading');
+    expect(
+      screen.getByRole('status').closest('[data-surface="card"]'),
+    ).not.toBeNull();
   });
 
   it('shows error with retry when finance summary fails', async () => {
@@ -138,6 +144,9 @@ describe('FinanceDashboard', () => {
       'data-state',
       'error',
     );
+    expect(
+      screen.getByRole('alert').closest('[data-surface="card"]'),
+    ).not.toBeNull();
     fireEvent.click(screen.getByText('common.retry'));
     expect(summaryState.refetch).toHaveBeenCalled();
   });
@@ -203,4 +212,29 @@ describe('FinanceDashboard', () => {
     );
     expect(screen.getByTestId('finance-summary-empty')).toBeInTheDocument();
   });
+});
+
+describe('FinanceSummarySection announcements', () => {
+  it.each(['summary', 'breakdown'] as const)(
+    'announces %s loading',
+    async (target) => {
+      (target === 'summary' ? summaryState : breakdownState).isLoading = true;
+      await renderWithRouter(<FinanceSummarySection />);
+      const status = screen.getByRole('status');
+      expect(status).toHaveAttribute('aria-busy', 'true');
+      expect(status).toHaveTextContent('common.loading');
+      expect(status.closest('[data-surface="card"]')).not.toBeNull();
+    },
+  );
+
+  it.each(['summary', 'breakdown'] as const)(
+    'announces %s errors',
+    async (target) => {
+      (target === 'summary' ? summaryState : breakdownState).isError = true;
+      await renderWithRouter(<FinanceSummarySection />);
+      expect(
+        screen.getByRole('alert').closest('[data-surface="card"]'),
+      ).not.toBeNull();
+    },
+  );
 });

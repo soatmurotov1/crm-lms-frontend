@@ -118,7 +118,7 @@ export const AuditTable = ({
       sortField={sortField}
       sortDir={sortDir}
       onToggleSort={onToggleSort}
-      className="glass-card overflow-hidden"
+      className=" "
     />
   );
 };

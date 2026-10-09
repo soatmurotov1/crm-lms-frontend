@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -204,10 +205,7 @@ const AttendanceDrawer = ({ lesson, onClose }: AttendanceDrawerProps) => {
         {roster.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-border p-4">
             {SUMMARY_STATUSES.map((status) => (
-              <div
-                key={status}
-                className="flex flex-col gap-1.5 rounded-xl border border-border bg-card p-2.5"
-              >
+              <Card dense key={status} className="flex flex-col gap-1.5">
                 <span className="flex items-center gap-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                   <span
                     className={cn(
@@ -230,7 +228,7 @@ const AttendanceDrawer = ({ lesson, onClose }: AttendanceDrawerProps) => {
                     / {roster.length}
                   </span>
                 </span>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -289,7 +287,7 @@ const AttendanceDrawer = ({ lesson, onClose }: AttendanceDrawerProps) => {
             filteredRoster.map((row) => (
               <div
                 key={row.studentId}
-                className="flex items-center justify-between gap-3 rounded-xl p-2 motion-safe:transition-colors duration-150 hover:bg-muted/[40%]"
+                className="flex items-center justify-between gap-3 rounded-lg p-2 motion-safe:transition-colors duration-150 hover:bg-muted/[40%]"
               >
                 <div className="flex flex-1 min-w-0 items-center gap-2.5">
                   <span

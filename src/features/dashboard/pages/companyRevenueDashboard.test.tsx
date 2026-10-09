@@ -234,7 +234,18 @@ vi.mock('@/features/dashboard/api/dashboardService', () => ({
   }),
 }));
 
+const pristineOverview = structuredClone(overview.data);
+
+// Growth needs complete, equal-length periods; fixtures opt in explicitly.
+const makeGrowthComparable = () =>
+  Object.assign(overview.data.kpis.revenue, {
+    period_to_inclusive: '2026-07-10',
+    previous_period_from: '2026-06-21',
+    previous_period_to_inclusive: '2026-06-30',
+  });
+
 afterEach(() => {
+  overview.data = structuredClone(pristineOverview);
   auth.user = {
     name: 'Demo Owner',
     role: 'owner',
@@ -245,18 +256,125 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const renderDashboard = (initialEntry = '/dashboard') => {
+const renderDashboard = async (
+  initialEntry = '/dashboard',
+  expandDetails = true,
+) => {
   useAuthStore.setState({
     user: auth.user as User,
     activeBranchId: auth.user.branch_id ?? null,
   });
-  return renderWithRouter(<CompanyRevenueDashboard />, {
+  const result = await renderWithRouter(<CompanyRevenueDashboard />, {
     initialEntry,
     routePattern: '/dashboard',
   });
+  const details = screen.queryByRole('button', {
+    name: 'dashboard.v2.analysis_title',
+  });
+  if (expandDetails && details) fireEvent.click(details);
+  return result;
 };
 
 describe('CompanyRevenueDashboard', () => {
+  it('shows only three primary KPIs and expands details on demand', async () => {
+    await renderDashboard('/dashboard', false);
+    const strip = screen.getByTestId('dashboard-v2-kpi-strip');
+    expect(within(strip).getAllByRole('button')).toHaveLength(3);
+    expect(strip).toHaveClass('grid', 'gap-3', 'sm:grid-cols-3');
+    expect(
+      screen.queryByText('dashboard.v2.period_revenue'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('finance-summary-section'),
+    ).not.toBeInTheDocument();
+    const details = screen.getByRole('button', {
+      name: 'dashboard.v2.analysis_title',
+    });
+    expect(details).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(details);
+    expect(details).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('dashboard.v2.period_revenue')).toBeVisible();
+    expect(screen.getByTestId('finance-summary-section')).toBeVisible();
+  });
+
+  it('hides growth for an incomplete period', async () => {
+    makeGrowthComparable();
+    const now = vi
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.parse('2026-07-07T10:00:00Z'));
+    try {
+      await renderDashboard();
+      expect(screen.queryByTestId('kpi-delta')).not.toBeInTheDocument();
+    } finally {
+      now.mockRestore();
+    }
+  });
+
+  it('hides growth when an ISO period end includes today in Tashkent', async () => {
+    const revenue = overview.data.kpis.revenue;
+    const original = { ...revenue };
+    const now = vi
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.parse('2026-07-07T20:00:00Z'));
+    Object.assign(revenue, {
+      period_to_inclusive: '2026-07-07T19:59:59.999Z',
+      previous_period_from: '2026-06-24',
+      previous_period_to_inclusive: '2026-06-30',
+    });
+    try {
+      await renderDashboard();
+      expect(screen.queryByTestId('kpi-delta')).not.toBeInTheDocument();
+    } finally {
+      Object.assign(revenue, original);
+      now.mockRestore();
+    }
+  });
+
+  it.each(['unequal', 'zero'] as const)(
+    'hides growth for %s comparison',
+    async (reason) => {
+      const revenue = makeGrowthComparable();
+      const original = { ...revenue };
+      if (reason === 'unequal') revenue.previous_period_from = '2026-06-22';
+      else revenue.previous_period = 0;
+      try {
+        await renderDashboard();
+        expect(screen.queryByTestId('kpi-delta')).not.toBeInTheDocument();
+      } finally {
+        Object.assign(revenue, original);
+      }
+    },
+  );
+
+  it('does not warn at exactly 24 hours', async () => {
+    const now = vi
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.parse('2026-07-11T10:00:00Z'));
+    try {
+      await renderDashboard('/dashboard', false);
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    } finally {
+      now.mockRestore();
+    }
+  });
+
+  it('warns only when data is older than 24 hours, even if generated recently', async () => {
+    const generated = overview.data.freshness.generated_at;
+    const now = vi
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.parse('2026-07-11T10:00:01Z'));
+    overview.data.freshness.generated_at = '2026-07-11T10:00:00Z';
+    try {
+      await renderDashboard('/dashboard', false);
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'dashboard.v2.stale_data',
+      );
+    } finally {
+      overview.data.freshness.generated_at = generated;
+      now.mockRestore();
+    }
+  });
+
   it.each([
     ['2026-07-10T07:00:00.000Z', 7, 'dashboard.greeting_afternoon'],
     ['2026-07-10T13:00:00.000Z', 13, 'dashboard.greeting_evening'],
@@ -290,6 +408,9 @@ describe('CompanyRevenueDashboard', () => {
     overviewState.isError = true;
     await renderDashboard();
     expect(screen.getByText('dashboard.v2.error_title')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'dashboard.v2.error_title',
+    );
     fireEvent.click(screen.getByText('common.retry'));
     expect(overviewState.refetch).toHaveBeenCalled();
   });
@@ -331,9 +452,7 @@ describe('CompanyRevenueDashboard', () => {
     expect(
       within(strip).getByText('dashboard.v2.today_revenue'),
     ).toBeInTheDocument();
-    expect(
-      within(strip).getByText('dashboard.v2.period_revenue'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('dashboard.v2.period_revenue')).toBeInTheDocument();
     expect(
       screen.getByText('dashboard.v2.period_over_period'),
     ).toBeInTheDocument();
@@ -407,10 +526,12 @@ describe('CompanyRevenueDashboard', () => {
   });
 
   it('shows period-over-period delta only on the PoP strip tile', async () => {
+    makeGrowthComparable();
     await renderDashboard();
     const strip = screen.getByTestId('dashboard-v2-kpi-strip');
     // DeltaChip renders "+15.5%" for revenue.delta_percent
-    const deltas = strip.querySelectorAll('[data-testid="kpi-delta"]');
+    expect(strip.querySelectorAll('[data-testid="kpi-delta"]')).toHaveLength(0);
+    const deltas = document.querySelectorAll('[data-testid="kpi-delta"]');
     expect(deltas.length).toBe(1);
     expect(deltas[0].textContent).toMatch(/15\.5/);
     expect(deltas[0]).toHaveClass('dark:text-foreground');
@@ -736,19 +857,14 @@ describe('CompanyRevenueDashboard navigation (autodrive-ls5)', () => {
     );
   });
 
-  it('debt KPI navigates to /students with status+has_debt, not /talabalar', async () => {
-    const { router } = await renderDashboard();
+  it('debt KPI focuses the recovery queue', async () => {
+    await renderDashboard();
     fireEvent.click(
       within(screen.getByTestId('dashboard-v2-kpi-strip')).getByText(
         'dashboard.v2.outstanding_debt',
       ),
     );
-    await waitFor(() =>
-      expect(router.state.location.pathname).toBe('/students'),
-    );
-    const params = new URLSearchParams(router.state.location.searchStr);
-    expect(params.get('status')).toBe('active');
-    expect(params.get('has_debt')).toBe('true');
+    expect(document.getElementById('dashboard-recovery')).toHaveFocus();
   });
 
   it('recovery-queue row navigates to /students/:id, not a name-search', async () => {

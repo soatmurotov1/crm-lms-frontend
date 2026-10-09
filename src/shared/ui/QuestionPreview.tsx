@@ -1,3 +1,5 @@
+import { CheckCircle } from '@phosphor-icons/react';
+import { Card } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -10,7 +12,7 @@ import { questionMediaUrl } from '@/features/questions/api/questionService';
 import axiosInstance from '@/api/axiosInstance';
 
 const selectClass =
-  'flex w-full cursor-pointer items-start gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-left text-sm transition hover:border-primary/40';
+  'flex w-full cursor-pointer items-start gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-left text-sm transition hover:bg-muted/40';
 
 function useAuthedMediaUrl(questionId: string, mediaId: string | null) {
   return useQuery({
@@ -55,7 +57,7 @@ export const QuestionPreview = ({
   }
 
   return (
-    <div className="space-y-4 rounded-xl border border-border bg-card p-4">
+    <Card className="space-y-4 ">
       <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {t('questions.learner_preview')}
       </div>
@@ -80,7 +82,7 @@ export const QuestionPreview = ({
               <div
                 key={option.option_key}
                 className={`${selectClass} ${
-                  isCorrect ? 'border-emerald-500/60 bg-emerald-500/5' : ''
+                  isCorrect ? 'border-border bg-success/10' : ''
                 }`}
               >
                 <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
@@ -89,6 +91,14 @@ export const QuestionPreview = ({
                 <span className="flex-1 whitespace-pre-wrap">
                   {option.text}
                 </span>
+                {isCorrect ? (
+                  <CheckCircle
+                    role="img"
+                    aria-label={t('questions.correct_option')}
+                    className="mt-0.5 h-5 w-5 shrink-0 text-success"
+                    weight="fill"
+                  />
+                ) : null}
               </div>
             );
           })}
@@ -107,6 +117,6 @@ export const QuestionPreview = ({
         {' · '}
         {t('questions.not_official_exam')}
       </p>
-    </div>
+    </Card>
   );
 };

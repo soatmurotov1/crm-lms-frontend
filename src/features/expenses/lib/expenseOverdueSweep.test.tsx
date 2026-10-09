@@ -669,7 +669,9 @@ describe('ExpensesPage overdue query selection', () => {
 
     expect(sweepLink).toHaveFocus();
     expect(sweep.container.querySelector('.absolute.inset-0.z-10')).toBeNull();
-    expect(sweepLink.closest('.glass-card')).not.toHaveClass('opacity-50');
+    expect(sweepLink.closest('[data-surface="card"]')).not.toHaveClass(
+      'opacity-50',
+    );
     expect(
       screen.getByRole('region', {
         name: 'expenses.overdue_sweep.title',

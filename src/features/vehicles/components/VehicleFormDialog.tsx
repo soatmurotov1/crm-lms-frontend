@@ -378,7 +378,7 @@ const VehicleFormDialog = ({
                       {VEHICLE_CATEGORIES.map((category) => (
                         <label
                           key={category}
-                          className="flex items-center gap-2 rounded-md border p-2 text-sm"
+                          className="flex items-center gap-2 rounded-md bg-muted/40 p-2 text-sm"
                         >
                           <Checkbox
                             checked={field.value.includes(category)}

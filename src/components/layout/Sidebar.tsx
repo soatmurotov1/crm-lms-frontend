@@ -32,6 +32,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Portal as TooltipPortal } from '@radix-ui/react-tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { SidebarAccountCard } from './SidebarAccountCard';
 import { Brand } from './Brand';
 import { isNavActive } from '@/lib/navActive';
@@ -102,41 +108,27 @@ const useDelayedAction = () => {
 
 const railItemClass = (highlighted: boolean) =>
   cn(
-    'group/rail relative flex min-h-14 w-full flex-col items-center justify-center gap-1 rounded-xl px-0.5 py-1 transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring',
+    'group/rail relative flex min-h-11 w-full items-center justify-center rounded-xl px-0.5 py-1 transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring',
     highlighted
       ? 'text-sidebar-foreground'
       : 'text-muted-foreground hover:text-sidebar-foreground',
   );
 
-const renderRailContent = (
-  Icon: NavSection['icon'],
-  label: string,
-  highlighted: boolean,
-) => (
-  <>
-    <span
-      className={cn(
-        'flex h-8 w-14 items-center justify-center rounded-full transition-[background-color,scale] duration-150 ease-out group-active/rail:scale-[0.94]',
-        highlighted
-          ? 'bg-sidebar-accent'
-          : 'group-hover/rail:bg-sidebar-accent/70',
-      )}
-    >
-      <Icon
-        className="h-5 w-5 shrink-0"
-        weight={highlighted ? 'fill' : 'regular'}
-        aria-hidden="true"
-      />
-    </span>
-    <span
-      className={cn(
-        'line-clamp-2 w-full break-normal text-center text-[11px] leading-[1.25]',
-        highlighted ? 'font-semibold' : 'font-medium',
-      )}
-    >
-      {label}
-    </span>
-  </>
+const renderRailContent = (Icon: NavSection['icon'], highlighted: boolean) => (
+  <span
+    className={cn(
+      'flex h-9 w-9 items-center justify-center rounded-full transition-[background-color,scale] duration-150 ease-out group-active/rail:scale-[0.94]',
+      highlighted
+        ? 'bg-sidebar-accent'
+        : 'group-hover/rail:bg-sidebar-accent/70',
+    )}
+  >
+    <Icon
+      className="h-5 w-5 shrink-0"
+      weight={highlighted ? 'fill' : 'regular'}
+      aria-hidden="true"
+    />
+  </span>
 );
 const ACTIVE_MARKER_CLASS =
   'before:absolute before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-primary before:transition-[opacity,scale] before:duration-150 before:ease-out';
@@ -160,12 +152,12 @@ const DesktopSidebar = ({
     data-state={expanded ? 'expanded' : 'collapsed'}
     className={cn(
       'fixed inset-y-0 left-0 z-40 hidden flex-col overflow-hidden border-r border-sidebar-border bg-sidebar lg:flex',
-      expanded ? 'w-64' : 'w-[86px]',
+      expanded ? 'w-64' : 'w-14',
     )}
   >
     <div
       className={cn(
-        'flex h-16 shrink-0 items-center border-b border-sidebar-border px-3',
+        'flex h-14 shrink-0 items-center border-b border-sidebar-border px-3',
         expanded ? 'justify-between gap-2' : 'justify-center',
       )}
     >
@@ -184,7 +176,10 @@ const DesktopSidebar = ({
         aria-expanded={expanded}
         title={sidebarLabel}
         onClick={() => onExpandedChange(!expanded)}
-        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-[background-color,color,scale] duration-150 ease-out hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar active:scale-[0.96]"
+        className={cn(
+          expanded ? 'h-10 w-10' : 'h-11 w-11',
+          'inline-flex shrink-0 items-center justify-center rounded-md text-muted-foreground transition-[background-color,color,scale] duration-150 ease-out hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar active:scale-[0.96]',
+        )}
       >
         <SidebarSimple className="h-5 w-5" aria-hidden="true" />
       </button>
@@ -195,16 +190,18 @@ const DesktopSidebar = ({
       data-tour="crm-sidebar-desktop"
       aria-label={sidebarLabel}
       className={cn(
-        'flex-1 overflow-y-auto overscroll-contain py-4',
+        'flex-1 overflow-y-auto overscroll-contain',
         expanded
-          ? 'app-sidebar-scroll px-3'
-          : 'px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+          ? 'app-sidebar-scroll px-3 py-4'
+          : 'px-2 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
       )}
     >
       {navigation}
     </nav>
 
-    <div className="border-t border-sidebar-border p-3">
+    <div
+      className={cn('border-t border-sidebar-border', expanded ? 'p-3' : 'p-1')}
+    >
       <SidebarAccountCard expanded={expanded} />
     </div>
   </aside>
@@ -370,8 +367,14 @@ export const Sidebar = ({
     clearHoverTimer();
     setFlyout({ sectionId, pathname: location.pathname, via });
   };
+  // Rail tooltip is controlled so focus restoration after the flyout closes
+  // (Escape) can't reopen it; hover/blur re-arm it.
+  const [tipId, setTipId] = useState<NavSectionId | null>(null);
+  const [tipBlocked, setTipBlocked] = useState(false);
   const closeFlyout = () => {
     clearHoverTimer();
+    setTipId(null);
+    setTipBlocked(true);
     setFlyout(null);
   };
   const scheduleHoverOpen = (sectionId: NavSectionId) => {
@@ -428,46 +431,58 @@ export const Sidebar = ({
     const isDesktop = variant === 'desktop';
     const isRail = isDesktop && !desktopExpanded;
 
+    const link = (
+      <Link
+        to={item.path}
+        preload={false}
+        onClick={onNavigate}
+        aria-label={label}
+        aria-current={active ? 'page' : undefined}
+        data-sidebar-item="true"
+        data-active={String(active)}
+        className={
+          isRail
+            ? railItemClass(active)
+            : cn(
+                ACTIVE_MARKER_CLASS,
+                'relative flex h-10 w-full items-center gap-3 rounded-md py-0 pl-4 pr-3 text-sm font-medium transition-[background-color,color] duration-150 ease-out before:left-1.5',
+                active
+                  ? 'before:scale-100 before:opacity-100 bg-sidebar-accent text-sidebar-foreground'
+                  : 'before:scale-75 before:opacity-0 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                isDesktop &&
+                  desktopExpanded &&
+                  item.pinnable !== false &&
+                  'pr-12',
+                variant === 'mobile' && 'h-11 text-[0.95rem]',
+              )
+        }
+      >
+        {isRail ? (
+          renderRailContent(item.icon, active)
+        ) : (
+          <>
+            <item.icon
+              className="h-[18px] w-[18px] shrink-0"
+              aria-hidden="true"
+            />
+            <span className="min-w-0 flex-1 truncate">{label}</span>
+          </>
+        )}
+      </Link>
+    );
+
     return (
       <div className="group relative" key={`${variant}-${item.path}`}>
-        <Link
-          to={item.path}
-          preload={false}
-          onClick={onNavigate}
-          aria-label={label}
-          aria-current={active ? 'page' : undefined}
-          data-sidebar-item="true"
-          data-active={String(active)}
-          title={isRail ? label : undefined}
-          className={
-            isRail
-              ? railItemClass(active)
-              : cn(
-                  ACTIVE_MARKER_CLASS,
-                  'relative flex h-10 w-full items-center gap-3 rounded-md py-0 pl-4 pr-3 text-sm font-medium transition-[background-color,color,box-shadow] duration-150 ease-out before:left-1.5',
-                  active
-                    ? 'before:scale-100 before:opacity-100 bg-sidebar-accent text-sidebar-foreground shadow-[0_1px_2px_hsl(var(--foreground)/0.05)]'
-                    : 'before:scale-75 before:opacity-0 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground',
-                  isDesktop &&
-                    desktopExpanded &&
-                    item.pinnable !== false &&
-                    'pr-12',
-                  variant === 'mobile' && 'h-11 text-[0.95rem]',
-                )
-          }
-        >
-          {isRail ? (
-            renderRailContent(item.icon, label, active)
-          ) : (
-            <>
-              <item.icon
-                className="h-[18px] w-[18px] shrink-0"
-                aria-hidden="true"
-              />
-              <span className="min-w-0 flex-1 truncate">{label}</span>
-            </>
-          )}
-        </Link>
+        {isRail ? (
+          <Tooltip>
+            <TooltipTrigger asChild>{link}</TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent side="right">{label}</TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
+        ) : (
+          link
+        )}
         {isDesktop && desktopExpanded && item.pinnable !== false && (
           <button
             type="button"
@@ -508,29 +523,46 @@ export const Sidebar = ({
           if (!next) closeFlyout();
         }}
       >
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            data-sidebar-section="true"
-            data-active={String(active)}
-            onClick={(event) => {
-              // Own the toggle so a click on a hover-opened flyout pins it open.
-              event.preventDefault();
-              if (open && !hoverOpened) closeFlyout();
-              else openFlyout(section.id, 'click');
-            }}
-            onPointerEnter={(event) => {
-              if (isMousePointer(event)) scheduleHoverOpen(section.id);
-            }}
-            onPointerLeave={(event) => {
-              if (isMousePointer(event)) scheduleHoverClose();
-            }}
-            title={label}
-            className={railItemClass(active || open)}
-          >
-            {renderRailContent(section.icon, label, active || open)}
-          </button>
-        </PopoverTrigger>
+        <Tooltip
+          open={!open && tipId === section.id}
+          onOpenChange={(next) => {
+            if (next && tipBlocked) return;
+            setTipId(next ? section.id : null);
+          }}
+        >
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                data-sidebar-section="true"
+                data-active={String(active)}
+                onClick={(event) => {
+                  // Own the toggle so a click on a hover-opened flyout pins it open.
+                  event.preventDefault();
+                  if (open && !hoverOpened) closeFlyout();
+                  else openFlyout(section.id, 'click');
+                }}
+                onPointerEnter={(event) => {
+                  setTipBlocked(false);
+                  if (isMousePointer(event)) scheduleHoverOpen(section.id);
+                }}
+                onBlur={() => {
+                  setTipBlocked(false);
+                }}
+                onPointerLeave={(event) => {
+                  if (isMousePointer(event)) scheduleHoverClose();
+                }}
+                aria-label={label}
+                className={railItemClass(active || open)}
+              >
+                {renderRailContent(section.icon, active || open)}
+              </button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipPortal>
+            <TooltipContent side="right">{label}</TooltipContent>
+          </TooltipPortal>
+        </Tooltip>
         <PopoverContent
           side="right"
           align="start"
@@ -656,7 +688,7 @@ export const Sidebar = ({
         {pinnedItems.length > 0 && (
           <div
             role="group"
-            className={cn('mb-5', collapsedDesktop && 'mb-3')}
+            className={collapsedDesktop ? 'mb-2' : 'mb-5'}
             aria-label={t('nav_sections.pinned')}
           >
             {collapsedDesktop ? (
@@ -683,7 +715,7 @@ export const Sidebar = ({
               section.collapsible === false ? (
                 <div
                   key={`rail-${section.id}`}
-                  className="space-y-1 border-b border-sidebar-border pb-2 mb-2 last:mb-0 last:border-b-0 last:pb-0"
+                  className="space-y-1 border-b border-sidebar-border pb-1 mb-1 last:mb-0 last:border-b-0 last:pb-0"
                 >
                   {section.items.map((item) =>
                     renderNavItem(item, variant, onNavigate),

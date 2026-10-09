@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -203,270 +204,279 @@ function FuelFormSession({
   };
 
   return (
-    <form className="glass-card space-y-5 p-5" onSubmit={handleFormSubmit}>
-      {!row && (
+    <Card asChild>
+      <form className=" space-y-5 " onSubmit={handleFormSubmit}>
+        {!row && (
+          <div className="space-y-3">
+            <label className="block space-y-1">
+              <span className="text-xs font-medium">
+                {t('fuel.vehicle_search')}
+              </span>
+              <Input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-xs font-medium">{t('fuel.vehicle')}</span>
+              <select className={selectClass} {...form.register('vehicle_id')}>
+                <option value="">{t('fuel.choose')}</option>
+                {vehicles.data?.data.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.plate_number}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <PaginationControls
+              currentPage={page}
+              totalPages={vehicles.data?.meta.totalPages ?? 1}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
+
         <div className="space-y-3">
           <label className="block space-y-1">
             <span className="text-xs font-medium">
-              {t('fuel.vehicle_search')}
+              {t('fuel.station_search')}
             </span>
             <Input
-              value={search}
+              value={stationSearch}
               onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
+                setStationSearch(e.target.value);
+                setStationPage(1);
               }}
             />
           </label>
           <label className="block space-y-1">
-            <span className="text-xs font-medium">{t('fuel.vehicle')}</span>
-            <select className={selectClass} {...form.register('vehicle_id')}>
+            <span className="text-xs font-medium">{t('fuel.station')}</span>
+            <select className={selectClass} {...form.register('station_id')}>
               <option value="">{t('fuel.choose')}</option>
-              {vehicles.data?.data.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.plate_number}
+              {row &&
+                !stations.data?.data.some((s) => s.id === row.station_id) && (
+                  <option value={row.station_id}>{row.station_name}</option>
+                )}
+              {stations.data?.data.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
                 </option>
               ))}
             </select>
           </label>
           <PaginationControls
-            currentPage={page}
-            totalPages={vehicles.data?.meta.totalPages ?? 1}
-            onPageChange={setPage}
+            currentPage={stationPage}
+            totalPages={stations.data?.meta.totalPages ?? 1}
+            onPageChange={setStationPage}
           />
         </div>
-      )}
 
-      <div className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="block space-y-1">
+            <span className="text-xs font-medium">{t('fuel.occurred_at')}</span>
+            <Input type="datetime-local" {...form.register('occurred_at')} />
+          </label>
+          <label className="block space-y-1">
+            <span className="text-xs font-medium">{t('fuel.odometer_km')}</span>
+            <Input inputMode="numeric" {...form.register('odometer_km')} />
+          </label>
+        </div>
+
         <label className="block space-y-1">
           <span className="text-xs font-medium">
-            {t('fuel.station_search')}
+            {t('fuel.funding_source')}
           </span>
-          <Input
-            value={stationSearch}
-            onChange={(e) => {
-              setStationSearch(e.target.value);
-              setStationPage(1);
-            }}
-          />
-        </label>
-        <label className="block space-y-1">
-          <span className="text-xs font-medium">{t('fuel.station')}</span>
-          <select className={selectClass} {...form.register('station_id')}>
-            <option value="">{t('fuel.choose')}</option>
-            {row &&
-              !stations.data?.data.some((s) => s.id === row.station_id) && (
-                <option value={row.station_id}>{row.station_name}</option>
-              )}
-            {stations.data?.data.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
+          <select className={selectClass} {...form.register('funding_source')}>
+            {['partner_credit', 'school_card', 'advance', 'personal'].map(
+              (v) => (
+                <option key={v} value={v}>
+                  {t(`fuel.${v}`)}
+                </option>
+              ),
+            )}
           </select>
         </label>
-        <PaginationControls
-          currentPage={stationPage}
-          totalPages={stations.data?.meta.totalPages ?? 1}
-          onPageChange={setStationPage}
-        />
-      </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block space-y-1">
-          <span className="text-xs font-medium">{t('fuel.occurred_at')}</span>
-          <Input type="datetime-local" {...form.register('occurred_at')} />
-        </label>
-        <label className="block space-y-1">
-          <span className="text-xs font-medium">{t('fuel.odometer_km')}</span>
-          <Input inputMode="numeric" {...form.register('odometer_km')} />
-        </label>
-      </div>
-
-      <label className="block space-y-1">
-        <span className="text-xs font-medium">{t('fuel.funding_source')}</span>
-        <select className={selectClass} {...form.register('funding_source')}>
-          {['partner_credit', 'school_card', 'advance', 'personal'].map((v) => (
-            <option key={v} value={v}>
-              {t(`fuel.${v}`)}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <section className="space-y-3 rounded-lg border p-4">
-        <h2 className="flex items-center gap-1.5 font-heading text-sm font-semibold">
-          <QrCode className="h-4 w-4 text-primary" />
-          {t('fuel.scan')}
-        </h2>
-        <Input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          capture="environment"
-          aria-label={t('fuel.scan')}
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            try {
-              const value = await decodeReceipt(file);
-              if (!mountedRef.current || submittingRef.current) return;
-              if (value) {
-                form.setValue('qr_url', value);
-                setScanMessage('qr_found');
-              } else setScanMessage('qr_fallback');
-            } catch {
-              if (mountedRef.current) setScanMessage('qr_fallback');
-            }
-          }}
-        />
-        <p className="text-xs text-muted-foreground">{t('fuel.qr_hint')}</p>
-        <label className="block space-y-1">
-          <span className="text-xs font-medium">{t('fuel.qr_url')}</span>
-          <Input {...form.register('qr_url')} />
-        </label>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={disabled || lookup.isPending || mutation.isPending}
-          onClick={() => void read()}
-          className="gap-1.5"
-        >
-          {lookup.isPending && (
-            <ArrowClockwise className="h-3.5 w-3.5 animate-spin" />
+        <section className="space-y-3 rounded-md bg-muted/40 p-3">
+          <h2 className="flex items-center gap-1.5 font-heading text-sm font-semibold">
+            <QrCode className="h-4 w-4 text-primary" />
+            {t('fuel.scan')}
+          </h2>
+          <Input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            capture="environment"
+            aria-label={t('fuel.scan')}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              try {
+                const value = await decodeReceipt(file);
+                if (!mountedRef.current || submittingRef.current) return;
+                if (value) {
+                  form.setValue('qr_url', value);
+                  setScanMessage('qr_found');
+                } else setScanMessage('qr_fallback');
+              } catch {
+                if (mountedRef.current) setScanMessage('qr_fallback');
+              }
+            }}
+          />
+          <p className="text-xs text-muted-foreground">{t('fuel.qr_hint')}</p>
+          <label className="block space-y-1">
+            <span className="text-xs font-medium">{t('fuel.qr_url')}</span>
+            <Input {...form.register('qr_url')} />
+          </label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={disabled || lookup.isPending || mutation.isPending}
+            onClick={() => void read()}
+            className="gap-1.5"
+          >
+            {lookup.isPending && (
+              <ArrowClockwise className="h-3.5 w-3.5 animate-spin" />
+            )}
+            {t('fuel.lookup')}
+          </Button>
+          {scanMessage && (
+            <p role="status" className="text-xs text-muted-foreground">
+              {t(`fuel.${scanMessage}`)}
+            </p>
           )}
-          {t('fuel.lookup')}
-        </Button>
-        {scanMessage && (
-          <p role="status" className="text-xs text-muted-foreground">
-            {t(`fuel.${scanMessage}`)}
+          <p className="text-xs text-muted-foreground">
+            {t('fuel.classify_hint')}
+          </p>
+        </section>
+
+        <div className="space-y-3">
+          {lines.fields.map((line, index) => (
+            <fieldset
+              className="space-y-3 rounded-md bg-muted/40 p-3"
+              key={line.id}
+            >
+              <legend className="text-xs font-medium px-1">
+                {t('fuel.line')} {index + 1}
+              </legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block space-y-1">
+                  <span className="text-xs font-medium">
+                    {t('fuel.fuel_type')}
+                  </span>
+                  <select
+                    className={selectClass}
+                    {...form.register(`lines.${index}.fuel_type`)}
+                  >
+                    <option value="">{t('fuel.choose')}</option>
+                    {fuelTypes.map((v) => (
+                      <option key={v} value={v}>
+                        {t(`fuel.${v}`)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-xs font-medium">{t('fuel.unit')}</span>
+                  <select
+                    className={selectClass}
+                    {...form.register(`lines.${index}.unit`)}
+                  >
+                    <option value="">{t('fuel.choose')}</option>
+                    {['litre', 'm3'].map((v) => (
+                      <option key={v} value={v}>
+                        {t(`fuel.${v}`)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {(
+                  [
+                    'name',
+                    'mxik',
+                    'quantity',
+                    'unit_price',
+                    'line_total',
+                  ] as const
+                ).map((key) => (
+                  <label className="block space-y-1" key={key}>
+                    <span className="text-xs font-medium">
+                      {t(`fuel.${key}`)}
+                    </span>
+                    <Input
+                      inputMode={
+                        ['quantity', 'unit_price', 'line_total'].includes(key)
+                          ? 'decimal'
+                          : undefined
+                      }
+                      {...form.register(`lines.${index}.${key}`)}
+                    />
+                  </label>
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-destructive hover:text-destructive"
+                onClick={() => lines.remove(index)}
+              >
+                <Trash className="h-3.5 w-3.5" />
+                {t('fuel.remove_line')}
+              </Button>
+            </fieldset>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => lines.append(blankLine())}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            {t('fuel.add_line')}
+          </Button>
+        </div>
+
+        {hasErrors && (
+          <p role="alert" className="text-sm text-destructive font-medium">
+            {t('fuel.invalid')}
           </p>
         )}
-        <p className="text-xs text-muted-foreground">
-          {t('fuel.classify_hint')}
-        </p>
-      </section>
 
-      <div className="space-y-3">
-        {lines.fields.map((line, index) => (
-          <fieldset className="space-y-3 rounded-lg border p-4" key={line.id}>
-            <legend className="text-xs font-medium px-1">
-              {t('fuel.line')} {index + 1}
-            </legend>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block space-y-1">
-                <span className="text-xs font-medium">
-                  {t('fuel.fuel_type')}
-                </span>
-                <select
-                  className={selectClass}
-                  {...form.register(`lines.${index}.fuel_type`)}
-                >
-                  <option value="">{t('fuel.choose')}</option>
-                  {fuelTypes.map((v) => (
-                    <option key={v} value={v}>
-                      {t(`fuel.${v}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="block space-y-1">
-                <span className="text-xs font-medium">{t('fuel.unit')}</span>
-                <select
-                  className={selectClass}
-                  {...form.register(`lines.${index}.unit`)}
-                >
-                  <option value="">{t('fuel.choose')}</option>
-                  {['litre', 'm3'].map((v) => (
-                    <option key={v} value={v}>
-                      {t(`fuel.${v}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {(
-                [
-                  'name',
-                  'mxik',
-                  'quantity',
-                  'unit_price',
-                  'line_total',
-                ] as const
-              ).map((key) => (
-                <label className="block space-y-1" key={key}>
-                  <span className="text-xs font-medium">
-                    {t(`fuel.${key}`)}
-                  </span>
-                  <Input
-                    inputMode={
-                      ['quantity', 'unit_price', 'line_total'].includes(key)
-                        ? 'decimal'
-                        : undefined
-                    }
-                    {...form.register(`lines.${index}.${key}`)}
-                  />
-                </label>
-              ))}
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-destructive hover:text-destructive"
-              onClick={() => lines.remove(index)}
-            >
-              <Trash className="h-3.5 w-3.5" />
-              {t('fuel.remove_line')}
-            </Button>
-          </fieldset>
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          onClick={() => lines.append(blankLine())}
-        >
-          <Plus className="h-3.5 w-3.5" />
-          {t('fuel.add_line')}
-        </Button>
-      </div>
-
-      {hasErrors && (
-        <p role="alert" className="text-sm text-destructive font-medium">
-          {t('fuel.invalid')}
-        </p>
-      )}
-
-      <div className="flex flex-wrap items-center gap-3 border-t pt-4">
-        {row && (
-          <label className="flex-1 space-y-1 min-w-[200px]">
-            <span className="text-xs font-medium">{t('fuel.reason')}</span>
-            <Input
-              required
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-            />
-          </label>
-        )}
-        <Button
-          disabled={disabled || mutation.isPending || lookup.isPending}
-          type="submit"
-          className="gap-1.5"
-        >
-          {mutation.isPending && (
-            <ArrowClockwise className="h-3.5 w-3.5 animate-spin" />
+        <div className="flex flex-wrap items-center gap-3 border-t pt-4">
+          {row && (
+            <label className="flex-1 space-y-1 min-w-[200px]">
+              <span className="text-xs font-medium">{t('fuel.reason')}</span>
+              <Input
+                required
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+            </label>
           )}
-          {t('common.save')}
-        </Button>
-      </div>
-      <p className="text-xs text-muted-foreground">{t('fuel.save_hint')}</p>
-      {conflict && (
-        <p role="alert" className="text-sm text-destructive">
-          {t('fuel.update_conflict')}
-        </p>
-      )}
-    </form>
+          <Button
+            disabled={disabled || mutation.isPending || lookup.isPending}
+            type="submit"
+            className="gap-1.5"
+          >
+            {mutation.isPending && (
+              <ArrowClockwise className="h-3.5 w-3.5 animate-spin" />
+            )}
+            {t('common.save')}
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">{t('fuel.save_hint')}</p>
+        {conflict && (
+          <p role="alert" className="text-sm text-destructive">
+            {t('fuel.update_conflict')}
+          </p>
+        )}
+      </form>
+    </Card>
   );
 }
 

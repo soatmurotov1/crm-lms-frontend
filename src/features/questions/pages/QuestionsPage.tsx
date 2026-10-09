@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -86,13 +87,13 @@ const QuestionsPage = () => {
         }
       />
 
-      <p className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+      <p className="rounded-md bg-muted/40 p-3 text-sm text-muted-foreground">
         {t('questions.school_private_banner')}
       </p>
 
       <ListSearchField value={search} onChange={setSearch} />
 
-      <div className="glass-card grid gap-3 p-4 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3">
         {canViewAll ? (
           <select
             aria-label={t('common.branch')}
@@ -158,26 +159,35 @@ const QuestionsPage = () => {
       </div>
 
       {questions.isLoading || searchPending || questions.isFetching ? (
-        <div role="status" aria-live="polite" className="space-y-3">
-          <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-        </div>
+        <Card asChild>
+          <div role="status" aria-live="polite" className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              {t('common.loading')}
+            </p>
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+        </Card>
       ) : questions.isError ? (
-        <div role="alert" className="space-y-2">
-          <p>{t('common.error')}</p>
-          <Button onClick={() => void questions.refetch()}>
-            {t('common.retry')}
-          </Button>
-        </div>
+        <Card role="alert">
+          <EmptyState
+            title={t('common.error')}
+            action={{
+              label: t('common.retry'),
+              onClick: () => void questions.refetch(),
+            }}
+          />
+        </Card>
       ) : !questions.data?.data.length ? (
-        <EmptyState
-          icon={Exam}
-          title={t(
-            debouncedSearch.trim() ? 'common.no_data' : 'questions.empty',
-          )}
-          description={t('questions.empty_desc')}
-        />
+        <Card>
+          <EmptyState
+            icon={Exam}
+            title={t(
+              debouncedSearch.trim() ? 'common.no_data' : 'questions.empty',
+            )}
+            description={t('questions.empty_desc')}
+          />
+        </Card>
       ) : (
         <div className="grid gap-3">
           {questions.data.data.map((question) => (

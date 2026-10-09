@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useWriteOptions } from '@/hooks/useWriteOptions';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
@@ -118,7 +119,7 @@ const LessonCard = ({
   // this lesson has been marked at least once.
   const marked = lesson.total_count > 0;
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 text-sm motion-safe:transition-colors duration-150 hover:border-primary/[40%]">
+    <Card className="flex flex-col gap-2 text-sm motion-safe:transition-colors duration-150 ">
       <button
         type="button"
         onClick={onOpen}
@@ -184,7 +185,7 @@ const LessonCard = ({
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -404,7 +405,7 @@ const AttendancePage = () => {
     : t(savePending ? 'common.creating' : 'attendance.create');
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={t('attendance.title')}
         title={t('attendance.title')}
@@ -425,23 +426,36 @@ const AttendancePage = () => {
       />
 
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-28 w-full" />
-          ))}
-        </div>
+        <Card asChild>
+          <div
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            role="status"
+            aria-busy="true"
+          >
+            <span className="sr-only">{t('common.loading')}</span>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="h-28 w-full" />
+            ))}
+          </div>
+        </Card>
       ) : isError ? (
-        <EmptyState
-          title={t('common.error')}
-          action={{ label: t('common.retry'), onClick: () => void refetch() }}
-        />
+        <Card>
+          <EmptyState
+            title={t('common.error')}
+            action={{ label: t('common.retry'), onClick: () => void refetch() }}
+          />
+        </Card>
       ) : !lessons.length ? (
-        <EmptyState
-          title={t(debouncedSearch ? 'common.no_data' : 'attendance.not_found')}
-          description={
-            debouncedSearch ? undefined : t('attendance.not_found_desc')
-          }
-        />
+        <Card>
+          <EmptyState
+            title={t(
+              debouncedSearch ? 'common.no_data' : 'attendance.not_found',
+            )}
+            description={
+              debouncedSearch ? undefined : t('attendance.not_found_desc')
+            }
+          />
+        </Card>
       ) : (
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

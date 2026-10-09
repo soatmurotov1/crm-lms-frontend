@@ -101,7 +101,7 @@ export const Topbar = ({
   ) as string;
 
   return (
-    <header className="flex h-16 items-center gap-2 border-b border-hair bg-surface px-4 sm:gap-3 lg:px-6">
+    <header className="flex h-14 items-center gap-2 border-b border-hair bg-surface px-4 sm:gap-3 lg:px-6">
       <button
         type="button"
         aria-label={t('actions.sidebar') as string}
@@ -165,7 +165,7 @@ export const Topbar = ({
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <div className="hidden h-11 min-w-52 items-center gap-2.5 rounded-md border border-border bg-card px-3 lg:flex">
+          <div className="hidden h-11 min-w-52 items-center gap-2.5 rounded-md bg-muted/40 px-3 lg:flex">
             <Buildings className="h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0 leading-tight">
               <span className="block text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">

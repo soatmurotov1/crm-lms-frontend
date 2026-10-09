@@ -211,7 +211,10 @@ const FleetMapPage = () => {
           aria-label={t('fleet_map.basemap_label')}
           className="absolute inset-0 z-0 flex items-center justify-center bg-muted/30 px-6 text-center"
         >
-          <div className="max-w-md rounded-xl border border-border/70 bg-background/90 p-5 shadow-lg shadow-black/5">
+          <div
+            data-map-overlay="empty-state"
+            className="max-w-md rounded-xl border border-border/70 bg-background/90 p-5 shadow-lg shadow-black/5"
+          >
             <MapTrifold
               className="mx-auto h-8 w-8 text-muted-foreground"
               aria-hidden="true"
@@ -228,7 +231,10 @@ const FleetMapPage = () => {
 
       <div className="pointer-events-none absolute inset-0 z-10">
         <div className="pointer-events-auto absolute left-[68px] right-3 top-3 flex flex-wrap items-center gap-2 lg:left-4 lg:right-auto lg:top-4">
-          <div className="flex min-h-11 max-w-full items-center gap-2 rounded-xl border border-border/70 bg-background/95 px-2.5 py-1.5 shadow-lg shadow-black/10 backdrop-blur">
+          <div
+            data-map-overlay="controls"
+            className="flex min-h-11 max-w-full items-center gap-2 rounded-xl border border-border/70 bg-background/95 px-2.5 py-1.5 shadow-lg shadow-black/10 backdrop-blur"
+          >
             <button
               ref={mobileRosterToggleRef}
               type="button"
@@ -262,6 +268,7 @@ const FleetMapPage = () => {
           </div>
 
           <div
+            data-map-overlay="controls"
             role="tablist"
             aria-label={t('nav.fleet_map')}
             className="flex min-h-11 rounded-xl border border-border/70 bg-background/95 p-1 shadow-lg shadow-black/10 backdrop-blur"
@@ -473,7 +480,7 @@ const FleetMapPage = () => {
                     type="button"
                     aria-pressed={selectedId === vehicle.id}
                     onClick={() => selectVehicle(vehicle.id)}
-                    className="group flex min-h-20 w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-border hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary aria-pressed:border-primary/30 aria-pressed:bg-primary/5"
+                    className="group flex min-h-20 w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-border hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary aria-pressed:border-border/30 aria-pressed:bg-primary/5"
                   >
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground group-aria-pressed:bg-primary/10 group-aria-pressed:text-primary">
                       <Car className="h-5 w-5" aria-hidden="true" />
@@ -584,7 +591,7 @@ const FleetMapPage = () => {
             </div>
 
             <dl className="mt-4 grid gap-3">
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+              <div className="rounded-lg border border-border/20 bg-primary/5 p-3">
                 <dt className="text-xs text-muted-foreground">
                   {view === 'current'
                     ? t('fleet_map.location_unavailable')

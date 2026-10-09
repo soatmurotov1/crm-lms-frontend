@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useUrlTab } from '@/hooks/useUrlTab';
@@ -169,185 +170,185 @@ const StudentDetailPage = () => {
       backLabel={t('students.title')}
       isLoading={false}
       isError={false}
-      header={
-        <div className="glass-card flex flex-wrap items-start justify-between gap-4 p-5">
-          <div className="space-y-2">
-            <h1 className="font-heading text-2xl font-bold text-balance">
-              {fullName}
-            </h1>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <span>{student.phone}</span>
+      title={fullName}
+      description={
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>{student.phone}</span>
+          <span>·</span>
+          <span>{student.branch_name ?? t('common.na')}</span>
+          {student.group_name && (
+            <>
               <span>·</span>
-              <span>{student.branch_name ?? t('common.na')}</span>
-              {student.group_name && (
-                <>
-                  <span>·</span>
-                  <span>{student.group_name}</span>
-                </>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {canRecordPayment &&
-                student.debt !== undefined &&
-                (student.debt > 0 ? (
-                  <Badge variant="destructive">
-                    {t('students.detail.debt')}: {formatMoney(student.debt)}
-                  </Badge>
-                ) : student.debt < 0 ? (
-                  <Badge variant="secondary" className="text-success">
-                    {t('students.credit_label')}:{' '}
-                    {formatMoney(Math.abs(student.debt))}
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary">{t('students.no_debt')}</Badge>
-                ))}
-              <Badge variant="outline">
-                {t(`students.course.${student.course_type}`)}
+              <span>{student.group_name}</span>
+            </>
+          )}
+        </div>
+      }
+      meta={
+        <div className="flex flex-wrap gap-2 pt-1">
+          {canRecordPayment &&
+            student.debt !== undefined &&
+            (student.debt > 0 ? (
+              <Badge variant="destructive">
+                {t('students.detail.debt')}: {formatMoney(student.debt)}
               </Badge>
-              {Boolean(
-                student.referrals_count && student.referrals_count > 0,
-              ) && (
-                <Link
-                  to="/students"
-                  search={{ referred_by_student_id: student.id }}
-                  className="inline-flex"
-                >
-                  <Badge
-                    variant="outline"
-                    className="gap-1.5 border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors cursor-pointer"
-                  >
-                    <Gift className="h-3.5 w-3.5" />
-                    <span>
-                      {t(
-                        'students.detail.referral_discount_badge',
-                        '{{count}} ta referal: chegirmaga tavsiya etiladi',
-                        { count: student.referrals_count },
-                      )}
-                    </span>
-                  </Badge>
-                </Link>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {canManageLearnerLogin && (
-              <Button
+            ) : student.debt < 0 ? (
+              <Badge variant="secondary" className="text-success">
+                {t('students.credit_label')}:{' '}
+                {formatMoney(Math.abs(student.debt))}
+              </Badge>
+            ) : (
+              <Badge variant="secondary">{t('students.no_debt')}</Badge>
+            ))}
+          <Badge variant="outline">
+            {t(`students.course.${student.course_type}`)}
+          </Badge>
+          {Boolean(student.referrals_count && student.referrals_count > 0) && (
+            <Link
+              to="/students"
+              search={{ referred_by_student_id: student.id }}
+              className="inline-flex"
+            >
+              <Badge
                 variant="outline"
-                className="gap-2"
-                onClick={() => setLearnerLoginOpen(true)}
+                className="gap-1.5 border-border bg-success/10 text-success hover:bg-success/15 transition-colors cursor-pointer"
               >
-                <Key className="h-4 w-4" /> {t('students.detail.login_button')}
-              </Button>
-            )}
-            {mayUpdate && (
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={() => setEditOpen(true)}
-              >
-                <PencilSimple className="h-4 w-4" /> {t('common.edit')}
-              </Button>
-            )}
-          </div>
+                <Gift className="h-3.5 w-3.5" />
+                <span>
+                  {t(
+                    'students.detail.referral_discount_badge',
+                    '{{count}} ta referal: chegirmaga tavsiya etiladi',
+                    { count: student.referrals_count },
+                  )}
+                </span>
+              </Badge>
+            </Link>
+          )}
+        </div>
+      }
+      actions={
+        <div className="flex flex-wrap gap-2">
+          {canManageLearnerLogin && (
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => setLearnerLoginOpen(true)}
+            >
+              <Key className="h-4 w-4" /> {t('students.detail.login_button')}
+            </Button>
+          )}
+          {mayUpdate && (
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => setEditOpen(true)}
+            >
+              <PencilSimple className="h-4 w-4" /> {t('common.edit')}
+            </Button>
+          )}
         </div>
       }
     >
-      <Tabs value={activeTab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="info">{t('common.tab_info')}</TabsTrigger>
-          {canReadPayments && (
-            <TabsTrigger value="payments">
-              {t('students.detail.tab_payments')}
+      <Tabs value={activeTab} onValueChange={setTab} className="min-w-0">
+        <div className="min-w-0 max-w-full overflow-x-auto">
+          <TabsList className="w-max">
+            <TabsTrigger value="info">{t('common.tab_info')}</TabsTrigger>
+            {canReadPayments && (
+              <TabsTrigger value="payments">
+                {t('students.detail.tab_payments')}
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="exams">
+              {t('students.detail.tab_exams')}
             </TabsTrigger>
-          )}
-          <TabsTrigger value="exams">
-            {t('students.detail.tab_exams')}
-          </TabsTrigger>
-          <TabsTrigger value="attendance">
-            {t('students.detail.tab_attendance')}
-          </TabsTrigger>
-          {canViewGroupHistory && (
-            <TabsTrigger value="group-history">
-              {t('students.detail.tab_group_history')}
+            <TabsTrigger value="attendance">
+              {t('students.detail.tab_attendance')}
             </TabsTrigger>
-          )}
-        </TabsList>
+            {canViewGroupHistory && (
+              <TabsTrigger value="group-history">
+                {t('students.detail.tab_group_history')}
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
         <TabsContent value="info">
-          <dl className="glass-card grid grid-cols-1 gap-x-8 gap-y-3 p-5 text-sm sm:grid-cols-2">
-            <Field label={t('common.phone')} value={student.phone} />
-            <Field
-              label={t('students.detail.branch')}
-              value={student.branch_name ?? t('common.na')}
-            />
-            <Field
-              label={t('students.detail.group')}
-              value={student.group_name ?? t('common.na')}
-            />
-            <Field
-              label={t('students.detail.course')}
-              value={t(`students.course.${student.course_type}`)}
-            />
-            {canReadPayments && student.total_price !== undefined && (
+          <Card asChild>
+            <dl className=" grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+              <Field label={t('common.phone')} value={student.phone} />
               <Field
-                label={t('students.detail.total_price')}
-                value={formatMoney(student.total_price)}
+                label={t('students.detail.branch')}
+                value={student.branch_name ?? t('common.na')}
               />
-            )}
-            {canReadPayments && student.debt !== undefined && (
               <Field
-                label={t('students.detail.debt')}
-                value={
-                  student.debt < 0 ? (
-                    <span className="text-success">
-                      {t('students.credit_label')}:{' '}
-                      {formatMoney(Math.abs(student.debt))}
-                    </span>
-                  ) : (
-                    formatMoney(student.debt)
-                  )
-                }
+                label={t('students.detail.group')}
+                value={student.group_name ?? t('common.na')}
               />
-            )}
-            {canRecordPayment && (
               <Field
-                label={t('students.payment_method')}
-                value={
-                  student.payment_method
-                    ? methodLabels[student.payment_method]
-                    : t('common.na')
-                }
+                label={t('students.detail.course')}
+                value={t(`students.course.${student.course_type}`)}
               />
-            )}
-            <Field
-              label={t('students.has_document')}
-              value={
-                <span
-                  className={
-                    student.has_document ? 'text-success' : 'text-destructive'
+              {canReadPayments && student.total_price !== undefined && (
+                <Field
+                  label={t('students.detail.total_price')}
+                  value={formatMoney(student.total_price)}
+                />
+              )}
+              {canReadPayments && student.debt !== undefined && (
+                <Field
+                  label={t('students.detail.debt')}
+                  value={
+                    student.debt < 0 ? (
+                      <span className="text-success">
+                        {t('students.credit_label')}:{' '}
+                        {formatMoney(Math.abs(student.debt))}
+                      </span>
+                    ) : (
+                      formatMoney(student.debt)
+                    )
                   }
-                >
-                  {student.has_document ? t('common.yes') : t('common.no')}
-                </span>
-              }
-            />
-            {canRecordPayment && (
+                />
+              )}
+              {canRecordPayment && (
+                <Field
+                  label={t('students.payment_method')}
+                  value={
+                    student.payment_method
+                      ? methodLabels[student.payment_method]
+                      : t('common.na')
+                  }
+                />
+              )}
               <Field
-                label={t('students.amount_paid')}
-                value={formatMoney(student.amount_paid)}
+                label={t('students.has_document')}
+                value={
+                  <span
+                    className={
+                      student.has_document ? 'text-success' : 'text-destructive'
+                    }
+                  >
+                    {student.has_document ? t('common.yes') : t('common.no')}
+                  </span>
+                }
               />
-            )}
-            <Field
-              label={t('students.operator')}
-              value={student.registered_by ?? t('common.na')}
-            />
-            <Field label={t('students.notes')} value={student.notes || '—'} />
-            <Field
-              label={t('students.detail.referrals_count')}
-              value={String(student.referrals_count ?? 0)}
-              referredByStudentId={student.id}
-            />
-          </dl>
+              {canRecordPayment && (
+                <Field
+                  label={t('students.amount_paid')}
+                  value={formatMoney(student.amount_paid)}
+                />
+              )}
+              <Field
+                label={t('students.operator')}
+                value={student.registered_by ?? t('common.na')}
+              />
+              <Field label={t('students.notes')} value={student.notes || '—'} />
+              <Field
+                label={t('students.detail.referrals_count')}
+                value={String(student.referrals_count ?? 0)}
+                referredByStudentId={student.id}
+              />
+            </dl>
+          </Card>
         </TabsContent>
 
         {canReadPayments && (
@@ -373,9 +374,9 @@ const StudentDetailPage = () => {
         )}
 
         <TabsContent value="exams">
-          <div className="glass-card p-5">
+          <Card className=" ">
             <StudentExamsTab student={student} />
-          </div>
+          </Card>
         </TabsContent>
 
         <TabsContent value="attendance">
@@ -527,7 +528,7 @@ const PaymentsTab = ({
 
   return (
     <>
-      <div className="glass-card overflow-hidden">
+      <Card edgeToEdge className=" overflow-hidden">
         <div className="flex items-center justify-end p-3">
           <Button size="sm" className="gap-2" onClick={onAdd}>
             <Plus className="h-4 w-4" /> {addLabel}
@@ -539,7 +540,7 @@ const PaymentsTab = ({
             <Skeleton className="h-8 w-full" />
           </div>
         ) : isError ? (
-          <div className="p-6">
+          <div className="p-4">
             <EmptyState
               icon={Warning}
               title={t('common.error')}
@@ -550,7 +551,7 @@ const PaymentsTab = ({
             />
           </div>
         ) : rows.length === 0 ? (
-          <div className="p-6">
+          <div className="p-4">
             <EmptyState title={emptyLabel} />
           </div>
         ) : (
@@ -619,7 +620,7 @@ const PaymentsTab = ({
             </table>
           </div>
         )}
-      </div>
+      </Card>
       {!isLoading && !isError && rows.length > 0 ? (
         <PaginationControls
           className="mt-3"
@@ -640,14 +641,14 @@ const AttendanceHistoryTab = ({ studentId }: { studentId: string }) => {
   const rows = data ?? [];
 
   return (
-    <div className="glass-card overflow-hidden">
+    <Card edgeToEdge className=" overflow-hidden">
       {isLoading ? (
         <div className="space-y-2 p-4">
           <Skeleton className="h-8 w-full" />
           <Skeleton className="h-8 w-full" />
         </div>
       ) : rows.length === 0 ? (
-        <div className="p-6">
+        <div className="p-4">
           <EmptyState title={t('common.no_data')} />
         </div>
       ) : (
@@ -687,7 +688,7 @@ const AttendanceHistoryTab = ({ studentId }: { studentId: string }) => {
           </table>
         </div>
       )}
-    </div>
+    </Card>
   );
 };
 
@@ -731,14 +732,14 @@ const GroupHistoryTab = ({ studentId }: { studentId: string }) => {
   }
 
   return (
-    <div className="glass-card overflow-hidden">
+    <Card edgeToEdge className=" overflow-hidden">
       {isLoading ? (
         <div className="space-y-2 p-4">
           <Skeleton className="h-8 w-full" />
           <Skeleton className="h-8 w-full" />
         </div>
       ) : rows.length === 0 ? (
-        <div className="p-6">
+        <div className="p-4">
           <EmptyState title={t('students.detail.group_history_empty')} />
         </div>
       ) : (
@@ -776,7 +777,7 @@ const GroupHistoryTab = ({ studentId }: { studentId: string }) => {
           </table>
         </div>
       )}
-    </div>
+    </Card>
   );
 };
 

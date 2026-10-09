@@ -1,3 +1,6 @@
+import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Skeleton } from '@/components/ui/skeleton';
 import { requestBranchId } from '@/lib/permissions';
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -168,7 +171,7 @@ export const LeadsPage = () => {
   } = useLeadsQuery(queryFilters, { enabled: viewMode === 'list' });
 
   return (
-    <div className="flex h-full flex-col gap-4 p-4 md:p-6">
+    <div className="flex h-full flex-col space-y-4">
       <PageHeader
         title={t('leads.title', 'Leads & CRM Funnel')}
         description={t(
@@ -271,15 +274,19 @@ export const LeadsPage = () => {
         {viewMode === 'board' && (
           <div className="h-full">
             {stagesLoading || boardLoading ? (
-              <div className="flex h-64 w-full items-center justify-center text-muted-foreground">
-                <FunnelSimple className="mr-2 h-5 w-5 animate-pulse" />
-                <span>{t('common.loading', 'Yuklanmoqda...')}</span>
-              </div>
+              <Card
+                role="status"
+                aria-label={t('common.loading', 'Yuklanmoqda...')}
+              >
+                <Skeleton className="h-64 w-full" />
+              </Card>
             ) : board.length === 0 ? (
-              <div className="flex h-64 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed text-muted-foreground">
-                <FunnelSimple className="h-8 w-8 text-muted-foreground/60" />
-                <p>{t('leads.no_leads', 'Hozircha lidlar mavjud emas')}</p>
-              </div>
+              <Card>
+                <EmptyState
+                  icon={FunnelSimple}
+                  title={t('leads.no_leads', 'Hozircha lidlar mavjud emas')}
+                />
+              </Card>
             ) : (
               <LeadBoard
                 columns={board}

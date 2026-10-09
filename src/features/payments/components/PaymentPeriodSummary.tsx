@@ -1,6 +1,7 @@
+import { Card } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { SummaryCard } from '@/components/ui/SummaryCard';
+import { StatCard } from '@/components/ui/StatCard';
 import { formatMoney } from '@/lib/money';
 import type { PaymentSummary } from '@/features/payments/types';
 import { Warning, Receipt, Wallet } from '@phosphor-icons/react';
@@ -38,30 +39,30 @@ export const PaymentPeriodSummary = ({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 tabular-nums">
         {isError ? (
-          <div className="glass-card md:col-span-3">
+          <Card className=" md:col-span-3">
             <EmptyState
               title={t('common.error')}
               action={{ label: t('common.retry'), onClick: onRetry }}
             />
-          </div>
+          </Card>
         ) : (
           <>
-            <SummaryCard
-              title={t('payments.total_collected')}
+            <StatCard
+              label={t('payments.total_collected')}
               value={formatMoney(summary?.period_collected ?? 0)}
               icon={<Wallet className="h-5 w-5" />}
               isLoading={showLoading}
             />
-            <SummaryCard
-              title={t('payments.payment_count')}
+            <StatCard
+              label={t('payments.payment_count')}
               value={`${summary?.period_payments_count ?? 0}${
                 t('common.count_unit') ? ` ${t('common.count_unit')}` : ''
               }`}
               icon={<Receipt className="h-5 w-5" />}
               isLoading={showLoading}
             />
-            <SummaryCard
-              title={t('payments.stats.debt')}
+            <StatCard
+              label={t('payments.stats.debt')}
               value={formatMoney(summary?.period_debt ?? 0)}
               icon={<Warning className="h-5 w-5" />}
               isLoading={showLoading}

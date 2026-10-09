@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { AriaRole, ReactNode } from 'react';
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { Tray } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ const isActionConfig = (
   'onClick' in action;
 
 interface EmptyStateProps {
+  role?: AriaRole;
   icon?: PhosphorIcon;
   title: string;
   description?: string;
@@ -30,9 +31,13 @@ export const EmptyState = ({
   title,
   description,
   action,
+  role,
 }: EmptyStateProps) => (
-  <div className="flex flex-col items-center justify-center py-8 text-center">
-    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+  <div
+    role={role}
+    className="flex flex-col items-center justify-center py-8 text-center"
+  >
+    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
       <Icon className="h-5 w-5" />
     </div>
     <h3 className="font-heading text-sm font-semibold text-foreground text-balance">

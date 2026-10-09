@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Plus, FileText } from '@phosphor-icons/react';
@@ -21,13 +22,13 @@ const DocumentsPage = () => {
         }
       />
 
-      <div className="glass-card overflow-hidden">
+      <Card edgeToEdge className=" overflow-hidden">
         <EmptyState
           icon={FileText}
           title={t('documents.empty_title')}
           description={t('documents.empty_desc')}
         />
-      </div>
+      </Card>
     </div>
   );
 };

@@ -157,11 +157,11 @@ export const AppLayout = () => {
           className={cn(
             'relative flex flex-col',
             isMapWorkspace ? 'h-dvh overflow-hidden' : 'min-h-dvh',
-            sidebarExpanded ? 'lg:ml-64' : 'lg:ml-[86px]',
+            sidebarExpanded ? 'lg:ml-64' : 'lg:ml-14',
           )}
         >
           <div className={cn(!isMapWorkspace && 'sticky top-0 z-30')}>
-            <div className="[&>p]:border-border [&>p]:bg-muted/50 [&>p]:text-left [&>p]:text-muted-foreground [&>p]:lg:px-6">
+            <div className="[&>p]:border-border [&>p]:bg-muted [&>p]:text-left [&>p]:text-muted-foreground [&>p]:px-2 [&>p]:lg:px-3">
               <DemoSessionBanner />
             </div>
             {!isMapWorkspace && (
@@ -177,7 +177,7 @@ export const AppLayout = () => {
             tabIndex={-1}
             className={cn(
               'flex-1 outline-none',
-              isMapWorkspace ? 'relative min-h-0' : 'p-4 lg:p-6',
+              isMapWorkspace ? 'relative min-h-0' : 'p-2 lg:p-3',
             )}
           >
             {isMapWorkspace && (
@@ -190,11 +190,7 @@ export const AppLayout = () => {
                 <List className="h-5 w-5" aria-hidden="true" />
               </button>
             )}
-            <div
-              className={
-                isMapWorkspace ? 'h-full' : 'mx-auto w-full max-w-screen-2xl'
-              }
-            >
+            <div className={isMapWorkspace ? 'h-full' : 'w-full'}>
               {!isMapWorkspace && <Breadcrumbs />}
               <div className={isMapWorkspace ? 'h-full' : undefined}>
                 <Suspense fallback={<PageLoader />}>

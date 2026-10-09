@@ -43,6 +43,24 @@ const renderSidebar = () =>
   );
 
 describe('Sidebar teacher nav trim (autodrive-vh0.2)', () => {
+  it.each(['dev', 'owner'] as const)(
+    'shows the design system for %s',
+    async (testRole) => {
+      role = testRole;
+      await renderSidebar();
+      expect(screen.getByLabelText('nav.design_system')).toBeVisible();
+    },
+  );
+
+  it.each(['manager', 'accountant', 'operator', 'teacher'] as const)(
+    'hides the design system for %s',
+    async (testRole) => {
+      role = testRole;
+      await renderSidebar();
+      expect(screen.queryByLabelText('nav.design_system')).toBeNull();
+    },
+  );
+
   it('hides Payments for a teacher', async () => {
     role = 'teacher';
     await renderSidebar();

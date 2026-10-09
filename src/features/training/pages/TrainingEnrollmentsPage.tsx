@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import { requestBranchId, userCan } from '@/lib/permissions';
 import { useWriteOptions } from '@/hooks/useWriteOptions';
 import {
@@ -713,7 +714,7 @@ const TrainingEnrollmentsPage = () => {
         }
       />
       <ListSearchField value={search} onChange={setSearch} />
-      <div className="glass-card grid gap-3 p-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         {canViewAll ? (
           <select
             aria-label={t('common.branch')}
@@ -795,6 +796,7 @@ const TrainingEnrollmentsPage = () => {
             />
           ) : undefined
         }
+        loadingState={<Skeleton className="h-5 w-full" />}
         emptyState={<EmptyState title={t('common.no_data')} />}
         renderMobileRow={({ row: enrollment }) => (
           <DataCard

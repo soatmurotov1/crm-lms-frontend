@@ -296,7 +296,7 @@ export const ExpensesTable = ({
         nextPage: t('common.next'),
       }}
       loadingState={
-        <div className="grid gap-3 p-3 md:p-0">
+        <div className="grid gap-3">
           {Array.from({ length: 4 }, (_, index) => (
             <Skeleton key={index} className="h-5 w-full" />
           ))}
@@ -323,7 +323,7 @@ export const ExpensesTable = ({
       getRowAriaLabel={(expense) => expense.title}
       rowClassName={() => 'table-row-interactive'}
       className={cn(
-        'glass-card overflow-hidden p-3 transition-opacity duration-200 md:p-0',
+        'transition-opacity duration-200',
         isFetching && !isLoading && 'opacity-50',
       )}
     />

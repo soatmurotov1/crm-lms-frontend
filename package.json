@@ -22,7 +22,9 @@
     "test:watch": "vitest",
     "prepare": "test -z \"$VERCEL\" && husky || true",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "check:design-system": "node scripts/check-design-system.mjs",
+    "test:design-system": "node --test scripts/check-design-system.test.mjs"
   },
   "dependencies": {
     "@autodrive/design-tokens": "git+https://github.com/ARX-SOLUTION/autodrive-design-tokens.git#b8210edfadb1abc720108389c793161cc8382013",

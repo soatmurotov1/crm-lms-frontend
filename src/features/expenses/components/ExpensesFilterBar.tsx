@@ -87,7 +87,7 @@ export const ExpensesFilterBar = ({
             {t('expenses.list_title')}
           </h2>
           {attentionFilter === 'overdue' && (
-            <span className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+            <span className="rounded-full border border-border bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
               {t('expenses.daily_brief.overdue_filter')}
             </span>
           )}

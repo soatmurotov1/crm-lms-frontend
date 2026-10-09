@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import { formatTashkentDateTime } from '@/lib/calendarDateTime';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -53,73 +54,72 @@ export const ExpenseHistoryPanel = ({
   const showError = timelineQuery.isError || eventsMissing;
 
   return (
-    <section
-      className="glass-card space-y-4 p-5"
-      data-testid="expense-history-panel"
-    >
-      <h2 className="font-heading text-lg font-semibold">
-        {t('expenses.history.title')}
-      </h2>
+    <Card asChild>
+      <section className=" space-y-4 " data-testid="expense-history-panel">
+        <h2 className="font-heading text-lg font-semibold">
+          {t('expenses.history.title')}
+        </h2>
 
-      {timelineQuery.isLoading && (
-        <div className="space-y-2" data-testid="expense-history-loading">
-          <Skeleton className="h-5 w-48" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
-      )}
+        {timelineQuery.isLoading && (
+          <div className="space-y-2" data-testid="expense-history-loading">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+        )}
 
-      {showError && !timelineQuery.isLoading && (
-        <div
-          className="flex items-center gap-3 text-sm"
-          data-testid="expense-history-error"
-        >
-          <span>{t('common.error')}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => void timelineQuery.refetch()}
+        {showError && !timelineQuery.isLoading && (
+          <div
+            className="flex items-center gap-3 text-sm"
+            data-testid="expense-history-error"
           >
-            {t('common.retry')}
-          </Button>
-        </div>
-      )}
-
-      {!timelineQuery.isLoading && !showError && events.length === 0 && (
-        <EmptyState title={t('common.no_data')} />
-      )}
-
-      {!timelineQuery.isLoading && !showError && events.length > 0 && (
-        <ol className="space-y-3" data-testid="expense-history-events">
-          {events.map((event) => (
-            <li
-              key={event.id}
-              className="border-b border-border py-2 text-sm last:border-b-0"
+            <span>{t('common.error')}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void timelineQuery.refetch()}
             >
-              <div className="font-medium">
-                {t(ACTION_LABEL_KEYS[event.action])}
-              </div>
-              <div className="text-muted-foreground">
-                {formatActor(event, t)}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {formatTashkentDateTime(
-                  event.created_at,
-                  i18n?.language ?? 'uz',
-                )}
-              </div>
-              {event.action === 'soft_deleted' && deletionReason(event) && (
-                <div className="mt-2 break-words rounded-md bg-destructive/10 p-2 text-xs text-destructive">
-                  <span className="font-medium">
-                    {t('expenses.history.deletion_reason')}
-                  </span>
-                  : {deletionReason(event)}
+              {t('common.retry')}
+            </Button>
+          </div>
+        )}
+
+        {!timelineQuery.isLoading && !showError && events.length === 0 && (
+          <EmptyState title={t('common.no_data')} />
+        )}
+
+        {!timelineQuery.isLoading && !showError && events.length > 0 && (
+          <ol className="space-y-3" data-testid="expense-history-events">
+            {events.map((event) => (
+              <li
+                key={event.id}
+                className="border-b border-border py-2 text-sm last:border-b-0"
+              >
+                <div className="font-medium">
+                  {t(ACTION_LABEL_KEYS[event.action])}
                 </div>
-              )}
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
+                <div className="text-muted-foreground">
+                  {formatActor(event, t)}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {formatTashkentDateTime(
+                    event.created_at,
+                    i18n?.language ?? 'uz',
+                  )}
+                </div>
+                {event.action === 'soft_deleted' && deletionReason(event) && (
+                  <div className="mt-2 break-words rounded-md bg-destructive/10 p-2 text-xs text-destructive">
+                    <span className="font-medium">
+                      {t('expenses.history.deletion_reason')}
+                    </span>
+                    : {deletionReason(event)}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+    </Card>
   );
 };

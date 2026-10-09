@@ -61,6 +61,19 @@ beforeEach(() => {
 });
 
 describe('permission template management', () => {
+  it('keeps the header and owner action visible while announcing loading', async () => {
+    vi.mocked(axiosInstance.get).mockReturnValue(new Promise(() => {}));
+    await mount();
+    expect(
+      screen.getByRole('heading', { name: 'access.templates_title' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'access.back_to_staff' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent('common.loading');
+  });
+
   it('creates a company template from selected catalogue permissions', async () => {
     await mount();
     fireEvent.click(

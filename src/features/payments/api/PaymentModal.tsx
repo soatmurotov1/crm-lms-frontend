@@ -592,10 +592,8 @@ const PaymentModalSession = ({
               {effectiveDebt !== undefined && (
                 <div
                   className={cn(
-                    'rounded-md border px-3 py-2 text-sm tabular-nums',
-                    effectiveDebt < 0
-                      ? 'bg-success/10 border-success/20'
-                      : 'bg-destructive/10 border-destructive/20',
+                    'rounded-md border border-border px-3 py-2 text-sm tabular-nums',
+                    effectiveDebt < 0 ? 'bg-success/10' : 'bg-destructive/10',
                   )}
                 >
                   <span className="text-muted-foreground">
@@ -677,7 +675,10 @@ const PaymentModalSession = ({
               />
 
               {submitError && (
-                <div className="rounded-md border border-warning/20 bg-warning/10 px-3 py-2 text-sm text-warning">
+                <div
+                  role="alert"
+                  className="rounded-md border border-border bg-warning/10 px-3 py-2 text-sm text-warning"
+                >
                   {t('payments.retry_safe')}
                 </div>
               )}

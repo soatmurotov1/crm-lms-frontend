@@ -57,6 +57,16 @@ const renderSidebar = (
   );
 
 describe('Sidebar navigation', () => {
+  it('provides 44px collapsed rail targets and toggle', async () => {
+    await renderSidebar(false, '/dashboard', false);
+    expect(screen.getByLabelText('nav.dashboard').className).toContain(
+      'min-h-11',
+    );
+    const toggle = screen.getByRole('button', { name: 'actions.sidebar' });
+    expect(toggle.className).toContain('h-11');
+    expect(toggle.className).toContain('w-11');
+  });
+
   it('renders full labels on desktop instead of relying on hover tooltips', async () => {
     await renderSidebar();
     expect(screen.getByLabelText('nav.dashboard')).toBeTruthy();
@@ -113,17 +123,39 @@ describe('Sidebar navigation', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
 
-  it('collapsed desktop: workspace pages stay directly visible in the rail', async () => {
+  it('collapsed desktop: workspace pages stay directly accessible in the icon-only rail', async () => {
     await renderSidebar(false, '/groups', false);
 
     expect(
       screen.queryByRole('button', { name: 'nav_sections.workspace' }),
     ).toBeNull();
     const dashboard = screen.getByLabelText('nav.dashboard');
-    expect(dashboard.className).toContain('flex-col');
-    expect(screen.getByText('nav.dashboard').className).not.toContain(
-      'sr-only',
+    expect(dashboard.getAttribute('aria-label')).toBe('nav.dashboard');
+    expect(dashboard.textContent).toBe('');
+    fireEvent.focus(dashboard);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'nav.dashboard',
     );
+  });
+
+  it('collapsed desktop: suppresses the grouped tooltip while its flyout is open and after Escape', async () => {
+    await renderSidebar(false, '/groups', false);
+    const team = screen.getByRole('button', { name: 'nav_sections.team' });
+
+    fireEvent.focus(team);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'nav_sections.team',
+    );
+    fireEvent.pointerEnter(team, { pointerType: 'mouse' });
+    const flyout = await screen.findByRole('dialog', {
+      name: 'nav_sections.team',
+    });
+    expect(screen.queryByRole('tooltip')).toBeNull();
+
+    fireEvent.keyDown(flyout, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(team).toHaveFocus();
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('collapsed desktop: hover opens the flyout after a delay without stealing focus', async () => {
@@ -161,13 +193,15 @@ describe('Sidebar navigation', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
 
-  it('collapsed desktop: a single-item group stays a direct labeled link', async () => {
+  it('collapsed desktop: a single-item group stays a direct icon-only link with a tooltip', async () => {
     canGate = false;
     const { router } = await renderSidebar(false, '/groups', false);
 
     const profile = screen.getByLabelText('nav.profile');
-    expect(profile.className).toContain('flex-col');
-    expect(screen.getByText('nav.profile').className).not.toContain('sr-only');
+    expect(profile.getAttribute('aria-label')).toBe('nav.profile');
+    expect(profile.textContent).toBe('');
+    fireEvent.focus(profile);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('nav.profile');
 
     fireEvent.click(profile);
     await waitFor(() =>
@@ -273,13 +307,16 @@ describe('Sidebar navigation', () => {
     expect(items.every((el) => el.getAttribute('data-active') === 'true')).toBe(
       true,
     );
-    expect(items.some((el) => el.className.includes('flex-col'))).toBe(true);
-    expect(
-      items.some(
-        (el) =>
-          el.className.includes('h-11') && !el.className.includes('flex-col'),
-      ),
-    ).toBe(true);
+    const drawer = screen.getByRole('dialog', { name: 'actions.sidebar' });
+    const mobileDashboard = within(drawer).getByRole('link', {
+      name: 'nav.dashboard',
+    });
+    expect(mobileDashboard).toHaveClass('h-11');
+    expect(within(mobileDashboard).getByText('nav.dashboard')).toBeVisible();
+
+    const desktopDashboard = items.find((item) => !drawer.contains(item))!;
+    expect(desktopDashboard.getAttribute('aria-label')).toBe('nav.dashboard');
+    expect(desktopDashboard.textContent).toBe('');
   });
 
   it('keeps the parent menu active on nested detail routes', async () => {

@@ -157,9 +157,11 @@ const ExpenseBreakdownPanel = ({
           </Card>
         </div>
       ) : (
-        <p className="rounded-lg border border-dashed border-border/80 bg-muted/10 p-4 text-center text-sm text-muted-foreground">
-          {t('dashboard.finance_summary.expense_breakdown.empty')}
-        </p>
+        <Card asChild>
+          <p className="text-sm text-muted-foreground">
+            {t('dashboard.finance_summary.expense_breakdown.empty')}
+          </p>
+        </Card>
       )}
     </section>
   );
@@ -183,18 +185,22 @@ export const FinanceSummarySection = ({
 
   if (isLoading) {
     return (
-      <section
-        data-testid="finance-summary-section"
-        data-state="loading"
-        className={className}
-        aria-busy="true"
-      >
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-          {KPI_KEYS.map((key) => (
-            <Skeleton key={key} className="h-24 rounded-lg" />
-          ))}
-        </div>
-      </section>
+      <Card asChild>
+        <section
+          data-testid="finance-summary-section"
+          data-state="loading"
+          className={className}
+          aria-busy="true"
+          role="status"
+        >
+          <span className="sr-only">{t('common.loading')}</span>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+            {KPI_KEYS.map((key) => (
+              <Skeleton key={key} className="h-24 rounded-lg" />
+            ))}
+          </div>
+        </section>
+      </Card>
     );
   }
 
@@ -205,7 +211,10 @@ export const FinanceSummarySection = ({
         data-state="error"
         className={className}
       >
-        <Card className="border-destructive/30 bg-destructive/5 p-6 text-center shadow-none">
+        <Card
+          role="alert"
+          className="border-border bg-destructive/5 text-center shadow-none"
+        >
           <Warning className="mx-auto h-7 w-7 text-destructive" />
           <p className="mt-2 text-sm font-semibold">
             {t(
@@ -275,29 +284,36 @@ export const FinanceSummarySection = ({
       </div>
 
       {allZero && (
-        <p
-          data-testid="finance-summary-empty"
-          className="mt-3 rounded-lg border border-dashed border-border/80 bg-muted/10 p-4 text-center text-sm text-muted-foreground"
-        >
-          {t(
-            'dashboard.finance_summary.empty',
-            'Tanlangan davr uchun moliya harakati yo‘q',
-          )}
-        </p>
+        <Card asChild>
+          <p
+            data-testid="finance-summary-empty"
+            className="mt-3 text-sm text-muted-foreground"
+          >
+            {t(
+              'dashboard.finance_summary.empty',
+              'Tanlangan davr uchun moliya harakati yo‘q',
+            )}
+          </p>
+        </Card>
       )}
 
       {isExpenseBreakdownLoading ? (
-        <div
-          data-testid="finance-expense-breakdown"
-          className="mt-5 border-t border-border pt-5"
-          aria-busy="true"
-        >
-          <Skeleton className="h-36 rounded-lg" />
-        </div>
+        <Card asChild>
+          <div
+            data-testid="finance-expense-breakdown"
+            className="mt-5 border-t border-border pt-5"
+            aria-busy="true"
+            role="status"
+          >
+            <span className="sr-only">{t('common.loading')}</span>
+            <Skeleton className="h-36 rounded-lg" />
+          </div>
+        </Card>
       ) : isExpenseBreakdownError ? (
         <Card
+          role="alert"
           data-testid="finance-expense-breakdown"
-          className="mt-5 border-destructive/30 bg-destructive/5 p-4 shadow-none"
+          className="mt-5 border-border bg-destructive/5 p-4 shadow-none"
         >
           <p className="text-sm font-semibold">
             {t('dashboard.finance_summary.expense_breakdown.error_title')}

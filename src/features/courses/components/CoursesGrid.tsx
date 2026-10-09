@@ -14,6 +14,8 @@ interface CoursesGridProps {
   courses: Course[];
   isLoading: boolean;
   isFetching: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   onNavigate: (course: Course) => void;
   onCreate: () => void;
   onEdit: (course: Course) => void;
@@ -29,6 +31,8 @@ export function CoursesGrid({
   courses,
   isLoading,
   isFetching,
+  isError,
+  onRetry,
   onNavigate,
   onCreate,
   onEdit,
@@ -138,6 +142,15 @@ export function CoursesGrid({
         nextPage: t('common.next'),
       }}
       loadingState={<Skeleton className="h-5 w-full" />}
+      errorState={
+        isError ? (
+          <EmptyState
+            role="alert"
+            title={t('common.error')}
+            action={{ label: t('common.retry'), onClick: () => onRetry?.() }}
+          />
+        ) : undefined
+      }
       emptyState={emptyState}
       renderMobileRow={({ row }) => (
         <DataCard

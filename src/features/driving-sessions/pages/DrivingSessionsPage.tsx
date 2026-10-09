@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import { useCallback, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -643,6 +644,7 @@ const DrivingSessionsPage = () => {
             />
           ) : undefined
         }
+        loadingState={<Skeleton className="h-5 w-full" />}
         emptyState={<EmptyState title={t('common.no_data')} />}
         renderMobileRow={({ row: session }) => (
           <DataCard

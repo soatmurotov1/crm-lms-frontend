@@ -126,6 +126,7 @@ const state = vi.hoisted(() => ({
       result_stats: { oqimoqda: 5, topshirdi: 4, yiqildi: 3 },
     },
     isLoading: false,
+    isError: false,
   },
   lessons: {
     data: { data: [] as Lesson[], total: 0, page: 1, limit: 100 },
@@ -195,6 +196,7 @@ afterEach(() => {
       result_stats: { oqimoqda: 5, topshirdi: 4, yiqildi: 3 },
     },
     isLoading: false,
+    isError: false,
   };
   state.lessons = {
     data: { data: [], total: 0, page: 1, limit: 100 },
@@ -368,5 +370,25 @@ describe('TeacherDashboard empty states (autodrive-vh0.6)', () => {
     expect(
       screen.getByText('dashboard.teacher.kpi_my_groups'),
     ).toBeInTheDocument();
+  });
+});
+
+describe('TeacherDashboard announcements', () => {
+  it('announces loading inside a Card', async () => {
+    state.analytics.isLoading = true;
+    await renderDashboard();
+    const status = screen.getByRole('status');
+    expect(status).toHaveAttribute('aria-busy', 'true');
+    expect(status).toHaveTextContent('common.loading');
+    expect(status.closest('[data-surface="card"]')).not.toBeNull();
+  });
+
+  it('announces analytics errors inside a Card', async () => {
+    state.analytics.isError = true;
+    await renderDashboard();
+    expect(
+      screen.getByRole('alert').closest('[data-surface="card"]'),
+    ).not.toBeNull();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 });

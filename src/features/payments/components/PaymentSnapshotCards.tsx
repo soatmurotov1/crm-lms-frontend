@@ -1,6 +1,7 @@
+import { Card } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { SummaryCard } from '@/components/ui/SummaryCard';
+import { StatCard } from '@/components/ui/StatCard';
 import { formatMoney } from '@/lib/money';
 import type { PaymentSnapshot } from '@/features/payments/types';
 import { Warning, Sun, TrendUp, UsersThree } from '@phosphor-icons/react';
@@ -34,34 +35,34 @@ export const PaymentSnapshotCards = ({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {isError ? (
-          <div className="glass-card md:col-span-2 lg:col-span-4">
+          <Card className=" md:col-span-2 lg:col-span-4">
             <EmptyState
               title={t('common.error')}
               action={{ label: t('common.retry'), onClick: onRetry }}
             />
-          </div>
+          </Card>
         ) : (
           <>
-            <SummaryCard
-              title={t('payments.stats.today_income')}
+            <StatCard
+              label={t('payments.stats.today_income')}
               value={formatMoney(snapshot?.today_income ?? 0)}
               icon={<Sun className="h-5 w-5" />}
               isLoading={showLoading}
             />
-            <SummaryCard
-              title={t('payments.stats.month_income')}
+            <StatCard
+              label={t('payments.stats.month_income')}
               value={formatMoney(snapshot?.this_month_income ?? 0)}
               icon={<TrendUp className="h-5 w-5" />}
               isLoading={showLoading}
             />
-            <SummaryCard
-              title={t('payments.stats.total_debt')}
+            <StatCard
+              label={t('payments.stats.total_debt')}
               value={formatMoney(snapshot?.current_total_debt ?? 0)}
               icon={<Warning className="h-5 w-5" />}
               isLoading={showLoading}
             />
-            <SummaryCard
-              title={t('payments.stats.debtor_students')}
+            <StatCard
+              label={t('payments.stats.debtor_students')}
               value={`${snapshot?.students_with_debt ?? 0}${
                 t('common.count_unit') ? ` ${t('common.count_unit')}` : ''
               }`}

@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, it, vi } from 'vitest';
 import Page from './InspectionDetailPage';
 const state = vi.hoisted(() => ({
+  navigate: vi.fn(),
   user: { id: 'author', role: 'teacher' },
   row: {
     id: 'i',
@@ -20,6 +21,7 @@ const state = vi.hoisted(() => ({
   },
 }));
 vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => state.navigate,
   useParams: () => ({ id: 'i' }),
   Link: ({ children }: { children: React.ReactNode }) => <a>{children}</a>,
 }));
@@ -74,4 +76,12 @@ it('allows a manager to enter a reasoned missing-photo override', () => {
     screen.getByRole('button', { name: 'inspections.submit' }),
   ).toBeDisabled();
   expect(screen.getByText('inspections.reason')).toBeVisible();
+});
+
+it('returns to the inspections list through the detail shell', () => {
+  render(<Page />);
+  const back = screen.getByRole('link', { name: 'inspections.title' });
+  expect(back).toHaveAttribute('href', '/vehicle-inspections');
+  fireEvent.click(back);
+  expect(state.navigate).toHaveBeenCalledWith({ to: '/vehicle-inspections' });
 });

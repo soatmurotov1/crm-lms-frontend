@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { lazy, Suspense } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useState } from 'react';
@@ -53,26 +54,22 @@ const BranchDetailPage = () => {
       backLabel={t('branches.title')}
       isLoading={false}
       isError={false}
-      header={
-        <div className="glass-card space-y-2 p-5">
-          <h1 className="font-heading text-2xl font-bold text-balance">
-            {branch.name}
-          </h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+      title={branch.name}
+      description={
+        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5" />
+            {branch.location}
+          </span>
+          {branch.phone && (
             <span className="flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5" />
-              {branch.location}
+              <Phone className="h-3.5 w-3.5" />
+              {branch.phone}
             </span>
-            {branch.phone && (
-              <span className="flex items-center gap-1.5">
-                <Phone className="h-3.5 w-3.5" />
-                {branch.phone}
-              </span>
-            )}
-            <span>
-              {t('branches.manager')}: {branch.manager_name || t('common.na')}
-            </span>
-          </div>
+          )}
+          <span>
+            {t('branches.manager')}: {branch.manager_name || t('common.na')}
+          </span>
         </div>
       }
     >
@@ -84,30 +81,32 @@ const BranchDetailPage = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="info" className="space-y-6">
-          <dl className="glass-card grid grid-cols-1 gap-x-8 gap-y-3 p-5 text-sm sm:grid-cols-2">
-            <Field
-              label={t('branches.students')}
-              value={String(branch.active_students)}
-              link={{ type: 'students', branchId: branch.id }}
-            />
-            <Field
-              label={t('branches.detail.revenue')}
-              value={formatMoney(branch.revenue)}
-            />
-            <Field
-              label={t('branches.detail.debt')}
-              value={formatMoney(branch.debt)}
-            />
-            <Field
-              label={t('branches.detail.today_payment')}
-              value={formatMoney(branch.today_payment)}
-              link={{ type: 'payments', branchId: branch.id, date: today }}
-            />
-          </dl>
+        <TabsContent value="info" className="space-y-4">
+          <Card asChild>
+            <dl className=" grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+              <Field
+                label={t('branches.students')}
+                value={String(branch.active_students)}
+                link={{ type: 'students', branchId: branch.id }}
+              />
+              <Field
+                label={t('branches.detail.revenue')}
+                value={formatMoney(branch.revenue)}
+              />
+              <Field
+                label={t('branches.detail.debt')}
+                value={formatMoney(branch.debt)}
+              />
+              <Field
+                label={t('branches.detail.today_payment')}
+                value={formatMoney(branch.today_payment)}
+                link={{ type: 'payments', branchId: branch.id, date: today }}
+              />
+            </dl>
+          </Card>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="glass-card p-5">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <Card className=" ">
               <h2 className="mb-3 text-sm font-semibold">
                 {t('branches.detail.revenue_trend')}
               </h2>
@@ -116,8 +115,8 @@ const BranchDetailPage = () => {
               >
                 <BranchRevenueTrendChart data={branch.monthly_revenue} />
               </Suspense>
-            </div>
-            <div className="glass-card p-5">
+            </Card>
+            <Card className=" ">
               <h2 className="mb-3 text-sm font-semibold">
                 {t('branches.detail.top_debtors')}
               </h2>
@@ -125,7 +124,7 @@ const BranchDetailPage = () => {
                 debtors={branch.top_debtors}
                 viewAllBranchId={branch.id}
               />
-            </div>
+            </Card>
           </div>
         </TabsContent>
 
@@ -166,7 +165,7 @@ const TopDebtorsList = ({
           key={debtor.id}
           to="/students/$id"
           params={{ id: debtor.id }}
-          className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="truncate">{debtor.name}</span>
           <span className="shrink-0 font-semibold text-destructive">

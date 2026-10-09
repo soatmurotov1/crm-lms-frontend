@@ -40,6 +40,7 @@ export const ROUTE_CAPABILITIES = {
   '/operators': 'manageStaff',
   '/teachers': 'manageStaff',
   '/users': 'manageUsers',
+  '/design-system': 'manageUsers',
   // Managers intentionally reach a staff detail from teacher/operator lists
   // even though the company-wide /users list remains owner/dev only.
   '/users/$id': 'manageStaff',

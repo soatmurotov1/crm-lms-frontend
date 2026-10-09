@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { requestBranchId } from '@/lib/permissions';
 import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
@@ -86,31 +87,29 @@ const CourseDetailPage = () => {
       backLabel={t('courses.title')}
       isLoading={false}
       isError={false}
-      header={
-        <div className="glass-card flex flex-wrap items-start justify-between gap-4 p-5">
-          <div className="space-y-2">
-            <h1 className="font-heading text-2xl font-bold text-balance">
-              {course.name}
-            </h1>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <span>{course.branch_name ?? t('common.na')}</span>
-              <span>·</span>
-              <span>{courseTypeLabel}</span>
-              <span>·</span>
-              <span>{formatMoney(course.price)}</span>
-            </div>
-            <Badge variant={course.is_active ? 'secondary' : 'destructive'}>
-              {course.is_active ? t('common.active') : t('common.inactive')}
-            </Badge>
-          </div>
-          <Button
-            variant="outline"
-            className="gap-2"
-            onClick={() => setEditOpen(true)}
-          >
-            <PencilSimple className="h-4 w-4" /> {t('common.edit')}
-          </Button>
+      title={course.name}
+      description={
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>{course.branch_name ?? t('common.na')}</span>
+          <span>·</span>
+          <span>{courseTypeLabel}</span>
+          <span>·</span>
+          <span>{formatMoney(course.price)}</span>
         </div>
+      }
+      meta={
+        <Badge variant={course.is_active ? 'secondary' : 'destructive'}>
+          {course.is_active ? t('common.active') : t('common.inactive')}
+        </Badge>
+      }
+      actions={
+        <Button
+          variant="outline"
+          className="gap-2"
+          onClick={() => setEditOpen(true)}
+        >
+          <PencilSimple className="h-4 w-4" /> {t('common.edit')}
+        </Button>
       }
     >
       <Tabs
@@ -125,30 +124,32 @@ const CourseDetailPage = () => {
         </TabsList>
 
         <TabsContent value="info">
-          <dl className="glass-card grid grid-cols-1 gap-x-8 gap-y-3 p-5 text-sm sm:grid-cols-2">
-            <Field label={t('courses.name')} value={course.name} />
-            <Field label={t('courses.type')} value={courseTypeLabel} />
-            <Field
-              label={t('courses.price')}
-              value={formatMoney(course.price)}
-            />
-            <Field
-              label={t('courses.duration')}
-              value={t('courses.duration_days_value', {
-                count: course.duration_days,
-              })}
-            />
-            <Field
-              label={t('common.branch')}
-              value={course.branch_name ?? t('common.na')}
-            />
-            <Field
-              label={t('common.status')}
-              value={
-                course.is_active ? t('common.active') : t('common.inactive')
-              }
-            />
-          </dl>
+          <Card asChild>
+            <dl className=" grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+              <Field label={t('courses.name')} value={course.name} />
+              <Field label={t('courses.type')} value={courseTypeLabel} />
+              <Field
+                label={t('courses.price')}
+                value={formatMoney(course.price)}
+              />
+              <Field
+                label={t('courses.duration')}
+                value={t('courses.duration_days_value', {
+                  count: course.duration_days,
+                })}
+              />
+              <Field
+                label={t('common.branch')}
+                value={course.branch_name ?? t('common.na')}
+              />
+              <Field
+                label={t('common.status')}
+                value={
+                  course.is_active ? t('common.active') : t('common.inactive')
+                }
+              />
+            </dl>
+          </Card>
         </TabsContent>
 
         <TabsContent value="students">

@@ -38,12 +38,17 @@ const isTourTargetVisible = (selector: string) => {
   return element.getClientRects().length > 0;
 };
 
-const popoverFill = () => {
+const tokenColor = (name: string, alpha?: number) => {
   const raw = getComputedStyle(document.documentElement)
-    .getPropertyValue('--popover')
+    .getPropertyValue(name)
     .trim();
-  return raw ? `hsl(${raw})` : 'hsl(45 45% 99%)';
+  return `hsl(${raw}${alpha === undefined ? '' : ` / ${alpha}`})`;
 };
+const tourColors = () => ({
+  arrowColor: tokenColor('--popover'),
+  overlayColor: tokenColor('--background', 0.55),
+  primaryColor: tokenColor('--primary'),
+});
 
 const focusRing =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover';
@@ -66,7 +71,7 @@ const CrmTourTooltip = ({
   return (
     <div
       {...tooltipProps}
-      className="w-[min(22rem,calc(100vw-1.5rem))] rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-warm"
+      className="w-[min(22rem,calc(100vw-1.5rem))] rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-[var(--shadow-overlay)]"
     >
       <h2 className="font-heading text-base font-bold tracking-tight text-balance">
         {t(titleKey)}
@@ -121,7 +126,7 @@ const OwnerCrmTour = ({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [run, setRun] = useState(true);
-  const [arrowColor, setArrowColor] = useState(popoverFill);
+  const [colors, setColors] = useState(tourColors);
   const pathnameRef = useRef(pathname);
   const navigateRef = useRef(navigate);
   const prepareRef = useRef(prepareChrome);
@@ -141,7 +146,7 @@ const OwnerCrmTour = ({
   useEffect(() => {
     const root = document.documentElement;
     const observer = new MutationObserver(() => {
-      setArrowColor(popoverFill());
+      setColors(tourColors());
     });
     observer.observe(root, { attributes: true, attributeFilter: ['class'] });
     return () => observer.disconnect();
@@ -233,15 +238,13 @@ const OwnerCrmTour = ({
         skip: t('crm_tour.skip'),
       }}
       options={{
-        arrowColor,
-        backgroundColor: arrowColor,
+        ...colors,
+        backgroundColor: colors.arrowColor,
         beforeTimeout: 16000,
         blockTargetInteraction: true,
         buttons: ['skip', 'back', 'primary'],
         dismissKeyAction: false,
         overlayClickAction: false,
-        overlayColor: 'hsl(192 43% 13% / 0.55)',
-        primaryColor: 'hsl(39 76% 53%)',
         scrollDuration: 200,
         scrollOffset: 96,
         skipBeacon: true,

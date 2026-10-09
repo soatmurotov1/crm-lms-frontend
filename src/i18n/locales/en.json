@@ -5,7 +5,12 @@
   "app": {
     "title": "Auto Maktab"
   },
+  "design_system": {
+    "title": "Design system",
+    "description": "Interface tokens, rules and components"
+  },
   "nav": {
+    "design_system": "Design system",
     "dashboard": "Dashboard",
     "branches": "Branches",
     "branches_all": "All branches",
@@ -356,6 +361,7 @@
       "debtors_scope_mismatch": "Select the same active branch to open this debtor list.",
       "coverage_short": "Paid",
       "active_short": "Active",
+      "stale_data": "Data is more than 24 hours old. Click the refresh button.",
       "analysis_title": "Detailed analysis",
       "analysis_subtitle": "Choose an area to understand what is driving the result.",
       "analysis_tabs_label": "Analysis area",

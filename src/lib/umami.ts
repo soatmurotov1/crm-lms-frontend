@@ -1,3 +1,8 @@
+import {
+  crmTelemetrySettings,
+  hostedAnalyticsConfig,
+} from './platformAnalytics';
+
 const SRC = import.meta.env.VITE_UMAMI_SRC;
 const ID = import.meta.env.VITE_UMAMI_WEBSITE_ID;
 const MAX_PENDING_EVENTS = 20;
@@ -19,6 +24,7 @@ const flushPendingEvents = (): void => {
 };
 
 export const initUmami = (): void => {
+  if (hostedAnalyticsConfig(crmTelemetrySettings)) return;
   if (!SRC || !ID || injected || typeof document === 'undefined') return;
 
   const script = document.createElement('script');
@@ -35,6 +41,10 @@ export const track = (event: string, data?: Record<string, unknown>): void => {
   if (typeof window === 'undefined') return;
 
   try {
+    window.dispatchEvent(
+      new CustomEvent('automaktab_crm_feature', { detail: event }),
+    );
+    if (hostedAnalyticsConfig(crmTelemetrySettings)) return;
     if (window.umami?.track) {
       flushPendingEvents();
       window.umami.track(event, data);

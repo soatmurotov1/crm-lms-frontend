@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useLocation, useNavigate, useParams } from '@tanstack/react-router';
 import {
   useEffect,
@@ -461,72 +462,72 @@ const ExpenseDetailPage = () => {
       }
       isLoading={false}
       isError={false}
-      header={
-        <div className="glass-card space-y-3 p-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Wallet className="h-5 w-5 text-primary" aria-hidden="true" />
-              <h1 className="font-heading text-2xl font-bold text-balance">
-                {serverExpense.title}
-              </h1>
-            </div>
-            {(canEditExpense ||
-              canCancelExpense ||
-              canDeleteExpense ||
-              paidDeleteLocked) && (
-              <div className="flex flex-wrap items-center gap-2">
-                {canEditExpense && (
-                  <Button
-                    variant="outline"
-                    className="gap-2"
-                    onClick={() => setEditOpen(true)}
-                    disabled={lifecyclePending}
-                  >
-                    <PencilSimple className="h-4 w-4" aria-hidden="true" />
-                    {t('common.edit')}
-                  </Button>
-                )}
-                {canCancelExpense && (
-                  <Button
-                    variant="outline"
-                    onClick={() => openLifecycleDialog('cancel')}
-                    disabled={lifecyclePending}
-                  >
-                    {t('expenses.lifecycle.cancel_action')}
-                  </Button>
-                )}
-                {canDeleteExpense ? (
-                  <Button
-                    variant="destructive"
-                    onClick={() => openLifecycleDialog('delete')}
-                    disabled={lifecyclePending}
-                  >
-                    {t('expenses.lifecycle.delete_action')}
-                  </Button>
-                ) : paidDeleteLocked ? (
-                  <Button
-                    variant="destructive"
-                    disabled
-                    title={t('expenses.lifecycle.paid_delete_locked')}
-                  >
-                    {t('expenses.lifecycle.delete_action')}
-                  </Button>
-                ) : null}
-              </div>
-            )}
-            <Badge variant={statusVariant(serverExpense.status)}>
-              {t(`expenses.status.${serverExpense.status}`)}
-            </Badge>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {t(`expenses.category.${serverExpense.category}`)}
-          </p>
+      title={
+        <span className="inline-flex items-center gap-2">
+          <Wallet className="h-5 w-5 text-primary" aria-hidden="true" />
+          {serverExpense.title}
+        </span>
+      }
+      description={
+        <>
+          {t(`expenses.category.${serverExpense.category}`)}{' '}
           {paidDeleteLocked && (
             <p className="text-sm text-muted-foreground" role="note">
               {t('expenses.lifecycle.paid_delete_locked')}
             </p>
           )}
-        </div>
+        </>
+      }
+      meta={
+        <Badge variant={statusVariant(serverExpense.status)}>
+          {t(`expenses.status.${serverExpense.status}`)}
+        </Badge>
+      }
+      actions={
+        (canEditExpense ||
+          canCancelExpense ||
+          canDeleteExpense ||
+          paidDeleteLocked) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {canEditExpense && (
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setEditOpen(true)}
+                disabled={lifecyclePending}
+              >
+                <PencilSimple className="h-4 w-4" aria-hidden="true" />
+                {t('common.edit')}
+              </Button>
+            )}
+            {canCancelExpense && (
+              <Button
+                variant="outline"
+                onClick={() => openLifecycleDialog('cancel')}
+                disabled={lifecyclePending}
+              >
+                {t('expenses.lifecycle.cancel_action')}
+              </Button>
+            )}
+            {canDeleteExpense ? (
+              <Button
+                variant="destructive"
+                onClick={() => openLifecycleDialog('delete')}
+                disabled={lifecyclePending}
+              >
+                {t('expenses.lifecycle.delete_action')}
+              </Button>
+            ) : paidDeleteLocked ? (
+              <Button
+                variant="destructive"
+                disabled
+                title={t('expenses.lifecycle.paid_delete_locked')}
+              >
+                {t('expenses.lifecycle.delete_action')}
+              </Button>
+            ) : null}
+          </div>
+        )
       }
     >
       <Tabs value={activeTab} onValueChange={setTab} className="space-y-4">
@@ -540,318 +541,326 @@ const ExpenseDetailPage = () => {
         </TabsList>
 
         <TabsContent value="info">
-          <dl className="glass-card grid grid-cols-1 gap-x-8 gap-y-4 p-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
-            <DetailField
-              label={t('expenses.detail.amount')}
-              value={formatMoney(serverExpense.amount)}
-            />
-            <DetailField
-              label={t('expenses.detail.paid')}
-              value={formatMoney(serverExpense.paid_amount)}
-            />
-            <DetailField
-              label={t('expenses.detail.remaining')}
-              value={formatMoney(serverExpense.remaining_amount)}
-            />
-            <DetailField
-              label={t('expenses.detail.expense_date')}
-              value={formatDate(serverExpense.expense_date)}
-            />
-            <DetailField
-              label={t('expenses.detail.due_date')}
-              value={
-                serverExpense.due_date
-                  ? formatDate(serverExpense.due_date)
-                  : t('common.na')
-              }
-            />
-            <DetailField
-              label={t('expenses.detail.branch')}
-              value={
-                serverExpense.branch_name ?? t('expenses.form.company_wide')
-              }
-            />
-            {serverExpense.vehicle_plate_number && (
+          <Card asChild>
+            <dl className=" grid grid-cols-1 gap-x-8 gap-y-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
               <DetailField
-                label={t('expenses.detail.vehicle')}
-                value={serverExpense.vehicle_plate_number}
+                label={t('expenses.detail.amount')}
+                value={formatMoney(serverExpense.amount)}
               />
-            )}
-            <DetailField
-              label={t('expenses.detail.payee')}
-              value={serverExpense.payee ?? t('common.na')}
-            />
-            {/* ponytail: created_by_id was a raw UUID and version an internal
+              <DetailField
+                label={t('expenses.detail.paid')}
+                value={formatMoney(serverExpense.paid_amount)}
+              />
+              <DetailField
+                label={t('expenses.detail.remaining')}
+                value={formatMoney(serverExpense.remaining_amount)}
+              />
+              <DetailField
+                label={t('expenses.detail.expense_date')}
+                value={formatDate(serverExpense.expense_date)}
+              />
+              <DetailField
+                label={t('expenses.detail.due_date')}
+                value={
+                  serverExpense.due_date
+                    ? formatDate(serverExpense.due_date)
+                    : t('common.na')
+                }
+              />
+              <DetailField
+                label={t('expenses.detail.branch')}
+                value={
+                  serverExpense.branch_name ?? t('expenses.form.company_wide')
+                }
+              />
+              {serverExpense.vehicle_plate_number && (
+                <DetailField
+                  label={t('expenses.detail.vehicle')}
+                  value={serverExpense.vehicle_plate_number}
+                />
+              )}
+              <DetailField
+                label={t('expenses.detail.payee')}
+                value={serverExpense.payee ?? t('common.na')}
+              />
+              {/* ponytail: created_by_id was a raw UUID and version an internal
                 counter. Both are audit-log material, not list material — the
                 audit log and the events panel already carry them. */}
-            <div className="sm:col-span-2 lg:col-span-3">
-              <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t('expenses.detail.note')}
-              </dt>
-              <dd className="mt-1 whitespace-pre-wrap text-sm">
-                {serverExpense.note ?? t('common.na')}
-              </dd>
-            </div>
-          </dl>
+              <div className="sm:col-span-2 lg:col-span-3">
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                  {t('expenses.detail.note')}
+                </dt>
+                <dd className="mt-1 whitespace-pre-wrap text-sm">
+                  {serverExpense.note ?? t('common.na')}
+                </dd>
+              </div>
+            </dl>
+          </Card>
         </TabsContent>
 
         {canViewPaymentHistory && (
           <TabsContent value="payments">
-            <section className="glass-card space-y-4 p-5">
-              <h2 className="font-heading text-lg font-semibold">
-                {t('expenses.payments.title')}
-              </h2>
-              {(() => {
-                const paymentsQuery = isOwnSettlementView
-                  ? mySettlementQuery
-                  : historyQuery;
-                const payments = isOwnSettlementView
-                  ? (mySettlementQuery.data?.payments ?? [])
-                  : (historyQuery.data?.payments ?? []);
-                return (
-                  <>
-                    {paymentsQuery.isLoading && (
-                      <p className="text-sm text-muted-foreground">
-                        {t('expenses.payments.loading')}
-                      </p>
-                    )}
-                    {paymentsQuery.isError && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <span>{t('expenses.payments.error')}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => void paymentsQuery.refetch()}
-                        >
-                          {t('common.retry')}
-                        </Button>
-                      </div>
-                    )}
-                    {!paymentsQuery.isLoading &&
-                      !paymentsQuery.isError &&
-                      payments.length === 0 && (
+            <Card asChild>
+              <section className=" space-y-4 ">
+                <h2 className="font-heading text-lg font-semibold">
+                  {t('expenses.payments.title')}
+                </h2>
+                {(() => {
+                  const paymentsQuery = isOwnSettlementView
+                    ? mySettlementQuery
+                    : historyQuery;
+                  const payments = isOwnSettlementView
+                    ? (mySettlementQuery.data?.payments ?? [])
+                    : (historyQuery.data?.payments ?? []);
+                  return (
+                    <>
+                      {paymentsQuery.isLoading && (
                         <p className="text-sm text-muted-foreground">
-                          {t('expenses.payments.empty')}
+                          {t('expenses.payments.loading')}
                         </p>
                       )}
-                    {payments.map((payment) => (
-                      <div
-                        key={payment.id}
-                        className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-2 text-sm"
-                      >
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span
-                            className={
-                              payment.voided_at
-                                ? 'text-muted-foreground line-through'
-                                : ''
-                            }
+                      {paymentsQuery.isError && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <span>{t('expenses.payments.error')}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => void paymentsQuery.refetch()}
                           >
-                            {formatMoney(payment.amount)} ·{' '}
-                            {t(
-                              `expenses.payments.methods.${payment.payment_method}`,
-                            )}{' '}
-                            · {formatDate(payment.date)}
-                          </span>
-                          {payment.voided_at && payment.void_reason && (
-                            <span className="text-xs text-muted-foreground italic">
-                              ({payment.void_reason})
-                            </span>
-                          )}
+                            {t('common.retry')}
+                          </Button>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {payment.voided_at ? (
-                            <Badge
-                              variant="outline"
-                              className="border-destructive/30 text-destructive bg-destructive/5"
+                      )}
+                      {!paymentsQuery.isLoading &&
+                        !paymentsQuery.isError &&
+                        payments.length === 0 && (
+                          <p className="text-sm text-muted-foreground">
+                            {t('expenses.payments.empty')}
+                          </p>
+                        )}
+                      {payments.map((payment) => (
+                        <div
+                          key={payment.id}
+                          className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-2 text-sm"
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className={
+                                payment.voided_at
+                                  ? 'text-muted-foreground line-through'
+                                  : ''
+                              }
                             >
-                              {t('expenses.payments.voided')}
-                            </Badge>
-                          ) : (
-                            <>
-                              <Badge variant="secondary">
-                                {t('expenses.payments.active')}
+                              {formatMoney(payment.amount)} ·{' '}
+                              {t(
+                                `expenses.payments.methods.${payment.payment_method}`,
+                              )}{' '}
+                              · {formatDate(payment.date)}
+                            </span>
+                            {payment.voided_at && payment.void_reason && (
+                              <span className="text-xs text-muted-foreground italic">
+                                ({payment.void_reason})
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {payment.voided_at ? (
+                              <Badge
+                                variant="outline"
+                                className="border-border text-destructive bg-destructive/5"
+                              >
+                                {t('expenses.payments.voided')}
                               </Badge>
-                              {mayVoidPayment && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                  onClick={() => {
-                                    setVoidPaymentTarget(payment);
-                                    setVoidPaymentConflict(false);
-                                  }}
-                                  disabled={voidPaymentMutation.isPending}
-                                >
-                                  {t('expenses.payments.void_action')}
-                                </Button>
-                              )}
-                            </>
-                          )}
+                            ) : (
+                              <>
+                                <Badge variant="secondary">
+                                  {t('expenses.payments.active')}
+                                </Badge>
+                                {mayVoidPayment && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                    onClick={() => {
+                                      setVoidPaymentTarget(payment);
+                                      setVoidPaymentConflict(false);
+                                    }}
+                                    disabled={voidPaymentMutation.isPending}
+                                  >
+                                    {t('expenses.payments.void_action')}
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </>
-                );
-              })()}
-              {mayPay &&
-                serverExpense.status !== 'cancelled' &&
-                serverExpense.status !== 'paid' && (
-                  <>
-                    {/* Errors sit above the fields they refer to and announce
+                      ))}
+                    </>
+                  );
+                })()}
+                {mayPay &&
+                  serverExpense.status !== 'cancelled' &&
+                  serverExpense.status !== 'paid' && (
+                    <>
+                      {/* Errors sit above the fields they refer to and announce
                         themselves, rather than rendering below the submit
                         button where a 409 about stale data is invisible. */}
-                    {(conflict || paymentError) && (
-                      <p
-                        role="alert"
-                        className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-                      >
-                        {t(
-                          conflict
-                            ? 'expenses.payments.conflict'
-                            : (paymentError as string),
-                        )}
-                      </p>
-                    )}
-                    <form
-                      className="grid gap-3 sm:grid-cols-2"
-                      onSubmit={(event) => {
-                        event.preventDefault();
-                        setConflict(false);
-                        setPaymentError(null);
-                        const canonicalAmount = canonicalPaymentAmount(amount);
-                        const normalizedDate = date.trim();
-                        const normalizedNote = note.trim() || null;
-                        if (!canonicalAmount) {
-                          setPaymentError('expenses.payments.invalid_amount');
-                          return;
-                        }
-                        if (!parseCalendarDate(normalizedDate)) {
-                          setPaymentError('expenses.payments.invalid_date');
-                          return;
-                        }
-                        const fingerprint = JSON.stringify([
-                          canonicalAmount,
-                          method,
-                          normalizedDate,
-                          normalizedNote,
-                        ]);
-                        if (
-                          paymentAttempt.current?.fingerprint !== fingerprint
-                        ) {
-                          paymentAttempt.current = {
-                            fingerprint,
-                            idempotencyKey: newRequestId(),
-                          };
-                        }
-                        paymentMutation.mutate(
-                          {
-                            amount: canonicalAmount,
-                            payment_method: method,
-                            date: normalizedDate,
-                            note: normalizedNote,
-                            idempotency_key:
-                              paymentAttempt.current.idempotencyKey,
-                            expected_version: serverExpense.version,
-                          },
-                          {
-                            onSuccess: () => {
-                              setAmountState({ expenseId: id, value: '' });
-                              setDate('');
-                              setNote('');
-                              paymentAttempt.current = null;
-                            },
-                            onError: (error) => {
-                              if (
-                                (error as { response?: { status?: number } })
-                                  .response?.status === 409
-                              ) {
-                                setConflict(true);
-                                void Promise.all([
-                                  expenseQuery.refetch(),
-                                  historyQuery.refetch(),
-                                ]);
-                              }
-                            },
-                          },
-                        );
-                      }}
-                    >
-                      <div className="space-y-1.5">
-                        <Label htmlFor="expense-payment-amount">
-                          {t('expenses.payments.amount')}
-                        </Label>
-                        <Input
-                          id="expense-payment-amount"
-                          value={amount}
-                          onChange={(e) =>
-                            setAmountState({
-                              expenseId: id,
-                              value: e.target.value,
-                            })
-                          }
-                          placeholder="0.00"
-                          disabled={paymentControlsDisabled}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="expense-payment-method">
-                          {t('expenses.payments.method')}
-                        </Label>
-                        <select
-                          id="expense-payment-method"
-                          value={method}
-                          onChange={(e) =>
-                            setMethod(e.target.value as ExpensePaymentMethod)
-                          }
-                          disabled={paymentControlsDisabled}
-                          className="h-10 w-full rounded-md border border-border bg-secondary px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      {(conflict || paymentError) && (
+                        <p
+                          role="alert"
+                          className="rounded-md bg-muted/40 px-3 py-2 text-sm text-destructive"
                         >
-                          <option value="naqd">
-                            {t('expenses.payments.methods.naqd')}
-                          </option>
-                          <option value="karta">
-                            {t('expenses.payments.methods.karta')}
-                          </option>
-                          <option value="perechisleniya">
-                            {t('expenses.payments.methods.perechisleniya')}
-                          </option>
-                        </select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="expense-payment-date">
-                          {t('expenses.payments.date')}
-                        </Label>
-                        <Input
-                          id="expense-payment-date"
-                          type="date"
-                          value={date}
-                          onChange={(e) => setDate(e.target.value)}
+                          {t(
+                            conflict
+                              ? 'expenses.payments.conflict'
+                              : (paymentError as string),
+                          )}
+                        </p>
+                      )}
+                      <form
+                        className="grid gap-3 sm:grid-cols-2"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          setConflict(false);
+                          setPaymentError(null);
+                          const canonicalAmount =
+                            canonicalPaymentAmount(amount);
+                          const normalizedDate = date.trim();
+                          const normalizedNote = note.trim() || null;
+                          if (!canonicalAmount) {
+                            setPaymentError('expenses.payments.invalid_amount');
+                            return;
+                          }
+                          if (!parseCalendarDate(normalizedDate)) {
+                            setPaymentError('expenses.payments.invalid_date');
+                            return;
+                          }
+                          const fingerprint = JSON.stringify([
+                            canonicalAmount,
+                            method,
+                            normalizedDate,
+                            normalizedNote,
+                          ]);
+                          if (
+                            paymentAttempt.current?.fingerprint !== fingerprint
+                          ) {
+                            paymentAttempt.current = {
+                              fingerprint,
+                              idempotencyKey: newRequestId(),
+                            };
+                          }
+                          paymentMutation.mutate(
+                            {
+                              amount: canonicalAmount,
+                              payment_method: method,
+                              date: normalizedDate,
+                              note: normalizedNote,
+                              idempotency_key:
+                                paymentAttempt.current.idempotencyKey,
+                              expected_version: serverExpense.version,
+                            },
+                            {
+                              onSuccess: () => {
+                                setAmountState({ expenseId: id, value: '' });
+                                setDate('');
+                                setNote('');
+                                paymentAttempt.current = null;
+                              },
+                              onError: (error) => {
+                                if (
+                                  (error as { response?: { status?: number } })
+                                    .response?.status === 409
+                                ) {
+                                  setConflict(true);
+                                  void Promise.all([
+                                    expenseQuery.refetch(),
+                                    historyQuery.refetch(),
+                                  ]);
+                                }
+                              },
+                            },
+                          );
+                        }}
+                      >
+                        <div className="space-y-1.5">
+                          <Label htmlFor="expense-payment-amount">
+                            {t('expenses.payments.amount')}
+                          </Label>
+                          <Input
+                            id="expense-payment-amount"
+                            value={amount}
+                            onChange={(e) =>
+                              setAmountState({
+                                expenseId: id,
+                                value: e.target.value,
+                              })
+                            }
+                            placeholder="0.00"
+                            disabled={paymentControlsDisabled}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="expense-payment-method">
+                            {t('expenses.payments.method')}
+                          </Label>
+                          <select
+                            id="expense-payment-method"
+                            value={method}
+                            onChange={(e) =>
+                              setMethod(e.target.value as ExpensePaymentMethod)
+                            }
+                            disabled={paymentControlsDisabled}
+                            className="h-10 w-full rounded-md border border-border bg-secondary px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <option value="naqd">
+                              {t('expenses.payments.methods.naqd')}
+                            </option>
+                            <option value="karta">
+                              {t('expenses.payments.methods.karta')}
+                            </option>
+                            <option value="perechisleniya">
+                              {t('expenses.payments.methods.perechisleniya')}
+                            </option>
+                          </select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="expense-payment-date">
+                            {t('expenses.payments.date')}
+                          </Label>
+                          <Input
+                            id="expense-payment-date"
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            disabled={paymentControlsDisabled}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="expense-payment-note">
+                            {t('expenses.payments.note')}
+                          </Label>
+                          <Input
+                            id="expense-payment-note"
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                            disabled={paymentControlsDisabled}
+                          />
+                        </div>
+                        <Button
+                          type="submit"
                           disabled={paymentControlsDisabled}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="expense-payment-note">
-                          {t('expenses.payments.note')}
-                        </Label>
-                        <Input
-                          id="expense-payment-note"
-                          value={note}
-                          onChange={(e) => setNote(e.target.value)}
-                          disabled={paymentControlsDisabled}
-                        />
-                      </div>
-                      <Button type="submit" disabled={paymentControlsDisabled}>
-                        {paymentMutation.isPending
-                          ? t('expenses.payments.saving')
-                          : t('expenses.payments.submit')}
-                      </Button>
-                    </form>
-                  </>
-                )}
-            </section>
+                        >
+                          {paymentMutation.isPending
+                            ? t('expenses.payments.saving')
+                            : t('expenses.payments.submit')}
+                        </Button>
+                      </form>
+                    </>
+                  )}
+              </section>
+            </Card>
           </TabsContent>
         )}
       </Tabs>

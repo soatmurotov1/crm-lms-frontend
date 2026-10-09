@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
@@ -75,8 +76,8 @@ export default function VehicleSessionsTab({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <Skeleton className="h-44 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-lg" />
+        <Skeleton className="h-44 w-full rounded-lg" />
       </div>
     );
   }
@@ -96,7 +97,7 @@ export default function VehicleSessionsTab({
   return (
     <div className="space-y-4">
       {/* GiST constraint explanation banner */}
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs text-muted-foreground flex items-start gap-3">
+      <div className="rounded-lg border border-border bg-primary/5 p-4 text-xs text-muted-foreground flex items-start gap-3">
         <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
         <div className="space-y-1">
           <span className="font-semibold text-foreground block">
@@ -110,18 +111,18 @@ export default function VehicleSessionsTab({
 
       {/* Prominently highlighted active session */}
       {activeSession && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-50/60 dark:bg-emerald-950/20 p-4 space-y-3">
+        <div className="rounded-lg border border-border bg-success/10 p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-success">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success" />
               </span>
               {t('vehicles.active_now')}
             </span>
             <Badge
               variant="default"
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-success hover:bg-success/90 text-success-foreground"
             >
               {t(`driving.status.${activeSession.status}`)}
             </Badge>
@@ -191,7 +192,7 @@ export default function VehicleSessionsTab({
         />
       ) : (
         <div className="space-y-3">
-          <div className="overflow-x-auto rounded-xl border bg-card">
+          <Card className="overflow-x-auto ">
             <table className="w-full text-left text-xs">
               <thead className="border-b bg-muted/40 font-semibold text-muted-foreground">
                 <tr>
@@ -269,7 +270,7 @@ export default function VehicleSessionsTab({
                 ))}
               </tbody>
             </table>
-          </div>
+          </Card>
 
           {/* Pagination */}
           {meta && meta.totalPages > 1 && (

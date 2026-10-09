@@ -82,7 +82,7 @@ describe('AppLayout mobile sidebar auto-close on navigation', () => {
     fireEvent.click(screen.getByText('toggle-desktop'));
 
     expect(screen.getByTestId('desktop-expanded')).toHaveTextContent('false');
-    expect(contentShell.className).toContain('lg:ml-[86px]');
+    expect(contentShell.className).toContain('lg:ml-14');
     expect(localStorage.getItem('autodrive-sidebar-expanded')).toBe('false');
   });
 
@@ -96,7 +96,7 @@ describe('AppLayout mobile sidebar auto-close on navigation', () => {
 
     expect(screen.getByTestId('desktop-expanded')).toHaveTextContent('false');
     expect(screen.getByRole('main').parentElement!.className).toContain(
-      'lg:ml-[86px]',
+      'lg:ml-14',
     );
   });
 });
@@ -120,6 +120,11 @@ describe('AppLayout demo company banner', () => {
     });
 
     expect(screen.getByRole('status')).toHaveTextContent('common.demo_banner');
+    expect(screen.getByRole('status').parentElement).toHaveClass(
+      '[&>p]:bg-muted',
+      '[&>p]:px-2',
+      '[&>p]:lg:px-3',
+    );
   });
 
   it('shows the reset notice for the demo login email', async () => {

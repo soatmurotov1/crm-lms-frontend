@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { useMemo } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -39,14 +40,13 @@ const FinanceDashboard = () => {
             'Naqd oqimi, majburiyatlar va o‘qituvchi to‘lovlari.',
           )}
         </p>
-        <Link
-          to="/expenses"
-          className="mt-3 inline-flex h-10 items-center gap-1 rounded-md border border-border bg-card px-3 text-[13px] font-semibold hover:bg-muted"
-        >
-          <Wallet className="h-4 w-4" aria-hidden="true" />
-          {t('nav.expenses', 'Xarajatlar')}
-          <CaretRight className="h-3.5 w-3.5" aria-hidden="true" />
-        </Link>
+        <Button asChild variant="outline" className="mt-3">
+          <Link to="/expenses">
+            <Wallet className="h-4 w-4" aria-hidden="true" />
+            {t('nav.expenses', 'Xarajatlar')}
+            <CaretRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </Link>
+        </Button>
       </header>
 
       <FinanceSummarySection query={query} />

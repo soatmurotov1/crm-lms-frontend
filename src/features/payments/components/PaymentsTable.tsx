@@ -320,7 +320,7 @@ export const PaymentsTable = ({
             }
           : { onRowActivate: undefined })}
         className={cn(
-          'glass-card overflow-hidden p-3 transition-opacity duration-200 md:p-0',
+          'transition-opacity duration-200',
           isFetching && !isLoading && 'opacity-50',
         )}
       />

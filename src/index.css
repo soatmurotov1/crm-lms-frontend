@@ -2,7 +2,7 @@
 @import 'tailwindcss';
 @import './fonts.css';
 
-@theme {
+@theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-surface: hsl(var(--surface));
@@ -91,12 +91,10 @@
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
-  --radius-xl: 0.625rem;
+  --radius-xl: 0.75rem;
   --radius-2xl: 0.75rem;
   --radius-3xl: 0.75rem;
   --radius-4xl: 0.75rem;
-
-  --shadow-warm: 0 1px 2px hsl(var(--brand-navy) / 0.04);
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -127,40 +125,61 @@
  * specificity. Keep this block unlayered and after the design-tokens import
  * so the app palette is authoritative in both light and dark mode.
  *
- * Road Signal: warm paper #F4F0E7, ink #132A30 and amber #E2A42D.
- * Dark: deep road-teal surfaces with an amber action/ring.
+ * Slate surfaces and technology-blue interactions.
+ * Dark: deep slate surfaces with blue actions and focus rings.
  *
  * Semantic status colors remain distinct from the brand colors so warnings,
  * errors, and success states do not become ambiguous UI decoration.
  * ==========================================================================
  */
+.light,
 :root {
   color-scheme: light;
-  --brand-white: 45 32% 93%;
-  --brand-blue: 192 43% 13%;
-  --brand-navy: 192 43% 13%;
-  --brand-orange: 39 76% 53%;
-  --brand-blue-bright: 191 37% 28%;
-  --brand-blue-soft: 191 26% 38%;
-  --brand-blue-deep: 192 52% 10%;
-  --brand-blue-pale: 45 40% 92%;
-
-  --background: var(--brand-white);
-  --surface: 45 45% 98%;
-  --card: 45 45% 99%;
-  --card-foreground: var(--brand-navy);
-  --popover: 45 45% 99%;
-  --popover-foreground: var(--brand-navy);
-  --foreground: var(--brand-navy);
-  --muted: 40 25% 90%;
-  --muted-foreground: 191 14% 36%;
-  --muted-foreground-strong: 192 28% 24%;
-  --primary: var(--brand-orange);
-  --primary-foreground: var(--brand-navy);
-  --secondary: 44 55% 88%;
-  --secondary-foreground: var(--brand-navy);
-  --accent: 43 72% 88%;
-  --accent-foreground: var(--brand-navy);
+  --slate-50: 210 40% 98%;
+  --slate-100: 210 40% 96%;
+  --slate-200: 214 32% 91%;
+  --slate-300: 213 27% 84%;
+  --slate-400: 215 20% 65%;
+  --slate-500: 215 16% 47%;
+  --slate-600: 215 19% 35%;
+  --slate-700: 215 25% 27%;
+  --slate-800: 217 33% 17%;
+  --slate-900: 222 47% 11%;
+  --slate-950: 229 84% 5%;
+  --blue-50: 214 100% 97%;
+  --blue-100: 214 95% 93%;
+  --blue-200: 213 97% 87%;
+  --blue-300: 212 96% 78%;
+  --blue-400: 213 94% 68%;
+  --blue-500: 217 91% 60%;
+  --blue-600: 221 83% 53%;
+  --blue-700: 224 76% 48%;
+  --blue-800: 226 71% 40%;
+  --blue-900: 224 64% 33%;
+  --brand-white: 0 0% 100%;
+  --brand-navy: var(--slate-950);
+  --brand-orange: var(--warning);
+  --brand-blue: var(--blue-600);
+  --brand-blue-bright: var(--blue-400);
+  --brand-blue-soft: var(--blue-200);
+  --brand-blue-deep: var(--blue-800);
+  --brand-blue-pale: var(--blue-50);
+  --background: var(--slate-50);
+  --surface: 0 0% 100%;
+  --card: 0 0% 100%;
+  --card-foreground: var(--slate-900);
+  --popover: 0 0% 100%;
+  --popover-foreground: var(--slate-900);
+  --foreground: var(--slate-900);
+  --muted: var(--slate-100);
+  --muted-foreground: var(--slate-600);
+  --muted-foreground-strong: var(--slate-700);
+  --primary: var(--blue-600);
+  --primary-foreground: var(--brand-white);
+  --secondary: var(--slate-100);
+  --secondary-foreground: var(--slate-900);
+  --accent: var(--blue-100);
+  --accent-foreground: var(--slate-900);
   --destructive: 0 72% 42%;
   --destructive-foreground: var(--brand-white);
   --success: 155 48% 29%;
@@ -170,76 +189,71 @@
   --warning-foreground: var(--brand-white);
   --info: 191 54% 27%;
   --info-foreground: var(--brand-white);
-  --border: 39 19% 82%;
-  --hair: 39 26% 88%;
-  --input: 39 20% 76%;
-  /* Unfocused border of editable controls that sit on --card. --border and
-     --input are 1.45:1 and 1.68:1 there; this is 3.95:1 (WCAG 2.2 SC 1.4.11). */
-  --control-border: 36 12% 48%;
-  /* Darker than --brand-orange: a 2px focus ring must clear 3:1 against BOTH
-     the offset colour and the adjacent surface (WCAG 2.2 SC 1.4.11). Amber at
-     53% L was 1.95:1 on --background. This is 5.36:1. */
-  --ring: 32 82% 31%;
+  --border: var(--slate-200);
+  --hair: var(--slate-100);
+  --input: var(--slate-300);
+  --control-border: 215 16% 47%;
+  --ring: var(--blue-600);
   --radius: 0.5rem;
-
-  --sidebar-background: 45 45% 98%;
-  --sidebar-foreground: var(--brand-navy);
-  --sidebar-primary: var(--brand-orange);
-  --sidebar-primary-foreground: var(--brand-navy);
-  --sidebar-accent: 43 62% 91%;
-  --sidebar-accent-foreground: var(--brand-navy);
-  --sidebar-border: 39 19% 84%;
+  --shadow-overlay: 0 12px 32px hsl(var(--slate-950) / 0.24);
+  --sidebar-background: var(--surface);
+  --sidebar-foreground: var(--slate-900);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
 }
 
 .dark {
   color-scheme: dark;
-  --brand-blue-bright: 174 31% 72%;
-  --brand-blue-soft: 178 22% 54%;
-  --brand-blue-deep: 174 38% 78%;
-  --brand-blue-pale: 188 27% 26%;
-
-  --background: 192 45% 11%;
-  --surface: 192 40% 14%;
-  --card: 192 35% 17%;
-  --card-foreground: var(--brand-white);
-  --popover: 199.53 53% 17%;
-  --popover-foreground: var(--brand-white);
-  --foreground: var(--brand-white);
-  --muted: 191 28% 22%;
-  --muted-foreground: 178 14% 72%;
-  --muted-foreground-strong: 178 18% 84%;
-  --primary: 40 84% 61%;
-  --primary-foreground: 192 45% 11%;
-  --secondary: 191 31% 23%;
-  --secondary-foreground: var(--brand-white);
-  --accent: 174 20% 25%;
-  --accent-foreground: var(--brand-white);
+  --brand-blue: var(--blue-400);
+  --brand-blue-bright: var(--blue-300);
+  --brand-blue-soft: var(--blue-500);
+  --brand-blue-deep: var(--blue-200);
+  --brand-blue-pale: var(--blue-900);
+  --background: var(--slate-950);
+  --surface: var(--slate-900);
+  --card: 217 33% 17%;
+  --card-foreground: var(--slate-50);
+  --popover: var(--slate-800);
+  --popover-foreground: var(--slate-50);
+  --foreground: var(--slate-50);
+  --muted: var(--slate-800);
+  --muted-foreground: 215 20% 72%;
+  --muted-foreground-strong: var(--slate-300);
+  --primary: var(--blue-400);
+  --primary-foreground: var(--slate-950);
+  --secondary: var(--slate-800);
+  --secondary-foreground: var(--slate-50);
+  --accent: var(--slate-700);
+  --accent-foreground: var(--slate-50);
   --destructive: 0 76% 74%;
-  --destructive-foreground: var(--brand-white);
+  --destructive-foreground: var(--slate-950);
   --success: 155 48% 50%;
-  --success-foreground: var(--brand-navy);
-  --warning: var(--brand-orange);
-  --warning-strong: var(--brand-orange);
-  --warning-foreground: var(--brand-navy);
+  --success-foreground: var(--slate-950);
+  --warning: 39 76% 53%;
+  --warning-strong: 39 76% 53%;
+  --warning-foreground: var(--slate-950);
   --info: 185 55% 57%;
-  --info-foreground: var(--brand-navy);
-  --border: 191 23% 31%;
-  --hair: 191 24% 23%;
-  --input: 191 23% 34%;
-  /* 4.12:1 against dark --card; --input is 2.01:1. */
-  --control-border: 190 16% 54%;
-  --ring: var(--brand-orange);
-
-  --sidebar-background: 192 42% 13%;
-  --sidebar-foreground: var(--brand-white);
-  --sidebar-primary: 40 84% 61%;
-  --sidebar-primary-foreground: 192 45% 11%;
-  --sidebar-accent: 174 20% 22%;
-  --sidebar-accent-foreground: var(--brand-white);
-  --sidebar-border: 191 23% 27%;
-  --sidebar-ring: var(--brand-orange);
+  --info-foreground: var(--slate-950);
+  --border: var(--slate-700);
+  --hair: var(--slate-800);
+  --input: var(--slate-700);
+  --control-border: 215 20% 65%;
+  --ring: var(--blue-400);
+  --shadow-overlay: 0 12px 32px hsl(var(--slate-950) / 0.64);
+  --sidebar-background: var(--surface);
+  --sidebar-foreground: var(--slate-50);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
+
 /* AutoDrive brand theme -- END */
 
 @layer base {
@@ -281,17 +295,6 @@
 }
 
 @layer components {
-  .glass,
-  .glass-sm,
-  .glass-lg {
-    background: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
-  }
-  .glass-card {
-    background: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
-    border-radius: var(--radius);
-  }
   /* Interactive list/table rows use the active semantic surface tokens. */
   .table-row-interactive {
     transition: background-color 0.15s ease;
@@ -339,7 +342,7 @@
     contain-intrinsic-size: auto none auto 320px;
   }
   /* Warm ambient backdrop for the product "front door" surfaces (login,
-     session gates, 404). Radial washes tinted with the brand amber + teal;
+     session gates, 404). Radial washes tinted with semantic warning and brand blue;
      both washes stay visible in light and dark because the tokens flip
      luminance per theme. */
   .ambient-surface {

@@ -1,3 +1,6 @@
+import { Sparkline } from '@/features/dashboard/components/Sparkline';
+import { Card } from '@/components/ui/card';
+import { StatCard } from '@/components/ui/StatCard';
 import { requestBranchId } from '@/lib/permissions';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,8 +54,6 @@ import {
   CHART_STYLE,
   formatNumber,
   greetingKey,
-  KpiCard,
-  SectionCard,
 } from '@/features/dashboard/lib/dashboardCards';
 
 // ---------- Formatting helpers ----------
@@ -229,7 +230,8 @@ const LegacyMainDashboard = () => {
   // ---- Skeleton ----
   if (isLoading || !analytics) {
     return (
-      <div className="space-y-6">
+      <Card className="space-y-6" role="status" aria-busy="true">
+        <span className="sr-only">{t('common.loading')}</span>
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-9 w-64" />
@@ -249,7 +251,7 @@ const LegacyMainDashboard = () => {
           ))}
         </div>
         <Skeleton className="h-72 rounded-lg" />
-      </div>
+      </Card>
     );
   }
 
@@ -347,29 +349,28 @@ const LegacyMainDashboard = () => {
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-[1.7fr_1fr_1fr_1fr]"
         aria-label={t('dashboard.title')}
       >
-        <KpiCard
+        <StatCard
           label={t('dashboard.hero_today_revenue')}
           value={formatNumber(todayRevenue)}
           unit={currency}
           icon={<Wallet className="h-4 w-4" />}
           tone="primary"
-          spark={revenueSparkValues}
-          lead
+          children={<Sparkline data={revenueSparkValues} tone="primary" />}
         />
-        <KpiCard
+        <StatCard
           label={t('dashboard.hero_active_students')}
           value={formatNumber(analytics.total_students)}
           icon={<UsersThree className="h-4 w-4" />}
           tone="info"
           delta={studentsDelta}
-          metaLeft={
+          meta={
             <span className="text-xs text-muted-foreground">
               +{analytics.new_this_month} {t('dashboard.hero_new_this_month')}
             </span>
           }
-          spark={studentsSpark}
+          children={<Sparkline data={studentsSpark} tone="info" />}
         />
-        <KpiCard
+        <StatCard
           label={t('dashboard.hero_outstanding_debt')}
           value={formatNumber(
             snapshot?.current_total_debt ?? analytics.total_debt,
@@ -377,7 +378,7 @@ const LegacyMainDashboard = () => {
           unit={currency}
           icon={<Warning className="h-4 w-4" />}
           tone="warning"
-          metaLeft={
+          meta={
             <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
               <Warning className="h-3 w-3" />
               {t('dashboard.hero_students_with_debt', {
@@ -386,7 +387,7 @@ const LegacyMainDashboard = () => {
               })}
             </span>
           }
-          metaRight={
+          secondary={
             analytics.avg_debt > 0
               ? t('dashboard.hero_avg_each', {
                   value: formatNumber(analytics.avg_debt),
@@ -394,12 +395,12 @@ const LegacyMainDashboard = () => {
               : undefined
           }
         />
-        <KpiCard
+        <StatCard
           label={t('dashboard.hero_graduates')}
           value={formatNumber(graduates)}
           icon={<SealCheck className="h-4 w-4" />}
           tone="success"
-          metaLeft={
+          meta={
             passDenominator > 0 ? (
               <span className="text-xs text-muted-foreground">
                 {t('dashboard.hero_pass_rate', { pct: passRate })}
@@ -411,10 +412,10 @@ const LegacyMainDashboard = () => {
 
       {/* ===== Revenue trend + course mix ===== */}
       <section className="cv-auto grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <SectionCard
+        <Card
           className="lg:col-span-3"
-          title={t('dashboard.revenue_trend_title')}
-          subtitle={t('dashboard.revenue_trend_sub', {
+          heading={t('dashboard.revenue_trend_title')}
+          description={t('dashboard.revenue_trend_sub', {
             total: formatNumber(revenueTotal),
             currency,
           })}
@@ -484,12 +485,12 @@ const LegacyMainDashboard = () => {
               </AreaChart>
             </ResponsiveContainer>
           )}
-        </SectionCard>
+        </Card>
 
-        <SectionCard
+        <Card
           className="lg:col-span-2"
-          title={t('dashboard.course_mix_title')}
-          subtitle={t('dashboard.course_mix_sub')}
+          heading={t('dashboard.course_mix_title')}
+          description={t('dashboard.course_mix_sub')}
         >
           {totalCourseMix === 0 ? (
             <div className="grid h-64 place-items-center text-sm text-muted-foreground">
@@ -562,15 +563,15 @@ const LegacyMainDashboard = () => {
               </div>
             </div>
           )}
-        </SectionCard>
+        </Card>
       </section>
 
       {/* ===== Three-column: top branches, recent payments, activity ===== */}
       <section className="cv-auto grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Top branches */}
-        <SectionCard
-          title={t('dashboard.top_branches_title')}
-          subtitle={t('dashboard.top_branches_sub')}
+        <Card
+          heading={t('dashboard.top_branches_title')}
+          description={t('dashboard.top_branches_sub')}
         >
           {topBranches.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground">
@@ -647,12 +648,12 @@ const LegacyMainDashboard = () => {
               ))}
             </ul>
           )}
-        </SectionCard>
+        </Card>
 
         {/* Recent payments */}
-        <SectionCard
-          title={t('dashboard.recent_payments_title')}
-          subtitle={t('dashboard.recent_payments_sub')}
+        <Card
+          heading={t('dashboard.recent_payments_title')}
+          description={t('dashboard.recent_payments_sub')}
         >
           {recentPaymentList.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground">
@@ -697,13 +698,13 @@ const LegacyMainDashboard = () => {
               ))}
             </ul>
           )}
-        </SectionCard>
+        </Card>
 
         {/* Pulse log — viewAudit (owner/dev); backend gates /audit-logs */}
         {canViewAudit && (
-          <SectionCard
-            title={t('dashboard.activity_title')}
-            subtitle={t('dashboard.activity_sub')}
+          <Card
+            heading={t('dashboard.activity_title')}
+            description={t('dashboard.activity_sub')}
           >
             {activityList.length === 0 ? (
               <div className="py-10 text-center text-sm text-muted-foreground">
@@ -772,16 +773,16 @@ const LegacyMainDashboard = () => {
                 })}
               </ul>
             )}
-          </SectionCard>
+          </Card>
         )}
       </section>
 
       {/* ===== Owner-only: branch comparison ===== */}
       {canViewAllBranches && analytics.branch_stats.length > 1 && (
-        <SectionCard
+        <Card
           className="cv-auto"
-          title={t('dashboard.branch_comparison')}
-          subtitle={t('dashboard.top_branches_sub')}
+          heading={t('dashboard.branch_comparison')}
+          description={t('dashboard.top_branches_sub')}
         >
           <ResponsiveContainer width="100%" height={260}>
             <BarChart
@@ -852,7 +853,7 @@ const LegacyMainDashboard = () => {
               />
             </BarChart>
           </ResponsiveContainer>
-        </SectionCard>
+        </Card>
       )}
     </div>
   );

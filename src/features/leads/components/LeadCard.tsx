@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { memo, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
@@ -80,7 +81,7 @@ export const LeadCard = memo(({ lead, className }: LeadCardProps) => {
     .join(', ');
 
   return (
-    <div
+    <Card
       draggable
       onDragStart={handleDragStart}
       onClick={handleClick}
@@ -88,14 +89,15 @@ export const LeadCard = memo(({ lead, className }: LeadCardProps) => {
       tabIndex={0}
       aria-label={leadAriaLabel}
       onKeyDown={(e) => {
+        if (e.defaultPrevented || e.target !== e.currentTarget) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleClick();
         }
       }}
       className={cn(
-        'group relative flex flex-col gap-2 rounded-xl border border-border bg-card p-3.5 shadow-xs transition-all duration-150',
-        'cursor-grab active:cursor-grabbing hover:border-primary/50 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+        'group relative flex flex-col gap-2 transition-all duration-150',
+        'cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
         className,
       )}
       data-testid={`lead-card-${lead.id}`}
@@ -129,7 +131,7 @@ export const LeadCard = memo(({ lead, className }: LeadCardProps) => {
           className={cn(
             'rounded-md px-2 py-0.5 text-[11px] capitalize',
             lead.source === 'referral'
-              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-medium border border-emerald-500/30'
+              ? 'bg-success/10 text-success font-medium border border-border'
               : 'bg-muted/80 text-muted-foreground',
           )}
         >
@@ -146,7 +148,7 @@ export const LeadCard = memo(({ lead, className }: LeadCardProps) => {
           </span>
         )}
         {taskStatus === 'today' && (
-          <span className="inline-flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
+          <span className="inline-flex items-center gap-1 font-medium text-warning">
             <Clock className="h-3.5 w-3.5 shrink-0" />
             <span>{t('leads.due_today', 'Bugun')}</span>
           </span>
@@ -179,7 +181,7 @@ export const LeadCard = memo(({ lead, className }: LeadCardProps) => {
           </span>
         )}
       </div>
-    </div>
+    </Card>
   );
 });
 

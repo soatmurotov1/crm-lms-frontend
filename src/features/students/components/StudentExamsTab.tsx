@@ -14,7 +14,7 @@ export const StudentExamsTab = ({ student }: { student: Student }) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="space-y-4 pt-4">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="font-heading text-lg font-semibold">
           {t('exams.history_title')}
@@ -24,8 +24,8 @@ export const StudentExamsTab = ({ student }: { student: Student }) => {
         </Button>
       </div>
 
-      <div className="rounded-md border border-border overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[480px] text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
               <th className="px-4 py-3 text-left font-medium text-muted-foreground">
@@ -56,14 +56,14 @@ export const StudentExamsTab = ({ student }: { student: Student }) => {
               <tr>
                 <td
                   colSpan={5}
-                  className="p-8 text-center text-muted-foreground"
+                  className="p-4 text-center text-muted-foreground"
                 >
                   {t('exams.empty')}
                 </td>
               </tr>
             ) : (
               exams?.map((exam) => (
-                <tr key={exam.id} className="border-b border-border/50">
+                <tr key={exam.id} className="border-b border-border">
                   <td className="px-4 py-3">
                     {exam.date
                       ? format(new Date(exam.date), 'dd.MM.yyyy')

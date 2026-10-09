@@ -287,7 +287,7 @@ const GroupsTable = ({
         cn('table-row-interactive', group.deleted_at && 'opacity-60')
       }
       className={cn(
-        'glass-card overflow-hidden transition-opacity duration-200',
+        'transition-opacity duration-200',
         isFetching && !isLoading && 'opacity-50',
       )}
     />

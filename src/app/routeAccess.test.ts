@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { roleCan } from '@/lib/permissions';
 import { ROUTE_CAPABILITIES } from './routeAccess';
+import { requireCapability } from './routeGuards';
+import { NAV_ITEMS } from '@/lib/navigation';
 import type { UserRole } from '@/features/staff/types';
 
 const ROLES: UserRole[] = [
@@ -62,10 +64,52 @@ describe('protected route capability matrix', () => {
     ['/operators', ['dev', 'owner', 'manager']],
     ['/teachers', ['dev', 'owner', 'manager']],
     ['/users', ['dev', 'owner']],
+    ['/design-system', ['dev', 'owner']],
     ['/users/$id', ['dev', 'owner', 'manager']],
     ['/audit', ['dev', 'owner']],
     ['/audit/$id', ['dev', 'owner']],
   ] as const)('%s keeps its approved role boundary', (path, expected) => {
     expect(allowedRoles(path)).toEqual(expected);
+  });
+});
+
+const guardAuth = vi.hoisted(() => ({
+  role: 'owner' as UserRole,
+}));
+vi.mock('@/store/authStore', () => ({
+  useAuthStore: {
+    getState: () => ({
+      hasHydrated: true,
+      isAuthenticated: true,
+      activeBranchId: null,
+      user: {
+        id: 'design-system-user',
+        email: 'sample@example.com',
+        role: guardAuth.role,
+      },
+    }),
+  },
+}));
+
+describe('design-system route enforcement', () => {
+  it('registers a System item with the same capability as the guarded route', () => {
+    expect(ROUTE_CAPABILITIES['/design-system']).toBe('manageUsers');
+    expect(NAV_ITEMS).toContainEqual(
+      expect.objectContaining({
+        path: '/design-system',
+        section: 'system',
+        cap: 'manageUsers',
+      }),
+    );
+  });
+  it.each(ROLES)('enforces direct route access for %s', (role) => {
+    guardAuth.role = role;
+    const enter = () =>
+      requireCapability(
+        { pathname: '/design-system', searchStr: '' },
+        ROUTE_CAPABILITIES['/design-system'],
+      );
+    if (role === 'owner' || role === 'dev') expect(enter).not.toThrow();
+    else expect(enter).toThrow();
   });
 });

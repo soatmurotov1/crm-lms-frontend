@@ -14,17 +14,14 @@ const preview: Preview = {
     },
     backgrounds: {
       default: 'app',
-      values: [
-        { name: 'app', value: 'hsl(0 0% 100%)' },
-        { name: 'app-dark', value: 'hsl(222 47% 11%)' },
-      ],
+      values: [{ name: 'app', value: 'hsl(var(--background))' }],
     },
     layout: 'centered',
   },
   decorators: [
     withThemeByClassName({
       themes: { light: '', dark: 'dark' },
-      defaultTheme: 'light',
+      defaultTheme: 'dark',
     }),
   ],
 };

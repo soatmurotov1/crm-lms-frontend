@@ -1,7 +1,8 @@
+import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Exam } from '@phosphor-icons/react';
+import { Exam } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useCan } from '@/hooks/useCan';
 import {
@@ -15,7 +16,7 @@ import {
   activeQuestionVersion,
   type QuestionLocale,
 } from '@/features/questions/types';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { EntityDetailShell } from '@/components/ui/EntityDetailShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,14 +44,15 @@ const QuestionDetailPage = () => {
   const [altText, setAltText] = useState('');
   const [rightsHolder, setRightsHolder] = useState('');
 
-  if (isLoading) {
+  if (isLoading || !question) {
     return (
-      <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-    );
-  }
-  if (!question) {
-    return (
-      <p className="text-sm text-muted-foreground">{t('common.not_found')}</p>
+      <EntityDetailShell
+        onBack={() => void navigate({ to: '/questions' })}
+        backLabel={t('questions.back')}
+        isLoading={isLoading}
+        isError={!question}
+        errorTitle={t('common.not_found')}
+      />
     );
   }
 
@@ -68,67 +70,64 @@ const QuestionDetailPage = () => {
   const canRetire = mayReview && isPrivate && question.status === 'published';
 
   return (
-    <div className="space-y-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate({ to: '/questions' })}
-      >
-        <ArrowLeft className="mr-1.5 h-4 w-4" />
-        {t('questions.back')}
-      </Button>
-
-      <PageHeader
-        eyebrow={t('questions.title')}
-        title={t(`questions.topics.${question.topic}`)}
-        description={`${t(`questions.status.${question.status}`)} · ${t(
-          `questions.visibility.${question.visibility}`,
-        )}`}
-        icon={<Exam className="h-3.5 w-3.5" />}
-        actions={
-          (canManage || canPublish || canRetire) && isPrivate ? (
-            <div className="flex flex-wrap gap-2">
-              {canManage && (
-                <Button variant="outline" onClick={() => setEditOpen(true)}>
-                  {t('questions.edit')}
-                </Button>
-              )}
-              {canPublish ? (
-                <Button
-                  onClick={() =>
-                    publish.mutate(question.id, {
-                      onSuccess: () => toast.success(t('questions.published')),
-                      onError: (e: Error) =>
-                        toast.error(extractErrorMessage(e, t('common.error'))),
-                    })
-                  }
-                  disabled={publish.isPending}
-                >
-                  {t('questions.publish')}
-                </Button>
-              ) : null}
-              {canRetire ? (
-                <Button
-                  variant="destructive"
-                  onClick={() =>
-                    retire.mutate(question.id, {
-                      onSuccess: () => toast.success(t('questions.retired')),
-                      onError: (e: Error) =>
-                        toast.error(extractErrorMessage(e, t('common.error'))),
-                    })
-                  }
-                  disabled={retire.isPending}
-                >
-                  {t('questions.retire')}
-                </Button>
-              ) : null}
-            </div>
-          ) : null
-        }
-      />
-
+    <EntityDetailShell
+      onBack={() => void navigate({ to: '/questions' })}
+      backLabel={t('questions.back')}
+      isLoading={false}
+      isError={false}
+      title={t(`questions.topics.${question.topic}`)}
+      description={`${t(`questions.status.${question.status}`)} · ${t(
+        `questions.visibility.${question.visibility}`,
+      )}`}
+      meta={
+        <>
+          <Exam className="h-3.5 w-3.5" />
+          {t('questions.title')}
+        </>
+      }
+      actions={
+        (canManage || canPublish || canRetire) && isPrivate ? (
+          <div className="flex flex-wrap gap-2">
+            {canManage && (
+              <Button variant="outline" onClick={() => setEditOpen(true)}>
+                {t('questions.edit')}
+              </Button>
+            )}
+            {canPublish ? (
+              <Button
+                onClick={() =>
+                  publish.mutate(question.id, {
+                    onSuccess: () => toast.success(t('questions.published')),
+                    onError: (e: Error) =>
+                      toast.error(extractErrorMessage(e, t('common.error'))),
+                  })
+                }
+                disabled={publish.isPending}
+              >
+                {t('questions.publish')}
+              </Button>
+            ) : null}
+            {canRetire ? (
+              <Button
+                variant="destructive"
+                onClick={() =>
+                  retire.mutate(question.id, {
+                    onSuccess: () => toast.success(t('questions.retired')),
+                    onError: (e: Error) =>
+                      toast.error(extractErrorMessage(e, t('common.error'))),
+                  })
+                }
+                disabled={retire.isPending}
+              >
+                {t('questions.retire')}
+              </Button>
+            ) : null}
+          </div>
+        ) : null
+      }
+    >
       {!isPrivate ? (
-        <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm">
+        <p className="rounded-md bg-muted/40 px-4 py-3 text-sm">
           {t('questions.platform_public_readonly')}
         </p>
       ) : null}
@@ -163,7 +162,7 @@ const QuestionDetailPage = () => {
       )}
 
       {mayUpload && isPrivate ? (
-        <div className="glass-card space-y-3 p-4">
+        <Card className=" space-y-3 ">
           <h3 className="font-medium">{t('questions.upload_media')}</h3>
           <p id="question-media-hint" className="text-xs text-muted-foreground">
             {t('questions.media_hint')}
@@ -229,7 +228,7 @@ const QuestionDetailPage = () => {
               e.target.value = '';
             }}
           />
-        </div>
+        </Card>
       ) : null}
 
       {editOpen ? (
@@ -241,7 +240,7 @@ const QuestionDetailPage = () => {
           onClose={() => setEditOpen(false)}
         />
       ) : null}
-    </div>
+    </EntityDetailShell>
   );
 };
 

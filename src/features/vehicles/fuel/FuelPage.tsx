@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { useCan } from '@/hooks/useCan';
 import { useMemo, useState } from 'react';
 import { Link } from '@tanstack/react-router';
@@ -23,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { SummaryCard } from '@/components/ui/SummaryCard';
+import { StatCard } from '@/components/ui/StatCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import PaginationControls from '@/components/ui/PaginationControls';
 import { useFuelList } from './service';
@@ -35,15 +36,15 @@ const STATUS_BADGE: Record<
 > = {
   approved: {
     icon: CheckCircle,
-    className: 'gap-1 border-success/30 bg-success/10 text-success',
+    className: 'gap-1 border-border bg-success/10 text-success',
   },
   submitted: {
     icon: Clock,
-    className: 'gap-1 border-warning/30 bg-warning/10 text-warning',
+    className: 'gap-1 border-border bg-warning/10 text-warning',
   },
   rejected: {
     icon: XCircle,
-    className: 'gap-1 border-destructive/30 bg-destructive/10 text-destructive',
+    className: 'gap-1 border-border bg-destructive/10 text-destructive',
   },
 };
 
@@ -179,14 +180,14 @@ export default function FuelPage() {
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <SummaryCard
-          title={t('fuel.total_records')}
+        <StatCard
+          label={t('fuel.total_records')}
           value={stats.count}
           icon={<Receipt className="h-5 w-5" aria-hidden="true" />}
           isLoading={query.isLoading}
         />
-        <SummaryCard
-          title={t('fuel.page_volume')}
+        <StatCard
+          label={t('fuel.page_volume')}
           value={
             [
               stats.litres > 0
@@ -208,8 +209,8 @@ export default function FuelPage() {
           icon={<Drop className="h-5 w-5" aria-hidden="true" />}
           isLoading={query.isLoading}
         />
-        <SummaryCard
-          title={t('fuel.page_amount')}
+        <StatCard
+          label={t('fuel.page_amount')}
           value={`${new Intl.NumberFormat(i18n.language).format(stats.money)} ${t('common.currency')}`}
           icon={<CurrencyCircleDollar className="h-5 w-5" aria-hidden="true" />}
           isLoading={query.isLoading}
@@ -260,22 +261,23 @@ export default function FuelPage() {
       </div>
 
       {query.isLoading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-28 w-full rounded-lg" />
-          <Skeleton className="h-28 w-full rounded-lg" />
-          <Skeleton className="h-28 w-full rounded-lg" />
-        </div>
+        <Card asChild>
+          <div className="space-y-3">
+            <Skeleton className="h-28 w-full rounded-lg" />
+            <Skeleton className="h-28 w-full rounded-lg" />
+            <Skeleton className="h-28 w-full rounded-lg" />
+          </div>
+        </Card>
       ) : query.isError ? (
-        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center space-y-3">
-          <p className="text-sm text-destructive">{t('common.error')}</p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => void query.refetch()}
-          >
-            {t('common.retry')}
-          </Button>
-        </div>
+        <Card role="alert">
+          <EmptyState
+            title={t('common.error')}
+            action={{
+              label: t('common.retry'),
+              onClick: () => void query.refetch(),
+            }}
+          />
+        </Card>
       ) : query.data?.data.length ? (
         <div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2">
           {query.data.data.map((row) => {
@@ -292,107 +294,113 @@ export default function FuelPage() {
             );
 
             return (
-              <Link
-                className="group relative block rounded-xl border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-sm [contain-intrinsic-size:auto_140px] [content-visibility:auto]"
-                key={row.id}
-                to="/vehicle-fuel/$id"
-                params={{ id: row.id }}
-              >
-                <div className="flex items-start justify-between gap-2 border-b pb-2.5">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary tracking-wide">
-                        <Car className="h-3.5 w-3.5" />
-                        {row.vehicle_plate}
-                      </span>
-                      {row.source_status === 'source_verified' && (
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] gap-0.5 text-emerald-600 border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40"
-                        >
-                          <Receipt className="h-2.5 w-2.5" />
-                          {t('fuel.tax_verified')}
-                        </Badge>
-                      )}
+              <Card key={row.id} asChild>
+                <Link
+                  className="group relative block transition-all [contain-intrinsic-size:auto_140px] [content-visibility:auto]"
+
+                  to="/vehicle-fuel/$id"
+                  params={{ id: row.id }}
+                >
+                  <div className="flex items-start justify-between gap-2 border-b pb-2.5">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary tracking-wide">
+                          <Car className="h-3.5 w-3.5" />
+                          {row.vehicle_plate}
+                        </span>
+                        {row.source_status === 'source_verified' && (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] gap-0.5 text-success border-border bg-success/10"
+                          >
+                            <Receipt className="h-2.5 w-2.5" />
+                            {t('fuel.tax_verified')}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-1.5">
+                        <Buildings className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="truncate">{row.station_name}</span>
+                      </div>
                     </div>
-                    <div className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-1.5">
-                      <Buildings className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <span className="truncate">{row.station_name}</span>
-                    </div>
+
+                    <div>{getStatusBadge(row.status)}</div>
                   </div>
 
-                  <div>{getStatusBadge(row.status)}</div>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between text-xs sm:text-sm">
-                  <div className="space-y-0.5 text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <Speedometer className="h-3.5 w-3.5" />
-                      <span>
-                        {row.odometer_km?.toLocaleString(i18n.language)} km
-                      </span>
+                  <div className="mt-3 flex items-center justify-between text-xs sm:text-sm">
+                    <div className="space-y-0.5 text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Speedometer className="h-3.5 w-3.5" />
+                        <span>
+                          {row.odometer_km?.toLocaleString(i18n.language)} km
+                        </span>
+                      </div>
+                      <div>
+                        {new Intl.DateTimeFormat(i18n.language, {
+                          dateStyle: 'short',
+                          timeStyle: 'short',
+                          timeZone: 'Asia/Tashkent',
+                        }).format(new Date(row.occurred_at))}
+                      </div>
                     </div>
-                    <div>
-                      {new Intl.DateTimeFormat(i18n.language, {
-                        dateStyle: 'short',
-                        timeStyle: 'short',
-                        timeZone: 'Asia/Tashkent',
-                      }).format(new Date(row.occurred_at))}
+
+                    <div className="text-right">
+                      <div className="font-bold text-base text-foreground tabular-nums">
+                        {new Intl.NumberFormat(i18n.language).format(
+                          totalMoney,
+                        )}{' '}
+                        {t('common.currency')}
+                      </div>
+                      <div className="text-xs text-muted-foreground font-medium">
+                        {[
+                          volumeByUnit.litre > 0
+                            ? `${new Intl.NumberFormat(i18n.language, {
+                                minimumFractionDigits: 1,
+                                maximumFractionDigits: 1,
+                              }).format(volumeByUnit.litre)} ${t('fuel.litre')}`
+                            : null,
+                          volumeByUnit.m3 > 0
+                            ? `${new Intl.NumberFormat(i18n.language, {
+                                minimumFractionDigits: 1,
+                                maximumFractionDigits: 1,
+                              }).format(volumeByUnit.m3)} ${t('fuel.m3')}`
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}{' '}
+                        · {t(`fuel.${row.funding_source}`)}
+                      </div>
                     </div>
                   </div>
-
-                  <div className="text-right">
-                    <div className="font-bold text-base text-foreground tabular-nums">
-                      {new Intl.NumberFormat(i18n.language).format(totalMoney)}{' '}
-                      {t('common.currency')}
-                    </div>
-                    <div className="text-xs text-muted-foreground font-medium">
-                      {[
-                        volumeByUnit.litre > 0
-                          ? `${new Intl.NumberFormat(i18n.language, {
-                              minimumFractionDigits: 1,
-                              maximumFractionDigits: 1,
-                            }).format(volumeByUnit.litre)} ${t('fuel.litre')}`
-                          : null,
-                        volumeByUnit.m3 > 0
-                          ? `${new Intl.NumberFormat(i18n.language, {
-                              minimumFractionDigits: 1,
-                              maximumFractionDigits: 1,
-                            }).format(volumeByUnit.m3)} ${t('fuel.m3')}`
-                          : null,
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}{' '}
-                      · {t(`fuel.${row.funding_source}`)}
-                    </div>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              </Card>
             );
           })}
         </div>
       ) : (
-        <EmptyState
-          icon={GasPump}
-          title={t(status ? 'fuel.no_status_records' : 'fuel.empty')}
-          description={t(
-            status ? 'fuel.no_status_records_desc' : 'fuel.empty_description',
-          )}
-          action={
-            status
-              ? {
-                  label: t('common.clear'),
-                  onClick: () => {
-                    setStatus('');
-                    setPage(1);
-                  },
-                }
-              : {
-                  label: t('fuel.create'),
-                  onClick: () => setCreateOpen(true),
-                }
-          }
-        />
+        <Card>
+          <EmptyState
+            icon={GasPump}
+            title={t(status ? 'fuel.no_status_records' : 'fuel.empty')}
+            description={t(
+              status ? 'fuel.no_status_records_desc' : 'fuel.empty_description',
+            )}
+            action={
+              status
+                ? {
+                    label: t('common.clear'),
+                    onClick: () => {
+                      setStatus('');
+                      setPage(1);
+                    },
+                  }
+                : {
+                    label: t('fuel.create'),
+                    onClick: () => setCreateOpen(true),
+                  }
+            }
+          />
+        </Card>
       )}
 
       <PaginationControls

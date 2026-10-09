@@ -45,7 +45,7 @@ export const PaymentsPageHeader = ({
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  className="gap-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:border-emerald-500 dark:text-emerald-400 dark:hover:bg-emerald-950 font-semibold"
+                  className="gap-2 border-border text-success hover:bg-success/10 hover:text-success font-semibold"
                   onClick={onExport}
                   disabled={exportDisabled}
                 >
