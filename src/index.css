@@ -174,7 +174,7 @@
   --muted: var(--slate-100);
   --muted-foreground: var(--slate-600);
   --muted-foreground-strong: var(--slate-700);
-  --primary: var(--blue-600);
+  --primary: var(--blue-700);
   --primary-foreground: var(--brand-white);
   --secondary: var(--slate-100);
   --secondary-foreground: var(--slate-900);
@@ -182,7 +182,7 @@
   --accent-foreground: var(--slate-900);
   --destructive: 0 72% 42%;
   --destructive-foreground: var(--brand-white);
-  --success: 155 48% 29%;
+  --success: 155 48% 26%;
   --success-foreground: var(--brand-white);
   --warning: 32 82% 31%;
   --warning-strong: 32 82% 28%;

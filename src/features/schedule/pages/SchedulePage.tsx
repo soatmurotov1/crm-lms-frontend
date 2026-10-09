@@ -537,7 +537,7 @@ const SchedulePage = () => {
                         </span>
                       </div>
                       {dayLessons.length === 0 ? (
-                        <div className="flex min-h-[80px] items-center justify-center rounded-md bg-muted/40 text-xs text-muted-foreground/[50%]">
+                        <div className="flex min-h-[80px] items-center justify-center rounded-md bg-muted/40 text-xs text-muted-foreground">
                           —
                         </div>
                       ) : (

@@ -121,6 +121,34 @@ for (const [theme, tokens] of [
         }
       }
     }
+    for (const surface of ['background', 'card', 'muted']) {
+      for (const opacity of [0.1, 0.15]) {
+        it(`primary text on ${surface} with ${opacity * 100}% primary tint meets WCAG AA`, () => {
+          const ink = rgb(resolve(tokens, 'primary'));
+          const base = rgb(resolve(tokens, surface));
+          const background = base.map(
+            (c, i) => c * (1 - opacity) + ink[i] * opacity,
+          );
+          const a = rgbLuminance(ink);
+          const b = rgbLuminance(background);
+          expect(
+            (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05),
+          ).toBeGreaterThanOrEqual(4.5);
+        });
+      }
+    }
+    it('success pill text inside a primary-tinted chip meets WCAG AA', () => {
+      const status = rgb(resolve(tokens, 'success'));
+      const primary = rgb(resolve(tokens, 'primary'));
+      const base = rgb(resolve(tokens, 'background'));
+      const chip = base.map((c, i) => c * 0.85 + primary[i] * 0.15);
+      const pill = chip.map((c, i) => c * 0.86 + status[i] * 0.14);
+      const a = rgbLuminance(status);
+      const b = rgbLuminance(pill);
+      expect(
+        (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05),
+      ).toBeGreaterThanOrEqual(4.5);
+    });
     it('success text on an opaque badge inside a success tint meets WCAG AA', () => {
       const status = rgb(resolve(tokens, 'success'));
       const base = rgb(resolve(tokens, 'background'));
