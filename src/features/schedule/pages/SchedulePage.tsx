@@ -81,8 +81,8 @@ const formatTime = (iso: string) => {
 // tone, kept as full static strings (not `bg-${tone}`) since Tailwind's
 // scanner only picks up literal class text.
 const typeCellClass: Record<LessonType, string> = {
-  theory: 'bg-primary/[14%] hover:bg-primary/[20%]',
-  practice: 'bg-info/[14%] hover:bg-info/[20%]',
+  theory: 'bg-primary/10 hover:bg-primary/15',
+  practice: 'bg-info/10 hover:bg-info/15',
 };
 const typeTagTextClass: Record<LessonType, string> = {
   theory: 'text-primary',
@@ -135,7 +135,7 @@ const LessonCard = ({ lesson, typeLabel, onOpen }: LessonCardProps) => {
         className={cn(
           'mt-auto w-fit rounded-full px-2 py-0.5 text-[10px] font-semibold',
           marked
-            ? 'bg-success/[14%] text-success'
+            ? 'bg-card text-success'
             : 'border border-dashed border-hair text-muted-foreground',
         )}
       >
