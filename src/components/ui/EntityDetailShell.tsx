@@ -121,7 +121,7 @@ const BackButton = ({
   href?: string;
 }) => {
   const className =
-    'inline-flex items-center gap-1.5 text-sm text-primary hover:underline print:hidden';
+    '-my-2 inline-flex items-center gap-1.5 py-2 text-sm text-primary hover:underline print:hidden';
   const content = (
     <>
       <ArrowLeft className="h-4 w-4" /> {label}

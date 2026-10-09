@@ -29,7 +29,7 @@ export default function FuelTypes({
         <h2>{t('fuel.allowed_types')}</h2>
         <div className="flex flex-wrap gap-4">
           {fuelTypes.map((type) => (
-            <label key={type} className="flex items-center gap-2">
+            <label key={type} className="flex min-h-11 items-center gap-2">
               <input
                 type="checkbox"
                 checked={selected.includes(type)}

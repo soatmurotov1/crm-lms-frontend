@@ -176,7 +176,7 @@ const TopDebtorsList = ({
       <Link
         to="/students"
         search={{ branch_id: viewAllBranchId, has_debt: true }}
-        className="block pt-1 text-xs font-semibold text-primary hover:underline"
+        className="block py-2 text-xs font-semibold text-primary hover:underline"
       >
         {t('branches.detail.view_all_debtors')}
       </Link>
