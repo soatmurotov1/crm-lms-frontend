@@ -409,7 +409,7 @@ export function DataGrid<TData extends RowData>({
                             {header.isPlaceholder ? null : canSort ? (
                               <button
                                 type="button"
-                                className="inline-flex items-center gap-1 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                className="-my-2 inline-flex items-center gap-1 rounded-sm py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 onClick={header.column.getToggleSortingHandler()}
                               >
                                 <table.FlexRender header={header} />

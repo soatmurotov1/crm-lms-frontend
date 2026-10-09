@@ -115,7 +115,7 @@ export const RecordExamModal = ({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md bg-card border-border">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="font-heading">
             {t('exams.add_title')}

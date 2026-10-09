@@ -154,7 +154,7 @@ const LessonCard = ({
         <button
           type="button"
           onClick={onNavigateGroup}
-          className="text-xs text-muted-foreground hover:text-primary hover:underline"
+          className="inline-flex min-h-11 min-w-11 items-center text-xs text-muted-foreground hover:text-primary hover:underline"
         >
           {lesson.group_name || t('attendance.unknown_group')}
         </button>

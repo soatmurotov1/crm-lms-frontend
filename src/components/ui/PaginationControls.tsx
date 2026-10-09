@@ -77,7 +77,7 @@ const PaginationControls = ({
       className={cn(
         'flex min-w-0 gap-3 border-t border-border/70 pt-3',
         showMeta
-          ? 'flex-col sm:flex-row sm:items-center sm:justify-between'
+          ? 'flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between'
           : 'items-center justify-end',
         className,
       )}
@@ -99,7 +99,7 @@ const PaginationControls = ({
         </div>
       ) : null}
       {showPager ? (
-        <div className="flex w-full items-center justify-between gap-1 sm:w-auto sm:justify-end">
+        <div className="flex w-full items-center justify-between gap-1 sm:ml-auto sm:w-auto sm:justify-end">
           <Button
             type="button"
             variant="outline"

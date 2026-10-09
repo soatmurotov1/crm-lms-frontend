@@ -453,7 +453,7 @@ const StudentModal = ({
   return (
     <>
       <Dialog open={open} onOpenChange={(o) => !o && attemptSafeClose()}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-heading text-lg font-semibold">
               {student ? t('students.edit') : t('students.add')}

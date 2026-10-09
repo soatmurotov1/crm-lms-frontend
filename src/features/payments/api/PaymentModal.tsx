@@ -373,7 +373,7 @@ const PaymentModalSession = ({
           !o && !loading && !submitLockedRef.current && attemptClose()
         }
       >
-        <DialogContent className="max-w-md bg-card border-border">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="font-heading">
               {isEdit ? t('payments.edit_payment') : t('payments.add_payment')}

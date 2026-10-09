@@ -2012,7 +2012,7 @@ const DashboardSkeleton = () => (
 const ErrorState = ({ onRetry }: { onRetry: () => void }) => {
   const { t } = useTranslation();
   return (
-    <Card role="alert" className="border-border bg-destructive/5  text-center">
+    <Card role="alert" className="bg-destructive/5 text-center">
       <Warning className="mx-auto h-8 w-8 text-destructive" />
       <h1 className="mt-3 text-lg font-semibold">
         {t(

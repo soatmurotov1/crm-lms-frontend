@@ -296,7 +296,7 @@ const PersonModal = ({
   return (
     <>
       <Dialog open={open} onOpenChange={(o) => !o && attemptClose()}>
-        <DialogContent className="max-w-md bg-card border-border">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="font-heading">{title}</DialogTitle>
             <DialogDescription className="sr-only">

@@ -70,7 +70,7 @@ const ExpenseBreakdownPanel = ({
 
       {hasBreakdownRows ? (
         <div className="grid gap-3 lg:grid-cols-2">
-          <Card className="border-border bg-card p-4 shadow-none">
+          <Card>
             <h4 className="text-sm font-semibold">
               {t('dashboard.finance_summary.expense_breakdown.by_branch')}
             </h4>
@@ -123,7 +123,7 @@ const ExpenseBreakdownPanel = ({
             </div>
           </Card>
 
-          <Card className="border-border bg-card p-4 shadow-none">
+          <Card>
             <h4 className="text-sm font-semibold">
               {t('dashboard.finance_summary.expense_breakdown.by_category')}
             </h4>
@@ -271,7 +271,7 @@ export const FinanceSummarySection = ({
           <Card
             key={key}
             data-testid={`finance-kpi-${key}`}
-            className="min-w-0 border-border bg-card p-4 shadow-none"
+            className="min-w-0"
           >
             <p className="text-xs font-medium leading-relaxed text-muted-foreground">
               {t(`dashboard.finance_summary.${key}`)}
