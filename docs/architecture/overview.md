@@ -40,14 +40,14 @@ src/
 2. Inside `src/features/<x>/`, any path of the same feature is allowed; other features follow rule 1.
 3. Module specifiers use the `@/` alias. For future moves, `scripts/move-module.mjs` rewrites imports, mocks, and moved relative specifiers.
 
-The `local/feature-boundaries` rule in `eslint.config.js` enforces rules 1 and 2 on `import`, `export … from`, and dynamic `import()` sources, so `pnpm run lint` fails on a deep import into another feature.
+The `local/feature-boundaries` rule in `eslint.config.js` enforces rules 1 and 2 on `import`, `export … from`, and dynamic `import()` sources, so `npm run lint` fails on a deep import into another feature.
 
 ### Adding a feature
 
 1. Create `src/features/<name>/` with the `api/`, `types.ts`, `pages/`, `components/`, and `lib/` entries it needs.
 2. Add a route file in `src/routes/` when the feature exposes a page; it imports from `@/features/<name>/pages/…`.
 3. Colocate tests next to the file they cover.
-4. Run the gate: `pnpm run typecheck && pnpm run lint --max-warnings=0 && pnpm test -- --run && pnpm run build`.
+4. Run the gate: `npm run typecheck && npm run lint -- --max-warnings=0 && npm test && npm run build`.
 
 ---
 
@@ -130,8 +130,8 @@ export dependencies are deferred to the routes that use them.
 ## API contract
 
 - Backend is the source for the authenticated OpenAPI document at `/api/openapi.json`.
-- Run `pnpm run api:types` with runtime-only `OPENAPI_TOKEN` or `OPENAPI_USERNAME`/`OPENAPI_PASSWORD` to regenerate `src/shared/api/schema.d.ts`.
-- Run `pnpm run api:check` in CI to fail when the committed generated contract is stale.
+- Run `npm run api:types` with runtime-only `OPENAPI_TOKEN` or `OPENAPI_USERNAME`/`OPENAPI_PASSWORD` to regenerate `src/shared/api/schema.d.ts`.
+- Run `npm run api:check` in CI to fail when the committed generated contract is stale.
 - `VITE_*` variables are browser-visible; OpenAPI credentials must never use that prefix or be bundled into the app.
 - Feature services import request/query aliases from `src/shared/api/contract.ts`; response payloads remain `unknown` until the backend publishes response schemas and are normalized by `src/lib/apiEnvelope.ts`.
 - Route pages use TanStack Router links, typed params, and route search validators. There is no navigation compatibility wrapper.

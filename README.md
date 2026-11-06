@@ -7,13 +7,13 @@ owner, manager, operator and teacher workflows.
 ## Development
 
 ```bash
-pnpm install
-pnpm run dev
-pnpm run lint
-pnpm run typecheck
-pnpm test
-pnpm run build
-pnpm run check:bundle
+npm install
+npm run dev
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run check:bundle
 ```
 
 The app uses TanStack Router for file-based routes and TanStack Query for
@@ -27,8 +27,8 @@ Set `OPENAPI_TOKEN` or `OPENAPI_USERNAME` plus `OPENAPI_PASSWORD` only in the
 runtime environment, then run:
 
 ```bash
-pnpm run api:types
-pnpm run api:check
+npm run api:types
+npm run api:check
 ```
 
 Never use a `VITE_` prefix for contract credentials: Vite exposes those values
@@ -41,8 +41,8 @@ Storybook hosts visual stories for the shadcn primitives this app uses, plus a
 `@autodrive/design-tokens` (so what you see is what ships).
 
 ```bash
-pnpm run storybook        # dev server on http://localhost:6006
-pnpm run build-storybook  # outputs to ./storybook-static (gitignored)
+npm run storybook        # dev server on http://localhost:6006
+npm run build-storybook  # outputs to ./storybook-static (gitignored)
 ```
 
 Stories included:

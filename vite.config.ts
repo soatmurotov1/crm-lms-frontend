@@ -176,7 +176,7 @@ export default defineConfig(({ mode }) => ({
           groups: [
             {
               name: 'react-core',
-              test: /\/\.pnpm\/(?:react|react-dom|scheduler)@/,
+              test: /\/node_modules\/(?:react|react-dom|scheduler)\//,
             },
             { name: 'export-xlsx', test: /\/xlsx\// },
             { name: 'charts-vendor', test: /\/recharts\/|\/d3-/ },

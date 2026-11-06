@@ -2,12 +2,11 @@
 
 # ---- build stage ----
 FROM node:24-alpine AS build
-RUN corepack enable && corepack prepare pnpm@11.17.0 --activate
 WORKDIR /app
 # Husky's `prepare` script needs a git repo; skip it in Docker (mirrors backend Dockerfile's HUSKY=0).
 ENV HUSKY=0
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . .
 
 # Vite bakes these into the static bundle at build time — must be build ARGs, not runtime env.
@@ -35,7 +34,7 @@ ENV VITE_ANALYTICS_ENVIRONMENT=$VITE_ANALYTICS_ENVIRONMENT
 ENV VITE_DEMO_PASSWORD=$VITE_DEMO_PASSWORD
 
 # Build the Vite SPA and its minimal online-first service worker.
-RUN pnpm run build
+RUN npm run build
 
 # ---- runtime stage ----
 # Pinned minor version (not floating :alpine) + unprivileged variant (runs as
