@@ -27,7 +27,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// Regression test for autodrive-bpf: DashboardPage fired useAuditLogs even for
+// Regression test for DashboardPage fired useAuditLogs even for
 // roles whose UI hides the widget (manager: viewAudit is OWNERS-only). The hook
 // now honors an `enabled` flag so callers gate firing beyond the role check.
 describe('useAuditLogs enabled gating', () => {

@@ -10,7 +10,7 @@ import AddStudentDialog, {
   type AddStudentPayload,
 } from '@/features/students/components/AddStudentDialog';
 
-// autodrive-qsgc.3: birth_date/start_date/completion_date/first_payment_date
+// birth_date/start_date/completion_date/first_payment_date
 // went through <Input type="date"> (native, browser-locale-formatted, and
 // implicitly coerced by consumers via `new Date(str)`). They're now the
 // shared DatePicker (@/lib/calendarDate), whose public contract is a plain
@@ -45,7 +45,7 @@ vi.mock('@/features/courses/api/courseService', () => ({
         id: COURSE_ID,
         name: 'Course 1',
         branch_id: BRANCH_ID,
-        course_type: 'tezkor',
+        course_type: 'online',
         price: 500000,
         duration_days: 14,
         is_active: true,
@@ -85,7 +85,7 @@ const typeDate = (name: string, value: string) => {
   fireEvent.blur(input);
 };
 
-describe('AddStudentDialog calendar-date wiring (autodrive-qsgc.3)', () => {
+describe('AddStudentDialog calendar-date wiring', () => {
   it('submits birth_date/start_date/completion_date/first_payment_date as YYYY-MM-DD strings', async () => {
     const onSubmit = vi.fn();
     render(
@@ -132,12 +132,6 @@ describe('AddStudentDialog calendar-date wiring (autodrive-qsgc.3)', () => {
       'students.wizard.amount_placeholder',
     );
     fireEvent.change(amountInput, { target: { value: '500000' } });
-    fireEvent.change(
-      document.querySelector(
-        'input[name="learner_password"]',
-      ) as HTMLInputElement,
-      { target: { value: 'password1' } },
-    );
     typeDate('first_payment_date', '2026-01-12');
     fireEvent.click(screen.getByRole('checkbox'));
 

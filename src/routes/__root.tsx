@@ -5,7 +5,6 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import type { AppRouterContext } from '@/app/router';
 import { ChunkErrorBoundary } from '@/components/layout/ChunkErrorBoundary';
 import { PageLoader } from '@/components/layout/PageLoader';
-import { PlatformAnalyticsConsent } from '@/components/analytics/PlatformAnalyticsConsent';
 
 const NotFoundPage = lazy(() => import('@/app/pages/NotFound'));
 
@@ -28,7 +27,6 @@ function RootComponent() {
     <ChunkErrorBoundary>
       <Suspense fallback={<PageLoader />}>
         <Outlet />
-        <PlatformAnalyticsConsent />
       </Suspense>
     </ChunkErrorBoundary>
   );

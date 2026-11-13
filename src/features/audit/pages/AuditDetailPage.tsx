@@ -24,7 +24,7 @@ const entityRoute: Record<string, string> = {
   user: '/users',
 };
 
-// Moved from AuditLogPage's modal as-is (autodrive-6ef.25) — renders the
+// Moved from AuditLogPage's modal as-is — renders the
 // before/after diff (update) or a full-dump table (create/delete).
 const AuditChangesView = (
   { changes, action }: { changes: Record<string, unknown>; action: string },

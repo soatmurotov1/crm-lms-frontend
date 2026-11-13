@@ -11,7 +11,7 @@ import PersonModal, {
   type PersonFormPayload,
 } from '@/features/staff/components/PersonModal';
 
-// autodrive-6ef.11 -- PersonModal is the single role-parameterized modal
+// -- PersonModal is the single role-parameterized modal
 // replacing UsersPage/OperatorsPage/TeachersPage's inline forms. Covers: the
 // right fields render per role, invalid input blocks submit, and a valid
 // submit produces the payload shape each page's mutation hook expects.
@@ -259,6 +259,7 @@ describe('PersonModal submit payload shape', () => {
     );
     fireEvent.change(q('fullName'), { target: { value: 'Malika Ustoz' } });
     fireEvent.change(q('phone'), { target: { value: '909876543' } });
+    fireEvent.change(q('specialization'), { target: { value: 'Matematika' } });
     fireEvent.click(screen.getByRole('button', { name: 'common.add' }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -266,7 +267,7 @@ describe('PersonModal submit payload shape', () => {
       fullName: 'Malika Ustoz',
       phone: '+998909876543',
       branchId: undefined,
-      specialization: 'THEORY',
+      specialization: 'Matematika',
     });
     expect(onSubmit.mock.calls[0][0]).not.toHaveProperty('email');
     expect(onSubmit.mock.calls[0][0]).not.toHaveProperty('password');

@@ -2,12 +2,12 @@ import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useUrlTab } from '@/hooks/useUrlTab';
+import { StudentProgressPanel } from '@/features/lms/api/widgets';
 import { useTranslation } from 'react-i18next';
 import {
   Warning,
   PencilSimple,
   Plus,
-  Key,
   ShieldCheck,
   Trash,
   Gift,
@@ -20,9 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { EntityDetailShell } from '@/components/ui/EntityDetailShell';
 import PaginationControls from '@/components/ui/PaginationControls';
-import { StudentExamsTab } from '@/features/students/components/StudentExamsTab';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { StudentLearnerLoginDialog } from '@/features/students/components/StudentLearnerLoginDialog';
 import StudentModal, {
   type CreateStudentPayload,
 } from '@/features/students/api/StudentModal';
@@ -56,7 +54,7 @@ const StudentDetailPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [urlTab, setTab] = useUrlTab(
-    ['info', 'payments', 'exams', 'attendance', 'group-history'] as const,
+    ['info', 'progress', 'payments', 'attendance', 'group-history'] as const,
     'info',
   );
 
@@ -71,10 +69,8 @@ const StudentDetailPage = () => {
     (urlTab === 'group-history' && !canViewGroupHistory)
       ? 'info'
       : urlTab;
-  const canManageLearnerLogin = useCan('students.update');
 
   const [editOpen, setEditOpen] = useState(false);
-  const [learnerLoginOpen, setLearnerLoginOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [deletePaymentTarget, setDeletePaymentTarget] =
     useState<Payment | null>(null);
@@ -228,15 +224,6 @@ const StudentDetailPage = () => {
       }
       actions={
         <div className="flex flex-wrap gap-2">
-          {canManageLearnerLogin && (
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={() => setLearnerLoginOpen(true)}
-            >
-              <Key className="h-4 w-4" /> {t('students.detail.login_button')}
-            </Button>
-          )}
           {mayUpdate && (
             <Button
               variant="outline"
@@ -253,14 +240,12 @@ const StudentDetailPage = () => {
         <div className="min-w-0 max-w-full overflow-x-auto">
           <TabsList className="w-max">
             <TabsTrigger value="info">{t('common.tab_info')}</TabsTrigger>
+            <TabsTrigger value="progress">{t('lms.progress.tab')}</TabsTrigger>
             {canReadPayments && (
               <TabsTrigger value="payments">
                 {t('students.detail.tab_payments')}
               </TabsTrigger>
             )}
-            <TabsTrigger value="exams">
-              {t('students.detail.tab_exams')}
-            </TabsTrigger>
             <TabsTrigger value="attendance">
               {t('students.detail.tab_attendance')}
             </TabsTrigger>
@@ -373,10 +358,10 @@ const StudentDetailPage = () => {
           </TabsContent>
         )}
 
-        <TabsContent value="exams">
-          <Card className=" ">
-            <StudentExamsTab student={student} />
-          </Card>
+        <TabsContent value="progress">
+          {activeTab === 'progress' ? (
+            <StudentProgressPanel studentId={student.id} />
+          ) : null}
         </TabsContent>
 
         <TabsContent value="attendance">
@@ -400,14 +385,6 @@ const StudentDetailPage = () => {
         operators={operators || []}
       />
 
-      {canManageLearnerLogin && (
-        <StudentLearnerLoginDialog
-          studentId={student.id}
-          hasLearnerAccount={Boolean(student.has_learner_account)}
-          open={learnerLoginOpen}
-          onClose={() => setLearnerLoginOpen(false)}
-        />
-      )}
 
       <PaymentModal
         open={payOpen}

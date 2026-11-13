@@ -32,7 +32,6 @@ import {
   useCreateTeacher,
   useUpdateTeacher,
   useDeleteTeacher,
-  Specialization,
 } from '@/features/staff/api/teacherService';
 import { useBranches } from '@/features/branches/api/branchService';
 import { toast } from 'sonner';
@@ -61,7 +60,7 @@ const TeachersPage = () => {
     status === 'active' ? true : status === 'inactive' ? false : undefined;
 
   // MagnifyingGlass/sort/page live in the URL so reload/back/share preserve them
-  // (autodrive-b85.3 -- mirrors admin-panel's useSearchSortFilters).
+  // (-- mirrors admin-panel's useSearchSortFilters).
   const {
     search,
     setSearch,
@@ -154,13 +153,6 @@ const TeachersPage = () => {
   const updateMut = useUpdateTeacher();
   const deleteMut = useDeleteTeacher();
 
-  const specLabels = useMemo<Record<Specialization, string>>(
-    () => ({
-      THEORY: t('teachers.spec_theory'),
-      PRACTICE: t('teachers.spec_practice'),
-    }),
-    [t],
-  );
 
   // Search is server-owned. GET /users exposes no sort contract, so the
   // controlled TanStack state below is intentionally limited to this page.
@@ -277,9 +269,7 @@ const TeachersPage = () => {
           meta: { cellClassName: 'text-muted-foreground' },
           cell: ({ getValue }) => {
             const specialization = getValue();
-            return specialization
-              ? specLabels[specialization] || specialization
-              : t('common.na');
+            return specialization || t('common.na');
           },
         }),
         teacherColumnHelper.display({
@@ -363,7 +353,7 @@ const TeachersPage = () => {
           ),
         }),
       ]),
-    [branches, specLabels, startIndex, t, mayUpdate, mayDelete],
+    [branches, startIndex, t, mayUpdate, mayDelete],
   );
 
   return (
@@ -540,10 +530,7 @@ const TeachersPage = () => {
                 fields={[
                   {
                     label: t('teachers.specialization'),
-                    value: teacher.specialization
-                      ? specLabels[teacher.specialization] ||
-                        teacher.specialization
-                      : t('common.na'),
+                    value: teacher.specialization || t('common.na'),
                   },
                   {
                     label: t('teachers.email'),

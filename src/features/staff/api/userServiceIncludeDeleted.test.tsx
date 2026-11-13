@@ -6,7 +6,7 @@ import { useUsersPage, useRestoreUser } from '@/features/staff/api/userService';
 import axiosInstance from '@/api/axiosInstance';
 import { userKeys } from '@/lib/queryKeys';
 
-// autodrive-cg9: owner-only "show deleted" toggle on UsersPage (managers).
+// owner-only "show deleted" toggle on UsersPage (managers).
 // Pins the wire contract (include_deleted=true only when the toggle is on,
 // PATCH /users/:id/restore) and the query-key requirement (toggling on
 // must not serve the cached un-deleted list from a stale cache entry).
@@ -43,7 +43,7 @@ const makeWrapper = (queryClient: QueryClient) => {
   return Wrapper;
 };
 
-describe('useUsersPage includeDeleted (autodrive-cg9)', () => {
+describe('useUsersPage includeDeleted', () => {
   it('sends include_deleted=true on the wire when the toggle is on', async () => {
     (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: emptyPage,
@@ -122,7 +122,7 @@ describe('useUsersPage includeDeleted (autodrive-cg9)', () => {
   });
 });
 
-describe('useRestoreUser (autodrive-cg9)', () => {
+describe('useRestoreUser', () => {
   it('PATCHes /users/:id/restore and invalidates the user list', async () => {
     (axiosInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({});
     const queryClient = new QueryClient({

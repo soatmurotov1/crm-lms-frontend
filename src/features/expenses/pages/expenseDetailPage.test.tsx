@@ -86,7 +86,6 @@ vi.mock('@/features/expenses/api/expenseService', () => ({
   useMySettlementDetail: expenseHooks.useMySettlementDetail,
   useExpenseBranchOptions: () => ({ data: [] }),
   useExpenseTeacherOptions: () => teacherOptionsState,
-  useExpenseVehicleOptions: () => ({ data: [] }),
   useCreateExpensePayment: () => paymentMutation,
   useCancelExpense: () => cancelMutation,
   useDeleteExpense: () => deleteMutation,
@@ -123,8 +122,6 @@ const expense: Expense = {
   id: 'expense-1',
   branch_id: 'branch-1',
   branch_name: 'Chorsu',
-  vehicle_id: null,
-  vehicle_plate_number: null,
   created_by_id: 'owner-1',
   category: 'rent',
   title: 'Office rent',
@@ -232,38 +229,6 @@ afterEach(() => {
 });
 
 describe('ExpenseDetailPage', () => {
-  it('uses teacher-scoped settlement data without finance actions', async () => {
-    permissionState.canViewExpenses = false;
-    permissionState.canManageFinance = false;
-    permissionState.canViewOwnSettlements = true;
-    const ownSettlement = {
-      ...expense,
-      category: 'teacher_settlement' as const,
-      teacher_id: 'teacher-1',
-    };
-    mySettlementState.data = {
-      ...history,
-      expense: ownSettlement,
-    };
-
-    await renderWithRouter(<ExpenseDetailPage />, {
-      initialEntry: '/my-settlements/expense-1',
-      routePattern: '/my-settlements/$id',
-      params: { id: 'expense-1' },
-    });
-
-    expect(expenseHooks.useExpense).toHaveBeenCalledWith(undefined);
-    expect(expenseHooks.useExpenseHistory).toHaveBeenCalledWith(undefined);
-    expect(expenseHooks.useMySettlementDetail).toHaveBeenCalledWith(
-      'expense-1',
-    );
-    expect(screen.getByText('Office rent')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', {
-        name: 'expenses.payments.void_action',
-      }),
-    ).not.toBeInTheDocument();
-  });
 
   it('renders server-provided expense totals and metadata', async () => {
     queryState.data = expense;
@@ -499,8 +464,6 @@ describe('ExpenseDetailPage', () => {
   it('lets finance users edit metadata after payment and cancel with reason/version', async () => {
     const paidExpense = {
       ...expense,
-      vehicle_id: 'vehicle-old',
-      vehicle_plate_number: 'OLD 001',
       has_payment_history: true,
     };
     queryState.data = paidExpense;
@@ -518,7 +481,6 @@ describe('ExpenseDetailPage', () => {
     expect(
       screen.getByLabelText(/expenses\.form\.expense_date/),
     ).toBeDisabled();
-    expect(screen.getByLabelText('expenses.form.vehicle')).toBeDisabled();
     fireEvent.change(titleInput, { target: { value: 'Updated rent note' } });
     fireEvent.click(
       screen.getByRole('button', { name: 'expenses.form.update_submit' }),
@@ -564,77 +526,6 @@ describe('ExpenseDetailPage', () => {
     expect(cancelMutation.mutate.mock.calls[0][0]).toEqual({
       reason: 'Vendor contract ended',
       expected_version: expense.version,
-    });
-  });
-
-  it('keeps a transferred vehicle link on an unrelated finance edit', async () => {
-    const transferredVehicleExpense = {
-      ...expense,
-      vehicle_id: 'vehicle-old',
-      vehicle_plate_number: 'OLD 001',
-      paid_amount: '0.00',
-      remaining_amount: expense.amount,
-      status: 'planned' as const,
-      has_payment_history: false,
-    };
-    queryState.data = transferredVehicleExpense;
-    historyState.data = {
-      ...history,
-      expense: transferredVehicleExpense,
-      payments: [],
-    };
-    await renderWithRouter(<ExpenseDetailPage />, {
-      initialEntry: '/expenses/expense-1',
-      routePattern: '/expenses/$id',
-      params: { id: 'expense-1' },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: 'common.edit' }));
-    fireEvent.change(await screen.findByLabelText(/expenses\.table\.title/), {
-      target: { value: 'Updated rent note' },
-    });
-    fireEvent.click(
-      screen.getByRole('button', { name: 'expenses.form.update_submit' }),
-    );
-
-    await waitFor(() => expect(updateMutation.mutate).toHaveBeenCalledOnce());
-    const payload = updateMutation.mutate.mock.calls[0][0];
-    expect(payload).not.toHaveProperty('branch_id');
-    expect(payload).not.toHaveProperty('vehicle_id');
-  });
-
-  it('clears the vehicle when finance explicitly moves the expense to company-wide', async () => {
-    const linkedExpense = {
-      ...expense,
-      vehicle_id: 'vehicle-old',
-      vehicle_plate_number: 'OLD 001',
-      paid_amount: '0.00',
-      remaining_amount: expense.amount,
-      status: 'planned' as const,
-      has_payment_history: false,
-    };
-    queryState.data = linkedExpense;
-    historyState.data = { ...history, expense: linkedExpense, payments: [] };
-    await renderWithRouter(<ExpenseDetailPage />, {
-      initialEntry: '/expenses/expense-1',
-      routePattern: '/expenses/$id',
-      params: { id: 'expense-1' },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: 'common.edit' }));
-    fireEvent.click(screen.getByLabelText(/expenses\.form\.branch/));
-    fireEvent.click(
-      screen.getByRole('option', { name: 'expenses.form.company_wide' }),
-    );
-    expect(screen.getByLabelText('expenses.form.vehicle')).toBeDisabled();
-    fireEvent.click(
-      screen.getByRole('button', { name: 'expenses.form.update_submit' }),
-    );
-
-    await waitFor(() => expect(updateMutation.mutate).toHaveBeenCalledOnce());
-    expect(updateMutation.mutate.mock.calls[0][0]).toMatchObject({
-      branch_id: null,
-      vehicle_id: null,
     });
   });
 
@@ -810,7 +701,7 @@ describe('ExpenseDetailPage', () => {
     const expenseTwo = {
       ...expense,
       id: 'expense-2',
-      title: 'Vehicle fuel',
+      title: 'Office supplies',
       remaining_amount: '700.00',
     };
     const historyTwo = { ...history, expense: expenseTwo, payments: [] };
@@ -1219,7 +1110,6 @@ describe('ExpenseFormDialog settlement mode', () => {
       { initialEntry: '/expenses', routePattern: '/expenses' },
     );
 
-    expect(screen.queryByLabelText('expenses.form.vehicle')).toBeNull();
     expect(screen.queryByText('Chorsu')).not.toBeInTheDocument();
     expect(
       screen.getByText('expenses.settlement.branch_pending'),

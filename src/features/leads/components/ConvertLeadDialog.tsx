@@ -159,13 +159,13 @@ export const ConvertLeadDialog = ({
                 <span className="text-foreground">{lead.branchName}</span>
               </div>
             )}
-            {lead.category && (
+            {lead.direction && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">
-                  {t('vehicles.category', 'Toifa')}:
+                  {t('leads.direction', "Yo'nalish")}:
                 </span>
                 <span className="font-semibold text-foreground">
-                  {lead.category}
+                  {lead.direction}
                 </span>
               </div>
             )}

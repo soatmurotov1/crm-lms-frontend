@@ -14,7 +14,7 @@ import type {
   UpdateBranchRequest,
 } from '@/shared/api/contract';
 
-// autodrive-cg9: includeDeleted is a second positional param (not folded
+// includeDeleted is a second positional param (not folded
 // into an options object) so every existing zero-arg/one-arg call site
 // (PersonModal, StudentModal, StudentsPage, GroupsPage, ...) keeps working
 // unchanged -- only BranchesPage's owner-only "show deleted" toggle passes
@@ -24,7 +24,7 @@ export const useBranches = (enabled = true, includeDeleted = false) =>
   useQuery<Branch[]>({
     queryKey: branchKeys.list({ includeDeleted }),
     enabled,
-    // autodrive-6ef.17: branch lists are stable org structure, so they can use
+    // branch lists are stable org structure, so they can use
     // a longer stale window than the 30s global default.
     staleTime: 5 * 60_000,
     queryFn: async ({ signal }) => {
@@ -96,7 +96,7 @@ export const useDeleteBranch = () => {
   });
 };
 
-// autodrive-cg9: owner-only restore, paired with the includeDeleted list
+// owner-only restore, paired with the includeDeleted list
 // toggle above. Un-deletes only this row -- see BranchesPage's restore
 // confirm copy (common.confirm_restore_desc) for the no-cascade caveat
 // (branch delete cascades to staff/students/groups/lessons; restore does

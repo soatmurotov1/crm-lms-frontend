@@ -38,7 +38,7 @@ const rows: DeletedExpenseHistorySummary[] = [
   {
     id: 'deleted-1',
     title: 'Fuel duplicate',
-    category: 'vehicle',
+    category: 'rent',
     amount: '250000.00',
     branch_id: 'branch-1',
     branch_name: 'Chilonzor',

@@ -46,15 +46,12 @@ vi.mock('@/hooks/useWriteOptions', () => ({
 vi.mock('../api/expenseService', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../api/expenseService')>()),
   useExpenseTeacherOptions: () => ({ data: [] }),
-  useExpenseVehicleOptions: () => ({ data: [] }),
 }));
 
 const original: Expense = {
   id: 'expense-1',
   branch_id: null,
   branch_name: null,
-  vehicle_id: null,
-  vehicle_plate_number: null,
   created_by_id: 'owner',
   category: 'supplies',
   title: 'Original title',

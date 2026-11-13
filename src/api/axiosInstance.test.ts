@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 import { queryClient } from '@/lib/queryClient';
 import { User } from '@/features/staff/types';
 
-// Regression test for the auth-expiry coordinator (autodrive-6cq.8, AC "D"):
+// Regression test for the auth-expiry coordinator (, AC "D"):
 // a 401 on a protected endpoint must trigger logout()+queryClient.clear(),
 // while a 401 on /auth/login, /auth/demo, or /auth/me (SKIP_LOGOUT_ON_401)
 // must NOT --

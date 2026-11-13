@@ -7,7 +7,7 @@ import { renderWithRouter } from '@/test/utils/renderWithRouter';
 import type { Payment } from '@/features/payments/types';
 import type { CreatePaymentPayload } from '@/features/payments/api/PaymentModal';
 
-// Characterization tests for PaymentsPage (autodrive decomposition work):
+// Characterization tests for PaymentsPage (decomposition work):
 // they capture the page's CURRENT observable behavior and must pass both
 // before and after extracting subcomponents into src/features/payments/components/.
 
@@ -51,7 +51,7 @@ vi.mock('@/features/payments/api/paymentService', async (importOriginal) => {
     }),
     usePaymentSummary: () => ({ data: undefined }),
     useCreatePayment: () => ({ mutate: createPaymentMutate, isPending: false }),
-    // PaymentsTable (autodrive-9e4.4) now calls these for its own row
+    // PaymentsTable now calls these for its own row
     // actions -- without a mock they'd hit the real useMutation/
     // useQueryClient with no QueryClientProvider in this test tree.
     useDeletePayment: () => ({ mutate: vi.fn(), isPending: false }),
@@ -101,7 +101,7 @@ const payment = (over: Partial<Payment> = {}): Payment => ({
   student_name: 'Aziz Karimov',
   branch_id: 'b1',
   branch_name: 'Branch One',
-  course_type: 'avto_maktab',
+  course_type: 'offline',
   total_price: 2000000,
   amount_paid: 1500000,
   remaining_debt: 500000,
@@ -137,7 +137,7 @@ beforeEach(() => {
         id: 'p2',
         student_id: 's2',
         student_name: 'Bobur Toshev',
-        course_type: 'tezkor',
+        course_type: 'online',
         remaining_debt: 0,
       }),
     ]),
@@ -147,7 +147,7 @@ beforeEach(() => {
 describe('PaymentsPage characterization', () => {
   it('opens the create action and clears only that action after confirmed close', async () => {
     const { router } = await renderPage(
-      '/payments?action=create&branch_id=b1&course_type=tezkor&q=aziz',
+      '/payments?action=create&branch_id=b1&course_type=online&q=aziz',
     );
 
     expect(
@@ -159,7 +159,7 @@ describe('PaymentsPage characterization', () => {
       const search = new URLSearchParams(router.state.location.searchStr);
       expect(search.has('action')).toBe(false);
       expect(search.get('branch_id')).toBe('b1');
-      expect(search.get('course_type')).toBe('tezkor');
+      expect(search.get('course_type')).toBe('online');
       expect(search.get('q')).toBe('aziz');
       expect(screen.queryByRole('dialog')).toBeNull();
     });
@@ -220,7 +220,7 @@ describe('PaymentsPage characterization', () => {
     // Both the desktop table and the mobile card list render each payment.
     expect(screen.getAllByText('Aziz Karimov').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Bobur Toshev').length).toBeGreaterThan(0);
-    // tezkor course renders the "fast" label, avto_maktab the "school" one
+    // online course renders the "fast" label, offline the "school" one
     expect(screen.getAllByText('payments.course_fast').length).toBeGreaterThan(
       0,
     );
@@ -230,11 +230,11 @@ describe('PaymentsPage characterization', () => {
 
   it('feeds URL filter params into the payments query', async () => {
     // totalPages: 2 -- page=2 in the URL below must be a legitimate page,
-    // otherwise the autodrive-52v.3 clamp (currentPage > totalPages) fires
+    // otherwise the clamp (currentPage > totalPages) fires
     // and rewrites it back to 1 before this assertion ever reads it.
     usePaymentsPageMock.mockReturnValue(pageOf([payment()], 2));
     await renderPage(
-      '/payments?branch_id=b9&status=paid&method=karta&course_type=tezkor' +
+      '/payments?branch_id=b9&status=paid&method=karta&course_type=online' +
         '&q=aziz&sort_by=amount_paid&sort_dir=asc&page=2' +
         '&date_from=2026-07-01&date_to=2026-07-10',
     );
@@ -243,7 +243,7 @@ describe('PaymentsPage characterization', () => {
     expect(call).toBeDefined();
     const [branchId, courseType, dateFrom, dateTo, page, limit, opts] = call!;
     expect(branchId).toBe('b9');
-    expect(courseType).toBe('tezkor');
+    expect(courseType).toBe('online');
     expect(dateFrom).toEqual(parseCalendarDate('2026-07-01'));
     expect(dateTo).toEqual(parseCalendarDate('2026-07-10'));
     expect(page).toBe(2);

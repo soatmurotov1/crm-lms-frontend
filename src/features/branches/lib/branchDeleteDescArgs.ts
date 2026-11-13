@@ -1,6 +1,6 @@
 import { Branch } from '@/features/branches/types';
 
-// Blast-radius copy for the delete confirm (autodrive-cg9) -- branch delete
+// Blast-radius copy for the delete confirm -- branch delete
 // really does cascade-soft-delete its students (see branches.service.ts
 // remove()), so active_students -- already shown on the same card -- is a
 // true dependent count, not just a stat. Pure function in its own file (not

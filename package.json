@@ -1,10 +1,10 @@
 {
-  "name": "@autodrive/frontend",
+  "name": "educrm-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "engines": {
-    "node": "24.x"
+    "node": ">=24"
   },
   "scripts": {
     "dev": "vite",
@@ -26,7 +26,6 @@
     "test:design-system": "node --test scripts/check-design-system.test.mjs"
   },
   "dependencies": {
-    "@autodrive/design-tokens": "https://codeload.github.com/ARX-SOLUTION/autodrive-design-tokens/tar.gz/b8210edfadb1abc720108389c793161cc8382013",
     "@hookform/resolvers": "^5.9.1",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-accordion": "^1.2.20",

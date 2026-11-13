@@ -14,14 +14,15 @@ import type {
   UsersQuery,
 } from '@/shared/api/contract';
 
-export type Specialization = 'THEORY' | 'PRACTICE';
+/** O'qituvchi mutaxassisligi — fan nomi (masalan, "Matematika"). */
+export type Specialization = string;
 
 export const useTeachers = () => {
   const branchId = useAuthStore((s) => s.activeBranchId ?? s.user?.branch_id);
   const isCrossTenant = useIsCrossTenant();
   return useQuery<User[]>({
     queryKey: teacherKeys.list({ branchId, page: 1, limit: 100 }),
-    // autodrive-6ef.17: teacher lists are stable org structure, so they can
+    // teacher lists are stable org structure, so they can
     // use a longer stale window than the 30s global default.
     staleTime: 5 * 60_000,
     queryFn: async ({ signal }) => {
@@ -35,9 +36,9 @@ export const useTeachers = () => {
   });
 };
 
-// Real server-side pagination for TeachersPage (autodrive-0id). `search` is
-// forwarded to GET /users too (autodrive-b85.3) -- it now matches
-// name/email/phone (autodrive-3kl), so the page no longer needs to
+// Real server-side pagination for TeachersPage. `search` is
+// forwarded to GET /users too -- it now matches
+// name/email/phone, so the page no longer needs to
 // re-filter the current page client-side.
 export const useTeachersPage = (
   page: number,
@@ -112,7 +113,7 @@ export const useUpdateTeacher = () => {
     },
     // UserDetailPage (/users/:id) reads via userKeys.detail(id), a root
     // teacherKeys.all doesn't cover -- an already-open detail tab kept
-    // showing the pre-edit name/phone for up to 30s (autodrive-52v.2).
+    // showing the pre-edit name/phone for up to 30s.
     // Same dual-invalidate idiom as paymentService's payment mutations.
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: teacherKeys.all });

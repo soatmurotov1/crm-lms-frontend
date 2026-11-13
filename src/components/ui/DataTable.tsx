@@ -37,7 +37,7 @@ export interface DataTableProps<T> {
   /** Extra classes for the outer wrapper (e.g. "transition-opacity"). */
   className?: string;
   rowHoverClassName?: string;
-  /** Extra classes per row (autodrive-cg9: muting a soft-deleted row). */
+  /** Extra classes per row (muting a soft-deleted row). */
   rowClassName?: (row: T) => string | undefined;
 }
 

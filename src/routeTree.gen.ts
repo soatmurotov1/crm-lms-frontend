@@ -12,51 +12,38 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated.analytics'
 import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authenticated.attendance'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedDesignSystemRouteImport } from './routes/_authenticated.design-system'
-import { Route as AuthenticatedOperatorsRouteImport } from './routes/_authenticated.operators'
+import { Route as AuthenticatedGradesRouteImport } from './routes/_authenticated.grades'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated.payments'
 import { Route as AuthenticatedPermissionTemplatesRouteImport } from './routes/_authenticated.permission-templates'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated.schedule'
+import { Route as AuthenticatedSubjectsRouteImport } from './routes/_authenticated.subjects'
 import { Route as AuthenticatedTeachersRouteImport } from './routes/_authenticated.teachers'
+import { Route as AuthenticatedAssignmentsIndexRouteImport } from './routes/_authenticated.assignments.index'
+import { Route as AuthenticatedAssignmentsIdRouteImport } from './routes/_authenticated.assignments.$id'
 import { Route as AuthenticatedAuditIndexRouteImport } from './routes/_authenticated.audit.index'
 import { Route as AuthenticatedAuditIdRouteImport } from './routes/_authenticated.audit.$id'
 import { Route as AuthenticatedBranchesIndexRouteImport } from './routes/_authenticated.branches.index'
 import { Route as AuthenticatedBranchesIdRouteImport } from './routes/_authenticated.branches.$id'
 import { Route as AuthenticatedCoursesIndexRouteImport } from './routes/_authenticated.courses.index'
 import { Route as AuthenticatedCoursesIdRouteImport } from './routes/_authenticated.courses.$id'
-import { Route as AuthenticatedDrivingSessionsIndexRouteImport } from './routes/_authenticated.driving-sessions.index'
-import { Route as AuthenticatedDrivingSessionsIdRouteImport } from './routes/_authenticated.driving-sessions.$id'
+import { Route as AuthenticatedDocumentsIndexRouteImport } from './routes/_authenticated.documents.index'
+import { Route as AuthenticatedExamsIndexRouteImport } from './routes/_authenticated.exams.index'
+import { Route as AuthenticatedExamsIdRouteImport } from './routes/_authenticated.exams.$id'
 import { Route as AuthenticatedExpensesIndexRouteImport } from './routes/_authenticated.expenses.index'
 import { Route as AuthenticatedExpensesIdRouteImport } from './routes/_authenticated.expenses.$id'
-import { Route as AuthenticatedFleetMapIndexRouteImport } from './routes/_authenticated.fleet-map.index'
-import { Route as AuthenticatedFuelStationsIndexRouteImport } from './routes/_authenticated.fuel-stations.index'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated.groups.index'
 import { Route as AuthenticatedGroupsIdRouteImport } from './routes/_authenticated.groups.$id'
 import { Route as AuthenticatedLeadsIndexRouteImport } from './routes/_authenticated.leads.index'
 import { Route as AuthenticatedLeadsIdRouteImport } from './routes/_authenticated.leads.$id'
-import { Route as AuthenticatedMySettlementsIndexRouteImport } from './routes/_authenticated.my-settlements.index'
-import { Route as AuthenticatedMySettlementsIdRouteImport } from './routes/_authenticated.my-settlements.$id'
-import { Route as AuthenticatedQuestionsIndexRouteImport } from './routes/_authenticated.questions.index'
-import { Route as AuthenticatedQuestionsIdRouteImport } from './routes/_authenticated.questions.$id'
-import { Route as AuthenticatedSchoolTestsIndexRouteImport } from './routes/_authenticated.school-tests.index'
-import { Route as AuthenticatedSchoolTestsIdRouteImport } from './routes/_authenticated.school-tests.$id'
 import { Route as AuthenticatedStudentsIndexRouteImport } from './routes/_authenticated.students.index'
 import { Route as AuthenticatedStudentsIdRouteImport } from './routes/_authenticated.students.$id'
-import { Route as AuthenticatedTrainingEnrollmentsIndexRouteImport } from './routes/_authenticated.training-enrollments.index'
-import { Route as AuthenticatedTrainingEnrollmentsIdRouteImport } from './routes/_authenticated.training-enrollments.$id'
-import { Route as AuthenticatedTrainingProgramsIndexRouteImport } from './routes/_authenticated.training-programs.index'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated.users.index'
 import { Route as AuthenticatedUsersIdRouteImport } from './routes/_authenticated.users.$id'
-import { Route as AuthenticatedVehicleFuelIndexRouteImport } from './routes/_authenticated.vehicle-fuel.index'
-import { Route as AuthenticatedVehicleFuelIdRouteImport } from './routes/_authenticated.vehicle-fuel.$id'
-import { Route as AuthenticatedVehicleInspectionsIndexRouteImport } from './routes/_authenticated.vehicle-inspections.index'
-import { Route as AuthenticatedVehicleInspectionsIdRouteImport } from './routes/_authenticated.vehicle-inspections.$id'
-import { Route as AuthenticatedVehiclesIndexRouteImport } from './routes/_authenticated.vehicles.index'
-import { Route as AuthenticatedVehiclesIdRouteImport } from './routes/_authenticated.vehicles.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,11 +58,6 @@ const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAttendanceRoute = AuthenticatedAttendanceRouteImport.update({
   id: '/attendance',
@@ -93,11 +75,17 @@ const AuthenticatedDesignSystemRoute =
     path: '/design-system',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedOperatorsRoute = AuthenticatedOperatorsRouteImport.update({
-  id: '/operators',
-  path: '/operators',
+const AuthenticatedGradesRoute = AuthenticatedGradesRouteImport.update({
+  id: '/grades',
+  path: '/grades',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -119,11 +107,28 @@ const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   path: '/schedule',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSubjectsRoute = AuthenticatedSubjectsRouteImport.update({
+  id: '/subjects',
+  path: '/subjects',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedTeachersRoute = AuthenticatedTeachersRouteImport.update({
   id: '/teachers',
   path: '/teachers',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAssignmentsIndexRoute =
+  AuthenticatedAssignmentsIndexRouteImport.update({
+    id: '/assignments/',
+    path: '/assignments/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAssignmentsIdRoute =
+  AuthenticatedAssignmentsIdRouteImport.update({
+    id: '/assignments/$id',
+    path: '/assignments/$id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAuditIndexRoute = AuthenticatedAuditIndexRouteImport.update({
   id: '/audit/',
   path: '/audit/',
@@ -156,18 +161,22 @@ const AuthenticatedCoursesIdRoute = AuthenticatedCoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedDrivingSessionsIndexRoute =
-  AuthenticatedDrivingSessionsIndexRouteImport.update({
-    id: '/driving-sessions/',
-    path: '/driving-sessions/',
+const AuthenticatedDocumentsIndexRoute =
+  AuthenticatedDocumentsIndexRouteImport.update({
+    id: '/documents/',
+    path: '/documents/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedDrivingSessionsIdRoute =
-  AuthenticatedDrivingSessionsIdRouteImport.update({
-    id: '/driving-sessions/$id',
-    path: '/driving-sessions/$id',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+const AuthenticatedExamsIndexRoute = AuthenticatedExamsIndexRouteImport.update({
+  id: '/exams/',
+  path: '/exams/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedExamsIdRoute = AuthenticatedExamsIdRouteImport.update({
+  id: '/exams/$id',
+  path: '/exams/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedExpensesIndexRoute =
   AuthenticatedExpensesIndexRouteImport.update({
     id: '/expenses/',
@@ -179,18 +188,6 @@ const AuthenticatedExpensesIdRoute = AuthenticatedExpensesIdRouteImport.update({
   path: '/expenses/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedFleetMapIndexRoute =
-  AuthenticatedFleetMapIndexRouteImport.update({
-    id: '/fleet-map/',
-    path: '/fleet-map/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedFuelStationsIndexRoute =
-  AuthenticatedFuelStationsIndexRouteImport.update({
-    id: '/fuel-stations/',
-    path: '/fuel-stations/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedGroupsIndexRoute =
   AuthenticatedGroupsIndexRouteImport.update({
     id: '/groups/',
@@ -212,42 +209,6 @@ const AuthenticatedLeadsIdRoute = AuthenticatedLeadsIdRouteImport.update({
   path: '/leads/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedMySettlementsIndexRoute =
-  AuthenticatedMySettlementsIndexRouteImport.update({
-    id: '/my-settlements/',
-    path: '/my-settlements/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedMySettlementsIdRoute =
-  AuthenticatedMySettlementsIdRouteImport.update({
-    id: '/my-settlements/$id',
-    path: '/my-settlements/$id',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedQuestionsIndexRoute =
-  AuthenticatedQuestionsIndexRouteImport.update({
-    id: '/questions/',
-    path: '/questions/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedQuestionsIdRoute =
-  AuthenticatedQuestionsIdRouteImport.update({
-    id: '/questions/$id',
-    path: '/questions/$id',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedSchoolTestsIndexRoute =
-  AuthenticatedSchoolTestsIndexRouteImport.update({
-    id: '/school-tests/',
-    path: '/school-tests/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedSchoolTestsIdRoute =
-  AuthenticatedSchoolTestsIdRouteImport.update({
-    id: '/school-tests/$id',
-    path: '/school-tests/$id',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedStudentsIndexRoute =
   AuthenticatedStudentsIndexRouteImport.update({
     id: '/students/',
@@ -259,24 +220,6 @@ const AuthenticatedStudentsIdRoute = AuthenticatedStudentsIdRouteImport.update({
   path: '/students/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedTrainingEnrollmentsIndexRoute =
-  AuthenticatedTrainingEnrollmentsIndexRouteImport.update({
-    id: '/training-enrollments/',
-    path: '/training-enrollments/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedTrainingEnrollmentsIdRoute =
-  AuthenticatedTrainingEnrollmentsIdRouteImport.update({
-    id: '/training-enrollments/$id',
-    path: '/training-enrollments/$id',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedTrainingProgramsIndexRoute =
-  AuthenticatedTrainingProgramsIndexRouteImport.update({
-    id: '/training-programs/',
-    path: '/training-programs/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -287,340 +230,227 @@ const AuthenticatedUsersIdRoute = AuthenticatedUsersIdRouteImport.update({
   path: '/users/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedVehicleFuelIndexRoute =
-  AuthenticatedVehicleFuelIndexRouteImport.update({
-    id: '/vehicle-fuel/',
-    path: '/vehicle-fuel/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedVehicleFuelIdRoute =
-  AuthenticatedVehicleFuelIdRouteImport.update({
-    id: '/vehicle-fuel/$id',
-    path: '/vehicle-fuel/$id',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedVehicleInspectionsIndexRoute =
-  AuthenticatedVehicleInspectionsIndexRouteImport.update({
-    id: '/vehicle-inspections/',
-    path: '/vehicle-inspections/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedVehicleInspectionsIdRoute =
-  AuthenticatedVehicleInspectionsIdRouteImport.update({
-    id: '/vehicle-inspections/$id',
-    path: '/vehicle-inspections/$id',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedVehiclesIndexRoute =
-  AuthenticatedVehiclesIndexRouteImport.update({
-    id: '/vehicles/',
-    path: '/vehicles/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedVehiclesIdRoute = AuthenticatedVehiclesIdRouteImport.update({
-  id: '/vehicles/$id',
-  path: '/vehicles/$id',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/design-system': typeof AuthenticatedDesignSystemRoute
-  '/operators': typeof AuthenticatedOperatorsRoute
+  '/grades': typeof AuthenticatedGradesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/permission-templates': typeof AuthenticatedPermissionTemplatesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/subjects': typeof AuthenticatedSubjectsRoute
   '/teachers': typeof AuthenticatedTeachersRoute
+  '/assignments/$id': typeof AuthenticatedAssignmentsIdRoute
   '/audit/$id': typeof AuthenticatedAuditIdRoute
   '/branches/$id': typeof AuthenticatedBranchesIdRoute
   '/courses/$id': typeof AuthenticatedCoursesIdRoute
-  '/driving-sessions/$id': typeof AuthenticatedDrivingSessionsIdRoute
+  '/exams/$id': typeof AuthenticatedExamsIdRoute
   '/expenses/$id': typeof AuthenticatedExpensesIdRoute
   '/groups/$id': typeof AuthenticatedGroupsIdRoute
   '/leads/$id': typeof AuthenticatedLeadsIdRoute
-  '/my-settlements/$id': typeof AuthenticatedMySettlementsIdRoute
-  '/questions/$id': typeof AuthenticatedQuestionsIdRoute
-  '/school-tests/$id': typeof AuthenticatedSchoolTestsIdRoute
   '/students/$id': typeof AuthenticatedStudentsIdRoute
-  '/training-enrollments/$id': typeof AuthenticatedTrainingEnrollmentsIdRoute
   '/users/$id': typeof AuthenticatedUsersIdRoute
-  '/vehicle-fuel/$id': typeof AuthenticatedVehicleFuelIdRoute
-  '/vehicle-inspections/$id': typeof AuthenticatedVehicleInspectionsIdRoute
-  '/vehicles/$id': typeof AuthenticatedVehiclesIdRoute
+  '/assignments/': typeof AuthenticatedAssignmentsIndexRoute
   '/audit/': typeof AuthenticatedAuditIndexRoute
   '/branches/': typeof AuthenticatedBranchesIndexRoute
   '/courses/': typeof AuthenticatedCoursesIndexRoute
-  '/driving-sessions/': typeof AuthenticatedDrivingSessionsIndexRoute
+  '/documents/': typeof AuthenticatedDocumentsIndexRoute
+  '/exams/': typeof AuthenticatedExamsIndexRoute
   '/expenses/': typeof AuthenticatedExpensesIndexRoute
-  '/fleet-map/': typeof AuthenticatedFleetMapIndexRoute
-  '/fuel-stations/': typeof AuthenticatedFuelStationsIndexRoute
   '/groups/': typeof AuthenticatedGroupsIndexRoute
   '/leads/': typeof AuthenticatedLeadsIndexRoute
-  '/my-settlements/': typeof AuthenticatedMySettlementsIndexRoute
-  '/questions/': typeof AuthenticatedQuestionsIndexRoute
-  '/school-tests/': typeof AuthenticatedSchoolTestsIndexRoute
   '/students/': typeof AuthenticatedStudentsIndexRoute
-  '/training-enrollments/': typeof AuthenticatedTrainingEnrollmentsIndexRoute
-  '/training-programs/': typeof AuthenticatedTrainingProgramsIndexRoute
   '/users/': typeof AuthenticatedUsersIndexRoute
-  '/vehicle-fuel/': typeof AuthenticatedVehicleFuelIndexRoute
-  '/vehicle-inspections/': typeof AuthenticatedVehicleInspectionsIndexRoute
-  '/vehicles/': typeof AuthenticatedVehiclesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/design-system': typeof AuthenticatedDesignSystemRoute
-  '/operators': typeof AuthenticatedOperatorsRoute
+  '/grades': typeof AuthenticatedGradesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/permission-templates': typeof AuthenticatedPermissionTemplatesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/subjects': typeof AuthenticatedSubjectsRoute
   '/teachers': typeof AuthenticatedTeachersRoute
+  '/assignments/$id': typeof AuthenticatedAssignmentsIdRoute
   '/audit/$id': typeof AuthenticatedAuditIdRoute
   '/branches/$id': typeof AuthenticatedBranchesIdRoute
   '/courses/$id': typeof AuthenticatedCoursesIdRoute
-  '/driving-sessions/$id': typeof AuthenticatedDrivingSessionsIdRoute
+  '/exams/$id': typeof AuthenticatedExamsIdRoute
   '/expenses/$id': typeof AuthenticatedExpensesIdRoute
   '/groups/$id': typeof AuthenticatedGroupsIdRoute
   '/leads/$id': typeof AuthenticatedLeadsIdRoute
-  '/my-settlements/$id': typeof AuthenticatedMySettlementsIdRoute
-  '/questions/$id': typeof AuthenticatedQuestionsIdRoute
-  '/school-tests/$id': typeof AuthenticatedSchoolTestsIdRoute
   '/students/$id': typeof AuthenticatedStudentsIdRoute
-  '/training-enrollments/$id': typeof AuthenticatedTrainingEnrollmentsIdRoute
   '/users/$id': typeof AuthenticatedUsersIdRoute
-  '/vehicle-fuel/$id': typeof AuthenticatedVehicleFuelIdRoute
-  '/vehicle-inspections/$id': typeof AuthenticatedVehicleInspectionsIdRoute
-  '/vehicles/$id': typeof AuthenticatedVehiclesIdRoute
+  '/assignments': typeof AuthenticatedAssignmentsIndexRoute
   '/audit': typeof AuthenticatedAuditIndexRoute
   '/branches': typeof AuthenticatedBranchesIndexRoute
   '/courses': typeof AuthenticatedCoursesIndexRoute
-  '/driving-sessions': typeof AuthenticatedDrivingSessionsIndexRoute
+  '/documents': typeof AuthenticatedDocumentsIndexRoute
+  '/exams': typeof AuthenticatedExamsIndexRoute
   '/expenses': typeof AuthenticatedExpensesIndexRoute
-  '/fleet-map': typeof AuthenticatedFleetMapIndexRoute
-  '/fuel-stations': typeof AuthenticatedFuelStationsIndexRoute
   '/groups': typeof AuthenticatedGroupsIndexRoute
   '/leads': typeof AuthenticatedLeadsIndexRoute
-  '/my-settlements': typeof AuthenticatedMySettlementsIndexRoute
-  '/questions': typeof AuthenticatedQuestionsIndexRoute
-  '/school-tests': typeof AuthenticatedSchoolTestsIndexRoute
   '/students': typeof AuthenticatedStudentsIndexRoute
-  '/training-enrollments': typeof AuthenticatedTrainingEnrollmentsIndexRoute
-  '/training-programs': typeof AuthenticatedTrainingProgramsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
-  '/vehicle-fuel': typeof AuthenticatedVehicleFuelIndexRoute
-  '/vehicle-inspections': typeof AuthenticatedVehicleInspectionsIndexRoute
-  '/vehicles': typeof AuthenticatedVehiclesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
-  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/attendance': typeof AuthenticatedAttendanceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/design-system': typeof AuthenticatedDesignSystemRoute
-  '/_authenticated/operators': typeof AuthenticatedOperatorsRoute
+  '/_authenticated/grades': typeof AuthenticatedGradesRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/permission-templates': typeof AuthenticatedPermissionTemplatesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
+  '/_authenticated/subjects': typeof AuthenticatedSubjectsRoute
   '/_authenticated/teachers': typeof AuthenticatedTeachersRoute
+  '/_authenticated/assignments/$id': typeof AuthenticatedAssignmentsIdRoute
   '/_authenticated/audit/$id': typeof AuthenticatedAuditIdRoute
   '/_authenticated/branches/$id': typeof AuthenticatedBranchesIdRoute
   '/_authenticated/courses/$id': typeof AuthenticatedCoursesIdRoute
-  '/_authenticated/driving-sessions/$id': typeof AuthenticatedDrivingSessionsIdRoute
+  '/_authenticated/exams/$id': typeof AuthenticatedExamsIdRoute
   '/_authenticated/expenses/$id': typeof AuthenticatedExpensesIdRoute
   '/_authenticated/groups/$id': typeof AuthenticatedGroupsIdRoute
   '/_authenticated/leads/$id': typeof AuthenticatedLeadsIdRoute
-  '/_authenticated/my-settlements/$id': typeof AuthenticatedMySettlementsIdRoute
-  '/_authenticated/questions/$id': typeof AuthenticatedQuestionsIdRoute
-  '/_authenticated/school-tests/$id': typeof AuthenticatedSchoolTestsIdRoute
   '/_authenticated/students/$id': typeof AuthenticatedStudentsIdRoute
-  '/_authenticated/training-enrollments/$id': typeof AuthenticatedTrainingEnrollmentsIdRoute
   '/_authenticated/users/$id': typeof AuthenticatedUsersIdRoute
-  '/_authenticated/vehicle-fuel/$id': typeof AuthenticatedVehicleFuelIdRoute
-  '/_authenticated/vehicle-inspections/$id': typeof AuthenticatedVehicleInspectionsIdRoute
-  '/_authenticated/vehicles/$id': typeof AuthenticatedVehiclesIdRoute
+  '/_authenticated/assignments/': typeof AuthenticatedAssignmentsIndexRoute
   '/_authenticated/audit/': typeof AuthenticatedAuditIndexRoute
   '/_authenticated/branches/': typeof AuthenticatedBranchesIndexRoute
   '/_authenticated/courses/': typeof AuthenticatedCoursesIndexRoute
-  '/_authenticated/driving-sessions/': typeof AuthenticatedDrivingSessionsIndexRoute
+  '/_authenticated/documents/': typeof AuthenticatedDocumentsIndexRoute
+  '/_authenticated/exams/': typeof AuthenticatedExamsIndexRoute
   '/_authenticated/expenses/': typeof AuthenticatedExpensesIndexRoute
-  '/_authenticated/fleet-map/': typeof AuthenticatedFleetMapIndexRoute
-  '/_authenticated/fuel-stations/': typeof AuthenticatedFuelStationsIndexRoute
   '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
   '/_authenticated/leads/': typeof AuthenticatedLeadsIndexRoute
-  '/_authenticated/my-settlements/': typeof AuthenticatedMySettlementsIndexRoute
-  '/_authenticated/questions/': typeof AuthenticatedQuestionsIndexRoute
-  '/_authenticated/school-tests/': typeof AuthenticatedSchoolTestsIndexRoute
   '/_authenticated/students/': typeof AuthenticatedStudentsIndexRoute
-  '/_authenticated/training-enrollments/': typeof AuthenticatedTrainingEnrollmentsIndexRoute
-  '/_authenticated/training-programs/': typeof AuthenticatedTrainingProgramsIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
-  '/_authenticated/vehicle-fuel/': typeof AuthenticatedVehicleFuelIndexRoute
-  '/_authenticated/vehicle-inspections/': typeof AuthenticatedVehicleInspectionsIndexRoute
-  '/_authenticated/vehicles/': typeof AuthenticatedVehiclesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/login'
-    | '/analytics'
     | '/attendance'
     | '/dashboard'
     | '/design-system'
-    | '/operators'
+    | '/grades'
+    | '/notifications'
     | '/payments'
     | '/permission-templates'
     | '/profile'
     | '/schedule'
+    | '/subjects'
     | '/teachers'
+    | '/assignments/$id'
     | '/audit/$id'
     | '/branches/$id'
     | '/courses/$id'
-    | '/driving-sessions/$id'
+    | '/exams/$id'
     | '/expenses/$id'
     | '/groups/$id'
     | '/leads/$id'
-    | '/my-settlements/$id'
-    | '/questions/$id'
-    | '/school-tests/$id'
     | '/students/$id'
-    | '/training-enrollments/$id'
     | '/users/$id'
-    | '/vehicle-fuel/$id'
-    | '/vehicle-inspections/$id'
-    | '/vehicles/$id'
+    | '/assignments/'
     | '/audit/'
     | '/branches/'
     | '/courses/'
-    | '/driving-sessions/'
+    | '/documents/'
+    | '/exams/'
     | '/expenses/'
-    | '/fleet-map/'
-    | '/fuel-stations/'
     | '/groups/'
     | '/leads/'
-    | '/my-settlements/'
-    | '/questions/'
-    | '/school-tests/'
     | '/students/'
-    | '/training-enrollments/'
-    | '/training-programs/'
     | '/users/'
-    | '/vehicle-fuel/'
-    | '/vehicle-inspections/'
-    | '/vehicles/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
-    | '/analytics'
     | '/attendance'
     | '/dashboard'
     | '/design-system'
-    | '/operators'
+    | '/grades'
+    | '/notifications'
     | '/payments'
     | '/permission-templates'
     | '/profile'
     | '/schedule'
+    | '/subjects'
     | '/teachers'
+    | '/assignments/$id'
     | '/audit/$id'
     | '/branches/$id'
     | '/courses/$id'
-    | '/driving-sessions/$id'
+    | '/exams/$id'
     | '/expenses/$id'
     | '/groups/$id'
     | '/leads/$id'
-    | '/my-settlements/$id'
-    | '/questions/$id'
-    | '/school-tests/$id'
     | '/students/$id'
-    | '/training-enrollments/$id'
     | '/users/$id'
-    | '/vehicle-fuel/$id'
-    | '/vehicle-inspections/$id'
-    | '/vehicles/$id'
+    | '/assignments'
     | '/audit'
     | '/branches'
     | '/courses'
-    | '/driving-sessions'
+    | '/documents'
+    | '/exams'
     | '/expenses'
-    | '/fleet-map'
-    | '/fuel-stations'
     | '/groups'
     | '/leads'
-    | '/my-settlements'
-    | '/questions'
-    | '/school-tests'
     | '/students'
-    | '/training-enrollments'
-    | '/training-programs'
     | '/users'
-    | '/vehicle-fuel'
-    | '/vehicle-inspections'
-    | '/vehicles'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/login'
-    | '/_authenticated/analytics'
     | '/_authenticated/attendance'
     | '/_authenticated/dashboard'
     | '/_authenticated/design-system'
-    | '/_authenticated/operators'
+    | '/_authenticated/grades'
+    | '/_authenticated/notifications'
     | '/_authenticated/payments'
     | '/_authenticated/permission-templates'
     | '/_authenticated/profile'
     | '/_authenticated/schedule'
+    | '/_authenticated/subjects'
     | '/_authenticated/teachers'
+    | '/_authenticated/assignments/$id'
     | '/_authenticated/audit/$id'
     | '/_authenticated/branches/$id'
     | '/_authenticated/courses/$id'
-    | '/_authenticated/driving-sessions/$id'
+    | '/_authenticated/exams/$id'
     | '/_authenticated/expenses/$id'
     | '/_authenticated/groups/$id'
     | '/_authenticated/leads/$id'
-    | '/_authenticated/my-settlements/$id'
-    | '/_authenticated/questions/$id'
-    | '/_authenticated/school-tests/$id'
     | '/_authenticated/students/$id'
-    | '/_authenticated/training-enrollments/$id'
     | '/_authenticated/users/$id'
-    | '/_authenticated/vehicle-fuel/$id'
-    | '/_authenticated/vehicle-inspections/$id'
-    | '/_authenticated/vehicles/$id'
+    | '/_authenticated/assignments/'
     | '/_authenticated/audit/'
     | '/_authenticated/branches/'
     | '/_authenticated/courses/'
-    | '/_authenticated/driving-sessions/'
+    | '/_authenticated/documents/'
+    | '/_authenticated/exams/'
     | '/_authenticated/expenses/'
-    | '/_authenticated/fleet-map/'
-    | '/_authenticated/fuel-stations/'
     | '/_authenticated/groups/'
     | '/_authenticated/leads/'
-    | '/_authenticated/my-settlements/'
-    | '/_authenticated/questions/'
-    | '/_authenticated/school-tests/'
     | '/_authenticated/students/'
-    | '/_authenticated/training-enrollments/'
-    | '/_authenticated/training-programs/'
     | '/_authenticated/users/'
-    | '/_authenticated/vehicle-fuel/'
-    | '/_authenticated/vehicle-inspections/'
-    | '/_authenticated/vehicles/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -652,13 +482,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/analytics': {
-      id: '/_authenticated/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/attendance': {
       id: '/_authenticated/attendance'
       path: '/attendance'
@@ -680,11 +503,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDesignSystemRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/operators': {
-      id: '/_authenticated/operators'
-      path: '/operators'
-      fullPath: '/operators'
-      preLoaderRoute: typeof AuthenticatedOperatorsRouteImport
+    '/_authenticated/grades': {
+      id: '/_authenticated/grades'
+      path: '/grades'
+      fullPath: '/grades'
+      preLoaderRoute: typeof AuthenticatedGradesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/payments': {
@@ -715,11 +545,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedScheduleRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/subjects': {
+      id: '/_authenticated/subjects'
+      path: '/subjects'
+      fullPath: '/subjects'
+      preLoaderRoute: typeof AuthenticatedSubjectsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/teachers': {
       id: '/_authenticated/teachers'
       path: '/teachers'
       fullPath: '/teachers'
       preLoaderRoute: typeof AuthenticatedTeachersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/assignments/': {
+      id: '/_authenticated/assignments/'
+      path: '/assignments'
+      fullPath: '/assignments/'
+      preLoaderRoute: typeof AuthenticatedAssignmentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/assignments/$id': {
+      id: '/_authenticated/assignments/$id'
+      path: '/assignments/$id'
+      fullPath: '/assignments/$id'
+      preLoaderRoute: typeof AuthenticatedAssignmentsIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/audit/': {
@@ -764,18 +615,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoursesIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/driving-sessions/': {
-      id: '/_authenticated/driving-sessions/'
-      path: '/driving-sessions'
-      fullPath: '/driving-sessions/'
-      preLoaderRoute: typeof AuthenticatedDrivingSessionsIndexRouteImport
+    '/_authenticated/documents/': {
+      id: '/_authenticated/documents/'
+      path: '/documents'
+      fullPath: '/documents/'
+      preLoaderRoute: typeof AuthenticatedDocumentsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/driving-sessions/$id': {
-      id: '/_authenticated/driving-sessions/$id'
-      path: '/driving-sessions/$id'
-      fullPath: '/driving-sessions/$id'
-      preLoaderRoute: typeof AuthenticatedDrivingSessionsIdRouteImport
+    '/_authenticated/exams/': {
+      id: '/_authenticated/exams/'
+      path: '/exams'
+      fullPath: '/exams/'
+      preLoaderRoute: typeof AuthenticatedExamsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/exams/$id': {
+      id: '/_authenticated/exams/$id'
+      path: '/exams/$id'
+      fullPath: '/exams/$id'
+      preLoaderRoute: typeof AuthenticatedExamsIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/expenses/': {
@@ -790,20 +648,6 @@ declare module '@tanstack/react-router' {
       path: '/expenses/$id'
       fullPath: '/expenses/$id'
       preLoaderRoute: typeof AuthenticatedExpensesIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/fleet-map/': {
-      id: '/_authenticated/fleet-map/'
-      path: '/fleet-map'
-      fullPath: '/fleet-map/'
-      preLoaderRoute: typeof AuthenticatedFleetMapIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/fuel-stations/': {
-      id: '/_authenticated/fuel-stations/'
-      path: '/fuel-stations'
-      fullPath: '/fuel-stations/'
-      preLoaderRoute: typeof AuthenticatedFuelStationsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/groups/': {
@@ -834,48 +678,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeadsIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/my-settlements/': {
-      id: '/_authenticated/my-settlements/'
-      path: '/my-settlements'
-      fullPath: '/my-settlements/'
-      preLoaderRoute: typeof AuthenticatedMySettlementsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/my-settlements/$id': {
-      id: '/_authenticated/my-settlements/$id'
-      path: '/my-settlements/$id'
-      fullPath: '/my-settlements/$id'
-      preLoaderRoute: typeof AuthenticatedMySettlementsIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/questions/': {
-      id: '/_authenticated/questions/'
-      path: '/questions'
-      fullPath: '/questions/'
-      preLoaderRoute: typeof AuthenticatedQuestionsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/questions/$id': {
-      id: '/_authenticated/questions/$id'
-      path: '/questions/$id'
-      fullPath: '/questions/$id'
-      preLoaderRoute: typeof AuthenticatedQuestionsIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/school-tests/': {
-      id: '/_authenticated/school-tests/'
-      path: '/school-tests'
-      fullPath: '/school-tests/'
-      preLoaderRoute: typeof AuthenticatedSchoolTestsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/school-tests/$id': {
-      id: '/_authenticated/school-tests/$id'
-      path: '/school-tests/$id'
-      fullPath: '/school-tests/$id'
-      preLoaderRoute: typeof AuthenticatedSchoolTestsIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/students/': {
       id: '/_authenticated/students/'
       path: '/students'
@@ -888,27 +690,6 @@ declare module '@tanstack/react-router' {
       path: '/students/$id'
       fullPath: '/students/$id'
       preLoaderRoute: typeof AuthenticatedStudentsIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/training-enrollments/': {
-      id: '/_authenticated/training-enrollments/'
-      path: '/training-enrollments'
-      fullPath: '/training-enrollments/'
-      preLoaderRoute: typeof AuthenticatedTrainingEnrollmentsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/training-enrollments/$id': {
-      id: '/_authenticated/training-enrollments/$id'
-      path: '/training-enrollments/$id'
-      fullPath: '/training-enrollments/$id'
-      preLoaderRoute: typeof AuthenticatedTrainingEnrollmentsIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/training-programs/': {
-      id: '/_authenticated/training-programs/'
-      path: '/training-programs'
-      fullPath: '/training-programs/'
-      preLoaderRoute: typeof AuthenticatedTrainingProgramsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/users/': {
@@ -925,151 +706,77 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/vehicle-fuel/': {
-      id: '/_authenticated/vehicle-fuel/'
-      path: '/vehicle-fuel'
-      fullPath: '/vehicle-fuel/'
-      preLoaderRoute: typeof AuthenticatedVehicleFuelIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/vehicle-fuel/$id': {
-      id: '/_authenticated/vehicle-fuel/$id'
-      path: '/vehicle-fuel/$id'
-      fullPath: '/vehicle-fuel/$id'
-      preLoaderRoute: typeof AuthenticatedVehicleFuelIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/vehicle-inspections/': {
-      id: '/_authenticated/vehicle-inspections/'
-      path: '/vehicle-inspections'
-      fullPath: '/vehicle-inspections/'
-      preLoaderRoute: typeof AuthenticatedVehicleInspectionsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/vehicle-inspections/$id': {
-      id: '/_authenticated/vehicle-inspections/$id'
-      path: '/vehicle-inspections/$id'
-      fullPath: '/vehicle-inspections/$id'
-      preLoaderRoute: typeof AuthenticatedVehicleInspectionsIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/vehicles/': {
-      id: '/_authenticated/vehicles/'
-      path: '/vehicles'
-      fullPath: '/vehicles/'
-      preLoaderRoute: typeof AuthenticatedVehiclesIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/vehicles/$id': {
-      id: '/_authenticated/vehicles/$id'
-      path: '/vehicles/$id'
-      fullPath: '/vehicles/$id'
-      preLoaderRoute: typeof AuthenticatedVehiclesIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
   }
 }
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedAttendanceRoute: typeof AuthenticatedAttendanceRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDesignSystemRoute: typeof AuthenticatedDesignSystemRoute
-  AuthenticatedOperatorsRoute: typeof AuthenticatedOperatorsRoute
+  AuthenticatedGradesRoute: typeof AuthenticatedGradesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedPermissionTemplatesRoute: typeof AuthenticatedPermissionTemplatesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
+  AuthenticatedSubjectsRoute: typeof AuthenticatedSubjectsRoute
   AuthenticatedTeachersRoute: typeof AuthenticatedTeachersRoute
+  AuthenticatedAssignmentsIdRoute: typeof AuthenticatedAssignmentsIdRoute
   AuthenticatedAuditIdRoute: typeof AuthenticatedAuditIdRoute
   AuthenticatedBranchesIdRoute: typeof AuthenticatedBranchesIdRoute
   AuthenticatedCoursesIdRoute: typeof AuthenticatedCoursesIdRoute
-  AuthenticatedDrivingSessionsIdRoute: typeof AuthenticatedDrivingSessionsIdRoute
+  AuthenticatedExamsIdRoute: typeof AuthenticatedExamsIdRoute
   AuthenticatedExpensesIdRoute: typeof AuthenticatedExpensesIdRoute
   AuthenticatedGroupsIdRoute: typeof AuthenticatedGroupsIdRoute
   AuthenticatedLeadsIdRoute: typeof AuthenticatedLeadsIdRoute
-  AuthenticatedMySettlementsIdRoute: typeof AuthenticatedMySettlementsIdRoute
-  AuthenticatedQuestionsIdRoute: typeof AuthenticatedQuestionsIdRoute
-  AuthenticatedSchoolTestsIdRoute: typeof AuthenticatedSchoolTestsIdRoute
   AuthenticatedStudentsIdRoute: typeof AuthenticatedStudentsIdRoute
-  AuthenticatedTrainingEnrollmentsIdRoute: typeof AuthenticatedTrainingEnrollmentsIdRoute
   AuthenticatedUsersIdRoute: typeof AuthenticatedUsersIdRoute
-  AuthenticatedVehicleFuelIdRoute: typeof AuthenticatedVehicleFuelIdRoute
-  AuthenticatedVehicleInspectionsIdRoute: typeof AuthenticatedVehicleInspectionsIdRoute
-  AuthenticatedVehiclesIdRoute: typeof AuthenticatedVehiclesIdRoute
+  AuthenticatedAssignmentsIndexRoute: typeof AuthenticatedAssignmentsIndexRoute
   AuthenticatedAuditIndexRoute: typeof AuthenticatedAuditIndexRoute
   AuthenticatedBranchesIndexRoute: typeof AuthenticatedBranchesIndexRoute
   AuthenticatedCoursesIndexRoute: typeof AuthenticatedCoursesIndexRoute
-  AuthenticatedDrivingSessionsIndexRoute: typeof AuthenticatedDrivingSessionsIndexRoute
+  AuthenticatedDocumentsIndexRoute: typeof AuthenticatedDocumentsIndexRoute
+  AuthenticatedExamsIndexRoute: typeof AuthenticatedExamsIndexRoute
   AuthenticatedExpensesIndexRoute: typeof AuthenticatedExpensesIndexRoute
-  AuthenticatedFleetMapIndexRoute: typeof AuthenticatedFleetMapIndexRoute
-  AuthenticatedFuelStationsIndexRoute: typeof AuthenticatedFuelStationsIndexRoute
   AuthenticatedGroupsIndexRoute: typeof AuthenticatedGroupsIndexRoute
   AuthenticatedLeadsIndexRoute: typeof AuthenticatedLeadsIndexRoute
-  AuthenticatedMySettlementsIndexRoute: typeof AuthenticatedMySettlementsIndexRoute
-  AuthenticatedQuestionsIndexRoute: typeof AuthenticatedQuestionsIndexRoute
-  AuthenticatedSchoolTestsIndexRoute: typeof AuthenticatedSchoolTestsIndexRoute
   AuthenticatedStudentsIndexRoute: typeof AuthenticatedStudentsIndexRoute
-  AuthenticatedTrainingEnrollmentsIndexRoute: typeof AuthenticatedTrainingEnrollmentsIndexRoute
-  AuthenticatedTrainingProgramsIndexRoute: typeof AuthenticatedTrainingProgramsIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
-  AuthenticatedVehicleFuelIndexRoute: typeof AuthenticatedVehicleFuelIndexRoute
-  AuthenticatedVehicleInspectionsIndexRoute: typeof AuthenticatedVehicleInspectionsIndexRoute
-  AuthenticatedVehiclesIndexRoute: typeof AuthenticatedVehiclesIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedAttendanceRoute: AuthenticatedAttendanceRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDesignSystemRoute: AuthenticatedDesignSystemRoute,
-  AuthenticatedOperatorsRoute: AuthenticatedOperatorsRoute,
+  AuthenticatedGradesRoute: AuthenticatedGradesRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedPermissionTemplatesRoute: AuthenticatedPermissionTemplatesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
+  AuthenticatedSubjectsRoute: AuthenticatedSubjectsRoute,
   AuthenticatedTeachersRoute: AuthenticatedTeachersRoute,
+  AuthenticatedAssignmentsIdRoute: AuthenticatedAssignmentsIdRoute,
   AuthenticatedAuditIdRoute: AuthenticatedAuditIdRoute,
   AuthenticatedBranchesIdRoute: AuthenticatedBranchesIdRoute,
   AuthenticatedCoursesIdRoute: AuthenticatedCoursesIdRoute,
-  AuthenticatedDrivingSessionsIdRoute: AuthenticatedDrivingSessionsIdRoute,
+  AuthenticatedExamsIdRoute: AuthenticatedExamsIdRoute,
   AuthenticatedExpensesIdRoute: AuthenticatedExpensesIdRoute,
   AuthenticatedGroupsIdRoute: AuthenticatedGroupsIdRoute,
   AuthenticatedLeadsIdRoute: AuthenticatedLeadsIdRoute,
-  AuthenticatedMySettlementsIdRoute: AuthenticatedMySettlementsIdRoute,
-  AuthenticatedQuestionsIdRoute: AuthenticatedQuestionsIdRoute,
-  AuthenticatedSchoolTestsIdRoute: AuthenticatedSchoolTestsIdRoute,
   AuthenticatedStudentsIdRoute: AuthenticatedStudentsIdRoute,
-  AuthenticatedTrainingEnrollmentsIdRoute:
-    AuthenticatedTrainingEnrollmentsIdRoute,
   AuthenticatedUsersIdRoute: AuthenticatedUsersIdRoute,
-  AuthenticatedVehicleFuelIdRoute: AuthenticatedVehicleFuelIdRoute,
-  AuthenticatedVehicleInspectionsIdRoute:
-    AuthenticatedVehicleInspectionsIdRoute,
-  AuthenticatedVehiclesIdRoute: AuthenticatedVehiclesIdRoute,
+  AuthenticatedAssignmentsIndexRoute: AuthenticatedAssignmentsIndexRoute,
   AuthenticatedAuditIndexRoute: AuthenticatedAuditIndexRoute,
   AuthenticatedBranchesIndexRoute: AuthenticatedBranchesIndexRoute,
   AuthenticatedCoursesIndexRoute: AuthenticatedCoursesIndexRoute,
-  AuthenticatedDrivingSessionsIndexRoute:
-    AuthenticatedDrivingSessionsIndexRoute,
+  AuthenticatedDocumentsIndexRoute: AuthenticatedDocumentsIndexRoute,
+  AuthenticatedExamsIndexRoute: AuthenticatedExamsIndexRoute,
   AuthenticatedExpensesIndexRoute: AuthenticatedExpensesIndexRoute,
-  AuthenticatedFleetMapIndexRoute: AuthenticatedFleetMapIndexRoute,
-  AuthenticatedFuelStationsIndexRoute: AuthenticatedFuelStationsIndexRoute,
   AuthenticatedGroupsIndexRoute: AuthenticatedGroupsIndexRoute,
   AuthenticatedLeadsIndexRoute: AuthenticatedLeadsIndexRoute,
-  AuthenticatedMySettlementsIndexRoute: AuthenticatedMySettlementsIndexRoute,
-  AuthenticatedQuestionsIndexRoute: AuthenticatedQuestionsIndexRoute,
-  AuthenticatedSchoolTestsIndexRoute: AuthenticatedSchoolTestsIndexRoute,
   AuthenticatedStudentsIndexRoute: AuthenticatedStudentsIndexRoute,
-  AuthenticatedTrainingEnrollmentsIndexRoute:
-    AuthenticatedTrainingEnrollmentsIndexRoute,
-  AuthenticatedTrainingProgramsIndexRoute:
-    AuthenticatedTrainingProgramsIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
-  AuthenticatedVehicleFuelIndexRoute: AuthenticatedVehicleFuelIndexRoute,
-  AuthenticatedVehicleInspectionsIndexRoute:
-    AuthenticatedVehicleInspectionsIndexRoute,
-  AuthenticatedVehiclesIndexRoute: AuthenticatedVehiclesIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

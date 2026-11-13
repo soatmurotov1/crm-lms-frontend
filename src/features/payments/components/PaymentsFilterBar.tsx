@@ -1,5 +1,5 @@
 // Callers: PaymentsPage. API: Date range + onDateRangeChange. Schema: URL
-// date_from/date_to. User: "davom et" (autodrive-qsgc.4).
+// date_from/date_to. User: "davom et".
 import { useTranslation } from 'react-i18next';
 import {
   Select,

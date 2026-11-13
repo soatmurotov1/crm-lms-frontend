@@ -109,11 +109,10 @@ export const useAuthStore = create<AuthState>()(
       setHasHydrated: (state) => set({ hasHydrated: state }),
     }),
     {
-      name: 'autodrive-auth',
+      name: 'lms-auth',
       // token is NOT persisted — memory only (XSS can't read httpOnly cookies,
-      // but it can read localStorage). The app and API now share the
-      // automaktab.uz parent domain (COOKIE_DOMAIN=.automaktab.uz), so the
-      // httpOnly cookie is first-party and survives hard refresh;
+      // but it can read localStorage). The API sets an httpOnly session
+      // cookie (same site in local dev: localhost), so it survives a hard refresh;
       // useRestoreSession re-hydrates the user from /auth/me via the cookie.
       partialize: (state) => ({
         user: state.user,

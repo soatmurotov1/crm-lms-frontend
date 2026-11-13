@@ -7,7 +7,7 @@ import {
   todayCalendarDate,
 } from '@/lib/calendarDate';
 
-// autodrive-qsgc.3: calendar dates are plain YYYY-MM-DD strings at every
+// calendar dates are plain YYYY-MM-DD strings at every
 // boundary. Internal Date conversions happen ONLY via local-midnight
 // construction — new Date('YYYY-MM-DD') (implicit UTC parse) is forbidden
 // anywhere in the date path. This file runs under TZ=UTC and

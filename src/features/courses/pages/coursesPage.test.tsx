@@ -33,7 +33,7 @@ const COURSES: Course[] = [
     name: 'Toyota kursi',
     branch_id: 'b1',
     branch_name: 'Yunusobod filiali',
-    course_type: 'avto_maktab',
+    course_type: 'offline',
     price: 1500000,
     duration_days: 60,
     is_active: true,

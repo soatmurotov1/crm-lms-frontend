@@ -61,29 +61,33 @@ export const userKeys = baseKeys('users');
 export const teacherKeys = baseKeys('teachers');
 export const studentKeys = baseKeys('students');
 export const branchKeys = baseKeys('branches');
-export const vehicleKeys = baseKeys('vehicles');
-export const trainingProgramKeys = baseKeys('training-programs');
-export const trainingEnrollmentKeys = baseKeys('training-enrollments');
-export const drivingSessionKeys = {
-  ...baseKeys('driving-sessions'),
-  summary: (enrollmentId: string) =>
-    [
-      'driving-sessions',
-      'summary',
-      enrollmentId,
-      ...accessQueryScope(),
-    ] as const,
-  report: (enrollmentId: string) =>
-    [
-      'driving-sessions',
-      'report',
-      enrollmentId,
-      ...accessQueryScope(),
-    ] as const,
-};
 export const courseKeys = baseKeys('courses');
 export const lessonKeys = baseKeys('lessons');
 export const auditLogKeys = baseKeys('audit-logs');
+export const documentKeys = baseKeys('documents');
+// LMS
+export const subjectKeys = baseKeys('subjects');
+export const curriculumKeys = baseKeys('curriculum');
+export const enrollmentKeys = baseKeys('enrollments');
+export const assignmentKeys = {
+  ...baseKeys('assignments'),
+  submissions: (id: string | undefined) =>
+    ['assignments', 'submissions', id, ...accessQueryScope()] as const,
+};
+export const examKeys = {
+  ...baseKeys('exams'),
+  results: (id: string | undefined) =>
+    ['exams', 'results', id, ...accessQueryScope()] as const,
+};
+export const gradeKeys = baseKeys('grades');
+export const progressKeys = baseKeys('progress');
+export const notificationKeys = {
+  ...baseKeys('notifications'),
+  unread: () => ['notifications', 'unread', ...accessQueryScope()] as const,
+};
+export const lmsKeys = {
+  summary: () => ['lms', 'summary', ...accessQueryScope()] as const,
+};
 export const leadKeys = {
   ...baseKeys('leads'),
   board: (filters: Filters = {}) =>
@@ -117,8 +121,6 @@ export const expenseKeys = {
   ...baseKeys('expenses'),
   branchOptions: (companyId: string | undefined) =>
     ['expenses', 'branch-options', companyId, ...accessQueryScope()] as const,
-  vehicleOptions: (filters: Filters = {}) =>
-    ['expenses', 'vehicle-options', filters, ...accessQueryScope()] as const,
   teacherOptions: (companyId: string | undefined) =>
     ['expenses', 'teacher-options', companyId, ...accessQueryScope()] as const,
   triageCounts: (filters: Filters = {}) =>
@@ -129,18 +131,9 @@ export const expenseKeys = {
     ['expenses', 'history', 'deleted', filters, ...accessQueryScope()] as const,
 };
 
-/** Teacher self-view (`GET /teacher-settlements/me`) — invalidated on settlement create. */
+/** Invalidated after an owner records a teacher settlement. */
 export const teacherSettlementKeys = {
   all: ['teacher-settlements'] as const,
-  me: (page = 1, limit = 10) =>
-    [
-      'teacher-settlements',
-      'me',
-      { page, limit },
-      ...accessQueryScope(),
-    ] as const,
-  meDetail: (id: string | number | undefined) =>
-    ['teacher-settlements', 'me', 'detail', id, ...accessQueryScope()] as const,
 };
 
 export const attendanceKeys = {
@@ -177,12 +170,6 @@ export const dashboardKeys = {
     ['dashboard', 'expense-breakdown', filters, ...accessQueryScope()] as const,
 };
 
-export const examKeys = {
-  all: ['exams'] as const,
-  byStudent: (studentId: string | undefined) =>
-    ['exams', 'student', studentId, ...accessQueryScope()] as const,
-};
-
 export const searchKeys = {
   all: ['search'] as const,
   query: (term: string) =>
@@ -197,21 +184,4 @@ export const authKeys = {
 export const telegramKeys = {
   all: ['telegram'] as const,
   linkStatus: () => ['telegram', 'link-status', ...accessQueryScope()] as const,
-};
-
-export const questionKeys = {
-  ...baseKeys('questions'),
-  availableForTests: (filters: Filters = {}) =>
-    [
-      'questions',
-      'available-for-tests',
-      filters,
-      ...accessQueryScope(),
-    ] as const,
-};
-
-export const schoolTestKeys = {
-  ...baseKeys('school-tests'),
-  assignments: (templateId: string | undefined) =>
-    ['school-tests', 'assignments', templateId, ...accessQueryScope()] as const,
 };

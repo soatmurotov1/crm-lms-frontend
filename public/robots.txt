@@ -1,4 +1,4 @@
-# App SPA: login and product UI. The marketing site owns the sitemap.
+# App SPA: login and product UI (no public sitemap).
 # The shell and login page are crawlable only so search engines can read the
 # noindex sent in the robots meta tag and the X-Robots-Tag header. Everything
 # else stays disallowed. robots.txt is not access control: customer data is

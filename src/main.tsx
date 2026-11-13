@@ -97,9 +97,6 @@ const bootstrap = async () => {
     window.requestIdleCallback(warmTranslations, { timeout: 2_000 });
   }
 
-  void import('./lib/webVitals')
-    .then(({ initWebVitals }) => initWebVitals())
-    .catch(() => undefined);
 };
 
 void bootstrap();

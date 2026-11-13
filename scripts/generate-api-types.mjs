@@ -60,7 +60,7 @@ async function generate(output) {
 }
 
 async function check(output) {
-  const directory = await mkdtemp(resolve(tmpdir(), 'autodrive-openapi-'));
+  const directory = await mkdtemp(resolve(tmpdir(), 'lms-openapi-'));
   const generatedOutput = resolve(directory, 'schema.d.ts');
 
   try {

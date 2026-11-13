@@ -41,3 +41,14 @@ vi.mock('react-i18next', () => ({
     init: () => {},
   },
 }));
+
+// LMS bloklari (kurs/o'quvchi tablari, dashboard bloki, topbar qo'ng'irog'i)
+// o'z so'rovlarini yuboradi. Boshqa feature'larning testlari ularni
+// sinamaydi — shu sabab global ravishda bo'sh komponentlar bilan almashtiriladi.
+vi.mock('@/features/lms/api/widgets', () => ({
+  CourseCurriculumPanel: () => null,
+  CourseEnrollmentsPanel: () => null,
+  StudentProgressPanel: () => null,
+  LmsOverview: () => null,
+  NotificationBell: () => null,
+}));

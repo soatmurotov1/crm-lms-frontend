@@ -4,7 +4,7 @@ import { useUrlParams } from './useUrlParams';
  * Shared search+sort+page URL state for server-paginated list pages
  * (TeachersPage, OperatorsPage) — mirrors admin-panel's
  * useSearchSortFilters, adapted to this repo's useUrlParams/q/sort_by/
- * sort_dir key names (autodrive-b85.3). `search` and `page` are sent to
+ * sort_dir key names. `search` and `page` are sent to
  * the server; `sortField`/`sortDir` stay client-side over just the current
  * page since GetUsersQueryDto has no sort param.
  */

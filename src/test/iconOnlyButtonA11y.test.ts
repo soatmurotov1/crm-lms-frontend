@@ -6,7 +6,7 @@ import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Regression guard for autodrive-6cq.5.5: every icon-only <Button>/<button>
+ * Regression guard for every icon-only <Button>/<button>
  * must expose an accessible name (aria-label/aria-labelledby) -- otherwise a
  * screen reader announces a bare "button" and there's nothing for a sighted
  * user to fall back to either.
@@ -203,7 +203,7 @@ function scanRepo(): Violation[] {
   return violations;
 }
 
-describe('icon-only Button/button accessible-name guard (autodrive-6cq.5.5)', () => {
+describe('icon-only Button/button accessible-name guard', () => {
   it('flags a fabricated icon-only button with no aria-label', () => {
     const violations: Violation[] = [];
     scanSource(

@@ -13,14 +13,14 @@ vi.mock('@/api/axiosInstance', () => ({
 
 const owner: User = {
   id: 'owner-1',
-  email: 'demo@automaktab.uz',
+  email: 'demo@lms.local',
   name: 'Demo Owner',
   role: 'owner',
 };
 
 const operator: User = {
   id: 'operator-1',
-  email: 'operator@automaktab.uz',
+  email: 'operator@lms.local',
   name: 'Operator',
   role: 'operator',
   branch_id: 'branch-1',

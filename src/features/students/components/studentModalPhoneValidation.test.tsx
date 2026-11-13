@@ -19,7 +19,7 @@ vi.mock('@/features/groups/api/groupService', () => ({
 vi.mock('@/features/courses/api/courseService', () => ({
   useCourses: () => ({ data: [] }),
 }));
-// autodrive-553: StudentModal now also runs a debounced create-time
+// StudentModal now also runs a debounced create-time
 // duplicate-check query (search-as-you-type on last name / phone).
 vi.mock('@/features/students/api/studentService', () => ({
   useStudentsPage: () => ({ data: undefined, isFetching: false }),
@@ -38,12 +38,11 @@ const setup = () => {
       open
       onClose={vi.fn()}
       onSubmit={onSubmit}
-      courseType="tezkor"
+      courseType="online"
     />,
   );
   fireEvent.change(q('last_name'), { target: { value: 'Karimov' } });
   fireEvent.change(q('first_name'), { target: { value: 'Aziz' } });
-  fireEvent.change(q('learner_password'), { target: { value: 'password1' } });
   return { onSubmit };
 };
 

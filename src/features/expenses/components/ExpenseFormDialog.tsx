@@ -25,7 +25,6 @@ import {
   useCreateExpense,
   useCreateTeacherSettlement,
   useExpenseTeacherOptions,
-  useExpenseVehicleOptions,
   useUpdateExpense,
 } from '@/features/expenses/api/expenseService';
 import type {
@@ -93,7 +92,6 @@ const makeExpenseFormSchema = (t: (key: string) => string) =>
     category: z.enum([
       'rent',
       'utilities',
-      'vehicle',
       'marketing',
       'supplies',
       'administrative',
@@ -116,7 +114,6 @@ const makeExpenseFormSchema = (t: (key: string) => string) =>
       ),
     payee: z.string().trim().optional(),
     note: z.string().trim().optional(),
-    vehicleId: z.string(),
   });
 
 const makeSettlementFormSchema = (t: (key: string) => string) =>
@@ -227,7 +224,6 @@ const ExpenseFormSession = ({
           dueDate: editExpense.due_date ?? '',
           payee: editExpense.payee ?? '',
           note: editExpense.note ?? '',
-          vehicleId: editExpense.vehicle_id ?? '',
         }
       : {
           branchTarget: 'company',
@@ -238,7 +234,6 @@ const ExpenseFormSession = ({
           dueDate: '',
           payee: '',
           note: '',
-          vehicleId: '',
         };
 
   const settlementDefaults = (): SettlementFormValues => ({
@@ -266,15 +261,6 @@ const ExpenseFormSession = ({
     control: expenseForm.control,
     name: 'branchTarget',
   });
-  const vehicleBranchId = isManager
-    ? (userBranchId ?? undefined)
-    : branchTarget === 'company'
-      ? undefined
-      : branchTarget;
-  const vehicleOptions = useExpenseVehicleOptions(
-    vehicleBranchId,
-    open && !isSettlement,
-  );
 
   useEffect(() => {
     if (!open) return;
@@ -355,9 +341,6 @@ const ExpenseFormSession = ({
         payee: commonPayload.payee,
         note: commonPayload.note,
         expected_version: originalExpense.version,
-        ...(expenseForm.getFieldState('vehicleId').isDirty
-          ? { vehicle_id: values.vehicleId || null }
-          : {}),
         ...(!guards.isManager &&
         !guards.financialFieldsLocked &&
         expenseForm.getFieldState('branchTarget').isDirty
@@ -402,7 +385,6 @@ const ExpenseFormSession = ({
               values.branchTarget === 'company' ? null : values.branchTarget,
           }),
       idempotency_key: getIdempotencyKey(),
-      ...(values.vehicleId ? { vehicle_id: values.vehicleId } : {}),
     };
 
     const submitMutation = () => {
@@ -704,13 +686,7 @@ const ExpenseFormSession = ({
                         </FormLabel>
                         <Select
                           value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            expenseForm.setValue('vehicleId', '', {
-                              shouldDirty: true,
-                              shouldValidate: true,
-                            });
-                          }}
+                          onValueChange={field.onChange}
                           disabled={financialFieldsLocked}
                         >
                           <FormControl>
@@ -739,83 +715,6 @@ const ExpenseFormSession = ({
 
                 <FormField
                   control={expenseForm.control}
-                  name="vehicleId"
-                  render={({ field }) => {
-                    const options = vehicleOptions.data ?? [];
-                    const showHistorical =
-                      !!editExpense?.vehicle_id &&
-                      field.value === editExpense.vehicle_id &&
-                      vehicleBranchId === editExpense.branch_id &&
-                      !options.some((option) => option.id === field.value);
-                    return (
-                      <FormItem>
-                        <FormLabel>{t('expenses.form.vehicle')}</FormLabel>
-                        <Select
-                          value={field.value || 'none'}
-                          onValueChange={(value) =>
-                            field.onChange(value === 'none' ? '' : value)
-                          }
-                          disabled={
-                            financialFieldsLocked ||
-                            !vehicleBranchId ||
-                            vehicleOptions.isLoading
-                          }
-                        >
-                          <FormControl>
-                            <SelectTrigger
-                              aria-label={t('expenses.form.vehicle')}
-                              className="bg-secondary border-border"
-                            >
-                              <SelectValue
-                                placeholder={t('expenses.form.vehicle_none')}
-                              />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="none">
-                              {t('expenses.form.vehicle_none')}
-                            </SelectItem>
-                            {showHistorical && (
-                              <SelectItem value={editExpense.vehicle_id!}>
-                                {editExpense.vehicle_plate_number ??
-                                  editExpense.vehicle_id}{' '}
-                                ({t('expenses.form.vehicle_historical')})
-                              </SelectItem>
-                            )}
-                            {options.map((option) => (
-                              <SelectItem key={option.id} value={option.id}>
-                                {option.plate_number} · {option.make}{' '}
-                                {option.model}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {!vehicleBranchId && (
-                          <p className="text-xs text-muted-foreground">
-                            {t('expenses.form.vehicle_requires_branch')}
-                          </p>
-                        )}
-                        {vehicleOptions.isError && (
-                          <div className="flex items-center gap-2 text-xs text-destructive">
-                            {t('expenses.form.vehicle_load_error')}
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => void vehicleOptions.refetch()}
-                            >
-                              {t('common.retry')}
-                            </Button>
-                          </div>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-
-                <FormField
-                  control={expenseForm.control}
                   name="category"
                   render={({ field }) => (
                     <FormItem>
@@ -838,9 +737,6 @@ const ExpenseFormSession = ({
                           </SelectItem>
                           <SelectItem value="utilities">
                             {t('expenses.category.utilities')}
-                          </SelectItem>
-                          <SelectItem value="vehicle">
-                            {t('expenses.category.vehicle')}
                           </SelectItem>
                           <SelectItem value="marketing">
                             {t('expenses.category.marketing')}

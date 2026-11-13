@@ -68,7 +68,7 @@ const STUDENT: Student = {
   first_name: 'Aziz',
   last_name: 'Karimov',
   phone: '+998901234567',
-  course_type: 'avto_maktab',
+  course_type: 'offline',
   branch_id: 'branch-9',
   branch_name: 'Chilonzor',
   payment_method: 'naqd',
@@ -115,7 +115,7 @@ describe('StudentsPage Excel export filters', () => {
   it('exports with the same active filters as the visible server-side list', async () => {
     await renderWithRouter(<StudentsPage />, {
       initialEntry:
-        '/students?course_type=avto_maktab&branch_id=branch-9' +
+        '/students?course_type=offline&branch_id=branch-9' +
         '&operator_id=operator-7&q=aziz&date_from=2026-07-01' +
         '&date_to=2026-07-31&status=active&has_debt=false' +
         '&has_group=false&referred_by_user_id=user-ref' +
@@ -144,7 +144,7 @@ describe('StudentsPage Excel export filters', () => {
 
     expect(exportFilters).toEqual(activeListFilters);
     expect(activeListFilters).toMatchObject({
-      courseType: 'avto_maktab',
+      courseType: 'offline',
       branchId: 'branch-9',
       operatorId: 'operator-7',
       search: 'aziz',

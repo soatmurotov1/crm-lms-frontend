@@ -1,4 +1,4 @@
-@import '@autodrive/design-tokens/tokens.css';
+@import './styles/design-tokens.css';
 @import 'tailwindcss';
 @import './fonts.css';
 
@@ -42,7 +42,7 @@
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
-  /* Keep existing utility names connected to the AutoDrive brand tokens. */
+  /* Keep existing utility names connected to the LMS brand tokens. */
   --color-white: hsl(var(--brand-white));
   --color-black: hsl(var(--brand-navy));
   --color-slate-50: hsl(var(--surface));
@@ -117,10 +117,10 @@
 }
 
 /* ==========================================================================
- * AutoDrive brand theme -- BEGIN
+ * LMS brand theme -- BEGIN
  *
  * MUST stay UNLAYERED (not inside @layer base).
- * `@autodrive/design-tokens/tokens.css` is imported unlayered. In the CSS
+ * `./styles/design-tokens.css` is imported unlayered. In the CSS
  * cascade, unlayered normal declarations beat layered ones at equal
  * specificity. Keep this block unlayered and after the design-tokens import
  * so the app palette is authoritative in both light and dark mode.
@@ -254,7 +254,7 @@
   --sidebar-ring: var(--ring);
 }
 
-/* AutoDrive brand theme -- END */
+/* LMS brand theme -- END */
 
 @layer base {
   * {

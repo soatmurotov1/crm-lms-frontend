@@ -64,8 +64,8 @@ vi.mock('@/features/dashboard/api/dashboardService', () => ({
   useDashboardAnalytics: () => ({
     data: {
       total_students: 10,
-      active_tezkor: 4,
-      active_avto: 6,
+      active_online: 4,
+      active_offline: 6,
       new_this_month: 2,
       new_last_month: 1,
       total_revenue: 1000000,
@@ -95,7 +95,7 @@ const renderDashboardPage = () =>
     routePattern: '/dashboard',
   });
 
-describe('DashboardRouter role routing (autodrive-vh0.6 regression)', () => {
+describe('DashboardRouter role routing (regression)', () => {
   // The sub-dashboards are now React.lazy, so the marker appears after the
   // Suspense boundary resolves — findBy* awaits that.
   it('routes a teacher to TeacherDashboard', async () => {

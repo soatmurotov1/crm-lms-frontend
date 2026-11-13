@@ -5,7 +5,7 @@ import UserDetailPage from '@/features/staff/pages/UserDetailPage';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
 // Controllable per-test fixture for isLoading/isError/data-not-found split
-// below (autodrive-d4j). Starts undefined (vi.hoisted runs before USER is
+// below. Starts undefined (vi.hoisted runs before USER is
 // initialized) -- backfilled to USER right after the const, same pattern as
 // branch.current in branchDetailPage.test.tsx.
 const userQuery = vi.hoisted(() => ({
@@ -54,10 +54,10 @@ describe('UserDetailPage referred_students_count Field', () => {
   });
 });
 
-// autodrive-d4j: a real fetch error must not read the same as a genuine
+// a real fetch error must not read the same as a genuine
 // not-found -- distinct title/icon per EntityDetailShell's isError/
 // errorTitle/errorIcon props, same split AuditDetailPage already does.
-describe('UserDetailPage error vs not-found (autodrive-d4j)', () => {
+describe('UserDetailPage error vs not-found', () => {
   it('shows the not-found message when the user genuinely does not exist', async () => {
     userQuery.data = undefined;
     userQuery.isError = false;

@@ -4,18 +4,33 @@
  */
 
 export interface paths {
-  '/admin/status': {
+  '/api/attendance': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /**
-     * Diagnostic — show which admin-related env vars the running container sees
-     * @description Requires `x-admin-key` (ADMIN_API_KEY) or an authenticated dev JWT. Only reveals presence flags, never secret values.
-     */
-    get: operations['AdminController_status'];
+    get?: never;
+    /** ADMIN, TEACHER */
+    put: operations['AttendanceController_updateAttendance'];
+    /** ADMIN, TEACHER */
+    post: operations['AttendanceController_createAttendance'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/attendance/{lessonId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, SUPERADMIN, TEACHER */
+    get: operations['AttendanceController_getAttendanceByLesson'];
     put?: never;
     post?: never;
     delete?: never;
@@ -24,14 +39,15 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/attendance': {
+  '/api/attendance/stats/weekly': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['AttendanceController_findHistoryForStudent'];
+    /** ADMIN, SUPERADMIN, TEACHER */
+    get: operations['AttendanceController_getWeeklyStats'];
     put?: never;
     post?: never;
     delete?: never;
@@ -40,7 +56,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/attendance/batch': {
+  '/api/auth/change-phone/confirm': {
     parameters: {
       query?: never;
       header?: never;
@@ -49,48 +65,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['AttendanceController_batchAttendance'];
+    /** Telefon raqamini o'zgartirishni tasdiqlash */
+    post: operations['AuthController_confirmPhoneChange'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/audit-logs': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get audit logs. Owner/dev see company-wide; manager sees own branch only. */
-    get: operations['AuditController_findAll'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/audit-logs/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a single audit log by id (deep-linkable detail view). */
-    get: operations['AuditController_findById'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/auth/change-password': {
+  '/api/auth/change-phone/send-code': {
     parameters: {
       query?: never;
       header?: never;
@@ -99,15 +82,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Change current user password (requires current password); returns a fresh token so the current session survives the tokenVersion bump */
-    post: operations['AuthController_changePassword'];
+    /** Yangi telefon raqamiga tasdiqlash kodi yuborish */
+    post: operations['AuthController_requestPhoneChange'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/auth/demo': {
+  '/api/auth/forgot-password': {
     parameters: {
       query?: never;
       header?: never;
@@ -116,15 +99,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Open a server-provisioned demo session */
-    post: operations['AuthController_demo'];
+    /** Parolni tiklash uchun SMS kod so'rash */
+    post: operations['AuthController_forgotPassword'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/auth/login': {
+  '/api/auth/login': {
     parameters: {
       query?: never;
       header?: never;
@@ -133,7 +116,6 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Login and receive httpOnly cookie + JSON token */
     post: operations['AuthController_login'];
     delete?: never;
     options?: never;
@@ -141,7 +123,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/auth/logout': {
+  '/api/auth/login-attempts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Kirish urinishlari jurnali (xavfsizlik) */
+    get: operations['AuthController_loginAttempts'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/auth/login/admin': {
     parameters: {
       query?: never;
       header?: never;
@@ -150,7 +149,55 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Clear auth cookie */
+    post: operations['AuthController_loginAdmin'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/auth/login/student': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AuthController_loginStudent'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/auth/login/teacher': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AuthController_loginTeacher'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/auth/logout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Chiqish — sessiya serverda yopiladi */
     post: operations['AuthController_logout'];
     delete?: never;
     options?: never;
@@ -158,24 +205,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/auth/me': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get current user from cookie/token */
-    get: operations['AuthController_me'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/auth/me/crm-tour': {
+  '/api/auth/logout-all': {
     parameters: {
       query?: never;
       header?: never;
@@ -184,15 +214,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
+    /** Hamma qurilmadan chiqish */
+    post: operations['AuthController_logoutAll'];
     delete?: never;
     options?: never;
     head?: never;
-    /** Record CRM tour completion for the current user. Keeps the first timestamp. */
-    patch: operations['AuthController_completeCrmTour'];
+    patch?: never;
     trace?: never;
   };
-  '/auth/stop-impersonation': {
+  '/api/auth/refresh': {
     parameters: {
       query?: never;
       header?: never;
@@ -201,33 +231,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Restore the original dev session from an impersonated token */
-    post: operations['AuthController_stopImpersonation'];
+    /** Refresh token orqali yangi access token olish */
+    post: operations['AuthController_refresh'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/blog-posts': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List published blog posts (public, paginated) */
-    get: operations['BlogPostsController_list'];
-    put?: never;
-    /** Create a blog post (dev only) */
-    post: operations['BlogPostsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/blog-posts/{id}': {
+  '/api/auth/register': {
     parameters: {
       query?: never;
       header?: never;
@@ -236,99 +248,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
-    /** Delete a blog post (dev only) */
-    delete: operations['BlogPostsController_remove'];
-    options?: never;
-    head?: never;
-    /** Update a blog post, incl. draft/publish toggle (dev only) */
-    patch: operations['BlogPostsController_update'];
-    trace?: never;
-  };
-  '/blog-posts/{slug}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a published blog post by slug (public) */
-    get: operations['BlogPostsController_findBySlug'];
-    put?: never;
-    post?: never;
+    /** Ochiq ro'yxatdan o'tish - yangi hisob STUDENT bo'lib ochiladi */
+    post: operations['AuthController_register'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/blog-posts/admin': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List blog posts of any status, paginated (dev only) */
-    get: operations['BlogPostsController_listAdmin'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/blog-posts/admin/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a blog post by id, any status (dev only) */
-    get: operations['BlogPostsController_findByIdAdmin'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/branches': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['BranchesController_findAll'];
-    put?: never;
-    post: operations['BranchesController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/branches/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['BranchesController_findById'];
-    put?: never;
-    post?: never;
-    delete: operations['BranchesController_remove'];
-    options?: never;
-    head?: never;
-    patch: operations['BranchesController_update'];
-    trace?: never;
-  };
-  '/branches/{id}/restore': {
+  '/api/auth/reset-password': {
     parameters: {
       query?: never;
       header?: never;
@@ -337,14 +265,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
+    /** SMS kod bilan yangi parol o'rnatish */
+    post: operations['AuthController_resetPassword'];
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['BranchesController_restore'];
+    patch?: never;
     trace?: never;
   };
-  '/companies/me/telegram-chat': {
+  '/api/auth/send-code': {
     parameters: {
       query?: never;
       header?: never;
@@ -353,150 +282,18 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Set/update the owner's company Telegram chat id for event notifications (payments, new students) */
-    patch: operations['CompaniesController_updateTelegramChat'];
-    trace?: never;
-  };
-  '/courses': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['CoursesController_findAll'];
-    put?: never;
-    post: operations['CoursesController_create'];
+    /**
+     * Telefon raqamiga tasdiqlash kodi (SMS) yuborish
+     * @description Raqam bazadan tekshiriladi: RESET_PASSWORD uchun hisob mavjud bo'lishi, REGISTER va CHANGE_PHONE uchun esa raqam bo'sh bo'lishi shart.
+     */
+    post: operations['AuthController_sendCode'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/courses/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['CoursesController_findById'];
-    put?: never;
-    post?: never;
-    delete: operations['CoursesController_remove'];
-    options?: never;
-    head?: never;
-    patch: operations['CoursesController_update'];
-    trace?: never;
-  };
-  '/dashboard/analytics': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get main dashboard analytics matching frontend */
-    get: operations['DashboardController_getAnalytics'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/dashboard/company-overview': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get revenue-control company dashboard overview */
-    get: operations['DashboardController_getCompanyOverview'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/dashboard/expense-breakdown': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Expense-ledger totals by branch and category for dashboard drill-downs */
-    get: operations['DashboardController_getExpenseBreakdown'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/dashboard/finance-summary': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Reconciled finance KPI summary (income, paid outflows, cash-flow balance, outstanding, teacher payable) */
-    get: operations['DashboardController_getFinanceSummary'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/dashboard/teacher-analytics': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get teacher specific dashboard analytics */
-    get: operations['DashboardController_getTeacherAnalytics'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/demo-requests': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List demo requests (dev only, paginated) */
-    get: operations['DemoRequestsController_list'];
-    put?: never;
-    /** Submit a demo/lead request (public, throttled 120/min/IP and 5/min/phone) */
-    post: operations['DemoRequestsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/demo-requests/{id}': {
+  '/api/auth/set-password': {
     parameters: {
       query?: never;
       header?: never;
@@ -505,31 +302,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Update demo request status (dev only) */
-    patch: operations['DemoRequestsController_updateStatus'];
-    trace?: never;
-  };
-  '/documents': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['DocumentsController_findAll'];
-    put?: never;
-    post: operations['DocumentsController_create'];
+    /** SMS kod tasdiqlangandan keyin foydalanuvchi o'z parolini qo'yadi */
+    post: operations['AuthController_setPassword'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/documents/{id}': {
+  '/api/auth/verify-code': {
     parameters: {
       query?: never;
       header?: never;
@@ -538,37 +319,23 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
-    delete: operations['DocumentsController_remove'];
-    options?: never;
-    head?: never;
-    patch: operations['DocumentsController_update'];
-    trace?: never;
-  };
-  '/driving-sessions': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['DrivingSessionsController_findAll'];
-    put?: never;
-    post: operations['DrivingSessionsController_create'];
+    /** SMS kodni tasdiqlash */
+    post: operations['AuthController_verifyCode'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/driving-sessions/{id}': {
+  '/api/branches': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['DrivingSessionsController_findOne'];
+    /** Faol filiallar ro‘yxati */
+    get: operations['BranchesController_list'];
     put?: never;
     post?: never;
     delete?: never;
@@ -577,7 +344,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/driving-sessions/{id}/approve': {
+  '/api/course': {
     parameters: {
       query?: never;
       header?: never;
@@ -586,85 +353,42 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['DrivingSessionsController_approve'];
+    /** ADMIN, SUPERADMIN */
+    post: operations['CourseController_createCourse'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/driving-sessions/{id}/cancel': {
+  '/api/course/{id}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations['DrivingSessionsController_cancel'];
-    delete?: never;
+    /** ADMIN, SUPERADMIN */
+    get: operations['CourseController_getOneCourse'];
+    /** ADMIN, SUPERADMIN */
+    put: operations['CourseController_updateCourseById'];
+    post?: never;
+    /** ADMIN, SUPERADMIN */
+    delete: operations['CourseController_deleteCourseById'];
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/driving-sessions/{id}/correct': {
+  '/api/course/all': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations['DrivingSessionsController_correct'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/driving-sessions/{id}/reject': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['DrivingSessionsController_reject'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/driving-sessions/{id}/submit': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['DrivingSessionsController_submit'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/driving-sessions/summary': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['DrivingSessionsController_summary'];
+    /** ADMIN, SUPERADMIN */
+    get: operations['CourseController_getAllCourse'];
     put?: never;
     post?: never;
     delete?: never;
@@ -673,32 +397,15 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/exams': {
+  '/api/dashboard/summary': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put?: never;
-    /** Create a new exam result */
-    post: operations['ExamsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/exams/student/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get exam history for a student */
-    get: operations['ExamsController_findByStudentId'];
+    /** Bosh sahifa ko‘rsatkichlari */
+    get: operations['DashboardController_getSummary'];
     put?: never;
     post?: never;
     delete?: never;
@@ -707,15 +414,121 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/expenses': {
+  '/api/exams': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['ExpensesController_findAll'];
+    get?: never;
     put?: never;
+    /** ADMIN, SUPERADMIN, TEACHER */
+    post: operations['ExamsController_createExam'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/exams/{examId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, SUPERADMIN, TEACHER, STUDENT */
+    get: operations['ExamsController_getExamById'];
+    put?: never;
+    post?: never;
+    /** ADMIN, SUPERADMIN, TEACHER */
+    delete: operations['ExamsController_deleteExam'];
+    options?: never;
+    head?: never;
+    /** ADMIN, SUPERADMIN, TEACHER */
+    patch: operations['ExamsController_updateExam'];
+    trace?: never;
+  };
+  '/api/exams/group/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, SUPERADMIN, TEACHER, STUDENT */
+    get: operations['ExamsController_getExamsByGroup'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/exams/response': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** STUDENT */
+    put: operations['ExamsController_updateResponse'];
+    /** STUDENT */
+    post: operations['ExamsController_createResponse'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/exams/response/{examId}/student/{studentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** TEACHER, ADMIN, SUPERADMIN, MANAGEMENT */
+    get: operations['ExamsController_getStudentResponse'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/exams/response/mine/{examId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** STUDENT */
+    get: operations['ExamsController_getMyResponse'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/expenses': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** ADMIN, SUPERADMIN */
     post: operations['ExpensesController_create'];
     delete?: never;
     options?: never;
@@ -723,23 +536,25 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/expenses/{id}': {
+  '/api/expenses/{id}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['ExpensesController_findOne'];
-    put?: never;
+    get?: never;
+    /** ADMIN, SUPERADMIN */
+    put: operations['ExpensesController_update'];
     post?: never;
+    /** ADMIN, SUPERADMIN */
     delete: operations['ExpensesController_remove'];
     options?: never;
     head?: never;
-    patch: operations['ExpensesController_update'];
+    patch?: never;
     trace?: never;
   };
-  '/expenses/{id}/cancel': {
+  '/api/expenses/{id}/pay': {
     parameters: {
       query?: never;
       header?: never;
@@ -752,42 +567,11 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['ExpensesController_cancel'];
+    /** ADMIN, SUPERADMIN */
+    patch: operations['ExpensesController_markPaid'];
     trace?: never;
   };
-  '/expenses/{id}/history': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['ExpensesController_getHistory'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/expenses/{id}/payments': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['ExpensesController_recordPayment'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/expenses/{id}/payments/{paymentId}/void': {
+  '/api/expenses/{id}/restore': {
     parameters: {
       query?: never;
       header?: never;
@@ -800,17 +584,19 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['ExpensesController_voidPayment'];
+    /** ADMIN, SUPERADMIN */
+    patch: operations['ExpensesController_restore'];
     trace?: never;
   };
-  '/expenses/branch-options': {
+  '/api/expenses/all': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['ExpensesController_getBranchOptions'];
+    /** ADMIN, SUPERADMIN */
+    get: operations['ExpensesController_getAll'];
     put?: never;
     post?: never;
     delete?: never;
@@ -819,15 +605,15 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/expenses/history/deleted': {
+  '/api/expenses/summary': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** List deleted expenses with history available */
-    get: operations['ExpensesController_listDeletedHistory'];
+    /** ADMIN, SUPERADMIN */
+    get: operations['ExpensesController_getSummary'];
     put?: never;
     post?: never;
     delete?: never;
@@ -836,23 +622,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/expenses/month-close.csv': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['ExpensesController_exportMonthClose'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/expenses/reviewed': {
+  '/api/grades': {
     parameters: {
       query?: never;
       header?: never;
@@ -861,22 +631,41 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
+    /** ADMIN, TEACHER */
+    post: operations['GradesController_create'];
     delete?: never;
     options?: never;
     head?: never;
-    /** Review expenses */
-    patch: operations['ExpensesController_review'];
+    patch?: never;
     trace?: never;
   };
-  '/expenses/teacher-options': {
+  '/api/grades/{id}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['ExpensesController_getTeacherOptions'];
+    get?: never;
+    /** ADMIN, TEACHER */
+    put: operations['GradesController_update'];
+    post?: never;
+    /** ADMIN, TEACHER */
+    delete: operations['GradesController_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/grades/group/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, TEACHER */
+    get: operations['GradesController_getByGroup'];
     put?: never;
     post?: never;
     delete?: never;
@@ -885,15 +674,15 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/expenses/triage-counts': {
+  '/api/grades/mine': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get open expense triage counts */
-    get: operations['ExpensesController_getTriageCounts'];
+    /** STUDENT — o'z baholari */
+    get: operations['GradesController_getMine'];
     put?: never;
     post?: never;
     delete?: never;
@@ -902,14 +691,15 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/expenses/vehicle-options': {
+  '/api/grades/student/{studentId}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['ExpensesController_getVehicleOptions'];
+    /** ADMIN, TEACHER, STUDENT */
+    get: operations['GradesController_getByStudent'];
     put?: never;
     post?: never;
     delete?: never;
@@ -918,23 +708,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/fuel-stations': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['FuelStationsController_list'];
-    put?: never;
-    post: operations['FuelStationsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/fuel-stations/{id}': {
+  '/api/groups': {
     parameters: {
       query?: never;
       header?: never;
@@ -943,21 +717,41 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
+    /** SUPERADMIN, ADMIN */
+    post: operations['GroupsController_createGroup'];
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['FuelStationsController_update'];
+    patch?: never;
     trace?: never;
   };
-  '/fuel-stations/{id}/balance': {
+  '/api/groups/{groupId}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['FuelStationsController_balance'];
+    get?: never;
+    /** SUPERADMIN, ADMIN, TEACHER */
+    put: operations['GroupsController_updateGroupById'];
+    post?: never;
+    /** SUPERADMIN, ADMIN, TEACHER */
+    delete: operations['GroupsController_deleteGroupById'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/groups/all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN, TEACHER, STUDENT */
+    get: operations['GroupsController_getAllGroup'];
     put?: never;
     post?: never;
     delete?: never;
@@ -966,55 +760,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/fuel-stations/{id}/reconciliations': {
+  '/api/groups/lesson/{groupId}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['FuelStationsController_reconciliations'];
-    put?: never;
-    post: operations['FuelStationsController_reconcile'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/groups': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['GroupsController_findAll'];
-    put?: never;
-    post: operations['GroupsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/groups/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['GroupsController_findById'];
+    /** SUPERADMIN, ADMIN, TEACHER, STUDENT */
+    get: operations['GroupsController_getGroupLessons'];
     put?: never;
     post?: never;
-    delete: operations['GroupsController_remove'];
+    delete?: never;
     options?: never;
     head?: never;
-    patch: operations['GroupsController_update'];
+    patch?: never;
     trace?: never;
   };
-  '/groups/{id}/restore': {
+  '/api/groups/students/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN, TEACHER */
+    get: operations['GroupsController_getAllStudentGroupById'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/homework': {
     parameters: {
       query?: never;
       header?: never;
@@ -1023,21 +803,41 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
+    /** SUPERADMIN, ADMIN, TEACHER */
+    post: operations['HomeworkController_createHomework'];
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['GroupsController_restore'];
+    patch?: never;
     trace?: never;
   };
-  '/groups/overview': {
+  '/api/homework-response': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['GroupsController_getOverview'];
+    get?: never;
+    /** STUDENT */
+    put: operations['HomeworkResponseController_updateHomeworkResponse'];
+    /** STUDENT */
+    post: operations['HomeworkResponseController_createHomeworkResponse'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/homework-response/homework/{homeworkId}/student/{studentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** TEACHER, ADMIN, SUPERADMIN, MANAGEMENT */
+    get: operations['HomeworkResponseController_getStudentHomeworkResponse'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1046,15 +846,15 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/health': {
+  '/api/homework-response/mine/{homeworkId}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Liveness + DB readiness probe */
-    get: operations['HealthController_check'];
+    /** STUDENT */
+    get: operations['HomeworkResponseController_getMyHomeworkResponse'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1063,25 +863,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/lead-sources': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get all lead sources (system + company custom) */
-    get: operations['LeadSourcesController_findAll'];
-    put?: never;
-    /** Add a new custom lead source for company */
-    post: operations['LeadSourcesController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/lead-sources/{id}': {
+  '/api/homework-results': {
     parameters: {
       query?: never;
       header?: never;
@@ -1090,25 +872,24 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
-    /** Delete a custom lead source */
-    delete: operations['LeadSourcesController_delete'];
+    /** ADMIN, SUPERADMIN, TEACHER */
+    post: operations['HomeworkResultsController_createHomeworkResult'];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/lead-stages': {
+  '/api/homework-results/{id}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get all lead stages for company */
-    get: operations['LeadStagesController_findAll'];
-    /** Update/reorder WORK stages for company */
-    put: operations['LeadStagesController_updateStages'];
+    get?: never;
+    /** ADMIN, SUPERADMIN, TEACHER */
+    put: operations['HomeworkResultsController_updateHomeworkResult'];
     post?: never;
     delete?: never;
     options?: never;
@@ -1116,17 +897,103 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/leads': {
+  '/api/homework-results/homework/{homeworkId}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** List leads with filters and pagination */
-    get: operations['LeadsController_findAll'];
+    /** ADMIN, SUPERADMIN, TEACHER */
+    get: operations['HomeworkResultsController_getHomeworkResultByHomeworkId'];
     put?: never;
-    /** Create a new lead */
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/homework-results/mine/{homeworkId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** STUDENT */
+    get: operations['HomeworkResultsController_getMyHomeworkResult'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/homework/{homeworkId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, SUPERADMIN, TEACHER */
+    get: operations['HomeworkController_getHomeworkById'];
+    /** SUPERADMIN, ADMIN */
+    put: operations['HomeworkController_updateHomework'];
+    post?: never;
+    /** SUPERADMIN, ADMIN, TEACHER */
+    delete: operations['HomeworkController_deleteHomework'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/homework/group/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, SUPERADMIN, TEACHER, STUDENT */
+    get: operations['HomeworkController_getAllHomeworkByGroup'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/homework/teacher/{homeworkId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** TEACHER */
+    put: operations['HomeworkController_updateHomeworkByTeacher'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/leads': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** ADMIN, SUPERADMIN, MANAGEMENT, ADMINSTRATOR */
     post: operations['LeadsController_create'];
     delete?: never;
     options?: never;
@@ -1134,44 +1001,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/leads/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get lead detail by ID */
-    get: operations['LeadsController_findById'];
-    put?: never;
-    post?: never;
-    /** Soft delete a lead */
-    delete: operations['LeadsController_delete'];
-    options?: never;
-    head?: never;
-    /** Update lead with optimistic concurrency check */
-    patch: operations['LeadsController_update'];
-    trace?: never;
-  };
-  '/leads/{id}/activities': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get timeline activities for lead */
-    get: operations['LeadsController_getActivities'];
-    put?: never;
-    /** Add note, task, or log call/message/meeting */
-    post: operations['LeadsController_createActivity'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/leads/{id}/activities/{aid}': {
+  '/api/leads/{id}': {
     parameters: {
       query?: never;
       header?: never;
@@ -1179,1094 +1009,17 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    put?: never;
+    /** ADMIN, SUPERADMIN, MANAGEMENT, ADMINSTRATOR */
+    put: operations['LeadsController_update'];
     post?: never;
-    /** Delete activity (author within 24h or manager) */
-    delete: operations['LeadsController_deleteActivity'];
-    options?: never;
-    head?: never;
-    /** Update note body or mark task completed */
-    patch: operations['LeadsController_updateActivity'];
-    trace?: never;
-  };
-  '/leads/{id}/assign': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Assign lead to staff user or unassign */
-    post: operations['LeadsController_assign'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Assign lead to staff user or unassign (PATCH alias) */
-    patch: operations['LeadsController_assignPatch'];
-    trace?: never;
-  };
-  '/leads/{id}/convert': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Convert lead to enrolled student */
-    post: operations['LeadsController_convert'];
-    delete?: never;
+    /** ADMIN, SUPERADMIN, MANAGEMENT, ADMINSTRATOR */
+    delete: operations['LeadsController_remove'];
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/leads/{id}/stage': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Transition lead to another stage */
-    post: operations['LeadsController_transitionStage'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Transition lead to another stage (PATCH alias) */
-    patch: operations['LeadsController_transitionStagePatch'];
-    trace?: never;
-  };
-  '/leads/board': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Kanban board columns and lead cards */
-    get: operations['LeadsController_getBoard'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/leads/check-duplicate': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Check phone for duplicate open leads and students (GET query) */
-    get: operations['LeadsController_checkDuplicateGet'];
-    put?: never;
-    /** Check phone for duplicate open leads and students */
-    post: operations['LeadsController_checkDuplicate'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/leads/export.xlsx': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Export leads to spreadsheet/CSV */
-    get: operations['LeadsController_exportLeads'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/leads/metrics': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get funnel and conversion metrics */
-    get: operations['LeadsController_getMetrics'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/learner/assignments': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List school assignments for the signed-in learner’s active school links */
-    get: operations['LearnerProgressController_listAssignments'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/learner/auth/login': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Log in to a learning account with phone + password */
-    post: operations['LearnerController_login'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/learner/auth/logout': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['LearnerController_logout'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/learner/me': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get the learning account and school links */
-    get: operations['LearnerController_me'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/learner/progress/topics': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Paginated weak topics from this learner’s finished attempts, including private practice */
-    get: operations['LearnerProgressController_listTopics'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/learner/results': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List this learner’s attempts only (school assignments and their own practice) */
-    get: operations['LearnerProgressController_listResults'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/lessons': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['AttendanceController_findAll'];
-    put?: never;
-    post: operations['AttendanceController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/lessons/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['AttendanceController_findById'];
-    put?: never;
-    post?: never;
-    delete: operations['AttendanceController_remove'];
-    options?: never;
-    head?: never;
-    patch: operations['AttendanceController_update'];
-    trace?: never;
-  };
-  '/metrics': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Prometheus metrics endpoint — gated by SCRAPER_TOKEN header (set env SCRAPER_TOKEN >=16 chars) */
-    get: operations['MetricsController_getMetrics'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/payments': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get all payments */
-    get: operations['PaymentsController_findAll'];
-    put?: never;
-    /** Record a new payment */
-    post: operations['PaymentsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/payments/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Delete a payment (reverts student debt) */
-    delete: operations['PaymentsController_remove'];
-    options?: never;
-    head?: never;
-    /** Update a payment (adjusts student debt if amount changes) */
-    patch: operations['PaymentsController_update'];
-    trace?: never;
-  };
-  '/payments/snapshot': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get current snapshot (today, month, debt) — branch-scoped only */
-    get: operations['PaymentsController_getSnapshot'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/payments/summary': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get payments summary */
-    get: operations['PaymentsController_getSummary'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/analytics': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Cross-company aggregates for the platform admin dashboard */
-    get: operations['PlatformAnalyticsController_getAnalytics'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/analytics/usage': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Per-company daily usage metrics from audit log (pilot success) */
-    get: operations['PlatformAnalyticsController_getCompanyUsage'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/audit-log': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Filterable audit log feed for the platform admin panel */
-    get: operations['PlatformAuditLogController_findAll'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/companies': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List companies (paginated) */
-    get: operations['PlatformCompaniesController_list'];
-    put?: never;
-    /** Create a new company */
-    post: operations['PlatformCompaniesController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/companies/{companyId}/branches': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List branches for a platform company */
-    get: operations['PlatformCompanyBranchesController_list'];
-    put?: never;
-    /** Create a branch inside a platform company */
-    post: operations['PlatformCompanyBranchesController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/companies/{companyId}/branches/{branchId}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Soft delete a branch inside a platform company */
-    delete: operations['PlatformCompanyBranchesController_remove'];
-    options?: never;
-    head?: never;
-    /** Update a branch inside a platform company */
-    patch: operations['PlatformCompanyBranchesController_update'];
-    trace?: never;
-  };
-  '/platform/companies/{companyId}/users': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List users inside a platform company */
-    get: operations['PlatformCompanyUsersController_list'];
-    put?: never;
-    /** Create a user inside a platform company */
-    post: operations['PlatformCompanyUsersController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/companies/{companyId}/users/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Soft delete a user inside a platform company */
-    delete: operations['PlatformCompanyUsersController_remove'];
-    options?: never;
-    head?: never;
-    /** Update a user inside a platform company */
-    patch: operations['PlatformCompanyUsersController_update'];
-    trace?: never;
-  };
-  '/platform/companies/{companyId}/users/{id}/reset-password': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Reset a company user password */
-    post: operations['PlatformCompanyUsersController_resetPassword'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/companies/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get company by id with usage stats */
-    get: operations['PlatformCompaniesController_findById'];
-    put?: never;
-    post?: never;
-    /** Soft delete a company */
-    delete: operations['PlatformCompaniesController_remove'];
-    options?: never;
-    head?: never;
-    /** Update mutable fields on a company */
-    patch: operations['PlatformCompaniesController_update'];
-    trace?: never;
-  };
-  '/platform/companies/{id}/approve': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Approve a company (set status=active) */
-    post: operations['PlatformCompaniesController_approve'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/companies/{id}/feature-flags': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Replace feature flags for a company */
-    post: operations['PlatformCompaniesController_updateFeatureFlags'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/companies/{id}/impersonate': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Issue an owner token for the selected company */
-    post: operations['PlatformCompaniesController_impersonate'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/companies/{id}/suspend': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Suspend a company (set status=suspended) */
-    post: operations['PlatformCompaniesController_suspend'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/global-config': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get platform-wide default course types and currencies */
-    get: operations['PlatformGlobalConfigController_getConfig'];
-    /** Replace platform-wide default course types and currencies */
-    put: operations['PlatformGlobalConfigController_updateConfig'];
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/health': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Platform dependency and migration health for the admin panel */
-    get: operations['PlatformHealthController_getHealth'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/import/companies': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Import companies from CSV (name, slug?, status?, contact_phone?, contact_email?) */
-    post: operations['PlatformImportController_importCompanies'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/import/users': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Import users from CSV (email,password,name,role,phone?,company_id|company_slug,branch_id?) */
-    post: operations['PlatformImportController_importUsers'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/users': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List platform users (paginated) */
-    get: operations['PlatformUsersController_list'];
-    put?: never;
-    /** Create a platform user */
-    post: operations['PlatformUsersController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/platform/users/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Soft delete a user */
-    delete: operations['PlatformUsersController_remove'];
-    options?: never;
-    head?: never;
-    /** Update a platform user (no password) */
-    patch: operations['PlatformUsersController_update'];
-    trace?: never;
-  };
-  '/platform/users/{id}/reset-password': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Reset a user password */
-    post: operations['PlatformUsersController_resetPassword'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List questions visible to the staff actor */
-    get: operations['QuestionsController_findAll'];
-    put?: never;
-    post: operations['QuestionsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['QuestionsController_findById'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Edit draft payload. Editing a published question creates a new immutable version. */
-    patch: operations['QuestionsController_updateDraft'];
-    trace?: never;
-  };
-  '/questions/{id}/dispute': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['QuestionsController_dispute'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/{id}/media': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['QuestionsController_uploadMedia'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/{id}/media/{mediaId}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['QuestionsController_getMedia'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/{id}/publish': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['QuestionsController_publish'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/{id}/retire': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['QuestionsController_retire'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/available-for-tests': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Published questions available for new tests (#215). Retired/disputed excluded. */
-    get: operations['QuestionsController_listAvailableForNewTests'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/practice': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List published platform_public questions for practice (excludes private, retired, disputed) */
-    get: operations['QuestionsController_listPractice'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/practice/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a reviewed published public practice question */
-    get: operations['QuestionsController_getPracticeQuestion'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/practice/{id}/check': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Check an answer against a currently published public question */
-    post: operations['QuestionsController_checkPracticeAnswer'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/practice/{id}/media/{mediaId}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Fetch diagram bytes for a published public practice question */
-    get: operations['QuestionsController_getPracticeMedia'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/practice/tickets': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List curated, reviewed public question tickets */
-    get: operations['QuestionsController_listPracticeTickets'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/questions/re-review': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Flag questions that cite a topic or legal provision for re-review after a rule change. They leave the practice pool until published again. */
-    post: operations['QuestionsController_flagForReReview'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/schedule/calendar': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['ScheduleController_getCalendarLessons'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/schedule/generate': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['ScheduleController_generateLessons'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/schedule/templates': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['ScheduleController_findAllTemplates'];
-    put?: never;
-    post: operations['ScheduleController_createTemplate'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/schedule/templates/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: operations['ScheduleController_deleteTemplate'];
-    options?: never;
-    head?: never;
-    patch: operations['ScheduleController_updateTemplate'];
-    trace?: never;
-  };
-  '/search': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Cross-entity search across students, groups, and staff */
-    get: operations['SearchController_search'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/students': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get all students */
-    get: operations['StudentsController_findAll'];
-    put?: never;
-    /** Register a new student */
-    post: operations['StudentsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/students/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a student by ID */
-    get: operations['StudentsController_findById'];
-    put?: never;
-    post?: never;
-    /** Delete a student */
-    delete: operations['StudentsController_remove'];
-    options?: never;
-    head?: never;
-    /** Update a student */
-    patch: operations['StudentsController_update'];
-    trace?: never;
-  };
-  '/students/{id}/learner-account': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    /** Create or reset the learner portal login for a student (phone + password) */
-    put: operations['StudentsController_upsertLearnerAccount'];
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/students/{id}/restore': {
+  '/api/leads/{id}/stage': {
     parameters: {
       query?: never;
       header?: never;
@@ -2279,53 +1032,19 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    /** Restore a soft-deleted student */
-    patch: operations['StudentsController_restore'];
+    /** ADMIN, SUPERADMIN, MANAGEMENT, ADMINSTRATOR */
+    patch: operations['LeadsController_updateStage'];
     trace?: never;
   };
-  '/students/bulk-create': {
+  '/api/leads/all': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put?: never;
-    /** Bulk register new students from CSV */
-    post: operations['StudentsController_bulkCreate'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/students/check-phones': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Check which phone numbers already belong to an active student in scope (CSV-import duplicate preview) */
-    post: operations['StudentsController_checkPhones'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/students/search': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Search students by name or phone */
-    get: operations['StudentsController_search'];
+    /** ADMIN, SUPERADMIN, MANAGEMENT, ADMINSTRATOR */
+    get: operations['LeadsController_getAll'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2334,7 +1053,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/teacher-settlements': {
+  '/api/leads/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, SUPERADMIN, MANAGEMENT, ADMINSTRATOR */
+    get: operations['LeadsController_getSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/lesson-videos': {
     parameters: {
       query?: never;
       header?: never;
@@ -2343,21 +1079,23 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['TeacherSettlementsController_create'];
+    /** ADMIN, SUPERADMIN, TEACHER */
+    post: operations['LessonVideosController_createLessonVideo'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/teacher-settlements/me': {
+  '/api/lesson-videos/{groupId}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['TeacherSettlementsController_listMine'];
+    /** ADMIN, SUPERADMIN, TEACHER, STUDENT */
+    get: operations['LessonVideosController_getLessonVideosByGroupId'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2366,23 +1104,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/teacher-settlements/me/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['TeacherSettlementsController_findMine'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/telegram/daily-report': {
+  '/api/lesson-videos/{id}': {
     parameters: {
       query?: never;
       header?: never;
@@ -2392,14 +1114,84 @@ export interface paths {
     get?: never;
     put?: never;
     post?: never;
+    /** ADMIN, SUPERADMIN, TEACHER */
+    delete: operations['LessonVideosController_deleteLessonVideo'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/lessons': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** SUPERADMIN, ADMIN, TEACHER */
+    post: operations['LessonsController_createLesson'];
     delete?: never;
     options?: never;
     head?: never;
-    /** Enable/disable the daily report push (owner/manager only) */
-    patch: operations['TelegramController_setDailyReport'];
+    patch?: never;
     trace?: never;
   };
-  '/telegram/expense-digest': {
+  '/api/lessons/{groupId}/{lessonId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN, TEACHER */
+    get: operations['LessonsController_getOneLessonByGroupIdAndLessonId'];
+    /** SUPERADMIN, ADMIN, TEACHER */
+    put: operations['LessonsController_updateLessonById'];
+    post?: never;
+    /** SUPERADMIN, ADMIN */
+    delete: operations['LessonsController_deleteLessonById'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/lessons/group/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN, TEACHER */
+    get: operations['LessonsController_getLessonsByGroupId'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** SUPERADMIN, ADMIN, TEACHER */
+    post: operations['NotificationsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/notifications/{id}': {
     parameters: {
       query?: never;
       header?: never;
@@ -2409,116 +1201,14 @@ export interface paths {
     get?: never;
     put?: never;
     post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Enable/disable expense digest delivery */
-    patch: operations['TelegramController_setExpenseDigest'];
-    trace?: never;
-  };
-  '/telegram/expense-digest/snooze': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Snooze expense digest delivery for 24 hours */
-    post: operations['TelegramController_snoozeExpenseDigest'];
-    delete?: never;
+    /** SUPERADMIN, ADMIN */
+    delete: operations['NotificationsController_remove'];
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/telegram/link': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Unlink this account from the bot */
-    delete: operations['TelegramController_unlink'];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/telegram/link-status': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Whether this account is linked to the bot */
-    get: operations['TelegramController_getLinkStatus'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/telegram/link-token': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Mint a one-time deep-link to connect this account to the bot */
-    post: operations['TelegramController_createLinkToken'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/tests/assignments/{assignmentId}/start': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Start or resume a school assignment attempt */
-    post: operations['TestAttemptsController_startAssignment'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/tests/attempts/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a learner attempt (reconnect) */
-    get: operations['TestAttemptsController_getLearnerAttempt'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/tests/attempts/{id}/answers': {
+  '/api/notifications/{id}/read': {
     parameters: {
       query?: never;
       header?: never;
@@ -2531,36 +1221,19 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    /** Autosave answers on a learner attempt */
-    patch: operations['TestAttemptsController_saveLearnerAnswers'];
+    /** Barcha rollar */
+    patch: operations['NotificationsController_markAsRead'];
     trace?: never;
   };
-  '/tests/attempts/{id}/submit': {
+  '/api/notifications/all': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put?: never;
-    /** Submit a learner attempt (idempotent) */
-    post: operations['TestAttemptsController_submitLearner'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/tests/outcomes': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Paginated school-assigned attempt outcomes. Public practice is excluded. */
-    get: operations['TestOutcomesController_list'];
+    /** SUPERADMIN, ADMIN */
+    get: operations['NotificationsController_getAll'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2569,15 +1242,15 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/tests/outcomes/groups': {
+  '/api/notifications/mine': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Paginated per-group summary of school-assigned tests (practice excluded) */
-    get: operations['TestOutcomesController_listGroups'];
+    /** Barcha rollar — o‘ziga tegishli xabarnomalar */
+    get: operations['NotificationsController_getMine'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2586,41 +1259,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/tests/outcomes/topics': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Paginated weak topics from school-assigned attempts in the actor’s scope */
-    get: operations['TestOutcomesController_listTopics'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/tests/practice/attempts/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Reconnect to a guest practice attempt */
-    get: operations['TestAttemptsController_getPracticeAttempt'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/tests/practice/attempts/{id}/answers': {
+  '/api/notifications/read/all': {
     parameters: {
       query?: never;
       header?: never;
@@ -2633,11 +1272,11 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    /** Autosave answers on a guest practice attempt */
-    patch: operations['TestAttemptsController_savePracticeAnswers'];
+    /** Barcha rollar */
+    patch: operations['NotificationsController_markAllAsRead'];
     trace?: never;
   };
-  '/tests/practice/attempts/{id}/submit': {
+  '/api/organizations': {
     parameters: {
       query?: never;
       header?: never;
@@ -2646,23 +1285,42 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Submit a guest practice attempt (idempotent) */
-    post: operations['TestAttemptsController_submitPractice'];
+    /** SUPERADMIN */
+    post: operations['OrganizationsController_create'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/tests/practice/preset': {
+  '/api/organizations/{id}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get the configurable public practice preset for a license category (never a government exam) */
-    get: operations['TestAttemptsController_getPreset'];
+    /** SUPERADMIN, ADMIN */
+    get: operations['OrganizationsController_getOne'];
+    /** SUPERADMIN */
+    put: operations['OrganizationsController_update'];
+    post?: never;
+    /** SUPERADMIN */
+    delete: operations['OrganizationsController_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/organizations/all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN */
+    get: operations['OrganizationsController_getAll'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2671,191 +1329,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/tests/practice/start': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Start a guest public B-category practice attempt (reviewed platform_public questions only) */
-    post: operations['TestAttemptsController_startPractice'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/tests/templates': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List school test templates visible to the actor (teachers: own only) */
-    get: operations['TestTemplatesController_findAll'];
-    put?: never;
-    /** Create a school test template (draft) */
-    post: operations['TestTemplatesController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/tests/templates/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a school test template */
-    get: operations['TestTemplatesController_findOne'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Update a draft/published template (republish needed) */
-    patch: operations['TestTemplatesController_update'];
-    trace?: never;
-  };
-  '/tests/templates/{id}/assignments': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List assignments for a template */
-    get: operations['TestTemplatesController_listAssignments'];
-    put?: never;
-    /** Assign a published template to a group or student */
-    post: operations['TestTemplatesController_assign'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/tests/templates/{id}/publish': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Publish a template for assignment */
-    post: operations['TestTemplatesController_publish'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/training-enrollments': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['TrainingEnrollmentsController_findAll'];
-    put?: never;
-    post: operations['TrainingEnrollmentsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/training-enrollments/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['TrainingEnrollmentsController_findOne'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/training-programs': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['TrainingProgramsController_findAll'];
-    put?: never;
-    post: operations['TrainingProgramsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/training-programs/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['TrainingProgramsController_findOne'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: operations['TrainingProgramsController_update'];
-    trace?: never;
-  };
-  '/users': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['UsersController_findAll'];
-    put?: never;
-    post: operations['UsersController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/users/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['UsersController_findById'];
-    put?: never;
-    post?: never;
-    delete: operations['UsersController_remove'];
-    options?: never;
-    head?: never;
-    patch: operations['UsersController_update'];
-    trace?: never;
-  };
-  '/users/{id}/activate': {
+  '/api/payments/{paymentId}/mark-paid': {
     parameters: {
       query?: never;
       header?: never;
@@ -2868,10 +1342,10 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['UsersController_activate'];
+    patch: operations['PaymentsController_markPaymentPaid'];
     trace?: never;
   };
-  '/users/{id}/deactivate': {
+  '/api/payments/{paymentId}/status': {
     parameters: {
       query?: never;
       header?: never;
@@ -2884,10 +1358,921 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['UsersController_deactivate'];
+    patch: operations['PaymentsController_updatePaymentStatus'];
     trace?: never;
   };
-  '/users/{id}/restore': {
+  '/api/payments/admin/monthly': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PaymentsController_getAdminMonthlyPayments'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/payments/students/{studentId}/monthly': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PaymentsController_getStudentMonthlyPayments'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/payments/students/{studentId}/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['PaymentsController_startStudentPayment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/payments/summary/monthly': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PaymentsController_getMonthlySummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/payments/summary/yearly': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PaymentsController_getYearlySummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/plans': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** SUPERADMIN */
+    post: operations['PlansController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/plans/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN */
+    get: operations['PlansController_getOne'];
+    /** SUPERADMIN */
+    put: operations['PlansController_update'];
+    post?: never;
+    /** SUPERADMIN */
+    delete: operations['PlansController_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/plans/all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN */
+    get: operations['PlansController_getAll'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/rooms': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** ADMIN, SUPERADMIN */
+    post: operations['RoomsController_createRoom'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/rooms/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, SUPERADMIN */
+    get: operations['RoomsController_getRoomById'];
+    /** ADMIN, SUPERADMIN */
+    put: operations['RoomsController_updateRoom'];
+    post?: never;
+    /** ADMIN, SUPERADMIN */
+    delete: operations['RoomsController_deleteRoom'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/rooms/all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, SUPERADMIN */
+    get: operations['RoomsController_getAllRoom'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/student-group': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** SUPERADMIN, ADMIN */
+    post: operations['StudentGroupController_createStudentGroup'];
+    /** SUPERADMIN, ADMIN */
+    delete: operations['StudentGroupController_deleteStudentGroup'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** SUPERADMIN, ADMIN */
+    post: operations['StudentsController_createStudent'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN */
+    get: operations['StudentsController_getOneStudent'];
+    /** SUPERADMIN, ADMIN */
+    put: operations['StudentsController_updateStudent'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students/{studentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** ADMIN, SUPERADMIN */
+    delete: operations['StudentsController_deleteStudentById'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students/all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** ADMIN, SUPERADMIN */
+    get: operations['StudentsController_getAllStudent'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students/my/group/homework/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** STUDENT */
+    get: operations['StudentsController_GetMyGroupsHomework'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students/my/group/lessonVideo/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** STUDENT */
+    get: operations['StudentsController_GetMyGroupLessonVideo'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students/my/groups': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** STUDENT */
+    get: operations['StudentsController_GetMyGroups'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students/my/lessons/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** STUDENT */
+    get: operations['StudentsController_GetMyLessons'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students/my/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** STUDENT */
+    put: operations['StudentsController_changeMyPassword'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/students/my/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** STUDENT */
+    get: operations['StudentsController_getMyProfile'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/subscriptions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** SUPERADMIN */
+    post: operations['SubscriptionsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/subscriptions/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** SUPERADMIN */
+    put: operations['SubscriptionsController_update'];
+    post?: never;
+    /** SUPERADMIN */
+    delete: operations['SubscriptionsController_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/subscriptions/all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN */
+    get: operations['SubscriptionsController_getAll'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/subscriptions/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN */
+    get: operations['SubscriptionsController_getSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/support': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Barcha rollar */
+    post: operations['SupportController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/support/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Barcha rollar */
+    get: operations['SupportController_getOne'];
+    put?: never;
+    post?: never;
+    /** SUPERADMIN */
+    delete: operations['SupportController_remove'];
+    options?: never;
+    head?: never;
+    /** SUPERADMIN, ADMIN */
+    patch: operations['SupportController_update'];
+    trace?: never;
+  };
+  '/api/support/{id}/reply': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Barcha rollar */
+    post: operations['SupportController_reply'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/support/all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Barcha rollar (xodim bo‘lmasa — faqat o‘ziniki) */
+    get: operations['SupportController_getAll'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/support/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN */
+    get: operations['SupportController_getSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/teachers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** SUPERADMIN, ADMIN */
+    post: operations['TeachersController_createTeacher'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/teachers/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN, ADMINSTRATOR, MANAGEMENT */
+    get: operations['TeachersController_getOneTeacher'];
+    /** SUPERADMIN, ADMIN */
+    put: operations['TeachersController_updateTeacherById'];
+    post?: never;
+    /** SUPERADMIN, ADMIN */
+    delete: operations['TeachersController_deleteTeacher'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/teachers/{id}/archive': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** SUPERADMIN, ADMIN */
+    put: operations['TeachersController_archiveTeacher'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/teachers/all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN, ADMINSTRATOR, MANAGEMENT */
+    get: operations['TeachersController_getAllTeacher'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/teachers/my/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** TEACHER */
+    put: operations['TeachersController_changeMyPassword'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/teachers/my/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** TEACHER */
+    get: operations['TeachersController_getMyProfile'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/users': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN, MANAGEMENT */
+    get: operations['UsersController_getAllUser'];
+    put?: never;
+    /** SUPERADMIN, ADMIN */
+    post: operations['UsersController_createUser'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/users/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** SUPERADMIN, ADMIN, MANAGEMENT */
+    get: operations['UsersController_getOneUser'];
+    /** SUPERADMIN, ADMIN, MANAGEMENT */
+    put: operations['UsersController_updateUser'];
+    post?: never;
+    /** SUPERADMIN, ADMIN */
+    delete: operations['UsersController_deleteUser'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/users/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Kirgan xodimning profili */
+    get: operations['UsersController_getMe'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** O‘z ismi va emailini yangilash */
+    patch: operations['UsersController_updateMe'];
+    trace?: never;
+  };
+  '/api/users/my/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** SUPERADMIN, ADMIN, MANAGEMENT, ADMINSTRATOR */
+    put: operations['UsersController_changeMyPassword'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/assignments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Topshiriqlar ro‘yxati */
+    get: operations['LmsAssignmentsController_list'];
+    put?: never;
+    post: operations['LmsAssignmentsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/assignments/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LmsAssignmentsController_detail'];
+    put?: never;
+    post?: never;
+    delete: operations['LmsAssignmentsController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['LmsAssignmentsController_update'];
+    trace?: never;
+  };
+  '/api/v2/assignments/{id}/submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Topshiriq javoblari (topshirmaganlar bilan) */
+    get: operations['LmsAssignmentsController_submissions'];
+    put?: never;
+    /** O‘quvchi javobini qayd etish */
+    post: operations['LmsAssignmentsController_submit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/attendance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** O‘quvchining davomat tarixi */
+    get: operations['V2AttendanceController_history'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/attendance/batch': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Darsning davomatini saqlash */
+    post: operations['V2AttendanceController_batch'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/audit-logs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** O‘zgarishlar jurnali */
+    get: operations['V2AuditController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/audit-logs/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Jurnal yozuvi */
+    get: operations['V2AuditController_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/auth/change-password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Parolni almashtirish */
+    post: operations['V2AuthController_changePassword'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/auth/demo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Demo kirish (bu serverda o‘chirilgan) */
+    post: operations['V2AuthController_demo'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Email va parol bilan kirish (xodimlar) */
+    post: operations['V2AuthController_login'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/auth/logout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Chiqish — sessiya serverda yopiladi */
+    post: operations['V2AuthController_logout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/auth/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Joriy foydalanuvchi — sessiyani tiklash uchun */
+    get: operations['V2AuthController_me'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/auth/me/crm-tour': {
     parameters: {
       query?: never;
       header?: never;
@@ -2900,186 +2285,48 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['UsersController_restore'];
+    /** Tanishtiruv turi tugatildi deb belgilash */
+    patch: operations['V2AuthController_completeCrmTour'];
     trace?: never;
   };
-  '/vehicle-defects': {
+  '/api/v2/branches': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['VehicleDefectsController_list'];
+    /** Filiallar ro‘yxati */
+    get: operations['V2BranchesController_list'];
+    put?: never;
+    /** Filial yaratish */
+    post: operations['V2BranchesController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/branches/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Filial kartochkasi: tushum, qarz, qarzdorlar */
+    get: operations['V2BranchesController_detail'];
     put?: never;
     post?: never;
-    delete?: never;
+    /** Filialni o‘chirish (nofaol qilish) */
+    delete: operations['V2BranchesController_remove'];
     options?: never;
     head?: never;
-    patch?: never;
+    /** Filialni tahrirlash */
+    patch: operations['V2BranchesController_update'];
     trace?: never;
   };
-  '/vehicle-defects/{id}/evidence': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['VehicleDefectsController_evidence'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-defects/{id}/resolve': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['VehicleDefectsController_resolve'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-fuel': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['VehicleFuelController_list'];
-    put?: never;
-    post: operations['VehicleFuelController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-fuel/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['VehicleFuelController_detail'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: operations['VehicleFuelController_update'];
-    trace?: never;
-  };
-  '/vehicle-fuel/{id}/cancel': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['VehicleFuelController_cancel'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-fuel/{id}/evidence': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['VehicleFuelController_upload'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-fuel/{id}/evidence/{evidenceId}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['VehicleFuelController_download'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-fuel/{id}/review': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['VehicleFuelController_review'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-fuel/{id}/submit': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['VehicleFuelController_submit'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-fuel/lookup': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['VehicleFuelController_lookup'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-fuel/vehicles/{id}/types': {
+  '/api/v2/branches/{id}/restore': {
     parameters: {
       query?: never;
       header?: never;
@@ -3092,58 +2339,27 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['VehicleFuelController_types'];
+    /** O‘chirilgan filialni tiklash */
+    patch: operations['V2BranchesController_restore'];
     trace?: never;
   };
-  '/vehicle-fuel/vehicles/options': {
+  '/api/v2/course-lessons/{id}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['VehicleFuelController_vehicles'];
+    get: operations['LmsCourseLessonsController_detail'];
     put?: never;
     post?: never;
-    delete?: never;
+    delete: operations['LmsCourseLessonsController_remove'];
     options?: never;
     head?: never;
-    patch?: never;
+    patch: operations['LmsCourseLessonsController_update'];
     trace?: never;
   };
-  '/vehicle-inspections': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['VehicleInspectionsController_list'];
-    put?: never;
-    post: operations['VehicleInspectionsController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-inspections/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['VehicleInspectionsController_detail'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: operations['VehicleInspectionsController_update'];
-    trace?: never;
-  };
-  '/vehicle-inspections/{id}/evidence': {
+  '/api/v2/course-lessons/{id}/materials': {
     parameters: {
       query?: never;
       header?: never;
@@ -3152,30 +2368,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['VehicleInspectionsController_upload'];
+    /** Darsga material (fayl, video yoki havola) qo‘shish */
+    post: operations['LmsCourseLessonsController_addMaterial'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/vehicle-inspections/{id}/evidence/{evidenceId}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['VehicleInspectionsController_download'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicle-inspections/{id}/review': {
+  '/api/v2/course-lessons/{id}/progress': {
     parameters: {
       query?: never;
       header?: never;
@@ -3184,37 +2385,60 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['VehicleInspectionsController_review'];
+    /** O‘quvchi darsni tugatganini belgilash */
+    post: operations['LmsCourseLessonsController_progress'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/vehicle-inspections/{id}/submit': {
+  '/api/v2/courses': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /** Kurslar ro‘yxati */
+    get: operations['V2CoursesController_list'];
     put?: never;
-    post: operations['VehicleInspectionsController_submit'];
+    /** Kurs yaratish */
+    post: operations['V2CoursesController_create'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/vehicle-inspections/receivers': {
+  '/api/v2/courses/{id}': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['VehicleInspectionsController_receivers'];
+    /** Kurs */
+    get: operations['V2CoursesController_detail'];
+    put?: never;
+    post?: never;
+    /** Kursni o‘chirish */
+    delete: operations['V2CoursesController_remove'];
+    options?: never;
+    head?: never;
+    /** Kursni tahrirlash */
+    patch: operations['V2CoursesController_update'];
+    trace?: never;
+  };
+  '/api/v2/courses/{id}/curriculum': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Kurs o‘quv dasturi (modullar → darslar → materiallar) */
+    get: operations['LmsCourseCurriculumController_get'];
     put?: never;
     post?: never;
     delete?: never;
@@ -3223,71 +2447,25 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/vehicle-inspections/summary': {
+  '/api/v2/courses/{id}/enrollments': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations['VehicleInspectionsController_summary'];
+    /** Kursga yozilgan o‘quvchilar va ularning progressi */
+    get: operations['LmsCourseCurriculumController_enrollments'];
     put?: never;
-    post?: never;
+    /** O‘quvchini kursga (va guruhga) yozish */
+    post: operations['LmsCourseCurriculumController_enroll'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/vehicles': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['VehiclesController_findAll'];
-    put?: never;
-    post: operations['VehiclesController_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicles/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations['VehiclesController_findById'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: operations['VehiclesController_update'];
-    trace?: never;
-  };
-  '/vehicles/{id}/documents': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['VehiclesController_addDocument'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/vehicles/{id}/documents/{documentId}': {
+  '/api/v2/courses/{id}/enrollments/{studentId}': {
     parameters: {
       query?: never;
       header?: never;
@@ -3297,13 +2475,13 @@ export interface paths {
     get?: never;
     put?: never;
     post?: never;
-    delete?: never;
+    delete: operations['LmsCourseCurriculumController_unenroll'];
     options?: never;
     head?: never;
-    patch: operations['VehiclesController_updateDocument'];
+    patch?: never;
     trace?: never;
   };
-  '/vehicles/{id}/maintenance': {
+  '/api/v2/courses/{id}/modules': {
     parameters: {
       query?: never;
       header?: never;
@@ -3312,14 +2490,171 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['VehiclesController_addMaintenance'];
+    /** Modul qo‘shish */
+    post: operations['LmsCourseCurriculumController_createModule'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/vehicles/{id}/maintenance/{maintenanceId}': {
+  '/api/v2/courses/{id}/progress': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Kurs bo‘yicha o‘quvchilar progressi */
+    get: operations['LmsCourseCurriculumController_progress'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/dashboard/analytics': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Oylar kesimidagi analitika (eski bosh sahifa) */
+    get: operations['V2DashboardController_analytics'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/dashboard/company-overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Bosh sahifa: tushum, qarz, o‘quvchilar, filiallar */
+    get: operations['V2DashboardController_companyOverview'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/dashboard/expense-breakdown': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Xarajatlar tur va filial bo‘yicha */
+    get: operations['V2DashboardController_expenseBreakdown'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/dashboard/finance-summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Davr bo‘yicha tushum, xarajat va qoldiq */
+    get: operations['V2DashboardController_financeSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/dashboard/teacher-analytics': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** O‘qituvchi: guruhlar va o‘quvchilar natijasi */
+    get: operations['V2DashboardController_teacherAnalytics'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/documents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Hujjatlar ro‘yxati */
+    get: operations['V2DocumentsController_list'];
+    put?: never;
+    /** Hujjat yuklash */
+    post: operations['V2DocumentsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/documents/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Hujjat */
+    get: operations['V2DocumentsController_detail'];
+    put?: never;
+    post?: never;
+    /** Hujjatni o‘chirish */
+    delete: operations['V2DocumentsController_remove'];
+    options?: never;
+    head?: never;
+    /** Hujjatni tahrirlash */
+    patch: operations['V2DocumentsController_update'];
+    trace?: never;
+  };
+  '/api/v2/documents/{id}/download': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Hujjat faylini yuklab olish */
+    get: operations['V2DocumentsController_download'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/exam-attempts/{id}/review': {
     parameters: {
       query?: never;
       header?: never;
@@ -3332,10 +2667,44 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['VehiclesController_updateMaintenance'];
+    /** Natijani qo‘lda baholash (matnli javoblar) */
+    patch: operations['LmsExamAttemptsController_review'];
     trace?: never;
   };
-  '/vehicles/{id}/transfer': {
+  '/api/v2/exams': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Testlar va imtihonlar */
+    get: operations['LmsExamsController_list'];
+    put?: never;
+    post: operations['LmsExamsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/exams/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LmsExamsController_detail'];
+    put?: never;
+    post?: never;
+    delete: operations['LmsExamsController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['LmsExamsController_update'];
+    trace?: never;
+  };
+  '/api/v2/exams/{id}/attempts': {
     parameters: {
       query?: never;
       header?: never;
@@ -3344,401 +2713,2241 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations['VehiclesController_transfer'];
+    /** O‘quvchi javoblarini qabul qilish va avtomatik baholash */
+    post: operations['LmsExamsController_attempt'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/api/v2/exams/{id}/questions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Savol qo‘shish */
+    post: operations['LmsExamsController_addQuestion'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/exams/{id}/questions/{questionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['LmsExamsController_updateQuestion'];
+    post?: never;
+    delete: operations['LmsExamsController_removeQuestion'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/exams/{id}/results': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Test natijalari */
+    get: operations['LmsExamsController_results'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/expenses': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Xarajatlar ro‘yxati */
+    get: operations['V2ExpensesController_list'];
+    put?: never;
+    /** Xarajat qo‘shish */
+    post: operations['V2ExpensesController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/expenses/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Xarajat */
+    get: operations['V2ExpensesController_detail'];
+    put?: never;
+    post?: never;
+    /** Xarajatni o‘chirish */
+    delete: operations['V2ExpensesController_remove'];
+    options?: never;
+    head?: never;
+    /** Xarajatni tahrirlash */
+    patch: operations['V2ExpensesController_update'];
+    trace?: never;
+  };
+  '/api/v2/expenses/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Xarajatni bekor qilish */
+    patch: operations['V2ExpensesController_cancel'];
+    trace?: never;
+  };
+  '/api/v2/expenses/{id}/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Xarajat tarixi va to‘lovlari */
+    get: operations['V2ExpensesController_history'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/expenses/{id}/payments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Xarajat bo‘yicha to‘lov */
+    post: operations['V2ExpensesController_pay'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/expenses/{id}/payments/{paymentId}/void': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** To‘lovni bekor qilish */
+    patch: operations['V2ExpensesController_voidPayment'];
+    trace?: never;
+  };
+  '/api/v2/expenses/branch-options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Xarajat uchun filiallar */
+    get: operations['V2ExpensesController_branchOptions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/expenses/history/deleted': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** O‘chirilgan xarajatlar */
+    get: operations['V2ExpensesController_deleted'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/expenses/month-close.csv': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Oy yopilishi (CSV) */
+    get: operations['V2ExpensesController_monthClose'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/expenses/teacher-options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Hisob-kitob uchun o‘qituvchilar */
+    get: operations['V2ExpensesController_teacherOptions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/expenses/triage-counts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Muddatlar bo‘yicha xarajatlar soni */
+    get: operations['V2ExpensesController_triage'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/grades': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Baholar jurnali (topshiriq + test) */
+    get: operations['LmsGradesController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/groups': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Guruhlar ro‘yxati */
+    get: operations['V2GroupsController_list'];
+    put?: never;
+    /** Guruh yaratish */
+    post: operations['V2GroupsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/groups/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Guruh kartochkasi (o‘quvchilar bilan) */
+    get: operations['V2GroupsController_detail'];
+    put?: never;
+    post?: never;
+    /** Guruhni o‘chirish */
+    delete: operations['V2GroupsController_remove'];
+    options?: never;
+    head?: never;
+    /** Guruhni tahrirlash */
+    patch: operations['V2GroupsController_update'];
+    trace?: never;
+  };
+  '/api/v2/groups/{id}/restore': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** O‘chirilgan guruhni tiklash */
+    patch: operations['V2GroupsController_restore'];
+    trace?: never;
+  };
+  '/api/v2/groups/overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Filiallar bo‘yicha guruhlar */
+    get: operations['V2GroupsController_overview'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/lead-sources': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lid manbalari */
+    get: operations['V2LeadSourcesController_list'];
+    put?: never;
+    /** Manba qo‘shish */
+    post: operations['V2LeadSourcesController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/lead-sources/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Manbani o‘chirish */
+    delete: operations['V2LeadSourcesController_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/lead-stages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lid bosqichlari */
+    get: operations['V2LeadStagesController_list'];
+    /** Lid bosqichlarini sozlash */
+    put: operations['V2LeadStagesController_update'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/leads': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lidlar ro‘yxati */
+    get: operations['V2LeadsController_list'];
+    put?: never;
+    /** Lid qo‘shish */
+    post: operations['V2LeadsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/leads/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lid */
+    get: operations['V2LeadsController_detail'];
+    put?: never;
+    post?: never;
+    /** Lidni o‘chirish */
+    delete: operations['V2LeadsController_remove'];
+    options?: never;
+    head?: never;
+    /** Lidni tahrirlash */
+    patch: operations['V2LeadsController_update'];
+    trace?: never;
+  };
+  '/api/v2/leads/{id}/activities': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lid faoliyati */
+    get: operations['V2LeadsController_activities'];
+    put?: never;
+    /** Faoliyat qo‘shish (izoh, qo‘ng‘iroq, vazifa) */
+    post: operations['V2LeadsController_createActivity'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/leads/{id}/activities/{aid}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Faoliyatni o‘chirish */
+    delete: operations['V2LeadsController_removeActivity'];
+    options?: never;
+    head?: never;
+    /** Faoliyatni tahrirlash */
+    patch: operations['V2LeadsController_updateActivity'];
+    trace?: never;
+  };
+  '/api/v2/leads/{id}/assign': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Mas’ul tayinlash (POST) */
+    post: operations['V2LeadsController_assignPost'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Mas’ul tayinlash */
+    patch: operations['V2LeadsController_assign'];
+    trace?: never;
+  };
+  '/api/v2/leads/{id}/convert': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Lidni o‘quvchiga aylantirish */
+    post: operations['V2LeadsController_convert'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/leads/{id}/stage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Lid bosqichini o‘zgartirish (POST) */
+    post: operations['V2LeadsController_stagePost'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Lid bosqichini o‘zgartirish */
+    patch: operations['V2LeadsController_stage'];
+    trace?: never;
+  };
+  '/api/v2/leads/board': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lidlar doskasi (bosqichlar bo‘yicha) */
+    get: operations['V2LeadsController_board'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/leads/check-duplicate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Telefon bo‘yicha takrorni tekshirish */
+    get: operations['V2LeadsController_checkDuplicate'];
+    put?: never;
+    /** Telefon bo‘yicha takrorni tekshirish (POST) */
+    post: operations['V2LeadsController_checkDuplicatePost'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/leads/export.xlsx': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lidlarni eksport qilish (CSV) */
+    get: operations['V2LeadsController_export'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/leads/metrics': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lidlar statistikasi */
+    get: operations['V2LeadsController_metrics'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/lessons': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Darslar ro‘yxati */
+    get: operations['V2LessonsController_list'];
+    put?: never;
+    /** Dars yaratish */
+    post: operations['V2LessonsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/lessons/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Dars va uning davomati */
+    get: operations['V2LessonsController_detail'];
+    put?: never;
+    post?: never;
+    /** Darsni o‘chirish */
+    delete: operations['V2LessonsController_remove'];
+    options?: never;
+    head?: never;
+    /** Darsni tahrirlash */
+    patch: operations['V2LessonsController_update'];
+    trace?: never;
+  };
+  '/api/v2/lms/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** LMS dashboard statistikasi */
+    get: operations['LmsSummaryController_summary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/materials/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['LmsMaterialsController_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/materials/{id}/download': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LmsMaterialsController_download'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/modules/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['LmsModulesController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['LmsModulesController_update'];
+    trace?: never;
+  };
+  '/api/v2/modules/{id}/lessons': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Modulga dars qo‘shish */
+    post: operations['LmsModulesController_createLesson'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Mening bildirishnomalarim */
+    get: operations['LmsNotificationsController_list'];
+    put?: never;
+    /** Bildirishnoma yuborish */
+    post: operations['LmsNotificationsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/notifications/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['LmsNotificationsController_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/notifications/{id}/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['LmsNotificationsController_read'];
+    trace?: never;
+  };
+  '/api/v2/notifications/read-all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['LmsNotificationsController_readAll'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/notifications/unread-count': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LmsNotificationsController_unread'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/payments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** To‘lovlar ro‘yxati */
+    get: operations['V2PaymentsController_list'];
+    put?: never;
+    /** To‘lov qabul qilish */
+    post: operations['V2PaymentsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/payments/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** To‘lovni o‘chirish */
+    delete: operations['V2PaymentsController_remove'];
+    options?: never;
+    head?: never;
+    /** To‘lovni tahrirlash */
+    patch: operations['V2PaymentsController_update'];
+    trace?: never;
+  };
+  '/api/v2/payments/snapshot': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Bugungi/oylik tushum va umumiy qarz */
+    get: operations['V2PaymentsController_snapshot'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/payments/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Filtrlangan to‘lovlar yig‘indisi */
+    get: operations['V2PaymentsController_summary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/permissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Ruxsatlar katalogi, shablonlar va filiallar */
+    get: operations['V2PermissionsController_catalogue'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/permissions/options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Yozish formalari uchun tanlovlar */
+    get: operations['V2PermissionsController_writeOptions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/permissions/templates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Ruxsatlar shablonini yaratish */
+    post: operations['V2PermissionsController_createTemplate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/permissions/templates/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Ruxsatlar shablonini o‘chirish */
+    delete: operations['V2PermissionsController_deleteTemplate'];
+    options?: never;
+    head?: never;
+    /** Ruxsatlar shablonini tahrirlash */
+    patch: operations['V2PermissionsController_updateTemplate'];
+    trace?: never;
+  };
+  '/api/v2/progress/courses/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LmsProgressController_course'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/progress/students/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** O‘quvchi progressi: davomat, topshiriq, test, kurslar */
+    get: operations['LmsProgressController_student'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/schedule/calendar': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Kalendar: oraliqdagi darslar */
+    get: operations['V2ScheduleController_calendar'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/schedule/generate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Shablonlar bo‘yicha darslarni yaratish */
+    post: operations['V2ScheduleController_generate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/schedule/templates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Haftalik jadval shablonlari */
+    get: operations['V2ScheduleController_templates'];
+    put?: never;
+    /** Jadval shabloni qo‘shish */
+    post: operations['V2ScheduleController_createTemplate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/schedule/templates/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Jadval shablonini o‘chirish */
+    delete: operations['V2ScheduleController_deleteTemplate'];
+    options?: never;
+    head?: never;
+    /** Jadval shablonini tahrirlash */
+    patch: operations['V2ScheduleController_updateTemplate'];
+    trace?: never;
+  };
+  '/api/v2/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Umumiy qidiruv: o‘quvchi, guruh, xodim */
+    get: operations['V2SearchController_search'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/students': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** O‘quvchilar ro‘yxati */
+    get: operations['V2StudentsController_list'];
+    put?: never;
+    /** O‘quvchini ro‘yxatga olish (boshlang‘ich to‘lov bilan) */
+    post: operations['V2StudentsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/students/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** O‘quvchi kartochkasi */
+    get: operations['V2StudentsController_detail'];
+    put?: never;
+    post?: never;
+    /** O‘quvchini o‘chirish */
+    delete: operations['V2StudentsController_remove'];
+    options?: never;
+    head?: never;
+    /** O‘quvchini tahrirlash (qo‘shimcha to‘lov bilan) */
+    patch: operations['V2StudentsController_update'];
+    trace?: never;
+  };
+  '/api/v2/students/{id}/learner-account': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** O‘quvchi portali parolini o‘rnatish */
+    put: operations['V2StudentsController_learnerAccount'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/students/{id}/restore': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** O‘chirilgan o‘quvchini tiklash */
+    patch: operations['V2StudentsController_restore'];
+    trace?: never;
+  };
+  '/api/v2/subjects': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Fanlar / kategoriyalar ro‘yxati */
+    get: operations['LmsSubjectsController_list'];
+    put?: never;
+    /** Fan yaratish */
+    post: operations['LmsSubjectsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/subjects/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LmsSubjectsController_detail'];
+    put?: never;
+    post?: never;
+    delete: operations['LmsSubjectsController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['LmsSubjectsController_update'];
+    trace?: never;
+  };
+  '/api/v2/submissions/{id}/download': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LmsSubmissionsController_download'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/submissions/{id}/grade': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Javobni baholash */
+    patch: operations['LmsSubmissionsController_grade'];
+    trace?: never;
+  };
+  '/api/v2/teacher-settlements': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** O‘qituvchi bilan hisob-kitob */
+    post: operations['V2TeacherSettlementsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/telegram/daily-report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Kunlik hisobotni yoqish/o‘chirish */
+    patch: operations['V2TelegramController_dailyReport'];
+    trace?: never;
+  };
+  '/api/v2/telegram/expense-digest': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Xarajatlar dayjestini yoqish/o‘chirish */
+    patch: operations['V2TelegramController_expenseDigest'];
+    trace?: never;
+  };
+  '/api/v2/telegram/expense-digest/snooze': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Dayjestni bir haftaga to‘xtatish */
+    post: operations['V2TelegramController_snooze'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/telegram/link': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Telegramni uzish */
+    delete: operations['V2TelegramController_unlink'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/telegram/link-status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Telegram bog‘langanmi */
+    get: operations['V2TelegramController_status'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/telegram/link-token': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Botga bog‘lash havolasi */
+    post: operations['V2TelegramController_linkToken'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/uploads': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Fayl yuklash (8 MB gacha) */
+    post: operations['LmsUploadsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/uploads/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LmsUploadsController_download'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/users': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Xodimlar (rol bo‘yicha: teacher, operator, ...) */
+    get: operations['V2UsersController_list'];
+    put?: never;
+    /** Xodim qo‘shish */
+    post: operations['V2UsersController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v2/users/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Xodim kartochkasi */
+    get: operations['V2UsersController_detail'];
+    put?: never;
+    post?: never;
+    /** Xodimni o‘chirish */
+    delete: operations['V2UsersController_remove'];
+    options?: never;
+    head?: never;
+    /** Xodimni tahrirlash */
+    patch: operations['V2UsersController_update'];
+    trace?: never;
+  };
+  '/api/v2/users/{id}/access': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Xodim ruxsatlari */
+    get: operations['V2UsersController_access'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Xodim ruxsatlarini o‘zgartirish */
+    patch: operations['V2UsersController_updateAccess'];
+    trace?: never;
+  };
+  '/api/v2/users/{id}/activate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Xodimni faollashtirish */
+    patch: operations['V2UsersController_activate'];
+    trace?: never;
+  };
+  '/api/v2/users/{id}/deactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Xodimni nofaol qilish (sessiyalari yopiladi) */
+    patch: operations['V2UsersController_deactivate'];
+    trace?: never;
+  };
+  '/api/v2/users/{id}/delegation': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Xodimga ruxsat berish huquqini topshirish */
+    patch: operations['V2UsersController_updateDelegation'];
+    trace?: never;
+  };
+  '/api/v2/users/{id}/restore': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** O‘chirilgan xodimni tiklash */
+    patch: operations['V2UsersController_restore'];
     trace?: never;
   };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    ApproveDrivingSessionDto: {
-      /** @description Required manager exception until a GPS provider is integrated */
-      gps_exception_reason: string;
-    };
-    AssignLeadDto: {
-      /** @description Assignee staff user ID, or null to unassign */
-      assigneeUserId?: Record<string, never> | null;
-    };
-    AssignTestDto: {
-      available_from?: string;
-      available_until?: string;
-      group_id?: string;
-      student_id?: string;
-    };
-    BatchAttendanceDto: {
-      lessonId: string;
-      records: components['schemas']['UpsertAttendanceDto'][];
-    };
-    BlogPostListItemResponse: {
-      cover_image_url?: Record<string, never>;
-      excerpt_en: string;
-      excerpt_ru: string;
-      excerpt_uz: string;
-      id: string;
-      published_at?: Record<string, never>;
-      slug: string;
-      /** @enum {string} */
-      status: 'draft' | 'published';
-      tags: string[];
-      title_en: string;
-      title_ru: string;
-      title_uz: string;
-      view_count: number;
-    };
-    BlogPostResponse: {
-      body_en: string;
-      body_ru: string;
-      body_uz: string;
-      cover_image_url?: Record<string, never>;
-      /** Format: date-time */
-      created_at: string;
-      excerpt_en: string;
-      excerpt_ru: string;
-      excerpt_uz: string;
-      id: string;
-      published_at?: Record<string, never>;
-      slug: string;
-      /** @enum {string} */
-      status: 'draft' | 'published';
-      tags: string[];
-      title_en: string;
-      title_ru: string;
-      title_uz: string;
-      /** Format: date-time */
-      updated_at: string;
-      view_count: number;
-    };
-    CancelExpenseDto: {
-      /** @description Version from the currently rendered expense response */
-      expected_version: number;
-      /** @example Duplicate obligation */
-      reason: string;
-    };
-    ChangePasswordDto: {
-      currentPassword: string;
-      /** @description Min 8 chars, must contain a digit and an uppercase letter */
+    ChangeStudentPasswordDto: {
+      /** @example string */
       newPassword: string;
+      /** @example string */
+      oldPassword: string;
     };
-    CheckLeadDuplicateDto: {
+    ChangeTeacherPasswordDto: {
+      /** @example string */
+      newPassword: string;
+      /** @example string */
+      oldPassword: string;
+    };
+    ChangeUserPasswordDto: {
+      /** @example string */
+      newPassword: string;
+      /** @example string */
+      oldPassword: string;
+    };
+    ConfirmPhoneChangeDto: {
+      /** @example 132044 */
+      code: string;
       /**
-       * @description Phone number to check for duplicates (+998XXXXXXXXX)
+       * @description Yangi telefon raqami
+       * @example +998907654321
+       */
+      newPhone: string;
+    };
+    CreateAssignmentDto: {
+      course_id?: string;
+      description?: string;
+      /** @example 2026-12-01T18:00:00.000Z */
+      due_date?: string;
+      group_id?: string;
+      /** @default 100 */
+      max_score: number;
+      /** @enum {string} */
+      status?: 'draft' | 'published' | 'closed';
+      title: string;
+    };
+    CreateAttendanceDto: {
+      comment?: string;
+      /**
+       * @description Eski mijozlar uchun. status berilsa avtomatik hisoblanadi.
+       * @example true
+       */
+      isPresent?: boolean;
+      /** @example 1 */
+      lessonId: number;
+      /**
+       * @description PRESENT / ABSENT / LATE (kechikdi) / EXCUSED (sababli)
+       * @enum {string}
+       */
+      status?: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+      /** @example 1 */
+      studentId: number;
+    };
+    CreateCourseDto: {
+      /** @example string */
+      description: string;
+      /** @example 1 */
+      durationLesson: number;
+      /** @example 1 */
+      durationMonth: number;
+      /**
+       * @example BEGINNER
+       * @enum {string}
+       */
+      level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+      /** @example string */
+      name: string;
+      /** @example 1 */
+      price: number;
+      /**
+       * @example ACTIVE
+       * @enum {string}
+       */
+      status: 'ACTIVE' | 'INACTIVE' | 'FREEZE';
+    };
+    CreateCourseLessonDto: {
+      /** @description Dars matni (markdown) */
+      content?: string;
+      duration_min?: number;
+      position?: number;
+      /** @example Kasrlar */
+      title: string;
+      /** @example https://www.youtube.com/watch?v=... */
+      video_url?: string;
+    };
+    CreateExpenseDto: {
+      amount: number;
+      /** @example Ijara */
+      category: string;
+      /** @description To‘lash muddati (ISO) */
+      dueDate?: string;
+      note?: string;
+      /** @enum {string} */
+      status?: 'PENDING' | 'PAID' | 'PARTIALLY_PAID' | 'CANCELLED';
+      title: string;
+    };
+    CreateGradeDto: {
+      comment?: string;
+      /** @example 2026-07-29 */
+      date?: string;
+      examId?: number;
+      /** @example 1 */
+      groupId: number;
+      lessonId?: number;
+      /** @example 100 */
+      maxScore?: number;
+      /** @example 85 */
+      score: number;
+      /** @example 1 */
+      studentId: number;
+      /** @enum {string} */
+      type?: 'LESSON' | 'HOMEWORK' | 'EXAM' | 'BEHAVIOR' | 'OTHER';
+    };
+    CreateHomeworkResultsDto: {
+      /** @example string */
+      comment?: string;
+      /** @example 1 */
+      homeworkId: number;
+      /** @example 1 */
+      score: number;
+      /** @example 1 */
+      studentId: number;
+      /** @example string */
+      title: string;
+    };
+    CreateLeadDto: {
+      /** @description Mas’ul xodim (User) id */
+      assignedToId?: number;
+      courseId?: number;
+      fullName: string;
+      /** @description Keyingi bog‘lanish vaqti (ISO) */
+      nextContactAt?: string;
+      note?: string;
+      phone: string;
+      /** @description Lid qayerdan kelgani (Instagram, tavsiya…) */
+      source?: string;
+      /** @enum {string} */
+      stage?: 'NEW' | 'CONTACTED' | 'TRIAL' | 'CONTRACT' | 'WON' | 'LOST';
+    };
+    CreateLessonDto: {
+      /** @example 1 */
+      groupId: number;
+      /** @example 2026-04-03 */
+      lessonDate?: string;
+      /** @example string */
+      title: string;
+    };
+    CreateMaterialDto: {
+      /** @enum {string} */
+      kind: 'video' | 'file' | 'link';
+      /** @description Bo‘sh bo‘lsa — fayl nomi */
+      title?: string;
+      url?: string;
+    };
+    CreateModuleDto: {
+      description?: string;
+      position?: number;
+      /** @example 1-modul: Kirish */
+      title: string;
+    };
+    CreateNotificationDto: {
+      /** @enum {string} */
+      audience: 'all' | 'teachers' | 'students' | 'group' | 'user';
+      /** @description audience=group */
+      group_id?: string;
+      message: string;
+      /** @description audience=user: xodim id (`12`) yoki o‘qituvchi (`t12`) */
+      recipient_id?: string;
+      title: string;
+      /** @enum {string} */
+      type?: 'info' | 'warning' | 'lesson' | 'homework' | 'payment' | 'system';
+    };
+    CreateOrganizationDto: {
+      address?: string;
+      /** @description Admin hisobining F.I.O.'si. Bo'sh bo'lsa rahbar ismi olinadi */
+      adminName?: string;
+      description?: string;
+      directorName?: string;
+      logo?: string;
+      /** @example Najot Talim */
+      name: string;
+      /**
+       * @description Tashkilot admini hisobining paroli
+       * @example Parol123
+       */
+      password: string;
+      /**
+       * @description Tashkilot admini shu raqam bilan tizimga kiradi
        * @example +998901234567
        */
       phone: string;
+      /** @enum {string} */
+      status?: 'ACTIVE' | 'INACTIVE' | 'FREEZE';
     };
-    CheckPhonesDto: {
+    CreatePlanDto: {
+      description?: string;
+      /**
+       * @description Necha oyga
+       * @example 1
+       */
+      durationMonth?: number;
       /**
        * @example [
-       *       "+998901234567"
+       *       "SMS xabarnoma",
+       *       "Hisobotlar"
        *     ]
        */
-      phones: string[];
-    };
-    CheckPracticeAnswerDto: {
+      features?: string[];
+      /** @example 30 */
+      maxGroups?: number;
+      /** @example 200 */
+      maxStudents?: number;
+      /** @example 20 */
+      maxTeachers?: number;
+      /** @example Standart */
+      name: string;
+      /** @example 500000 */
+      price: number;
       /** @enum {string} */
-      locale: 'uz' | 'ru';
+      status?: 'ACTIVE' | 'INACTIVE' | 'FREEZE';
+    };
+    CreateQuizDto: {
+      course_id?: string;
+      description?: string;
+      duration_min?: number;
+      ends_at?: string;
+      group_id?: string;
       /** @enum {string} */
-      option_key: 'A' | 'B' | 'C' | 'D';
+      kind?: 'quiz' | 'exam';
+      /** @default 1 */
+      max_attempts: number;
+      /** @default 60 */
+      pass_percent: number;
+      starts_at?: string;
+      /** @enum {string} */
+      status?: 'draft' | 'published' | 'closed';
+      title: string;
     };
-    CompanyDetailResponse: Record<string, never>;
-    CompanyResponse: Record<string, never>;
-    CompanyTelegramChatResponse: {
-      telegram_chat_id: string | null;
+    CreateRoomDto: {
+      capacity: number;
+      name: string;
     };
-    ConvertLeadDto: {
+    CreateStudentGroupDto: {
+      groupId: number;
+      studentId: number;
+    };
+    CreateSubjectDto: {
+      /** @example #2563eb */
+      color?: string;
+      description?: string;
+      /** @example Matematika */
+      name: string;
+      parent_id?: Record<string, never> | null;
+    };
+    CreateSubmissionDto: {
+      student_id: string;
+      text?: string;
+    };
+    CreateSubscriptionDto: {
+      /** @description Berilmasa tarif narxi olinadi */
+      amount?: number;
+      comment?: string;
       /**
-       * @description Force convert even if duplicate phone exists in active students
-       * @default false
+       * @description Berilmasa tarif davomiyligidan hisoblanadi
+       * @example 2026-09-01
        */
-      force: boolean;
+      endDate?: string;
+      /** @example 1 */
+      organizationId: number;
+      /** @example 1 */
+      planId: number;
+      /** @example 2026-08-01 */
+      startDate?: string;
+      /** @enum {string} */
+      status?: 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELED';
     };
-    CorrectDrivingSessionDto: {
-      actual_minutes: number;
-      reason: string;
+    CreateTicketDto: {
+      contactPhone?: string;
+      /** @example Payme orqali to‘lov o‘tmayapti. */
+      message: string;
+      organizationId?: number;
+      /** @enum {string} */
+      priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+      /** @example To‘lov qabul qilinmayapti */
+      subject: string;
     };
-    CreateBlogPostDto: {
-      body_en: string;
-      body_ru: string;
-      body_uz: string;
-      cover_image_url?: string;
-      excerpt_en: string;
-      excerpt_ru: string;
-      excerpt_uz: string;
-      /** @example ustoz-va-avtomaktab-boshqaruvi */
-      slug: string;
+    EnrollStudentDto: {
+      /** @description Kurs guruhi (ixtiyoriy) */
+      group_id?: string;
+      student_id: string;
+    };
+    ForgotPasswordDto: {
+      /** @example +998901234567 */
+      phone: string;
+    };
+    GradeSubmissionDto: {
+      feedback?: string;
+      score: number;
+      /** @enum {string} */
+      status?: 'graded' | 'returned';
+    };
+    LoginDto: {
+      /** @example string */
+      password: string;
+      /** @example +998901234567 */
+      phone: string;
+    };
+    LogoutDto: {
+      /** @description Refresh token (ixtiyoriy) */
+      refreshToken?: string;
+    };
+    MarkPaymentDto: {
+      /** @enum {string} */
+      method?: 'PAYME' | 'MANUAL' | 'CASH' | 'CARD' | 'TRANSFER';
+    };
+    Object: Record<string, never>;
+    ProgressMarkDto: {
+      /** @description true — tugatdi, false — belgini olib tashlash */
+      completed: boolean;
+      student_id: string;
+    };
+    QuestionDto: {
       /**
-       * @default draft
+       * @description single/multiple — to‘g‘ri variant indekslari; text — qabul qilinadigan javoblar
+       * @example [
+       *       0
+       *     ]
+       */
+      correct: string[];
+      /** @description Variantlar */
+      options?: string[];
+      /** @default 1 */
+      points: number;
+      position?: number;
+      text: string;
+      /** @enum {string} */
+      type: 'single' | 'multiple' | 'text';
+    };
+    RefreshTokenDto: {
+      /**
+       * @description Login paytida berilgan refresh token
+       * @example 3f2a...c1.9kQm...
+       */
+      refreshToken: string;
+    };
+    RegisterDto: {
+      /** @example 2005-04-12 */
+      birth_date: string;
+      /**
+       * @description SMS orqali kelgan 6 xonali kod
+       * @example 917810
+       */
+      code: string;
+      /** @example Aliyev Ali Valiyevich */
+      fullName: string;
+      /** @example parol123 */
+      password: string;
+      /** @example +998901234567 */
+      phone: string;
+    };
+    ReplyTicketDto: {
+      /** @example Muammo hal qilindi, tekshirib ko‘ring. */
+      message: string;
+    };
+    RequestPhoneChangeDto: {
+      /**
+       * @description Yangi telefon raqami
+       * @example +998907654321
+       */
+      newPhone: string;
+    };
+    ReviewAttemptDto: {
+      feedback?: string;
+      score: number;
+    };
+    SendCodeDto: {
+      /** @example +998901234567 */
+      phone: string;
+      /**
+       * @description REGISTER - ro'yxatdan o'tish, RESET_PASSWORD - parolni tiklash, CHANGE_PHONE - raqamni o'zgartirish
+       * @default REGISTER
        * @enum {string}
        */
-      status: 'draft' | 'published';
+      purpose: 'REGISTER' | 'RESET_PASSWORD' | 'CHANGE_PHONE';
+    };
+    SetPasswordDto: {
+      /** @example 917810 */
+      code: string;
+      /** @example yangiParol123 */
+      password: string;
+      /** @example +998901234567 */
+      phone: string;
+    };
+    StartPaymentDto: {
+      groupId: number;
+      month: number;
+      year: number;
+    };
+    SubmitAttemptDto: {
+      /**
+       * @description Savol id → javob (variant indeksi, indekslar ro‘yxati yoki matn)
+       * @example {
+       *       "1": 0,
+       *       "2": [
+       *         0,
+       *         2
+       *       ],
+       *       "3": "javob"
+       *     }
+       */
+      answers: Record<string, never>;
+      student_id: string;
+    };
+    UpdateAssignmentDto: {
+      description?: Record<string, never> | null;
+      due_date?: Record<string, never> | null;
+      max_score?: number;
+      /** @enum {string} */
+      status?: 'draft' | 'published' | 'closed';
+      title?: string;
+    };
+    UpdateAttendanceDto: {
+      comment?: string;
+      /**
+       * @description Eski mijozlar uchun. status berilsa avtomatik hisoblanadi.
+       * @example true
+       */
+      isPresent?: boolean;
+      /** @example 1 */
+      lessonId: number;
+      /**
+       * @description PRESENT / ABSENT / LATE (kechikdi) / EXCUSED (sababli)
+       * @enum {string}
+       */
+      status?: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+      /** @example 1 */
+      studentId: number;
+    };
+    UpdateCourseDto: {
+      /** @example string */
+      description?: string;
+      /** @example 1 */
+      durationLesson?: number;
+      /** @example 1 */
+      durationMonth?: number;
+      /**
+       * @example BEGINNER
+       * @enum {string}
+       */
+      level?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+      /** @example string */
+      name?: string;
+      /** @example 1 */
+      price?: number;
+      /**
+       * @example ACTIVE
+       * @enum {string}
+       */
+      status?: 'ACTIVE' | 'INACTIVE' | 'FREEZE';
+    };
+    UpdateCourseLessonDto: {
+      content?: Record<string, never> | null;
+      duration_min?: Record<string, never> | null;
+      position?: number;
+      title?: string;
+      video_url?: Record<string, never> | null;
+    };
+    UpdateExpenseDto: {
+      amount?: number;
+      /** @example Ijara */
+      category?: string;
+      /** @description To‘lash muddati (ISO) */
+      dueDate?: string;
+      note?: string;
+      /** @enum {string} */
+      status?: 'PENDING' | 'PAID' | 'PARTIALLY_PAID' | 'CANCELLED';
+      title?: string;
+    };
+    UpdateGradeDto: {
+      comment?: string;
+      /** @example 2026-07-29 */
+      date?: string;
+      examId?: number;
+      lessonId?: number;
+      /** @example 100 */
+      maxScore?: number;
+      /** @example 85 */
+      score?: number;
+      /** @enum {string} */
+      type?: 'LESSON' | 'HOMEWORK' | 'EXAM' | 'BEHAVIOR' | 'OTHER';
+    };
+    UpdateLeadDto: {
+      /** @description Mas’ul xodim (User) id */
+      assignedToId?: number;
+      courseId?: number;
+      fullName?: string;
+      /** @description Keyingi bog‘lanish vaqti (ISO) */
+      nextContactAt?: string;
+      note?: string;
+      phone?: string;
+      /** @description Lid qayerdan kelgani (Instagram, tavsiya…) */
+      source?: string;
+      /** @enum {string} */
+      stage?: 'NEW' | 'CONTACTED' | 'TRIAL' | 'CONTRACT' | 'WON' | 'LOST';
+    };
+    UpdateLeadStageDto: {
+      /** @enum {string} */
+      stage: 'NEW' | 'CONTACTED' | 'TRIAL' | 'CONTRACT' | 'WON' | 'LOST';
+    };
+    UpdateLessonDto: {
+      /** @example string */
+      title?: string;
+    };
+    UpdateMeDto: {
+      /** @example admin@example.com */
+      email?: Record<string, never> | null;
+      fullName?: string;
+    };
+    UpdateModuleDto: {
+      description?: Record<string, never> | null;
+      position?: number;
+      title?: string;
+    };
+    UpdateOrganizationDto: {
+      address?: string;
+      /** @description Admin hisobining F.I.O.'si. Bo'sh bo'lsa rahbar ismi olinadi */
+      adminName?: string;
+      description?: string;
+      directorName?: string;
+      logo?: string;
+      /** @example Najot Talim */
+      name?: string;
+      /**
+       * @description Tashkilot admini hisobining paroli
+       * @example Parol123
+       */
+      password?: string;
+      /**
+       * @description Tashkilot admini shu raqam bilan tizimga kiradi
+       * @example +998901234567
+       */
+      phone?: string;
+      /** @enum {string} */
+      status?: 'ACTIVE' | 'INACTIVE' | 'FREEZE';
+    };
+    UpdatePaymentStatusDto: {
+      /** @enum {string} */
+      status: 'PENDING' | 'PAID' | 'CANCELED';
+    };
+    UpdatePlanDto: {
+      description?: string;
+      /**
+       * @description Necha oyga
+       * @example 1
+       */
+      durationMonth?: number;
       /**
        * @example [
-       *       "owner",
-       *       "marketing"
+       *       "SMS xabarnoma",
+       *       "Hisobotlar"
        *     ]
        */
-      tags?: string[];
-      title_en: string;
-      title_ru: string;
-      title_uz: string;
+      features?: string[];
+      /** @example 30 */
+      maxGroups?: number;
+      /** @example 200 */
+      maxStudents?: number;
+      /** @example 20 */
+      maxTeachers?: number;
+      /** @example Standart */
+      name?: string;
+      /** @example 500000 */
+      price?: number;
+      /** @enum {string} */
+      status?: 'ACTIVE' | 'INACTIVE' | 'FREEZE';
     };
-    CreateBranchDto: {
+    UpdateQuizDto: {
+      description?: Record<string, never> | null;
+      duration_min?: Record<string, never> | null;
+      ends_at?: Record<string, never> | null;
+      max_attempts?: number;
+      pass_percent?: number;
+      starts_at?: Record<string, never> | null;
+      /** @enum {string} */
+      status?: 'draft' | 'published' | 'closed';
+      title?: string;
+    };
+    UpdateRoomDto: {
+      capacity?: number;
+      name?: string;
+    };
+    UpdateSubjectDto: {
+      color?: Record<string, never> | null;
+      description?: Record<string, never> | null;
+      name?: string;
+      parent_id?: Record<string, never> | null;
+    };
+    UpdateSubscriptionDto: {
+      /** @description Berilmasa tarif narxi olinadi */
+      amount?: number;
+      comment?: string;
+      /**
+       * @description Berilmasa tarif davomiyligidan hisoblanadi
+       * @example 2026-09-01
+       */
+      endDate?: string;
+      /** @example 1 */
+      organizationId?: number;
+      /** @example 1 */
+      planId?: number;
+      /** @example 2026-08-01 */
+      startDate?: string;
+      /** @enum {string} */
+      status?: 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELED';
+    };
+    UpdateTicketDto: {
+      /** @enum {string} */
+      priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+      /** @enum {string} */
+      status?: 'OPEN' | 'IN_PROGRESS' | 'ANSWERED' | 'CLOSED';
+    };
+    V2AccessScopeDto: {
+      branchId?: string;
+      permissions: string[];
+      /** @enum {string} */
+      scope: 'company' | 'branch' | 'own';
+    };
+    V2AssignLeadDto: {
+      assigneeUserId: Record<string, never> | null;
+    };
+    V2AttendanceRecordDto: {
+      lessonId?: string;
+      notes?: string;
+      /** @enum {string} */
+      status: 'present' | 'absent' | 'late' | 'excused';
+      studentId: string;
+    };
+    V2BatchAttendanceDto: {
+      lessonId: string;
+      records: components['schemas']['V2AttendanceRecordDto'][];
+    };
+    V2BranchMembershipDto: {
+      active: boolean;
+      branchId: string;
+    };
+    V2ChangePasswordDto: {
+      currentPassword: string;
+      /** @description Kamida 8 belgi, ichida raqam va bosh harf bo‘lishi kerak */
+      newPassword: string;
+    };
+    V2ConvertLeadDto: {
+      force?: boolean;
+    };
+    V2CreateBranchDto: {
+      /** @description Manzil */
       location: string;
       name: string;
       phone?: string;
     };
-    CreateCompanyDto: {
-      contactEmail?: string;
-      contactPhone?: string;
-      name: string;
-      /** @description Auto-generated from name if omitted. */
-      slug?: string;
-      /**
-       * @default active
-       * @enum {string}
-       */
-      status: 'pending' | 'active' | 'suspended';
-    };
-    CreateCourseDto: {
+    V2CreateCourseDto: {
       branch_id: string;
       /**
-       * @default avto_maktab
+       * @default offline
        * @enum {string}
        */
-      course_type: 'tezkor' | 'avto_maktab';
+      course_type: 'online' | 'offline';
+      /** @example 60 */
       duration_days: number;
-      /** @example Tezkor kurs */
+      /** @example Frontend dasturlash */
       name: string;
+      /** @example 3500000 */
       price: number;
+      /** @description Fan / kategoriya (LMS); null — olib tashlash */
+      subject_id?: string | null;
     };
-    CreateDemoRequestDto: {
-      /** @example AutoSchool Pro */
-      center_name?: string;
-      /** @example Alisher Karimov */
-      full_name: string;
+    V2CreateDocumentDto: {
+      branch_id?: string;
+      group_id?: string;
       note?: string;
-      /** @example +998901234567 */
-      phone: string;
-      /** @example Tashkent */
-      region: string;
-      /** @example pricing/uz */
-      source?: string;
+      student_id?: string;
+      /** @description Bo‘sh bo‘lsa — fayl nomi */
+      title?: string;
       /** @enum {string} */
-      student_count?: '<50' | '50-150' | '150-300' | '300+';
+      type?: 'contract' | 'certificate' | 'order' | 'report' | 'other';
     };
-    CreateDocumentDto: {
-      notes?: string;
-      student_id: string;
-      /** @default false */
-      submitted: boolean;
-      /** @enum {string} */
-      type:
-        'driving_license' | 'medical_certificate' | 'passport_copy' | 'other';
-    };
-    CreateDrivingSessionDto: {
-      /** Format: date-time */
-      ends_at: string;
-      /** Format: uuid */
-      enrollment_id: string;
-      /**
-       * Format: uuid
-       * @description Active PRACTICE teacher in the training branch
-       */
-      instructor_id: string;
-      /** Format: date-time */
-      starts_at: string;
-      /** Format: uuid */
-      vehicle_id: string;
-    };
-    CreateExamDto: {
-      /**
-       * @description Exam Type (THEORY or PRACTICE)
-       * @enum {string}
-       */
-      examType: 'THEORY' | 'PRACTICE';
-      /**
-       * @description Notes
-       * @example Good job
-       */
-      notes?: string;
-      /**
-       * @description Did the student pass?
-       * @example true
-       */
-      passed: boolean;
-      /**
-       * @description Score
-       * @example 85
-       */
-      score?: number;
-      /**
-       * @description Student ID
-       * @example uuid
-       */
-      studentId: string;
-    };
-    CreateExpenseDto: {
-      /**
-       * @description Positive decimal string with exactly two fractional places
-       * @example 125000.00
-       */
+    V2CreateExpenseDto: {
+      /** @example 1500000.00 */
       amount: string;
-      /** Format: uuid */
-      branch_id?: string | null;
+      /** @description Bo‘sh — butun markaz bo‘yicha */
+      branch_id?: Record<string, never>;
       /** @enum {string} */
       category:
         | 'rent'
         | 'utilities'
-        | 'vehicle'
         | 'marketing'
         | 'supplies'
         | 'administrative'
-        | 'teacher_settlement'
         | 'other';
-      /**
-       * Format: date
-       * @example 2026-09-05
-       */
       due_date?: Record<string, never>;
-      /**
-       * Format: date
-       * @example 2026-08-31
-       */
+      /** @example 2026-11-06 */
       expense_date: string;
-      /**
-       * Format: uuid
-       * @description Client-generated UUID, stable for retries of this exact expense payload.
-       */
       idempotency_key: string;
-      note?: Record<string, never> | null;
-      payee?: Record<string, never> | null;
-      /** @example Ofis ijarasi */
+      note?: Record<string, never>;
+      payee?: Record<string, never>;
+      /** @example Noyabr ijarasi */
       title: string;
-      /** Format: uuid */
-      vehicle_id?: Record<string, never> | null;
     };
-    CreateExpensePaymentDto: {
-      /** @example 250000.00 */
+    V2CreateExpensePaymentDto: {
+      /** @example 500000.00 */
       amount: string;
-      /**
-       * Format: date
-       * @example 2026-08-31
-       */
+      /** @example 2026-11-06 */
       date: string;
-      /** @description Version returned by the expense API */
       expected_version: number;
-      /** Format: uuid */
       idempotency_key: string;
-      note?: Record<string, never> | null;
+      note?: Record<string, never>;
       /** @enum {string} */
       payment_method: 'naqd' | 'karta' | 'perechisleniya';
     };
-    CreateGroupDto: {
+    V2CreateGroupDto: {
       branchId: string;
+      /** @description Kurs (LMS o‘quv dasturi); null — biriktirilmagan */
+      courseId?: Record<string, never>;
       /**
-       * @default avto_maktab
+       * @default offline
        * @enum {string}
        */
-      courseType: 'tezkor' | 'avto_maktab';
+      courseType: 'online' | 'offline';
       /** @example 11-guruh */
       name: string;
-      /** @description UUID of the teacher to assign; null clears the assignment */
-      teacherId?: Record<string, never> | null;
+      /** @description O‘qituvchi (`t12`); null — biriktirilmagan */
+      teacherId?: Record<string, never>;
     };
-    CreateInspectionDto: Record<string, never>;
-    CreateLeadActivityDto: {
-      /** @description Activity body or notes */
+    V2CreateLeadActivityDto: {
       body?: string;
-      /** @description Due date for TASK activity (required for TASK) */
-      dueAt?: string;
-      /**
-       * @description Manual activity kind
-       * @enum {string}
-       */
-      kind: 'NOTE' | 'CALL' | 'MESSAGE' | 'MEETING' | 'TASK';
+      dueAt?: Record<string, never>;
+      /** @enum {string} */
+      kind: 'NOTE' | 'CALL' | 'TASK' | 'STAGE_CHANGE' | 'SYSTEM';
+      meta?: Record<string, never>;
     };
-    CreateLeadDto: {
-      /** @description Assignee staff user ID */
+    V2CreateLeadDto: {
       assigneeUserId?: string;
-      /** @description Target branch ID (required for owner without assigned branch) */
-      branchId?: string;
-      /**
-       * @example B
-       * @enum {string}
-       */
-      category?:
-        | 'A1'
-        | 'A'
-        | 'B'
-        | 'BC'
-        | 'C'
-        | 'D'
-        | 'BE'
-        | 'CE'
-        | 'DE'
-        | 'TRAM'
-        | 'TROLLEYBUS';
-      /**
-       * @example avto_maktab
-       * @enum {string}
-       */
-      courseType?: 'tezkor' | 'avto_maktab';
-      /** @description Desired group ID */
+      branchId: string;
+      /** @enum {string} */
+      courseType?: 'online' | 'offline';
       desiredGroupId?: string;
-      /**
-       * @description Lead email address
-       * @example lead@example.uz
-       */
+      /** @example Frontend */
+      direction?: string;
       email?: string;
-      /**
-       * @description Lead first name
-       * @example Aziz
-       */
       firstName: string;
       landing?: string;
-      /**
-       * @description Lead last name
-       * @example Karimov
-       */
       lastName?: string;
-      /**
-       * @description Marketing consent for funnels/broadcasts
-       * @default false
-       */
-      marketingConsent: boolean;
-      /** @description Next scheduled follow-up or task date */
-      nextStepAt?: string;
-      /** @description Initial note or comments */
+      marketingConsent?: boolean;
       note?: string;
-      /**
-       * @description Uzbek phone number (+998XXXXXXXXX)
-       * @example +998901234567
-       */
+      /** @example +998901234567 */
       phone: string;
       referrer?: string;
-      /** @description Referrer staff user ID */
       referrerStaffId?: string;
-      /** @description Referrer student ID */
       referrerStudentId?: string;
-      /**
-       * @example telegram
-       * @enum {string}
-       */
+      /** @enum {string} */
       source:
-        | 'referral'
-        | 'instagram'
-        | 'directory_map'
         | 'telegram'
-        | 'walk_in'
+        | 'instagram'
+        | 'referral'
+        | 'directory_map'
         | 'olx'
-        | 'other';
-      /** @description Other source detail if source is other */
+        | 'walk_in'
+        | 'other'
+        | 'website'
+        | 'recommendation'
+        | 'banner';
       sourceOther?: string;
-      /** @description Target initial lead stage ID */
       stageId?: string;
       utmCampaign?: string;
       utmContent?: string;
@@ -3746,14 +4955,10 @@ export interface components {
       utmSource?: string;
       utmTerm?: string;
     };
-    CreateLeadSourceDto: {
-      /**
-       * @description Custom lead source name
-       * @example Facebook Ads
-       */
+    V2CreateLeadSourceDto: {
       name: string;
     };
-    CreateLessonDto: {
+    V2CreateLessonDto: {
       /** @example 2026-06-22T09:00:00Z */
       date: string;
       groupId: string;
@@ -3762,67 +4967,35 @@ export interface components {
       /** @example 1-dars teoriya */
       title: string;
     };
-    CreatePaymentDto: {
+    V2CreatePaymentDto: {
+      /** @example 500000 */
       amount: number;
-      /** @description Client-generated UUID, stable for the lifetime of one form submission. A retried/duplicate request with the same key returns the original payment instead of creating a second one. */
+      /** @description Takroriy so‘rovdan himoya kaliti */
       idempotency_key?: string;
       /** @enum {string} */
       payment_method: 'naqd' | 'karta' | 'perechisleniya';
       student_id: string;
     };
-    CreatePlatformUserDto: {
-      branchId?: string;
-      companyId?: string;
-      email: string;
-      name: string;
-      /** @description Min 8 chars, must contain a digit and an uppercase letter */
-      password: string;
-      phone?: string;
-      /** @enum {string} */
-      role: 'dev' | 'owner' | 'accountant' | 'manager' | 'operator' | 'teacher';
-    };
-    CreateQuestionDto: {
-      /** @description Required for school_private; ignored for platform_public */
-      branch_id?: string;
-      /** @enum {string} */
-      correct_option_key: 'A' | 'B' | 'C' | 'D';
-      diagram_media_id?: string;
-      legal_provision?: string;
-      locales: components['schemas']['QuestionLocaleInputDto'][];
-      source_url?: string;
-      /** @description Curated platform ticket number */
-      ticket_number?: number;
-      /** @enum {string} */
-      topic:
-        | 'traffic_signs'
-        | 'road_markings'
-        | 'right_of_way'
-        | 'speed_and_distance'
-        | 'signals'
-        | 'overtaking'
-        | 'pedestrian_crossings'
-        | 'first_aid'
-        | 'vehicle_safety'
-        | 'liability'
-        | 'general_rules';
-      /** @enum {string} */
-      visibility: 'platform_public' | 'school_private';
-    };
-    CreateStudentDto: {
+    V2CreateStudentDto: {
       address?: string;
+      /** @description To‘lov (online: boshlang‘ich, tahrirda: qo‘shimcha) */
       amount_paid?: number;
+      /** @example 2000-05-17 */
       birth_date?: string;
       branch_id?: string;
       completion_date?: string;
       contract_number?: string;
       course_id?: string;
       /** @enum {string} */
-      course_type: 'tezkor' | 'avto_maktab';
+      course_type: 'online' | 'offline';
+      email?: string;
       first_name: string;
       /** @enum {string} */
       gender?: 'male' | 'female';
       group_id?: string;
       has_document?: boolean;
+      idempotency_key?: string;
+      /** @description Oflayn kurs: boshlang‘ich to‘lov */
       initial_payment?: number;
       last_name: string;
       /** @enum {string} */
@@ -3835,381 +5008,78 @@ export interface components {
         | 'olx'
         | 'other';
       lead_source_other?: string;
-      /** @description Min 8 chars, must contain a digit */
-      learner_password: string;
+      /** @description O‘quvchi portali paroli (kamida 8 belgi, raqam bilan) */
+      learner_password?: string;
+      middle_name?: string;
       notes?: string;
-      o83?: boolean;
       passport_number?: string;
       passport_series?: string;
       /** @enum {string} */
       payment_method?: 'naqd' | 'karta' | 'perechisleniya';
+      /** @example +998901234567 */
       phone: string;
       referred_by_student_id?: string;
       referred_by_user_id?: string;
-      /** @description UUID of the operator who registered this student */
+      /** @description Ro‘yxatga olgan operator */
       registered_by?: string;
       /** @enum {string} */
       result?: 'oqimoqda' | 'topshirdi' | 'yiqildi';
+      start_date?: string;
       /** @enum {string} */
       status?: 'active' | 'completed' | 'dropped' | 'suspended';
+      /** @example 3500000 */
       total_price: number;
     };
-    CreateTeacherSettlementDto: {
-      /**
-       * @description Positive decimal string with exactly two fractional places
-       * @example 125000.00
-       */
+    V2CreateTeacherSettlementDto: {
+      /** @example 3000000.00 */
       amount: string;
-      /**
-       * Format: date
-       * @example 2026-09-05
-       */
       due_date?: Record<string, never>;
-      /**
-       * Format: uuid
-       * @description Client-generated UUID, stable for retries of this exact settlement payload.
-       */
       idempotency_key: string;
-      note?: Record<string, never> | null;
-      payee?: Record<string, never> | null;
-      /**
-       * @description Calendar month as YYYY-MM; stored as the first SQL date
-       * @example 2026-08
-       */
+      note?: Record<string, never>;
+      payee?: Record<string, never>;
+      /** @example 2026-11 */
       period_month: string;
-      /** Format: uuid */
+      /** @example t3 */
       teacher_id: string;
-      /** @example O'qituvchi hisob-kitobi */
       title: string;
     };
-    CreateTemplateDto: {
+    V2CreateTemplateDto: {
       /**
-       * @description 1=Dushanba ... 7=Yakshanba
+       * @description 1 = Dushanba ... 7 = Yakshanba
        * @example 1
        */
       dayOfWeek: number;
       /** @example 11:00 */
       endTime: string;
-      /** @example 2026-06-22T09:00:00.000Z */
       groupId: string;
       /** @enum {string} */
       lessonType: 'theory' | 'practice';
       /** @example 09:00 */
       startTime: string;
     };
-    CreateTestTemplateDto: {
-      /**
-       * @default after_submit
-       * @enum {string}
-       */
-      answer_review_timing:
-        'never' | 'immediate' | 'after_submit' | 'after_deadline';
-      available_from?: string;
-      available_until?: string;
-      /** @description Required when actor is owner without a fixed branch */
-      branch_id?: string;
-      /**
-       * @default B
-       * @enum {string}
-       */
-      category: 'B';
-      description?: string;
-      /** @description 0-100 inclusive */
-      passing_threshold_percent: number;
-      question_count: number;
-      /** @description Published question IDs available to this school */
-      question_ids: string[];
-      /**
-       * @description 0 = unlimited retries
-       * @default 1
-       */
-      retry_limit: number;
-      /** @default false */
-      shuffle_options: boolean;
-      /** @default true */
-      shuffle_questions: boolean;
-      /** @description Seconds allowed once an attempt starts */
-      time_limit_seconds: number;
-      title: string;
-    };
-    CreateTrainingEnrollmentDto: {
-      /**
-       * Format: uuid
-       * @description Optional for owner/dev; manager is fixed to own branch
-       */
-      branch_id?: string;
-      /** Format: uuid */
-      program_id: string;
-      /** Format: uuid */
-      student_id: string;
-    };
-    CreateTrainingProgramDto: {
-      /** Format: uuid */
-      branch_id: string;
-      /** @enum {string} */
-      category:
-        | 'A1'
-        | 'A'
-        | 'B'
-        | 'C'
-        | 'D'
-        | 'BE'
-        | 'CE'
-        | 'DE'
-        | 'TRAM'
-        | 'TROLLEYBUS';
-      /** Format: uuid */
-      course_id?: string;
-      /** @enum {string} */
-      course_type: 'tezkor' | 'avto_maktab';
-      name: string;
-      /** @description Internally approved practice minutes; not a government certificate */
-      required_minutes: number;
-    };
-    CreateUserDto: {
+    V2CreateUserDto: {
       branchId?: string;
-      /** @example manager@autodrive.uz */
+      /** @example manager@educrm.uz */
       email?: string;
       fullName: string;
-      /** @description Min 8 chars, must contain a digit and an uppercase letter */
-      password: string;
+      /** @description Kamida 8 belgi, ichida raqam va bosh harf bo‘lishi kerak */
+      password?: string;
       /** @example +998901234567 */
       phone?: string;
       /** @enum {string} */
-      role: 'dev' | 'owner' | 'accountant' | 'manager' | 'operator' | 'teacher';
-      /** @enum {string} */
-      specialization: 'THEORY' | 'PRACTICE';
-    };
-    CreateVehicleDocumentDto: {
-      /** Format: date */
-      expires_on?: Record<string, never> | null;
-      label: string;
-      reference?: string;
-      /** @enum {string} */
-      type: 'registration' | 'insurance' | 'technical_inspection' | 'other';
-    };
-    CreateVehicleDto: {
+      role: 'dev' | 'owner' | 'manager' | 'accountant' | 'operator' | 'teacher';
       /**
-       * Format: uuid
-       * @description Required for owner/dev; manager uses own branch
+       * @description Fan / mutaxassislik
+       * @example Matematika
        */
-      branch_id?: string;
-      categories: (
-        | 'A1'
-        | 'A'
-        | 'B'
-        | 'C'
-        | 'D'
-        | 'BE'
-        | 'CE'
-        | 'DE'
-        | 'TRAM'
-        | 'TROLLEYBUS'
-      )[];
-      /**
-       * Format: uuid
-       * @description Directly assigned instructor / custodian ID
-       */
-      current_custodian_id?: Record<string, never> | null;
-      make: string;
-      manufacture_year: number;
-      model: string;
-      odometer_km?: number;
-      /** @example 01 A 123 BC */
-      plate_number: string;
-      /** @example WVWZZZ1JZXW000001 */
-      vin?: string;
+      specialization?: string;
     };
-    CreateVehicleMaintenanceDto: {
-      /** Format: date-time */
-      completed_at?: Record<string, never> | null;
-      description: string;
-      next_due_odometer_km?: Record<string, never> | null;
-      /** Format: date */
-      next_due_on?: Record<string, never> | null;
-      /** Format: date-time */
-      started_at: string;
-    };
-    DeletedExpenseHistoryListItemResponse: {
-      amount: string;
-      /** Format: uuid */
-      branch_id: string | null;
-      branch_name: string | null;
-      /** @enum {string} */
-      category:
-        | 'rent'
-        | 'utilities'
-        | 'vehicle'
-        | 'marketing'
-        | 'supplies'
-        | 'administrative'
-        | 'teacher_settlement'
-        | 'other';
-      /** Format: date-time */
-      deleted_at: string;
-      /** Format: uuid */
-      id: string;
-      title: string;
-    };
-    DeleteExpenseDto: {
-      /** @description Version from the currently rendered expense response */
+    V2ExpenseLifecycleDto: {
       expected_version: number;
-      /** @example Created in error */
       reason: string;
     };
-    DemoRequestMinimalResponse: {
-      /** Format: date-time */
-      created_at: string;
-      id: string;
-    };
-    DemoRequestResponse: {
-      center_name?: Record<string, never>;
-      /** Format: date-time */
-      created_at: string;
-      full_name: string;
-      id: string;
-      note?: Record<string, never>;
-      phone: string;
-      region: string;
-      source: string;
-      /** @enum {string} */
-      status: 'new' | 'contacted' | 'archived';
-      student_count?: Record<string, never>;
-    };
-    ExpenseBreakdownBranchResponse: {
-      /** Format: uuid */
-      branch_id: string;
-      /** @example Yunusobod filiali */
-      branch_name: string;
-      /** @example 125000.00 */
-      total: string;
-    };
-    ExpenseBreakdownCategoryResponse: {
-      /**
-       * @example rent
-       * @enum {string}
-       */
-      category:
-        | 'rent'
-        | 'utilities'
-        | 'vehicle'
-        | 'marketing'
-        | 'supplies'
-        | 'administrative'
-        | 'teacher_settlement'
-        | 'other';
-      /** @example 125000.00 */
-      total: string;
-    };
-    ExpenseBreakdownCompanyWideResponse: {
-      /** @example 30000.00 */
-      total: string;
-    };
-    ExpenseBreakdownResponse: {
-      by_branch: components['schemas']['ExpenseBreakdownBranchResponse'][];
-      by_category: components['schemas']['ExpenseBreakdownCategoryResponse'][];
-      company_wide: components['schemas']['ExpenseBreakdownCompanyWideResponse'];
-      /** @example 2026-09-01 */
-      from: string;
-      /** @example 2026-09-30 */
-      to: string;
-      /**
-       * @description Sum of non-deleted expense ledger amounts in the selected expense-date window, including cancelled history records.
-       * @example 155000.00
-       */
-      total: string;
-    };
-    ExpenseResponse: {
-      amount: string;
-      /** Format: uuid */
-      branch_id: string | null;
-      branch_name: string | null;
-      /** @enum {string} */
-      category:
-        | 'rent'
-        | 'utilities'
-        | 'vehicle'
-        | 'marketing'
-        | 'supplies'
-        | 'administrative'
-        | 'teacher_settlement'
-        | 'other';
-      /** Format: date-time */
-      created_at: string;
-      /** Format: uuid */
-      created_by_id: string;
-      /** Format: date */
-      due_date: string | null;
-      /** Format: date */
-      expense_date: string;
-      has_payment_history?: boolean;
-      /** Format: uuid */
-      id: string;
-      note: string | null;
-      overdue_days?: number;
-      paid_amount: string;
-      payee: string | null;
-      /**
-       * @description YYYY-MM for teacher settlements; null otherwise
-       * @example 2026-08
-       */
-      period_month: string | null;
-      remaining_amount: string;
-      /** Format: date-time */
-      reviewed_at: string | null;
-      /** Format: uuid */
-      reviewed_by_id: string | null;
-      /** @enum {string} */
-      status: 'planned' | 'partially_paid' | 'paid' | 'cancelled';
-      /** Format: uuid */
-      teacher_id: string | null;
-      title: string;
-      /** Format: date-time */
-      updated_at: string;
-      /** Format: uuid */
-      vehicle_id: string | null;
-      vehicle_plate_number: string | null;
-      version: number;
-    };
-    ExpenseTriageCountsResponse: {
-      created_yesterday: number;
-      due_today: number;
-      due_within_three_days: number;
-      overdue_1_7: number;
-      overdue_8_30: number;
-      overdue_31_plus: number;
-      pending_total: number;
-    };
-    FlagQuestionsForReReviewDto: {
-      /** @description Exact legal_provision tag stored on the draft or published version */
-      legal_provision?: string;
-      /** @description Why the matched questions must be reviewed again */
-      reason: string;
-      /** @enum {string} */
-      topic?:
-        | 'traffic_signs'
-        | 'road_markings'
-        | 'right_of_way'
-        | 'speed_and_distance'
-        | 'signals'
-        | 'overtaking'
-        | 'pedestrian_crossings'
-        | 'first_aid'
-        | 'vehicle_safety'
-        | 'liability'
-        | 'general_rules';
-    };
-    FuelCancelDto: Record<string, never>;
-    FuelDraftDto: Record<string, never>;
-    FuelEvidenceDto: Record<string, never>;
-    FuelLookupDto: Record<string, never>;
-    FuelReconciliationDto: Record<string, never>;
-    FuelReviewDto: Record<string, never>;
-    FuelStationDto: Record<string, never>;
-    FuelStationUpdateDto: Record<string, never>;
-    FuelTypesDto: Record<string, never>;
-    FuelUpdateDto: Record<string, never>;
-    GenerateLessonsDto: {
+    V2GenerateLessonsDto: {
+      /** @description Bo‘sh bo‘lsa — barcha guruhlar */
       groupId?: string;
       /**
        * @description Necha haftaga dars yaratish
@@ -4217,468 +5087,179 @@ export interface components {
        */
       weeks: number;
     };
-    GlobalConfigResponse: Record<string, never>;
-    InspectionEvidenceDto: Record<string, never>;
-    LeadStageTransitionDto: {
-      /**
-       * @description Required if moving to LOST stage
-       * @enum {string}
-       */
+    V2LeadDuplicateQueryDto: {
+      branchId?: string;
+      excludeLeadId?: string;
+      phone: string;
+    };
+    V2LeadStageItemDto: {
+      /** @example #3B82F6 */
+      color: string;
+      id?: string;
+      isActive?: boolean;
+      name: string;
+      position: number;
+    };
+    V2LeadStageTransitionDto: {
+      /** @enum {string} */
       lostReason?:
         | 'EXPENSIVE'
-        | 'CHOSE_OTHER_SCHOOL'
-        | 'INCONVENIENT_TIME'
-        | 'CHANGED_MIND'
+        | 'FAR_AWAY'
+        | 'BAD_SCHEDULE'
+        | 'COMPETITOR'
+        | 'NOT_INTERESTED'
         | 'NO_ANSWER'
         | 'OTHER';
-      /** @description Required if moving to LOST stage and lostReason is OTHER */
       lostReasonOther?: string;
-      /**
-       * @description Target Lead Stage ID
-       * @example uuid
-       */
       stageId: string;
-      /**
-       * @description Current record version for optimistic locking
-       * @example 1
-       */
       version?: number;
     };
-    LoginDto: {
+    V2LearnerAccountDto: {
+      /** @description Kamida 8 belgi, ichida raqam */
+      password: string;
+    };
+    V2LoginDto: {
       /** @example user@example.com */
       email: string;
       /** @example password123 */
       password: string;
     };
-    LoginLearnerDto: {
-      /** @example password1 */
-      password: string;
-      /** @example +998901234567 */
-      phone: string;
+    V2PermissionTemplateDto: {
+      name: string;
+      permissions: string[];
     };
-    PlatformBranchResponse: Record<string, never>;
-    PlatformImpersonationResponse: Record<string, never>;
-    PlatformUserResponse: Record<string, never>;
-    PracticeAnswerCheckResponse: Record<string, never>;
-    PracticeExamPresetResponse: Record<string, never>;
-    PracticeQuestionResponse: Record<string, never>;
-    PracticeTicketResponse: Record<string, never>;
-    PublishQuestionDto: {
-      /** @description Required reviewer for platform_public publish */
-      reviewer_id?: string;
-    };
-    QuestionLocaleInputDto: {
-      explanation: string;
-      /** @enum {string} */
-      locale: 'uz' | 'ru' | 'en';
-      options: components['schemas']['QuestionOptionInputDto'][];
-      stem: string;
-    };
-    QuestionMediaResponse: Record<string, never>;
-    QuestionOptionInputDto: {
-      /** @enum {string} */
-      option_key: 'A' | 'B' | 'C' | 'D';
-      text: string;
-    };
-    QuestionResponse: Record<string, never>;
-    ReasonDrivingSessionDto: {
-      reason: string;
-    };
-    ResetPasswordDto: {
-      /** @description Min 8 chars, must contain a digit and an uppercase letter */
-      password: string;
-    };
-    ResolveVehicleDefectDto: Record<string, never>;
-    ReviewExpenseItemDto: {
-      expected_version: number;
-      /** Format: uuid */
-      id: string;
-    };
-    ReviewExpensesDto: {
-      items: components['schemas']['ReviewExpenseItemDto'][];
-    };
-    ReviewInspectionDto: Record<string, never>;
-    SaveAttemptAnswerDto: {
-      item_id: string;
-      /** @enum {string} */
-      selected_option_key: 'A' | 'B' | 'C' | 'D';
-    };
-    SaveAttemptAnswersDto: {
-      answers: components['schemas']['SaveAttemptAnswerDto'][];
-    };
-    SavePracticeAnswersDto: {
-      answers: components['schemas']['SaveAttemptAnswerDto'][];
-      /** @description Opaque guest token returned by POST /tests/practice/start */
-      guest_token: string;
-    };
-    SetDailyReportDto: {
-      /** @description Enable/disable the daily report push */
+    V2TelegramToggleDto: {
       enabled: boolean;
     };
-    SetExpenseDigestDto: {
-      /** @description Enable/disable expense digest delivery */
-      enabled: boolean;
+    V2UpdateAccessDto: {
+      branches?: components['schemas']['V2BranchMembershipDto'][];
+      scopes: components['schemas']['V2AccessScopeDto'][];
+      /** @description Joriy `access_version` (optimistik qulf) */
+      version: number;
     };
-    StartAssignmentAttemptDto: {
-      /**
-       * @default uz
-       * @enum {string}
-       */
-      locale: 'uz' | 'ru' | 'en';
-    };
-    StartPracticeAttemptDto: {
-      /**
-       * @default B
-       * @enum {string}
-       */
-      category: 'B';
-      /**
-       * @default uz
-       * @enum {string}
-       */
-      locale: 'uz' | 'ru' | 'en';
-    };
-    SubmitDrivingSessionDto: {
-      actual_minutes: number;
-    };
-    SubmitInspectionDto: Record<string, never>;
-    SubmitPracticeAttemptDto: {
-      /** @description Opaque guest token returned by POST /tests/practice/start */
-      guest_token: string;
-    };
-    TelegramLinkStatusResponse: {
-      daily_report_enabled: boolean;
-      expense_digest_enabled: boolean;
-      /** Format: date-time */
-      expense_digest_snoozed_until: string | null;
-      linked: boolean;
-    };
-    TelegramLinkTokenResponse: {
-      /**
-       * @description Deep-link URL — open in Telegram to complete linking
-       * @example https://t.me/AutoMaktabBot?start=3f9c1e2a-...
-       */
-      deep_link: string;
-    };
-    TestAssignmentResponse: Record<string, never>;
-    TestAttemptResponse: Record<string, never>;
-    TestTemplateResponse: Record<string, never>;
-    TransferVehicleDto: {
-      reason: string;
-      /** Format: uuid */
-      to_branch_id: string;
-    };
-    UpdateBlogPostDto: {
-      body_en?: string;
-      body_ru?: string;
-      body_uz?: string;
-      cover_image_url?: string;
-      excerpt_en?: string;
-      excerpt_ru?: string;
-      excerpt_uz?: string;
-      /** @example ustoz-va-avtomaktab-boshqaruvi */
-      slug?: string;
-      /**
-       * @default draft
-       * @enum {string}
-       */
-      status: 'draft' | 'published';
-      /**
-       * @example [
-       *       "owner",
-       *       "marketing"
-       *     ]
-       */
-      tags?: string[];
-      title_en?: string;
-      title_ru?: string;
-      title_uz?: string;
-    };
-    UpdateBranchDto: {
+    V2UpdateBranchDto: {
+      /** @description Manzil */
       location?: string;
       name?: string;
       phone?: string;
     };
-    UpdateCompanyDto: {
-      contactEmail?: string;
-      contactPhone?: string;
-      name?: string;
-      slug?: string;
-      /** @enum {string} */
-      status?: 'pending' | 'active' | 'suspended';
-    };
-    UpdateCompanyFeatureFlagsDto: {
-      /**
-       * @example {
-       *       "admin_dashboard_v2": true,
-       *       "allow_owner_impersonation_banner": false
-       *     }
-       */
-      features: {
-        [key: string]: boolean;
-      };
-    };
-    UpdateCourseDto: {
+    V2UpdateCourseDto: {
       branch_id?: string;
-      /**
-       * @default avto_maktab
-       * @enum {string}
-       */
-      course_type: 'tezkor' | 'avto_maktab';
+      /** @enum {string} */
+      course_type?: 'online' | 'offline';
       duration_days?: number;
-      /** @example Tezkor kurs */
       name?: string;
       price?: number;
+      /** @description Fan / kategoriya (LMS); null — olib tashlash */
+      subject_id?: string | null;
     };
-    UpdateDemoRequestStatusDto: {
-      /** @enum {string} */
-      status: 'new' | 'contacted' | 'archived';
-    };
-    UpdateDocumentDto: {
-      notes?: string;
-      /** @default false */
-      submitted: boolean;
-      /** @enum {string} */
-      type?:
-        'driving_license' | 'medical_certificate' | 'passport_copy' | 'other';
-    };
-    UpdateExpenseDto: {
-      /**
-       * @description Positive decimal string with exactly two fractional places
-       * @example 125000.00
-       */
-      amount?: string;
-      /** Format: uuid */
+    V2UpdateDocumentDto: {
       branch_id?: Record<string, never> | null;
+      group_id?: Record<string, never> | null;
+      note?: Record<string, never> | null;
+      student_id?: Record<string, never> | null;
+      title?: string;
+      /** @enum {string} */
+      type?: 'contract' | 'certificate' | 'order' | 'report' | 'other';
+    };
+    V2UpdateExpenseDto: {
+      amount?: string;
+      branch_id?: Record<string, never>;
       /** @enum {string} */
       category?:
         | 'rent'
         | 'utilities'
-        | 'vehicle'
         | 'marketing'
         | 'supplies'
         | 'administrative'
-        | 'teacher_settlement'
         | 'other';
-      /**
-       * Format: date
-       * @example 2026-09-05
-       */
-      due_date?: Record<string, never> | null;
-      /** @description Version from the currently rendered expense response */
+      due_date?: Record<string, never>;
       expected_version: number;
-      /**
-       * Format: date
-       * @example 2026-08-31
-       */
       expense_date?: string;
-      note?: Record<string, never> | null;
-      payee?: Record<string, never> | null;
-      /**
-       * @description Teacher settlement only. Calendar month as YYYY-MM; expense_date follows day 1.
-       * @example 2026-08
-       */
-      period_month?: string;
-      /**
-       * Format: uuid
-       * @description Teacher settlement only. Branch is derived from the selected teacher.
-       */
-      teacher_id?: string;
-      /** @example Ofis ijarasi */
+      note?: Record<string, never>;
+      payee?: Record<string, never>;
       title?: string;
-      /** Format: uuid */
-      vehicle_id?: Record<string, never> | null;
     };
-    UpdateGlobalConfigDto: {
-      /**
-       * @example [
-       *       "avto_maktab",
-       *       "tezkor"
-       *     ]
-       */
-      course_types: string[];
-      /**
-       * @example [
-       *       "UZS",
-       *       "USD"
-       *     ]
-       */
-      currencies: string[];
-    };
-    UpdateGroupDto: {
+    V2UpdateGroupDto: {
       branchId?: string;
-      /**
-       * @default avto_maktab
-       * @enum {string}
-       */
-      courseType: 'tezkor' | 'avto_maktab';
-      /** @example 11-guruh */
+      /** @description Kurs (LMS o‘quv dasturi); null — biriktirilmagan */
+      courseId?: Record<string, never>;
+      /** @enum {string} */
+      courseType?: 'online' | 'offline';
       name?: string;
-      /** @description UUID of the teacher to assign; null clears the assignment */
-      teacherId?: Record<string, never> | null;
+      /** @description O‘qituvchi (`t12`); null — olib tashlash */
+      teacherId?: Record<string, never>;
     };
-    UpdateInspectionDto: Record<string, never>;
-    UpdateLeadActivityDto: {
-      /** @description Updated activity body */
+    V2UpdateLeadActivityDto: {
       body?: string;
-      /** @description Completion date for TASK activity, or null to unmark completed */
-      doneAt?: Record<string, never> | null;
+      doneAt?: Record<string, never>;
     };
-    UpdateLeadDto: {
+    V2UpdateLeadDto: {
       assigneeUserId?: string;
+      branchId?: string;
       /** @enum {string} */
-      category?:
-        | 'A1'
-        | 'A'
-        | 'B'
-        | 'BC'
-        | 'C'
-        | 'D'
-        | 'BE'
-        | 'CE'
-        | 'DE'
-        | 'TRAM'
-        | 'TROLLEYBUS';
-      /** @enum {string} */
-      courseType?: 'tezkor' | 'avto_maktab';
+      courseType?: 'online' | 'offline';
       desiredGroupId?: string;
-      /** @description Lead email address */
+      /** @example Frontend */
+      direction?: string;
       email?: string;
-      /**
-       * @description Lead first name
-       * @example Aziz
-       */
       firstName?: string;
-      landing?: string;
-      /**
-       * @description Lead last name
-       * @example Karimov
-       */
       lastName?: string;
       marketingConsent?: boolean;
-      nextStepAt?: string;
       note?: string;
-      /**
-       * @description Uzbek phone number (+998XXXXXXXXX)
-       * @example +998901234567
-       */
       phone?: string;
-      referrer?: string;
       referrerStaffId?: string;
       referrerStudentId?: string;
       /** @enum {string} */
       source?:
-        | 'referral'
-        | 'instagram'
-        | 'directory_map'
         | 'telegram'
-        | 'walk_in'
+        | 'instagram'
+        | 'referral'
+        | 'directory_map'
         | 'olx'
-        | 'other';
+        | 'walk_in'
+        | 'other'
+        | 'website'
+        | 'recommendation'
+        | 'banner';
       sourceOther?: string;
-      utmCampaign?: string;
-      utmContent?: string;
-      utmMedium?: string;
-      utmSource?: string;
-      utmTerm?: string;
-      /**
-       * @description Current record version for optimistic locking
-       * @example 1
-       */
-      version: number;
     };
-    UpdateLeadStageItemDto: {
-      /**
-       * @description Stage color hex
-       * @example #F59E0B
-       */
-      color: string;
-      /** @description Stage UUID if updating an existing stage */
-      id?: string;
-      /**
-       * @description Active status
-       * @default true
-       */
-      isActive: boolean;
-      /**
-       * @description Stage display name
-       * @example Bog‘lanildi
-       */
-      name: string;
-      /**
-       * @description Display position
-       * @example 1
-       */
-      position: number;
-    };
-    UpdateLeadStagesDto: {
-      /** @description Target stage ID to move open leads into if a stage is being deactivated */
+    V2UpdateLeadStagesDto: {
       moveToStageId?: string;
-      /** @description Array of WORK stages (≤8 active stages) */
-      stages: components['schemas']['UpdateLeadStageItemDto'][];
+      stages: components['schemas']['V2LeadStageItemDto'][];
     };
-    UpdateLessonDto: {
-      /** @example 2026-06-22T09:00:00Z */
+    V2UpdateLessonDto: {
       date?: string;
       /** @enum {string} */
       lessonType?: 'theory' | 'practice';
-      /** @example 1-dars teoriya */
       title?: string;
     };
-    UpdatePaymentDto: {
+    V2UpdatePaymentDto: {
       amount?: number;
       /** @enum {string} */
       payment_method?: 'naqd' | 'karta' | 'perechisleniya';
     };
-    UpdatePlatformUserDto: {
-      branchId?: string;
-      companyId?: string;
-      email?: string;
-      name?: string;
-      phone?: string;
-      /** @enum {string} */
-      role?:
-        'dev' | 'owner' | 'accountant' | 'manager' | 'operator' | 'teacher';
-    };
-    UpdateQuestionDraftDto: {
-      /** @enum {string} */
-      correct_option_key?: 'A' | 'B' | 'C' | 'D';
-      diagram_media_id?: Record<string, never>;
-      legal_provision?: Record<string, never>;
-      locales?: components['schemas']['QuestionLocaleInputDto'][];
-      source_url?: Record<string, never>;
-      ticket_number?: Record<string, never> | null;
-      /** @enum {string} */
-      topic?:
-        | 'traffic_signs'
-        | 'road_markings'
-        | 'right_of_way'
-        | 'speed_and_distance'
-        | 'signals'
-        | 'overtaking'
-        | 'pedestrian_crossings'
-        | 'first_aid'
-        | 'vehicle_safety'
-        | 'liability'
-        | 'general_rules';
-    };
-    UpdateStudentDto: {
+    V2UpdateStudentDto: {
       address?: string;
+      /** @description To‘lov (online: boshlang‘ich, tahrirda: qo‘shimcha) */
       amount_paid?: number;
+      /** @example 2000-05-17 */
       birth_date?: string;
       branch_id?: string;
       completion_date?: string;
       contract_number?: string;
       course_id?: string;
       /** @enum {string} */
-      course_type?: 'tezkor' | 'avto_maktab';
+      course_type?: 'online' | 'offline';
+      email?: string;
       first_name?: string;
       /** @enum {string} */
       gender?: 'male' | 'female';
       group_id?: string;
       has_document?: boolean;
-      /** @description Client-generated UUID, stable for one edit form submission. A retry with the same key does not record the added payment a second time. */
+      /** @description Qo‘shimcha to‘lov takrorlanmasligi uchun kalit */
       idempotency_key?: string;
+      /** @description Oflayn kurs: boshlang‘ich to‘lov */
       initial_payment?: number;
       last_name?: string;
       /** @enum {string} */
@@ -4691,8 +5272,9 @@ export interface components {
         | 'olx'
         | 'other';
       lead_source_other?: string;
+      learner_password?: string;
+      middle_name?: string;
       notes?: string;
-      o83?: boolean;
       passport_number?: string;
       passport_series?: string;
       /** @enum {string} */
@@ -4700,126 +5282,44 @@ export interface components {
       phone?: string;
       referred_by_student_id?: string;
       referred_by_user_id?: string;
+      /** @description Ro‘yxatga olgan operator */
+      registered_by?: string;
       /** @enum {string} */
       result?: 'oqimoqda' | 'topshirdi' | 'yiqildi';
+      start_date?: string;
       /** @enum {string} */
       status?: 'active' | 'completed' | 'dropped' | 'suspended';
       total_price?: number;
     };
-    UpdateTelegramChatDto: {
-      /**
-       * @description Telegram chat id to receive company event notifications (payments, new students). Omit or send empty to disconnect.
-       * @example -1001234567890
-       */
-      telegram_chat_id?: string;
-    };
-    UpdateTemplateDto: {
-      /**
-       * @description 1=Dushanba ... 7=Yakshanba
-       * @example 1
-       */
+    V2UpdateTemplateDto: {
       dayOfWeek?: number;
-      /** @example 11:00 */
       endTime?: string;
-      /** @example 2026-06-22T09:00:00.000Z */
       groupId?: string;
       /** @enum {string} */
       lessonType?: 'theory' | 'practice';
-      /** @example 09:00 */
       startTime?: string;
     };
-    UpdateTestTemplateDto: {
-      /** @enum {string} */
-      answer_review_timing?:
-        'never' | 'immediate' | 'after_submit' | 'after_deadline';
-      available_from?: Record<string, never>;
-      available_until?: Record<string, never>;
-      description?: string;
-      passing_threshold_percent?: number;
-      question_count?: number;
-      question_ids?: string[];
-      retry_limit?: number;
-      shuffle_options?: boolean;
-      shuffle_questions?: boolean;
-      time_limit_seconds?: number;
-      title?: string;
-    };
-    UpdateTrainingProgramDto: {
-      is_active?: boolean;
-      name?: string;
-      /** @description Internally approved practice minutes; not a government certificate */
-      required_minutes?: number;
-    };
-    UpdateUserDto: {
+    V2UpdateUserDto: {
       branchId?: string;
+      email?: string;
       fullName?: string;
       phone?: string;
-      /** @enum {string} */
-      specialization?: 'THEORY' | 'PRACTICE';
-    };
-    UpdateVehicleDocumentDto: {
-      /** Format: date */
-      expires_on?: Record<string, never> | null;
-      label?: string;
-      reference?: string;
-      /** @enum {string} */
-      type?: 'registration' | 'insurance' | 'technical_inspection' | 'other';
-    };
-    UpdateVehicleDto: {
-      categories?: (
-        | 'A1'
-        | 'A'
-        | 'B'
-        | 'C'
-        | 'D'
-        | 'BE'
-        | 'CE'
-        | 'DE'
-        | 'TRAM'
-        | 'TROLLEYBUS'
-      )[];
       /**
-       * Format: uuid
-       * @description Directly assigned instructor / custodian ID
+       * @description Fan / mutaxassislik
+       * @example Matematika
        */
-      current_custodian_id?: Record<string, never> | null;
-      make?: string;
-      manufacture_year?: number;
-      model?: string;
-      odometer_km?: number;
-      /** @example 01 A 123 BC */
-      plate_number?: string;
-      /** @enum {string} */
-      status?: 'active' | 'out_of_service' | 'retired';
-      /** @example WVWZZZ1JZXW000001 */
-      vin?: string;
+      specialization?: string;
     };
-    UpdateVehicleMaintenanceDto: {
-      /** Format: date-time */
-      completed_at?: Record<string, never> | null;
-      description?: string;
-      next_due_odometer_km?: Record<string, never> | null;
-      /** Format: date */
-      next_due_on?: Record<string, never> | null;
-      /** Format: date-time */
-      started_at?: string;
-    };
-    UpsertAttendanceDto: {
-      lessonId: string;
-      notes?: string;
-      /** @enum {string} */
-      status: 'present' | 'absent' | 'late' | 'excused';
-      studentId: string;
-    };
-    UpsertLearnerAccountDto: {
-      /** @description Min 8 chars, must contain a digit */
-      password: string;
-    };
-    VoidExpensePaymentDto: {
-      /** @description Version returned by the expense API */
-      expected_version: number;
-      /** @example Duplicate payment recorded in error */
-      reason: string;
+    VerifyCodeDto: {
+      /** @example 917810 */
+      code: string;
+      /** @example +998901234567 */
+      phone: string;
+      /**
+       * @default REGISTER
+       * @enum {string}
+       */
+      purpose: 'REGISTER' | 'RESET_PASSWORD' | 'CHANGE_PHONE';
     };
   };
   responses: never;
@@ -4830,38 +5330,18 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  AdminController_status: {
+  AttendanceController_updateAttendance: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Optional when authenticated as dev; otherwise required */
-        'x-admin-key'?: string;
-      };
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Missing or invalid credentials */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AttendanceController_findHistoryForStudent: {
-    parameters: {
-      query: {
-        limit?: number;
-        student_id: string;
-      };
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateAttendanceDto'];
+      };
+    };
     responses: {
       200: {
         headers: {
@@ -4871,7 +5351,7 @@ export interface operations {
       };
     };
   };
-  AttendanceController_batchAttendance: {
+  AttendanceController_createAttendance: {
     parameters: {
       query?: never;
       header?: never;
@@ -4880,7 +5360,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['BatchAttendanceDto'];
+        'application/json': components['schemas']['CreateAttendanceDto'];
       };
     };
     responses: {
@@ -4892,47 +5372,12 @@ export interface operations {
       };
     };
   };
-  AuditController_findAll: {
-    parameters: {
-      query?: {
-        action?: string;
-        /** @description dev only — view-as company */
-        company_id?: string;
-        end_date?: string;
-        /** @deprecated */
-        endDate?: string;
-        entity?: string;
-        /** @description Filter to audit logs for a single entity id */
-        entity_id?: string;
-        limit?: number;
-        page?: number;
-        start_date?: string;
-        /** @deprecated */
-        startDate?: string;
-        user_id?: string;
-        /** @deprecated */
-        userId?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuditController_findById: {
+  AttendanceController_getAttendanceByLesson: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        lessonId: number;
       };
       cookie?: never;
     };
@@ -4946,7 +5391,26 @@ export interface operations {
       };
     };
   };
-  AuthController_changePassword: {
+  AttendanceController_getWeeklyStats: {
+    parameters: {
+      query: {
+        groupId: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_confirmPhoneChange: {
     parameters: {
       query?: never;
       header?: never;
@@ -4955,7 +5419,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['ChangePasswordDto'];
+        'application/json': components['schemas']['ConfirmPhoneChangeDto'];
       };
     };
     responses: {
@@ -4967,14 +5431,39 @@ export interface operations {
       };
     };
   };
-  AuthController_demo: {
+  AuthController_requestPhoneChange: {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RequestPhoneChangeDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_forgotPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ForgotPasswordDto'];
+      };
+    };
     responses: {
       201: {
         headers: {
@@ -5005,6 +5494,93 @@ export interface operations {
       };
     };
   };
+  AuthController_loginAttempts: {
+    parameters: {
+      query?: {
+        /** @description Nechta yozuv (1-200) */
+        limit?: number;
+        /** @description Faqat muvaffaqiyatsiz urinishlar */
+        onlyFailed?: boolean;
+        /** @description Faqat shu telefon raqami bo'yicha */
+        phone?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_loginAdmin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_loginStudent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_loginTeacher: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   AuthController_logout: {
     parameters: {
       query?: never;
@@ -5012,9 +5588,13 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LogoutDto'];
+      };
+    };
     responses: {
-      204: {
+      201: {
         headers: {
           [name: string]: unknown;
         };
@@ -5022,41 +5602,7 @@ export interface operations {
       };
     };
   };
-  AuthController_me: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_completeCrmTour: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_stopImpersonation: {
+  AuthController_logoutAll: {
     parameters: {
       query?: never;
       header?: never;
@@ -5073,29 +5619,7 @@ export interface operations {
       };
     };
   };
-  BlogPostsController_list: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['BlogPostListItemResponse'][];
-        };
-      };
-    };
-  };
-  BlogPostsController_create: {
+  AuthController_refresh: {
     parameters: {
       query?: never;
       header?: never;
@@ -5104,164 +5628,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateBlogPostDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['BlogPostResponse'];
-        };
-      };
-    };
-  };
-  BlogPostsController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  BlogPostsController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateBlogPostDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['BlogPostResponse'];
-        };
-      };
-    };
-  };
-  BlogPostsController_findBySlug: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['BlogPostResponse'];
-        };
-      };
-    };
-  };
-  BlogPostsController_listAdmin: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-        status?: 'draft' | 'published';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['BlogPostListItemResponse'][];
-        };
-      };
-    };
-  };
-  BlogPostsController_findByIdAdmin: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['BlogPostResponse'];
-        };
-      };
-    };
-  };
-  BranchesController_findAll: {
-    parameters: {
-      query?: {
-        /** @description dev only — view-as company */
-        company_id?: string;
-        /** @description owner/dev only — include soft-deleted branches alongside live ones. 403 for any other role. */
-        include_deleted?: boolean;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  BranchesController_create: {
-    parameters: {
-      query?: {
-        /** @description dev only — target company for the new branch */
-        company_id?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateBranchDto'];
+        'application/json': components['schemas']['RefreshTokenDto'];
       };
     };
     responses: {
@@ -5273,87 +5640,7 @@ export interface operations {
       };
     };
   };
-  BranchesController_findById: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  BranchesController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  BranchesController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateBranchDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  BranchesController_restore: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CompaniesController_updateTelegramChat: {
+  AuthController_register: {
     parameters: {
       query?: never;
       header?: never;
@@ -5362,30 +5649,105 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UpdateTelegramChatDto'];
+        'application/json': components['schemas']['RegisterDto'];
       };
     };
     responses: {
-      200: {
+      201: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          'application/json': components['schemas']['CompanyTelegramChatResponse'];
-        };
+        content?: never;
       };
     };
   };
-  CoursesController_findAll: {
+  AuthController_resetPassword: {
     parameters: {
-      query?: {
-        branch_id?: string;
-        /** @description dev only — view-as company */
-        company_id?: string;
-        course_type?: 'tezkor' | 'avto_maktab';
-        /** @description Filter by course name (contains) */
-        search?: string;
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SetPasswordDto'];
       };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_sendCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SendCodeDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_setPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SetPasswordDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_verifyCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['VerifyCodeDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  BranchesController_list: {
+    parameters: {
+      query?: never;
       header?: never;
       path?: never;
       cookie?: never;
@@ -5400,7 +5762,7 @@ export interface operations {
       };
     };
   };
-  CoursesController_create: {
+  CourseController_createCourse: {
     parameters: {
       query?: never;
       header?: never;
@@ -5421,12 +5783,12 @@ export interface operations {
       };
     };
   };
-  CoursesController_findById: {
+  CourseController_getOneCourse: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        id: number;
       };
       cookie?: never;
     };
@@ -5440,31 +5802,12 @@ export interface operations {
       };
     };
   };
-  CoursesController_remove: {
+  CourseController_updateCourseById: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CoursesController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
+        id: number;
       };
       cookie?: never;
     };
@@ -5482,13 +5825,32 @@ export interface operations {
       };
     };
   };
-  DashboardController_getAnalytics: {
+  CourseController_deleteCourseById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CourseController_getAllCourse: {
     parameters: {
       query?: {
-        branch_id?: string;
-        /** @description dev only — view-as company */
-        company_id?: string;
-        course_type?: 'tezkor' | 'avto_maktab';
+        /** @description Bitta sahifadagi yozuvlar soni (eng ko'pi 200) */
+        limit?: number;
+        /** @description Sahifa raqami */
+        page?: number;
       };
       header?: never;
       path?: never;
@@ -5504,15 +5866,15 @@ export interface operations {
       };
     };
   };
-  DashboardController_getCompanyOverview: {
+  DashboardController_getSummary: {
     parameters: {
       query?: {
-        branch_id?: string;
-        /** @description dev only — view-as company */
-        company_id?: string;
-        course_type?: 'tezkor' | 'avto_maktab';
+        branchId?: number;
+        courseType?: 'ONLINE' | 'OFFLINE';
+        /** @description Standart: oy boshi */
         from?: string;
         granularity?: 'day' | 'week';
+        /** @description Standart: bugun */
         to?: string;
       };
       header?: never;
@@ -5529,98 +5891,7 @@ export interface operations {
       };
     };
   };
-  DashboardController_getExpenseBreakdown: {
-    parameters: {
-      query?: {
-        branch_id?: string;
-        /** @description Inclusive Tashkent calendar start date (YYYY-MM-DD) */
-        from?: string;
-        /** @description Inclusive Tashkent calendar end date (YYYY-MM-DD) */
-        to?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': {
-            data: components['schemas']['ExpenseBreakdownResponse'];
-            success: boolean;
-          };
-        };
-      };
-    };
-  };
-  DashboardController_getFinanceSummary: {
-    parameters: {
-      query?: {
-        branch_id?: string;
-        /** @description Inclusive Tashkent calendar start date (YYYY-MM-DD) */
-        from?: string;
-        /** @description Inclusive Tashkent calendar end date (YYYY-MM-DD) */
-        to?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DashboardController_getTeacherAnalytics: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DemoRequestsController_list: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-        status?: 'new' | 'contacted' | 'archived';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['DemoRequestResponse'][];
-        };
-      };
-    };
-  };
-  DemoRequestsController_create: {
+  ExamsController_createExam: {
     parameters: {
       query?: never;
       header?: never;
@@ -5629,81 +5900,20 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateDemoRequestDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
+        'multipart/form-data': {
+          description?: string | null;
+          durationTime?: number | null;
+          /** Format: date-time */
+          endAt?: string | null;
+          /** Format: binary */
+          file?: string | null;
+          groupId?: number;
+          lessonId?: number | null;
+          maxScore?: number | null;
+          /** Format: date-time */
+          startAt?: string | null;
+          title?: string;
         };
-        content: {
-          'application/json': components['schemas']['DemoRequestMinimalResponse'];
-        };
-      };
-    };
-  };
-  DemoRequestsController_updateStatus: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateDemoRequestStatusDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['DemoRequestResponse'];
-        };
-      };
-    };
-  };
-  DocumentsController_findAll: {
-    parameters: {
-      query?: {
-        branch_id?: string;
-        /** @description dev only — view-as company */
-        company_id?: string;
-        /** @description Filter by student name (contains) */
-        search?: string;
-        student_id?: string;
-        type?:
-          'driving_license' | 'medical_certificate' | 'passport_copy' | 'other';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DocumentsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateDocumentDto'];
       };
     };
     responses: {
@@ -5715,12 +5925,12 @@ export interface operations {
       };
     };
   };
-  DocumentsController_remove: {
+  ExamsController_getExamById: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        examId: number;
       };
       cookie?: never;
     };
@@ -5734,85 +5944,12 @@ export interface operations {
       };
     };
   };
-  DocumentsController_update: {
+  ExamsController_deleteExam: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateDocumentDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DrivingSessionsController_findAll: {
-    parameters: {
-      query?: {
-        branch_id?: string;
-        enrollment_id?: string;
-        from?: string;
-        instructor_id?: string;
-        limit?: number;
-        page?: number;
-        status?:
-          'planned' | 'submitted' | 'approved' | 'rejected' | 'cancelled';
-        student_id?: string;
-        to?: string;
-        vehicle_id?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DrivingSessionsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateDrivingSessionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DrivingSessionsController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
+        examId: number;
       };
       cookie?: never;
     };
@@ -5826,131 +5963,33 @@ export interface operations {
       };
     };
   };
-  DrivingSessionsController_approve: {
+  ExamsController_updateExam: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        examId: number;
       };
       cookie?: never;
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['ApproveDrivingSessionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
+        'multipart/form-data': {
+          description?: string | null;
+          durationTime?: number | null;
+          /** Format: date-time */
+          endAt?: string | null;
+          /** Format: binary */
+          file?: string | null;
+          groupId?: number;
+          lessonId?: number | null;
+          maxScore?: number | null;
+          /** Format: date-time */
+          startAt?: string | null;
+          title?: string;
         };
-        content?: never;
       };
     };
-  };
-  DrivingSessionsController_cancel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ReasonDrivingSessionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DrivingSessionsController_correct: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CorrectDrivingSessionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DrivingSessionsController_reject: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ReasonDrivingSessionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DrivingSessionsController_submit: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['SubmitDrivingSessionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DrivingSessionsController_summary: {
-    parameters: {
-      query: {
-        enrollment_id: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
     responses: {
       200: {
         headers: {
@@ -5960,33 +5999,12 @@ export interface operations {
       };
     };
   };
-  ExamsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateExamDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ExamsController_findByStudentId: {
+  ExamsController_getExamsByGroup: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        groupId: number;
       };
       cookie?: never;
     };
@@ -6000,30 +6018,87 @@ export interface operations {
       };
     };
   };
-  ExpensesController_findAll: {
+  ExamsController_updateResponse: {
     parameters: {
-      query?: {
-        attention?: 'overdue';
-        branch_id?: string;
-        category?:
-          | 'rent'
-          | 'utilities'
-          | 'vehicle'
-          | 'marketing'
-          | 'supplies'
-          | 'administrative'
-          | 'teacher_settlement'
-          | 'other';
-        date_from?: string;
-        date_to?: string;
-        limit?: number;
-        page?: number;
-        scope?: 'company';
-        search?: string;
-        status?: 'planned' | 'partially_paid' | 'paid' | 'cancelled';
-      };
+      query?: never;
       header?: never;
       path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          comment?: string | null;
+          examId?: number;
+          /** Format: binary */
+          file?: string | null;
+          title?: string | null;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ExamsController_createResponse: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          comment?: string | null;
+          examId?: number;
+          /** Format: binary */
+          file?: string | null;
+          title?: string | null;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ExamsController_getStudentResponse: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        examId: number;
+        studentId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ExamsController_getMyResponse: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        examId: number;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -6057,54 +6132,12 @@ export interface operations {
       };
     };
   };
-  ExpensesController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ExpensesController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['DeleteExpenseDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
   ExpensesController_update: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        id: number;
       };
       cookie?: never;
     };
@@ -6122,35 +6155,12 @@ export interface operations {
       };
     };
   };
-  ExpensesController_cancel: {
+  ExpensesController_remove: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CancelExpenseDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ExpensesController_getHistory: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
+        id: number;
       };
       cookie?: never;
     };
@@ -6164,18 +6174,105 @@ export interface operations {
       };
     };
   };
-  ExpensesController_recordPayment: {
+  ExpensesController_markPaid: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        id: number;
       };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ExpensesController_restore: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ExpensesController_getAll: {
+    parameters: {
+      query?: {
+        category?: string;
+        /** @description O‘chirilganlar tarixi */
+        deleted?: boolean;
+        /** @description Yaratilgan sana — boshlanishi (ISO) */
+        from?: string;
+        /** @description Bitta sahifadagi yozuvlar soni (eng ko'pi 200) */
+        limit?: number;
+        /** @description Faqat muddati o‘tgan xarajatlar */
+        overdue?: boolean;
+        /** @description Sahifa raqami */
+        page?: number;
+        /** @description Nomi bo‘yicha qidiruv */
+        search?: string;
+        status?: 'PENDING' | 'PAID' | 'PARTIALLY_PAID' | 'CANCELLED';
+        /** @description Yaratilgan sana — oxiri (ISO) */
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ExpensesController_getSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GradesController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
       cookie?: never;
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateExpensePaymentDto'];
+        'application/json': components['schemas']['CreateGradeDto'];
       };
     };
     responses: {
@@ -6187,19 +6284,18 @@ export interface operations {
       };
     };
   };
-  ExpensesController_voidPayment: {
+  GradesController_update: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
-        paymentId: string;
+        id: number;
       };
       cookie?: never;
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['VoidExpensePaymentDto'];
+        'application/json': components['schemas']['UpdateGradeDto'];
       };
     };
     responses: {
@@ -6211,7 +6307,45 @@ export interface operations {
       };
     };
   };
-  ExpensesController_getBranchOptions: {
+  GradesController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GradesController_getByGroup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GradesController_getMine: {
     parameters: {
       query?: never;
       header?: never;
@@ -6228,15 +6362,13 @@ export interface operations {
       };
     };
   };
-  ExpensesController_listDeletedHistory: {
+  GradesController_getByStudent: {
     parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-        search?: string;
-      };
+      query?: never;
       header?: never;
-      path?: never;
+      path: {
+        studentId: number;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -6245,23 +6377,101 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          'application/json': {
-            data: {
-              data: components['schemas']['DeletedExpenseHistoryListItemResponse'][];
-              meta: Record<string, never>;
-            };
-            success: boolean;
-          };
-        };
+        content?: never;
       };
     };
   };
-  ExpensesController_exportMonthClose: {
+  GroupsController_createGroup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          courseId?: number;
+          name?: string;
+          roomId?: number;
+          /** @example 2026-03-14 */
+          startDate?: string;
+          /** @example 10:00 */
+          startTime?: string;
+          /** @enum {string} */
+          status?: 'ACTIVE' | 'INACTIVE' | 'FREEZE';
+          teacherId?: number;
+          weekDays?: string[] | string;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GroupsController_updateGroupById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          courseId?: number;
+          name?: string;
+          roomId?: number;
+          /** @example 2026-03-14 */
+          startDate?: string;
+          /** @example 10:00 */
+          startTime?: string;
+          /** @enum {string} */
+          status?: 'ACTIVE' | 'INACTIVE' | 'FREEZE';
+          teacherId?: number;
+          weekDays?: string[] | string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GroupsController_deleteGroupById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GroupsController_getAllGroup: {
     parameters: {
       query: {
-        branch_id?: string;
-        month: string;
+        status: string;
       };
       header?: never;
       path?: never;
@@ -6277,7 +6487,45 @@ export interface operations {
       };
     };
   };
-  ExpensesController_review: {
+  GroupsController_getGroupLessons: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GroupsController_getAllStudentGroupById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  HomeworkController_createHomework: {
     parameters: {
       query?: never;
       header?: never;
@@ -6286,7 +6534,41 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['ReviewExpensesDto'];
+        'multipart/form-data': {
+          /** @example 16 */
+          durationTime?: number | null;
+          /** Format: binary */
+          file?: string | null;
+          groupId?: number;
+          lessonId?: number;
+          title?: string;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  HomeworkResponseController_updateHomeworkResponse: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          file?: string | null;
+          homeworkId?: number;
+          title?: string;
+        };
       };
     };
     responses: {
@@ -6294,20 +6576,44 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          'application/json': {
-            data: components['schemas']['ExpenseResponse'][];
-            success: boolean;
-          };
-        };
+        content?: never;
       };
     };
   };
-  ExpensesController_getTeacherOptions: {
+  HomeworkResponseController_createHomeworkResponse: {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          file?: string | null;
+          homeworkId?: number;
+          title?: string;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  HomeworkResponseController_getStudentHomeworkResponse: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        homeworkId: number;
+        studentId: number;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -6320,15 +6626,13 @@ export interface operations {
       };
     };
   };
-  ExpensesController_getTriageCounts: {
+  HomeworkResponseController_getMyHomeworkResponse: {
     parameters: {
-      query?: {
-        branch_id?: string;
-        /** @description scope=company returns company-wide branchless expenses (branch_id IS NULL) for finance roles only; omit it to include all company rows for owner/accountant. */
-        scope?: 'company';
-      };
+      query?: never;
       header?: never;
-      path?: never;
+      path: {
+        homeworkId: number;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -6337,22 +6641,101 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          'application/json': {
-            data: components['schemas']['ExpenseTriageCountsResponse'];
-            success: boolean;
-          };
-        };
+        content?: never;
       };
     };
   };
-  ExpensesController_getVehicleOptions: {
+  HomeworkResultsController_createHomeworkResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateHomeworkResultsDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  HomeworkResultsController_updateHomeworkResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateHomeworkResultsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  HomeworkResultsController_getHomeworkResultByHomeworkId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        homeworkId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  HomeworkResultsController_getMyHomeworkResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        homeworkId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  HomeworkController_getHomeworkById: {
     parameters: {
       query: {
-        branch_id: string;
+        status: 'APPROVED' | 'PENDING' | 'NOT_REVIEWED' | 'REJECTED';
       };
       header?: never;
-      path?: never;
+      path: {
+        homeworkId: number;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -6365,59 +6748,26 @@ export interface operations {
       };
     };
   };
-  FuelStationsController_list: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  FuelStationsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['FuelStationDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  FuelStationsController_update: {
+  HomeworkController_updateHomework: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        homeworkId: number;
       };
       cookie?: never;
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['FuelStationUpdateDto'];
+        'multipart/form-data': {
+          /** @example 16 */
+          durationTime?: number | null;
+          /** Format: binary */
+          file?: string | null;
+          groupId?: number;
+          lessonId?: number;
+          title?: string;
+        };
       };
     };
     responses: {
@@ -6429,12 +6779,12 @@ export interface operations {
       };
     };
   };
-  FuelStationsController_balance: {
+  HomeworkController_deleteHomework: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        homeworkId: number;
       };
       cookie?: never;
     };
@@ -6448,15 +6798,12 @@ export interface operations {
       };
     };
   };
-  FuelStationsController_reconciliations: {
+  HomeworkController_getAllHomeworkByGroup: {
     parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
+      query?: never;
       header?: never;
       path: {
-        id: string;
+        groupId: number;
       };
       cookie?: never;
     };
@@ -6470,334 +6817,28 @@ export interface operations {
       };
     };
   };
-  FuelStationsController_reconcile: {
+  HomeworkController_updateHomeworkByTeacher: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        homeworkId: number;
       };
       cookie?: never;
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['FuelReconciliationDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
+        'multipart/form-data': {
+          /** @example 16 */
+          durationTime?: number | null;
+          /** Format: binary */
+          file?: string | null;
+          groupId?: number;
+          lessonId?: number;
+          title?: string;
         };
-        content?: never;
       };
     };
-  };
-  GroupsController_findAll: {
-    parameters: {
-      query?: {
-        branch_id?: string;
-        /** @description dev only — view-as company */
-        company_id?: string;
-        course_type?: 'tezkor' | 'avto_maktab';
-        /** @description owner/dev only — include soft-deleted groups alongside live ones. 403 for any other role. */
-        include_deleted?: boolean;
-        /** @description Filter by group name (contains) */
-        search?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  GroupsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateGroupDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  GroupsController_findById: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  GroupsController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  GroupsController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateGroupDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  GroupsController_restore: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  GroupsController_getOverview: {
-    parameters: {
-      query?: {
-        /** @description dev only — view-as company */
-        company_id?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  HealthController_check: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadSourcesController_findAll: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadSourcesController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateLeadSourceDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadSourcesController_delete: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadStagesController_findAll: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadStagesController_updateStages: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateLeadStagesDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Assignee user ID */
-        assigneeId?: string;
-        /** @description Branch ID */
-        branchId?: string;
-        category?:
-          | 'A1'
-          | 'A'
-          | 'B'
-          | 'BC'
-          | 'C'
-          | 'D'
-          | 'BE'
-          | 'CE'
-          | 'DE'
-          | 'TRAM'
-          | 'TROLLEYBUS';
-        courseType?: 'tezkor' | 'avto_maktab';
-        limit?: number;
-        /** @description Filter only leads assigned to current user */
-        mine?: boolean;
-        /** @description Filter only leads with overdue nextStepAt */
-        overdueOnly?: boolean;
-        page?: number;
-        period?: '7d' | '30d' | '60d' | 'all';
-        /** @description Search term for name or phone */
-        q?: string;
-        source?:
-          | 'referral'
-          | 'instagram'
-          | 'directory_map'
-          | 'telegram'
-          | 'walk_in'
-          | 'olx'
-          | 'other';
-        /** @description Stage ID */
-        stageId?: string;
-        tab?: 'new' | 'in_progress' | 'won' | 'lost' | 'all';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
     responses: {
       200: {
         headers: {
@@ -6828,50 +6869,12 @@ export interface operations {
       };
     };
   };
-  LeadsController_findById: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_delete: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
   LeadsController_update: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        id: number;
       };
       cookie?: never;
     };
@@ -6889,12 +6892,12 @@ export interface operations {
       };
     };
   };
-  LeadsController_getActivities: {
+  LeadsController_remove: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        id: number;
       };
       cookie?: never;
     };
@@ -6908,62 +6911,18 @@ export interface operations {
       };
     };
   };
-  LeadsController_createActivity: {
+  LeadsController_updateStage: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        id: number;
       };
       cookie?: never;
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateLeadActivityDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_deleteActivity: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        aid: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_updateActivity: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        aid: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateLeadActivityDto'];
+        'application/json': components['schemas']['UpdateLeadStageDto'];
       };
     };
     responses: {
@@ -6975,417 +6934,20 @@ export interface operations {
       };
     };
   };
-  LeadsController_assign: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['AssignLeadDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_assignPatch: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['AssignLeadDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_convert: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ConvertLeadDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_transitionStage: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['LeadStageTransitionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_transitionStagePatch: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['LeadStageTransitionDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_getBoard: {
+  LeadsController_getAll: {
     parameters: {
       query?: {
-        /** @description Assignee user ID */
-        assigneeId?: string;
-        /** @description Branch ID */
-        branchId?: string;
-        category?:
-          | 'A1'
-          | 'A'
-          | 'B'
-          | 'BC'
-          | 'C'
-          | 'D'
-          | 'BE'
-          | 'CE'
-          | 'DE'
-          | 'TRAM'
-          | 'TROLLEYBUS';
-        courseType?: 'tezkor' | 'avto_maktab';
+        /** @description Bitta sahifadagi yozuvlar soni (eng ko'pi 200) */
         limit?: number;
-        /** @description Filter only leads assigned to current user */
+        /** @description Faqat menga biriktirilgan lidlar */
         mine?: boolean;
-        /** @description Filter only leads with overdue nextStepAt */
-        overdueOnly?: boolean;
+        /** @description Bog‘lanish vaqti o‘tib ketgan lidlar */
+        overdue?: boolean;
+        /** @description Sahifa raqami */
         page?: number;
-        period?: '7d' | '30d' | '60d' | 'all';
-        /** @description Search term for name or phone */
-        q?: string;
-        source?:
-          | 'referral'
-          | 'instagram'
-          | 'directory_map'
-          | 'telegram'
-          | 'walk_in'
-          | 'olx'
-          | 'other';
-        /** @description Stage ID */
-        stageId?: string;
-        tab?: 'new' | 'in_progress' | 'won' | 'lost' | 'all';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_checkDuplicateGet: {
-    parameters: {
-      query: {
-        /** @description Phone number to check for duplicates (+998XXXXXXXXX) */
-        phone: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_checkDuplicate: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CheckLeadDuplicateDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_exportLeads: {
-    parameters: {
-      query?: {
-        /** @description Assignee user ID */
-        assigneeId?: string;
-        /** @description Branch ID */
-        branchId?: string;
-        category?:
-          | 'A1'
-          | 'A'
-          | 'B'
-          | 'BC'
-          | 'C'
-          | 'D'
-          | 'BE'
-          | 'CE'
-          | 'DE'
-          | 'TRAM'
-          | 'TROLLEYBUS';
-        courseType?: 'tezkor' | 'avto_maktab';
-        limit?: number;
-        /** @description Filter only leads assigned to current user */
-        mine?: boolean;
-        /** @description Filter only leads with overdue nextStepAt */
-        overdueOnly?: boolean;
-        page?: number;
-        period?: '7d' | '30d' | '60d' | 'all';
-        /** @description Search term for name or phone */
-        q?: string;
-        source?:
-          | 'referral'
-          | 'instagram'
-          | 'directory_map'
-          | 'telegram'
-          | 'walk_in'
-          | 'olx'
-          | 'other';
-        /** @description Stage ID */
-        stageId?: string;
-        tab?: 'new' | 'in_progress' | 'won' | 'lost' | 'all';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LeadsController_getMetrics: {
-    parameters: {
-      query?: {
-        /** @description Filter metrics by branch ID */
-        branchId?: string;
-        period?: '7d' | '30d' | '60d' | 'all';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LearnerProgressController_listAssignments: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LearnerController_login: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['LoginLearnerDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LearnerController_logout: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LearnerController_me: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LearnerProgressController_listTopics: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LearnerProgressController_listResults: {
-    parameters: {
-      query?: {
-        /** @description Omit to include this learner’s school attempts and their own public practice. Guest practice without this learner id is never listed. */
-        kind?: 'public_practice' | 'school_assignment';
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AttendanceController_findAll: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-        /** @description Search lesson title, group name, or type */
+        /** @description Ism yoki telefon bo‘yicha qidiruv */
         search?: string;
+        stage?: 'NEW' | 'CONTACTED' | 'TRIAL' | 'CONTRACT' | 'WON' | 'LOST';
       };
       header?: never;
       path?: never;
@@ -7401,7 +6963,88 @@ export interface operations {
       };
     };
   };
-  AttendanceController_create: {
+  LeadsController_getSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LessonVideosController_createLessonVideo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          file?: string | null;
+          groupId?: number;
+          lessonId?: number;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LessonVideosController_getLessonVideosByGroupId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LessonVideosController_deleteLessonVideo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LessonsController_createLesson: {
     parameters: {
       query?: never;
       header?: never;
@@ -7422,12 +7065,13 @@ export interface operations {
       };
     };
   };
-  AttendanceController_findById: {
+  LessonsController_getOneLessonByGroupIdAndLessonId: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        groupId: number;
+        lessonId: number;
       };
       cookie?: never;
     };
@@ -7441,31 +7085,13 @@ export interface operations {
       };
     };
   };
-  AttendanceController_remove: {
+  LessonsController_updateLessonById: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AttendanceController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
+        groupId: number;
+        lessonId: number;
       };
       cookie?: never;
     };
@@ -7483,73 +7109,14 @@ export interface operations {
       };
     };
   };
-  MetricsController_getMetrics: {
+  LessonsController_deleteLessonById: {
     parameters: {
       query?: never;
-      header: {
-        /** @description Must equal env SCRAPER_TOKEN */
-        'x-scraper-token': string;
-      };
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PaymentsController_findAll: {
-    parameters: {
-      query?: {
-        branch_id?: string;
-        /**
-         * @deprecated
-         * @description Deprecated alias for branch_id
-         */
-        branchId?: string;
-        /** @description dev only — view-as company */
-        company_id?: string;
-        course_type?: 'tezkor' | 'avto_maktab';
-        /** @description yyyy-mm-dd in Asia/Tashkent */
-        end_date?: string;
-        /**
-         * @deprecated
-         * @description Deprecated alias for end_date
-         */
-        endDate?: string;
-        limit?: number;
-        page?: number;
-        payment_method?: 'naqd' | 'karta' | 'perechisleniya';
-        payment_status?: 'paid' | 'unpaid';
-        /**
-         * @deprecated
-         * @description Deprecated alias for payment_method
-         */
-        payment_type?: 'naqd' | 'karta' | 'perechisleniya';
-        /**
-         * @deprecated
-         * @description Deprecated alias for payment_status; true maps to unpaid and false maps to paid
-         */
-        paymentStatus?: 'paid' | 'unpaid' | 'true' | 'false';
-        search?: string;
-        sort_by?: 'student_name' | 'amount_paid' | 'remaining_debt' | 'date';
-        sort_order?: 'asc' | 'desc';
-        /** @description yyyy-mm-dd in Asia/Tashkent */
-        start_date?: string;
-        /**
-         * @deprecated
-         * @description Deprecated alias for start_date
-         */
-        startDate?: string;
-        student_id?: string;
-      };
       header?: never;
-      path?: never;
+      path: {
+        groupId: number;
+        lessonId: number;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -7562,7 +7129,26 @@ export interface operations {
       };
     };
   };
-  PaymentsController_create: {
+  LessonsController_getLessonsByGroupId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_create: {
     parameters: {
       query?: never;
       header?: never;
@@ -7571,7 +7157,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreatePaymentDto'];
+        'application/json': components['schemas']['CreateNotificationDto'];
       };
     };
     responses: {
@@ -7583,7 +7169,1528 @@ export interface operations {
       };
     };
   };
-  PaymentsController_remove: {
+  NotificationsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_markAsRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_getAll: {
+    parameters: {
+      query: {
+        limit: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_getMine: {
+    parameters: {
+      query: {
+        limit: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_markAllAsRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrganizationsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateOrganizationDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrganizationsController_getOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrganizationsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateOrganizationDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrganizationsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrganizationsController_getAll: {
+    parameters: {
+      query: {
+        status: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PaymentsController_markPaymentPaid: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        paymentId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MarkPaymentDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PaymentsController_updatePaymentStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        paymentId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePaymentStatusDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PaymentsController_getAdminMonthlyPayments: {
+    parameters: {
+      query: {
+        month: string;
+        status: string;
+        year: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PaymentsController_getStudentMonthlyPayments: {
+    parameters: {
+      query: {
+        month: string;
+        year: string;
+      };
+      header?: never;
+      path: {
+        studentId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PaymentsController_startStudentPayment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        studentId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StartPaymentDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PaymentsController_getMonthlySummary: {
+    parameters: {
+      query: {
+        month: string;
+        year: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PaymentsController_getYearlySummary: {
+    parameters: {
+      query: {
+        year: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PlansController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreatePlanDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PlansController_getOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PlansController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePlanDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PlansController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PlansController_getAll: {
+    parameters: {
+      query: {
+        status: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RoomsController_createRoom: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateRoomDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RoomsController_getRoomById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RoomsController_updateRoom: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateRoomDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RoomsController_deleteRoom: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RoomsController_getAllRoom: {
+    parameters: {
+      query?: {
+        /** @description Bitta sahifadagi yozuvlar soni (eng ko'pi 200) */
+        limit?: number;
+        /** @description Sahifa raqami */
+        page?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentGroupController_createStudentGroup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateStudentGroupDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentGroupController_deleteStudentGroup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateStudentGroupDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_createStudent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** @example 2026-01-02 */
+          birth_date?: string;
+          fullName?: string;
+          password?: string;
+          /** @example +998901234567 */
+          phone?: string;
+          /** Format: binary */
+          photo?: string | null;
+          /** @enum {string|null} */
+          status?: 'ACTIVE' | 'INACTIVE' | 'FREEZE' | null;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_getOneStudent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_updateStudent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** @example 2026-01-02 */
+          birth_date?: string;
+          fullName?: string;
+          password?: string;
+          /** @example +998901234567 */
+          phone?: string;
+          /** Format: binary */
+          photo?: string | null;
+          /** @enum {string|null} */
+          status?: 'ACTIVE' | 'INACTIVE' | 'FREEZE' | null;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_deleteStudentById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        studentId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_getAllStudent: {
+    parameters: {
+      query?: {
+        /** @description Bitta sahifadagi yozuvlar soni (eng ko'pi 200) */
+        limit?: number;
+        /** @description Sahifa raqami */
+        page?: number;
+        /** @description Ism yoki telefon bo‘yicha qidiruv */
+        search?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_GetMyGroupsHomework: {
+    parameters: {
+      query: {
+        lessonId: number;
+      };
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_GetMyGroupLessonVideo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_GetMyGroups: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_GetMyLessons: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_changeMyPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ChangeStudentPasswordDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StudentsController_getMyProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SubscriptionsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateSubscriptionDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SubscriptionsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateSubscriptionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SubscriptionsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SubscriptionsController_getAll: {
+    parameters: {
+      query: {
+        organizationId: string;
+        status: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SubscriptionsController_getSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupportController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateTicketDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupportController_getOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupportController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupportController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateTicketDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupportController_reply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplyTicketDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupportController_getAll: {
+    parameters: {
+      query: {
+        status: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupportController_getSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TeachersController_createTeacher: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** @example 4 */
+          experience?: number;
+          fullName?: string;
+          password?: string;
+          /** @example +998901234567 */
+          phone?: string;
+          /** Format: binary */
+          photo?: string | null;
+          position?: string;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TeachersController_getOneTeacher: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TeachersController_updateTeacherById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** @example 4 */
+          experience?: number;
+          fullName?: string;
+          password?: string;
+          /** @example +998901234567 */
+          phone?: string;
+          /** Format: binary */
+          photo?: string | null;
+          position?: string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TeachersController_deleteTeacher: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TeachersController_archiveTeacher: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TeachersController_getAllTeacher: {
+    parameters: {
+      query?: {
+        /** @description Bitta sahifadagi yozuvlar soni (eng ko'pi 200) */
+        limit?: number;
+        /** @description Sahifa raqami */
+        page?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TeachersController_changeMyPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ChangeTeacherPasswordDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TeachersController_getMyProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_getAllUser: {
+    parameters: {
+      query?: {
+        /** @description Bitta sahifadagi yozuvlar soni (eng ko'pi 200) */
+        limit?: number;
+        /** @description Sahifa raqami */
+        page?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_createUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          address?: string | null;
+          fullName?: string;
+          /** @example 2026-01-02 */
+          hire_date?: string;
+          password?: string;
+          /** @example +998901234567 */
+          phone?: string;
+          /** Format: binary */
+          photo?: string | null;
+          position?: string;
+          /** @enum {string} */
+          role?:
+            | 'SUPERADMIN'
+            | 'ADMIN'
+            | 'STUDENT'
+            | 'TEACHER'
+            | 'MANAGEMENT'
+            | 'ADMINSTRATOR'
+            | 'ACCOUNTANT';
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_getOneUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_updateUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          address?: string | null;
+          fullName?: string;
+          /** @example +998901234567 */
+          phone?: string;
+          /** Format: binary */
+          photo?: string | null;
+          position?: string;
+          /** @enum {string} */
+          role?:
+            | 'SUPERADMIN'
+            | 'ADMIN'
+            | 'STUDENT'
+            | 'TEACHER'
+            | 'MANAGEMENT'
+            | 'ADMINSTRATOR'
+            | 'ACCOUNTANT';
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_deleteUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_getMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_updateMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateMeDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_changeMyPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ChangeUserPasswordDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsAssignmentsController_list: {
+    parameters: {
+      query?: {
+        course_id?: string;
+        group_id?: string;
+        limit?: number;
+        order?: 'asc' | 'desc';
+        page?: number;
+        search?: string;
+        status?: 'draft' | 'published' | 'closed';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsAssignmentsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateAssignmentDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsAssignmentsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsAssignmentsController_remove: {
     parameters: {
       query?: never;
       header?: never;
@@ -7602,7 +8709,7 @@ export interface operations {
       };
     };
   };
-  PaymentsController_update: {
+  LmsAssignmentsController_update: {
     parameters: {
       query?: never;
       header?: never;
@@ -7613,7 +8720,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UpdatePaymentDto'];
+        'application/json': components['schemas']['UpdateAssignmentDto'];
       };
     };
     responses: {
@@ -7625,11 +8732,1643 @@ export interface operations {
       };
     };
   };
-  PaymentsController_getSnapshot: {
+  LmsAssignmentsController_submissions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsAssignmentsController_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateSubmissionDto'];
+        'multipart/form-data': components['schemas']['CreateSubmissionDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AttendanceController_history: {
+    parameters: {
+      query: {
+        limit?: number;
+        student_id: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AttendanceController_batch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2BatchAttendanceDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AuditController_list: {
+    parameters: {
+      query?: {
+        action?: 'CREATE' | 'UPDATE' | 'DELETE';
+        branch_id?: string;
+        company_id?: string;
+        end_date?: string;
+        endDate?: string;
+        entity?: string;
+        entity_id?: string;
+        limit?: number;
+        page?: number;
+        start_date?: string;
+        startDate?: string;
+        user_id?: string;
+        userId?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AuditController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AuthController_changePassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2ChangePasswordDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AuthController_demo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AuthController_login: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2LoginDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AuthController_logout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AuthController_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2AuthController_completeCrmTour: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2BranchesController_list: {
+    parameters: {
+      query?: {
+        /** @description Faqat platforma egasi uchun */
+        company_id?: string;
+        /** @description O‘chirilganlarni ham ko‘rsatish */
+        include_deleted?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2BranchesController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateBranchDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2BranchesController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2BranchesController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2BranchesController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateBranchDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2BranchesController_restore: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseLessonsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseLessonsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseLessonsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCourseLessonDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseLessonsController_addMaterial: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateMaterialDto'];
+        'multipart/form-data': components['schemas']['CreateMaterialDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseLessonsController_progress: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProgressMarkDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2CoursesController_list: {
     parameters: {
       query?: {
         branch_id?: string;
-        /** @description dev only — view-as company */
+        /** @description Faqat platforma egasi uchun */
+        company_id?: string;
+        course_type?: 'online' | 'offline';
+        search?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2CoursesController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateCourseDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2CoursesController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2CoursesController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2CoursesController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateCourseDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseCurriculumController_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseCurriculumController_enrollments: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseCurriculumController_enroll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['EnrollStudentDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseCurriculumController_unenroll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        studentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseCurriculumController_createModule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateModuleDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsCourseCurriculumController_progress: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DashboardController_analytics: {
+    parameters: {
+      query?: {
+        branch_id?: string;
+        /** @description Faqat platforma egasi uchun */
+        company_id?: string;
+        course_type?: 'online' | 'offline';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DashboardController_companyOverview: {
+    parameters: {
+      query?: {
+        branch_id?: string;
+        /** @description Faqat platforma egasi uchun */
+        company_id?: string;
+        course_type?: 'online' | 'offline';
+        /** @description Standart: oy boshi */
+        from?: string;
+        granularity?: 'day' | 'week';
+        /** @description Standart: bugun */
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DashboardController_expenseBreakdown: {
+    parameters: {
+      query?: {
+        branch_id?: string;
+        /** @description Standart: oy boshi */
+        from?: string;
+        /** @description Standart: bugun */
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DashboardController_financeSummary: {
+    parameters: {
+      query?: {
+        branch_id?: string;
+        /** @description Standart: oy boshi */
+        from?: string;
+        /** @description Standart: bugun */
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DashboardController_teacherAnalytics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DocumentsController_list: {
+    parameters: {
+      query?: {
+        branch_id?: string;
+        group_id?: string;
+        limit?: number;
+        page?: number;
+        search?: string;
+        student_id?: string;
+        type?: 'contract' | 'certificate' | 'order' | 'report' | 'other';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DocumentsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['V2CreateDocumentDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DocumentsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DocumentsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DocumentsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateDocumentDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2DocumentsController_download: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamAttemptsController_review: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReviewAttemptDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_list: {
+    parameters: {
+      query?: {
+        course_id?: string;
+        group_id?: string;
+        kind?: 'quiz' | 'exam';
+        limit?: number;
+        order?: 'asc' | 'desc';
+        page?: number;
+        search?: string;
+        status?: 'draft' | 'published' | 'closed';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateQuizDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateQuizDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_attempt: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SubmitAttemptDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_addQuestion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['QuestionDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_updateQuestion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        questionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['QuestionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_removeQuestion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        questionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsExamsController_results: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_list: {
+    parameters: {
+      query?: {
+        attention?: 'overdue';
+        branch_id?: string;
+        category?:
+          | 'rent'
+          | 'utilities'
+          | 'marketing'
+          | 'supplies'
+          | 'administrative'
+          | 'other'
+          | 'teacher_settlement';
+        date_from?: string;
+        date_to?: string;
+        limit?: number;
+        page?: number;
+        scope?: 'company';
+        search?: string;
+        status?: 'planned' | 'partially_paid' | 'paid' | 'cancelled';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateExpenseDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2ExpenseLifecycleDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateExpenseDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2ExpenseLifecycleDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_pay: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateExpensePaymentDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_voidPayment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        paymentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2ExpenseLifecycleDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_branchOptions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_deleted: {
+    parameters: {
+      query?: {
+        limit?: number;
+        page?: number;
+        search?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_monthClose: {
+    parameters: {
+      query: {
+        branch_id?: string;
+        month: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_teacherOptions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ExpensesController_triage: {
+    parameters: {
+      query?: {
+        branch_id?: string;
+        scope?: 'company';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsGradesController_list: {
+    parameters: {
+      query?: {
+        course_id?: string;
+        group_id?: string;
+        limit?: number;
+        page?: number;
+        source?: 'assignment' | 'quiz';
+        student_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2GroupsController_list: {
+    parameters: {
+      query?: {
+        branch_id?: string;
+        company_id?: string;
+        course_type?: 'online' | 'offline';
+        include_deleted?: boolean;
+        search?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2GroupsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateGroupDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2GroupsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2GroupsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2GroupsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateGroupDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2GroupsController_restore: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2GroupsController_overview: {
+    parameters: {
+      query?: {
         company_id?: string;
       };
       header?: never;
@@ -7646,48 +10385,934 @@ export interface operations {
       };
     };
   };
-  PaymentsController_getSummary: {
+  V2LeadSourcesController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadSourcesController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateLeadSourceDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadSourcesController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadStagesController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadStagesController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateLeadStagesDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_list: {
+    parameters: {
+      query?: {
+        assigneeId?: string;
+        branchId?: string;
+        courseType?: 'online' | 'offline';
+        /** @description O'qish yo'nalishi */
+        direction?: string;
+        limit?: number;
+        mine?: boolean;
+        overdueOnly?: boolean;
+        page?: number;
+        period?: '7d' | '30d' | '60d' | 'all';
+        q?: string;
+        source?:
+          | 'telegram'
+          | 'instagram'
+          | 'referral'
+          | 'directory_map'
+          | 'olx'
+          | 'walk_in'
+          | 'other'
+          | 'website'
+          | 'recommendation'
+          | 'banner';
+        stageId?: string;
+        tab?: 'new' | 'in_progress' | 'won' | 'lost' | 'all';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateLeadDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateLeadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_activities: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_createActivity: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateLeadActivityDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_removeActivity: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        aid: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_updateActivity: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        aid: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateLeadActivityDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_assignPost: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2AssignLeadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_assign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2AssignLeadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_convert: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2ConvertLeadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_stagePost: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2LeadStageTransitionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_stage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2LeadStageTransitionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_board: {
+    parameters: {
+      query?: {
+        assigneeId?: string;
+        branchId?: string;
+        courseType?: 'online' | 'offline';
+        /** @description O'qish yo'nalishi */
+        direction?: string;
+        limit?: number;
+        mine?: boolean;
+        overdueOnly?: boolean;
+        page?: number;
+        period?: '7d' | '30d' | '60d' | 'all';
+        q?: string;
+        source?:
+          | 'telegram'
+          | 'instagram'
+          | 'referral'
+          | 'directory_map'
+          | 'olx'
+          | 'walk_in'
+          | 'other'
+          | 'website'
+          | 'recommendation'
+          | 'banner';
+        stageId?: string;
+        tab?: 'new' | 'in_progress' | 'won' | 'lost' | 'all';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_checkDuplicate: {
+    parameters: {
+      query: {
+        branchId?: string;
+        excludeLeadId?: string;
+        phone: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_checkDuplicatePost: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2LeadDuplicateQueryDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_export: {
+    parameters: {
+      query?: {
+        assigneeId?: string;
+        branchId?: string;
+        courseType?: 'online' | 'offline';
+        /** @description O'qish yo'nalishi */
+        direction?: string;
+        limit?: number;
+        mine?: boolean;
+        overdueOnly?: boolean;
+        page?: number;
+        period?: '7d' | '30d' | '60d' | 'all';
+        q?: string;
+        source?:
+          | 'telegram'
+          | 'instagram'
+          | 'referral'
+          | 'directory_map'
+          | 'olx'
+          | 'walk_in'
+          | 'other'
+          | 'website'
+          | 'recommendation'
+          | 'banner';
+        stageId?: string;
+        tab?: 'new' | 'in_progress' | 'won' | 'lost' | 'all';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LeadsController_metrics: {
+    parameters: {
+      query?: {
+        branchId?: string;
+        period?: '7d' | '30d' | '60d' | 'all';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LessonsController_list: {
+    parameters: {
+      query?: {
+        limit?: number;
+        page?: number;
+        search?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LessonsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateLessonDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LessonsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LessonsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2LessonsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateLessonDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsSummaryController_summary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsMaterialsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsMaterialsController_download: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsModulesController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsModulesController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateModuleDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsModulesController_createLesson: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCourseLessonDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsNotificationsController_list: {
+    parameters: {
+      query?: {
+        limit?: number;
+        page?: number;
+        unread?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsNotificationsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateNotificationDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsNotificationsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsNotificationsController_read: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsNotificationsController_readAll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsNotificationsController_unread: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2PaymentsController_list: {
     parameters: {
       query?: {
         branch_id?: string;
-        /**
-         * @deprecated
-         * @description Deprecated alias for branch_id
-         */
+        /** @deprecated */
         branchId?: string;
-        /** @description dev only — view-as company */
         company_id?: string;
-        course_type?: 'tezkor' | 'avto_maktab';
-        /** @description yyyy-mm-dd in Asia/Tashkent */
+        course_type?: 'online' | 'offline';
         end_date?: string;
-        /**
-         * @deprecated
-         * @description Deprecated alias for end_date
-         */
+        /** @deprecated */
         endDate?: string;
         limit?: number;
         page?: number;
         payment_method?: 'naqd' | 'karta' | 'perechisleniya';
+        /** @description O‘quvchining joriy holati: to‘liq to‘lagan yoki qarzdor */
         payment_status?: 'paid' | 'unpaid';
-        /**
-         * @deprecated
-         * @description Deprecated alias for payment_method
-         */
-        payment_type?: 'naqd' | 'karta' | 'perechisleniya';
-        /**
-         * @deprecated
-         * @description Deprecated alias for payment_status; true maps to unpaid and false maps to paid
-         */
-        paymentStatus?: 'paid' | 'unpaid' | 'true' | 'false';
+        /** @deprecated */
+        payment_type?: components['schemas']['Object'];
+        /** @deprecated */
+        paymentStatus?: string;
         search?: string;
         sort_by?: 'student_name' | 'amount_paid' | 'remaining_debt' | 'date';
         sort_order?: 'asc' | 'desc';
-        /** @description yyyy-mm-dd in Asia/Tashkent */
         start_date?: string;
-        /**
-         * @deprecated
-         * @description Deprecated alias for start_date
-         */
+        /** @deprecated */
         startDate?: string;
         student_id?: string;
       };
@@ -7705,97 +11330,7 @@ export interface operations {
       };
     };
   };
-  PlatformAnalyticsController_getAnalytics: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PlatformAnalyticsController_getCompanyUsage: {
-    parameters: {
-      query?: {
-        /** @description Window size 1–90, default 14 */
-        days?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PlatformAuditLogController_findAll: {
-    parameters: {
-      query?: {
-        action?: string;
-        company_id?: string;
-        /** @description Inclusive ISO date, for example 2026-05-18 */
-        end_date?: string;
-        entity?: string;
-        limit?: number;
-        page?: number;
-        /** @description Inclusive ISO date, for example 2026-05-18 */
-        start_date?: string;
-        user_id?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PlatformCompaniesController_list: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-        /** @description Matches name or slug, case-insensitive */
-        search?: string;
-        status?: 'pending' | 'active' | 'suspended';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['CompanyResponse'][];
-        };
-      };
-    };
-  };
-  PlatformCompaniesController_create: {
+  V2PaymentsController_create: {
     parameters: {
       query?: never;
       header?: never;
@@ -7804,233 +11339,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateCompanyDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['CompanyResponse'];
-        };
-      };
-    };
-  };
-  PlatformCompanyBranchesController_list: {
-    parameters: {
-      query?: {
-        includeDeleted?: boolean;
-        limit?: number;
-        page?: number;
-        /** @description Matches branch name, location, or phone */
-        search?: string;
-      };
-      header?: never;
-      path: {
-        companyId: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformBranchResponse'][];
-        };
-      };
-    };
-  };
-  PlatformCompanyBranchesController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        companyId: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateBranchDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformBranchResponse'];
-        };
-      };
-    };
-  };
-  PlatformCompanyBranchesController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        branchId: string;
-        companyId: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PlatformCompanyBranchesController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        branchId: string;
-        companyId: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateBranchDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformBranchResponse'];
-        };
-      };
-    };
-  };
-  PlatformCompanyUsersController_list: {
-    parameters: {
-      query?: {
-        branchId?: string;
-        companyId?: string;
-        includeDeleted?: boolean;
-        limit?: number;
-        page?: number;
-        role?:
-          'dev' | 'owner' | 'accountant' | 'manager' | 'operator' | 'teacher';
-        /** @description Matches name, email, or phone (case-insensitive) */
-        search?: string;
-      };
-      header?: never;
-      path: {
-        companyId: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformUserResponse'][];
-        };
-      };
-    };
-  };
-  PlatformCompanyUsersController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        companyId: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreatePlatformUserDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformUserResponse'];
-        };
-      };
-    };
-  };
-  PlatformCompanyUsersController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        companyId: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PlatformCompanyUsersController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        companyId: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdatePlatformUserDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformUserResponse'];
-        };
-      };
-    };
-  };
-  PlatformCompanyUsersController_resetPassword: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        companyId: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ResetPasswordDto'];
+        'application/json': components['schemas']['V2CreatePaymentDto'];
       };
     };
     responses: {
@@ -8042,7 +11351,7 @@ export interface operations {
       };
     };
   };
-  PlatformCompaniesController_findById: {
+  V2PaymentsController_remove: {
     parameters: {
       query?: never;
       header?: never;
@@ -8053,17 +11362,15 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          'application/json': components['schemas']['CompanyDetailResponse'];
-        };
+        content?: never;
       };
     };
   };
-  PlatformCompaniesController_remove: {
+  V2PaymentsController_update: {
     parameters: {
       query?: never;
       header?: never;
@@ -8072,7 +11379,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdatePaymentDto'];
+      };
+    };
     responses: {
       200: {
         headers: {
@@ -8082,370 +11393,11 @@ export interface operations {
       };
     };
   };
-  PlatformCompaniesController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateCompanyDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['CompanyResponse'];
-        };
-      };
-    };
-  };
-  PlatformCompaniesController_approve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['CompanyResponse'];
-        };
-      };
-    };
-  };
-  PlatformCompaniesController_updateFeatureFlags: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateCompanyFeatureFlagsDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['CompanyResponse'];
-        };
-      };
-    };
-  };
-  PlatformCompaniesController_impersonate: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformImpersonationResponse'];
-        };
-      };
-    };
-  };
-  PlatformCompaniesController_suspend: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['CompanyResponse'];
-        };
-      };
-    };
-  };
-  PlatformGlobalConfigController_getConfig: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['GlobalConfigResponse'];
-        };
-      };
-    };
-  };
-  PlatformGlobalConfigController_updateConfig: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateGlobalConfigDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['GlobalConfigResponse'];
-        };
-      };
-    };
-  };
-  PlatformHealthController_getHealth: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PlatformImportController_importCompanies: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'multipart/form-data': {
-          /** @default false */
-          dry_run?: boolean;
-          /** Format: binary */
-          file: string;
-        };
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PlatformImportController_importUsers: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'multipart/form-data': {
-          /** @default false */
-          dry_run?: boolean;
-          /** Format: binary */
-          file: string;
-        };
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PlatformUsersController_list: {
-    parameters: {
-      query?: {
-        branchId?: string;
-        companyId?: string;
-        includeDeleted?: boolean;
-        limit?: number;
-        page?: number;
-        role?:
-          'dev' | 'owner' | 'accountant' | 'manager' | 'operator' | 'teacher';
-        /** @description Matches name, email, or phone (case-insensitive) */
-        search?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformUserResponse'][];
-        };
-      };
-    };
-  };
-  PlatformUsersController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreatePlatformUserDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformUserResponse'];
-        };
-      };
-    };
-  };
-  PlatformUsersController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PlatformUsersController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdatePlatformUserDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PlatformUserResponse'];
-        };
-      };
-    };
-  };
-  PlatformUsersController_resetPassword: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ResetPasswordDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuestionsController_findAll: {
+  V2PaymentsController_snapshot: {
     parameters: {
       query?: {
         branch_id?: string;
         company_id?: string;
-        limit?: number;
-        page?: number;
-        status?: 'draft' | 'in_review' | 'published' | 'retired' | 'disputed';
-        topic?:
-          | 'traffic_signs'
-          | 'road_markings'
-          | 'right_of_way'
-          | 'speed_and_distance'
-          | 'signals'
-          | 'overtaking'
-          | 'pedestrian_crossings'
-          | 'first_aid'
-          | 'vehicle_safety'
-          | 'liability'
-          | 'general_rules';
-        visibility?: 'platform_public' | 'school_private';
       };
       header?: never;
       path?: never;
@@ -8461,375 +11413,33 @@ export interface operations {
       };
     };
   };
-  QuestionsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateQuestionDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['QuestionResponse'];
-        };
-      };
-    };
-  };
-  QuestionsController_findById: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['QuestionResponse'];
-        };
-      };
-    };
-  };
-  QuestionsController_updateDraft: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateQuestionDraftDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuestionsController_dispute: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuestionsController_uploadMedia: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'multipart/form-data': {
-          alt_text: string;
-          /** Format: binary */
-          file: string;
-          /** @enum {string} */
-          rights_basis: 'original' | 'licensed' | 'public_domain';
-          rights_confirmed: boolean;
-          rights_holder: string;
-        };
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['QuestionMediaResponse'];
-        };
-      };
-    };
-  };
-  QuestionsController_getMedia: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-        mediaId: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuestionsController_publish: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['PublishQuestionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuestionsController_retire: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuestionsController_listAvailableForNewTests: {
+  V2PaymentsController_summary: {
     parameters: {
       query?: {
-        limit?: number;
-        locale?: 'uz' | 'ru' | 'en';
-        page?: number;
-        ticket?: number;
-        topic?:
-          | 'traffic_signs'
-          | 'road_markings'
-          | 'right_of_way'
-          | 'speed_and_distance'
-          | 'signals'
-          | 'overtaking'
-          | 'pedestrian_crossings'
-          | 'first_aid'
-          | 'vehicle_safety'
-          | 'liability'
-          | 'general_rules';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuestionsController_listPractice: {
-    parameters: {
-      query?: {
-        limit?: number;
-        locale?: 'uz' | 'ru' | 'en';
-        page?: number;
-        ticket?: number;
-        topic?:
-          | 'traffic_signs'
-          | 'road_markings'
-          | 'right_of_way'
-          | 'speed_and_distance'
-          | 'signals'
-          | 'overtaking'
-          | 'pedestrian_crossings'
-          | 'first_aid'
-          | 'vehicle_safety'
-          | 'liability'
-          | 'general_rules';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PracticeQuestionResponse'][];
-        };
-      };
-    };
-  };
-  QuestionsController_getPracticeQuestion: {
-    parameters: {
-      query?: {
-        locale?: 'uz' | 'ru';
-      };
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PracticeQuestionResponse'];
-        };
-      };
-    };
-  };
-  QuestionsController_checkPracticeAnswer: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CheckPracticeAnswerDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PracticeAnswerCheckResponse'];
-        };
-      };
-    };
-  };
-  QuestionsController_getPracticeMedia: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-        mediaId: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuestionsController_listPracticeTickets: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PracticeTicketResponse'][];
-        };
-      };
-    };
-  };
-  QuestionsController_flagForReReview: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['FlagQuestionsForReReviewDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ScheduleController_getCalendarLessons: {
-    parameters: {
-      query?: {
-        /** @description Required for dev role */
+        branch_id?: string;
+        /** @deprecated */
+        branchId?: string;
         company_id?: string;
-        date_from?: string;
-        date_to?: string;
+        course_type?: 'online' | 'offline';
+        end_date?: string;
+        /** @deprecated */
+        endDate?: string;
+        limit?: number;
+        page?: number;
+        payment_method?: 'naqd' | 'karta' | 'perechisleniya';
+        /** @description O‘quvchining joriy holati: to‘liq to‘lagan yoki qarzdor */
+        payment_status?: 'paid' | 'unpaid';
+        /** @deprecated */
+        payment_type?: components['schemas']['Object'];
+        /** @deprecated */
+        paymentStatus?: string;
+        search?: string;
+        sort_by?: 'student_name' | 'amount_paid' | 'remaining_debt' | 'date';
+        sort_order?: 'asc' | 'desc';
+        start_date?: string;
+        /** @deprecated */
+        startDate?: string;
+        student_id?: string;
       };
       header?: never;
       path?: never;
@@ -8845,28 +11455,7 @@ export interface operations {
       };
     };
   };
-  ScheduleController_generateLessons: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['GenerateLessonsDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ScheduleController_findAllTemplates: {
+  V2PermissionsController_catalogue: {
     parameters: {
       query?: never;
       header?: never;
@@ -8883,73 +11472,15 @@ export interface operations {
       };
     };
   };
-  ScheduleController_createTemplate: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateTemplateDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ScheduleController_deleteTemplate: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ScheduleController_updateTemplate: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateTemplateDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SearchController_search: {
+  V2PermissionsController_writeOptions: {
     parameters: {
       query: {
-        q: string;
+        action: 'create' | 'update';
+        branchId?: string;
+        course_type?: 'online' | 'offline';
+        limit?: number;
+        resource: string;
+        search?: string;
       };
       header?: never;
       path?: never;
@@ -8965,32 +11496,267 @@ export interface operations {
       };
     };
   };
-  StudentsController_findAll: {
+  V2PermissionsController_createTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2PermissionTemplateDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2PermissionsController_deleteTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2PermissionsController_updateTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2PermissionTemplateDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsProgressController_course: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsProgressController_student: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ScheduleController_calendar: {
     parameters: {
       query?: {
         branch_id?: string;
-        /** @description dev only — view-as company */
         company_id?: string;
-        /** @description Filter students enrolled in this course */
-        course_id?: string;
-        course_type?: 'tezkor' | 'avto_maktab';
-        /** @description Created date from, yyyy-mm-dd */
         date_from?: string;
-        /** @description Created date to, yyyy-mm-dd */
         date_to?: string;
-        /** @description Filter students by current debt */
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ScheduleController_generate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2GenerateLessonsDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ScheduleController_templates: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ScheduleController_createTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateTemplateDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ScheduleController_deleteTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2ScheduleController_updateTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateTemplateDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2SearchController_search: {
+    parameters: {
+      query?: {
+        q?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2StudentsController_list: {
+    parameters: {
+      query?: {
+        branch_id?: string;
+        company_id?: string;
+        course_id?: string;
+        course_type?: 'online' | 'offline';
+        date_from?: string;
+        date_to?: string;
         has_debt?: boolean;
-        /** @description Filter students by group assignment */
         has_group?: boolean;
-        /** @description owner/dev only — include soft-deleted students alongside live ones. 403 for any other role. */
+        /** @description O‘chirilganlarni ham (faqat egasi) */
         include_deleted?: boolean;
         limit?: number;
-        /** @description Filter by operator who registered the student (owner/manager only) */
+        /** @description Ro‘yxatga olgan operator */
         operator_id?: string;
         page?: number;
-        /** @description Filter students referred by this student */
         referred_by_student_id?: string;
-        /** @description Filter students referred by this user (teacher/operator) */
         referred_by_user_id?: string;
         search?: string;
         sort_by?:
@@ -9012,7 +11778,7 @@ export interface operations {
       };
     };
   };
-  StudentsController_create: {
+  V2StudentsController_create: {
     parameters: {
       query?: never;
       header?: never;
@@ -9021,7 +11787,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateStudentDto'];
+        'application/json': components['schemas']['V2CreateStudentDto'];
       };
     };
     responses: {
@@ -9033,7 +11799,7 @@ export interface operations {
       };
     };
   };
-  StudentsController_findById: {
+  V2StudentsController_detail: {
     parameters: {
       query?: never;
       header?: never;
@@ -9052,7 +11818,7 @@ export interface operations {
       };
     };
   };
-  StudentsController_remove: {
+  V2StudentsController_remove: {
     parameters: {
       query?: never;
       header?: never;
@@ -9071,7 +11837,7 @@ export interface operations {
       };
     };
   };
-  StudentsController_update: {
+  V2StudentsController_update: {
     parameters: {
       query?: never;
       header?: never;
@@ -9082,7 +11848,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UpdateStudentDto'];
+        'application/json': components['schemas']['V2UpdateStudentDto'];
       };
     };
     responses: {
@@ -9094,7 +11860,7 @@ export interface operations {
       };
     };
   };
-  StudentsController_upsertLearnerAccount: {
+  V2StudentsController_learnerAccount: {
     parameters: {
       query?: never;
       header?: never;
@@ -9105,7 +11871,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UpsertLearnerAccountDto'];
+        'application/json': components['schemas']['V2LearnerAccountDto'];
       };
     };
     responses: {
@@ -9117,7 +11883,7 @@ export interface operations {
       };
     };
   };
-  StudentsController_restore: {
+  V2StudentsController_restore: {
     parameters: {
       query?: never;
       header?: never;
@@ -9128,7 +11894,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -9136,99 +11902,15 @@ export interface operations {
       };
     };
   };
-  StudentsController_bulkCreate: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description CSV file containing students */
-    requestBody: {
-      content: {
-        'multipart/form-data': {
-          /** Format: uuid */
-          branch_id?: string;
-          /** Format: binary */
-          file: string;
-        };
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StudentsController_checkPhones: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CheckPhonesDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StudentsController_search: {
-    parameters: {
-      query: {
-        q: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TeacherSettlementsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateTeacherSettlementDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TeacherSettlementsController_listMine: {
+  LmsSubjectsController_list: {
     parameters: {
       query?: {
         limit?: number;
+        order?: 'asc' | 'desc';
         page?: number;
+        /** @description Faqat shu kategoriya ichidagilar */
+        parent_id?: string;
+        search?: string;
       };
       header?: never;
       path?: never;
@@ -9244,7 +11926,28 @@ export interface operations {
       };
     };
   };
-  TeacherSettlementsController_findMine: {
+  LmsSubjectsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateSubjectDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsSubjectsController_detail: {
     parameters: {
       query?: never;
       header?: never;
@@ -9263,16 +11966,37 @@ export interface operations {
       };
     };
   };
-  TelegramController_setDailyReport: {
+  LmsSubjectsController_remove: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsSubjectsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
       cookie?: never;
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetDailyReportDto'];
+        'application/json': components['schemas']['UpdateSubjectDto'];
       };
     };
     responses: {
@@ -9284,16 +12008,37 @@ export interface operations {
       };
     };
   };
-  TelegramController_setExpenseDigest: {
+  LmsSubmissionsController_download: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsSubmissionsController_grade: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
       cookie?: never;
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetExpenseDigestDto'];
+        'application/json': components['schemas']['GradeSubmissionDto'];
       };
     };
     responses: {
@@ -9305,7 +12050,138 @@ export interface operations {
       };
     };
   };
-  TelegramController_snoozeExpenseDigest: {
+  V2TeacherSettlementsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2CreateTeacherSettlementDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2TelegramController_dailyReport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2TelegramToggleDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2TelegramController_expenseDigest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2TelegramToggleDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2TelegramController_snooze: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2TelegramController_unlink: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2TelegramController_status: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2TelegramController_linkToken: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LmsUploadsController_create: {
     parameters: {
       query?: never;
       header?: never;
@@ -9322,85 +12198,7 @@ export interface operations {
       };
     };
   };
-  TelegramController_unlink: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TelegramController_getLinkStatus: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['TelegramLinkStatusResponse'];
-        };
-      };
-    };
-  };
-  TelegramController_createLinkToken: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['TelegramLinkTokenResponse'];
-        };
-      };
-    };
-  };
-  TestAttemptsController_startAssignment: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        assignmentId: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['StartAssignmentAttemptDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestAttemptsController_getLearnerAttempt: {
+  LmsUploadsController_download: {
     parameters: {
       query?: never;
       header?: never;
@@ -9419,549 +12217,18 @@ export interface operations {
       };
     };
   };
-  TestAttemptsController_saveLearnerAnswers: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['SaveAttemptAnswersDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestAttemptsController_submitLearner: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestOutcomesController_list: {
-    parameters: {
-      query?: {
-        /** @description Limit to one group inside the actor’s tenant scope */
-        group_id?: string;
-        limit?: number;
-        page?: number;
-        status?: 'in_progress' | 'submitted' | 'timed_out';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestOutcomesController_listGroups: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestOutcomesController_listTopics: {
-    parameters: {
-      query?: {
-        group_id?: string;
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestAttemptsController_getPracticeAttempt: {
-    parameters: {
-      query: {
-        /** @description Opaque guest token returned by POST /tests/practice/start */
-        guest_token: string;
-      };
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestAttemptsController_savePracticeAnswers: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['SavePracticeAnswersDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestAttemptsController_submitPractice: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['SubmitPracticeAttemptDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestAttemptsController_getPreset: {
-    parameters: {
-      query: {
-        category: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PracticeExamPresetResponse'];
-        };
-      };
-    };
-  };
-  TestAttemptsController_startPractice: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['StartPracticeAttemptDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['TestAttemptResponse'];
-        };
-      };
-    };
-  };
-  TestTemplatesController_findAll: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestTemplatesController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateTestTemplateDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['TestTemplateResponse'];
-        };
-      };
-    };
-  };
-  TestTemplatesController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestTemplatesController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateTestTemplateDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestTemplatesController_listAssignments: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TestTemplatesController_assign: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['AssignTestDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['TestAssignmentResponse'];
-        };
-      };
-    };
-  };
-  TestTemplatesController_publish: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TrainingEnrollmentsController_findAll: {
-    parameters: {
-      query?: {
-        branch_id?: string;
-        limit?: number;
-        page?: number;
-        status?: 'legacy' | 'active' | 'completed' | 'cancelled';
-        student_id?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TrainingEnrollmentsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateTrainingEnrollmentDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TrainingEnrollmentsController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TrainingProgramsController_findAll: {
-    parameters: {
-      query?: {
-        branch_id?: string;
-        category?:
-          | 'A1'
-          | 'A'
-          | 'B'
-          | 'C'
-          | 'D'
-          | 'BE'
-          | 'CE'
-          | 'DE'
-          | 'TRAM'
-          | 'TROLLEYBUS';
-        is_active?: boolean;
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TrainingProgramsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateTrainingProgramDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TrainingProgramsController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  TrainingProgramsController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateTrainingProgramDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_findAll: {
+  V2UsersController_list: {
     parameters: {
       query?: {
         branchId?: string;
-        /** @description dev only — view-as company */
         company_id?: string;
-        /**
-         * @deprecated
-         * @description Deprecated alias for company_id
-         */
         companyId?: string;
-        /** @description owner/dev only — include soft-deleted users alongside live ones. 403 for any other role. */
         include_deleted?: boolean;
         isActive?: boolean;
         limit?: number;
         page?: number;
         role?:
-          'dev' | 'owner' | 'accountant' | 'manager' | 'operator' | 'teacher';
+          'dev' | 'owner' | 'manager' | 'accountant' | 'operator' | 'teacher';
         search?: string;
       };
       header?: never;
@@ -9978,7 +12245,7 @@ export interface operations {
       };
     };
   };
-  UsersController_create: {
+  V2UsersController_create: {
     parameters: {
       query?: never;
       header?: never;
@@ -9987,7 +12254,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateUserDto'];
+        'application/json': components['schemas']['V2CreateUserDto'];
       };
     };
     responses: {
@@ -9999,7 +12266,7 @@ export interface operations {
       };
     };
   };
-  UsersController_findById: {
+  V2UsersController_detail: {
     parameters: {
       query?: never;
       header?: never;
@@ -10018,7 +12285,49 @@ export interface operations {
       };
     };
   };
-  UsersController_remove: {
+  V2UsersController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2UsersController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateUserDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2UsersController_access: {
     parameters: {
       query?: never;
       header?: never;
@@ -10037,7 +12346,7 @@ export interface operations {
       };
     };
   };
-  UsersController_update: {
+  V2UsersController_updateAccess: {
     parameters: {
       query?: never;
       header?: never;
@@ -10048,7 +12357,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UpdateUserDto'];
+        'application/json': components['schemas']['V2UpdateAccessDto'];
       };
     };
     responses: {
@@ -10060,7 +12369,7 @@ export interface operations {
       };
     };
   };
-  UsersController_activate: {
+  V2UsersController_activate: {
     parameters: {
       query?: never;
       header?: never;
@@ -10071,7 +12380,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -10079,7 +12388,7 @@ export interface operations {
       };
     };
   };
-  UsersController_deactivate: {
+  V2UsersController_deactivate: {
     parameters: {
       query?: never;
       header?: never;
@@ -10090,6 +12399,29 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  V2UsersController_updateDelegation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['V2UpdateAccessDto'];
+      };
+    };
+    responses: {
       200: {
         headers: {
           [name: string]: unknown;
@@ -10098,7 +12430,7 @@ export interface operations {
       };
     };
   };
-  UsersController_restore: {
+  V2UsersController_restore: {
     parameters: {
       query?: never;
       header?: never;
@@ -10109,747 +12441,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleDefectsController_list: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleDefectsController_evidence: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleDefectsController_resolve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ResolveVehicleDefectDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_list: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['FuelDraftDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_detail: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['FuelUpdateDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_cancel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['FuelCancelDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_upload: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['FuelEvidenceDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_download: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        evidenceId: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_review: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['FuelReviewDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_submit: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_lookup: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['FuelLookupDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_types: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['FuelTypesDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleFuelController_vehicles: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_list: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateInspectionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_detail: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateInspectionDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_upload: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['InspectionEvidenceDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_download: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        evidenceId: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_review: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ReviewInspectionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_submit: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['SubmitInspectionDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_receivers: {
-    parameters: {
-      query?: {
-        limit?: number;
-        page?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehicleInspectionsController_summary: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehiclesController_findAll: {
-    parameters: {
-      query?: {
-        branch_id?: string;
-        category?:
-          | 'A1'
-          | 'A'
-          | 'B'
-          | 'C'
-          | 'D'
-          | 'BE'
-          | 'CE'
-          | 'DE'
-          | 'TRAM'
-          | 'TROLLEYBUS';
-        limit?: number;
-        page?: number;
-        search?: string;
-        status?: 'active' | 'out_of_service' | 'retired';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehiclesController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateVehicleDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehiclesController_findById: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehiclesController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateVehicleDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehiclesController_addDocument: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateVehicleDocumentDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehiclesController_updateDocument: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        documentId: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateVehicleDocumentDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehiclesController_addMaintenance: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateVehicleMaintenanceDto'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehiclesController_updateMaintenance: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-        maintenanceId: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateVehicleMaintenanceDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  VehiclesController_transfer: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['TransferVehicleDto'];
-      };
-    };
-    responses: {
-      201: {
+      204: {
         headers: {
           [name: string]: unknown;
         };

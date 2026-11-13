@@ -62,7 +62,7 @@ describe('minimal write options', () => {
         course,
       }: {
         search: string;
-        course: 'tezkor' | 'avto_maktab';
+        course: 'online' | 'offline';
       }) =>
         useWriteOptions('payments', 'create', 'a', true, {
           search,
@@ -73,7 +73,7 @@ describe('minimal write options', () => {
         wrapper,
         initialProps: {
           search: '',
-          course: 'tezkor' as 'tezkor' | 'avto_maktab',
+          course: 'online' as 'online' | 'offline',
         },
       },
     );
@@ -81,15 +81,15 @@ describe('minimal write options', () => {
       expect(result.current.data?.students?.[0].id).toBe('student-a'),
     );
     delay = true;
-    rerender({ search: 'other', course: 'tezkor' });
+    rerender({ search: 'other', course: 'online' });
     expect(result.current.data?.students).toBeUndefined();
-    rerender({ search: '', course: 'tezkor' });
+    rerender({ search: '', course: 'online' });
     await waitFor(() =>
       expect(result.current.data?.students?.[0].id).toBe('student-a'),
     );
-    rerender({ search: '', course: 'avto_maktab' });
+    rerender({ search: '', course: 'offline' });
     expect(result.current.data?.students).toBeUndefined();
-    rerender({ search: '', course: 'tezkor' });
+    rerender({ search: '', course: 'online' });
     await waitFor(() =>
       expect(result.current.data?.students?.[0].id).toBe('student-a'),
     );
@@ -286,10 +286,10 @@ describe('minimal write options', () => {
               own_resources: [],
             }
           : {
-              vehicles: [
+              groups: [
                 {
                   id: config?.params.branchId,
-                  plate_number: 'TEST',
+                  name: 'TEST',
                   branch_id: config?.params.branchId,
                 },
               ],
@@ -303,7 +303,7 @@ describe('minimal write options', () => {
     );
     const { result, rerender } = renderHook(
       ({ branch }: { branch?: string }) =>
-        useWriteOptions('fuel', 'create', branch),
+        useWriteOptions('lessons', 'create', branch),
       { initialProps: { branch: undefined } as { branch?: string }, wrapper },
     );
     await waitFor(() => expect(result.current.branches).toHaveLength(2));
@@ -314,12 +314,12 @@ describe('minimal write options', () => {
     ).toBe(false);
     rerender({ branch: 'a' });
     await waitFor(() =>
-      expect(result.current.data?.vehicles?.[0].id).toBe('a'),
+      expect(result.current.data?.groups?.[0].id).toBe('a'),
     );
     rerender({ branch: 'b' });
-    expect(result.current.data?.vehicles?.[0].id).not.toBe('a');
+    expect(result.current.data?.groups?.[0].id).not.toBe('a');
     await waitFor(() =>
-      expect(result.current.data?.vehicles?.[0].id).toBe('b'),
+      expect(result.current.data?.groups?.[0].id).toBe('b'),
     );
   });
   it('sends student lookup filters to the server and keys the cache by them', async () => {
@@ -358,7 +358,7 @@ describe('minimal write options', () => {
       ({ search }) =>
         useWriteOptions('payments', 'create', undefined, true, {
           search,
-          course_type: 'tezkor',
+          course_type: 'online',
           limit: 50,
         }),
       { wrapper, initialProps: { search: '  ' } },
@@ -371,7 +371,7 @@ describe('minimal write options', () => {
           resource: 'payments',
           action: 'create',
           branchId: 'a',
-          course_type: 'tezkor',
+          course_type: 'online',
           limit: 50,
         },
       }),

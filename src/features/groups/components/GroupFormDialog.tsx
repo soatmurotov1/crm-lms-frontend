@@ -1,5 +1,5 @@
 import { useWriteOptions } from '@/hooks/useWriteOptions';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -13,6 +13,9 @@ import {
   useGroups,
 } from '@/features/groups/api/groupService';
 import { useTeachers } from '@/features/staff/api/teacherService';
+import { coursesListQueryOptions } from '@/features/courses/api/courseService';
+import { QueryClientContext, useQuery } from '@tanstack/react-query';
+import { queryClient as appQueryClient } from '@/lib/queryClient';
 import { Group } from '@/features/groups/types';
 import { Branch } from '@/features/branches/types';
 import { Button } from '@/components/ui/button';
@@ -57,6 +60,7 @@ const makeGroupFormSchema = (t: (key: string) => string) =>
     branchId: z.string().trim().min(1, t('common.required')),
     courseType: z.string(),
     teacherId: z.string().optional(),
+    courseId: z.string().optional(),
   });
 
 type GroupFormValues = z.infer<ReturnType<typeof makeGroupFormSchema>>;
@@ -71,14 +75,19 @@ const GroupFormDialog = ({
   const createMutation = useCreateGroup();
   const updateMutation = useUpdateGroup();
   const { data: readTeachers } = useTeachers();
+  const { data: courses = [] } = useQuery(
+    coursesListQueryOptions({}, open),
+    useContext(QueryClientContext) ?? appQueryClient,
+  );
 
   const groupFormSchema = makeGroupFormSchema(t);
 
   const defaultFormValues = (): GroupFormValues => ({
     name: '',
     branchId: '',
-    courseType: 'avto_maktab',
+    courseType: 'offline',
     teacherId: '',
+    courseId: '',
   });
 
   const form = useForm<GroupFormValues>({
@@ -95,6 +104,7 @@ const GroupFormDialog = ({
             branchId: editGroup.branch_id,
             courseType: editGroup.course_type as string,
             teacherId: editGroup.teacher_id || '',
+            courseId: editGroup.course_id || '',
           }
         : defaultFormValues(),
     );
@@ -109,7 +119,7 @@ const GroupFormDialog = ({
       onClose,
     );
 
-  // autodrive-553: create-time duplicate check, scoped to the selected
+  // create-time duplicate check, scoped to the selected
   // branch -- a same-named group in a DIFFERENT branch must not warn, so
   // branch_id rides along in the same GET /groups?search= call (backend
   // already intersects search + branch_id). "Close match" = normalized
@@ -171,6 +181,7 @@ const GroupFormDialog = ({
       branchId: values.branchId,
       courseType: values.courseType,
       teacherId: values.teacherId || null,
+      courseId: values.courseId || null,
     };
 
     if (editGroup) {
@@ -269,12 +280,44 @@ const GroupFormDialog = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="avto_maktab">
+                        <SelectItem value="offline">
                           {t('groups.course_school')}
                         </SelectItem>
-                        <SelectItem value="tezkor">
+                        <SelectItem value="online">
                           {t('groups.course_fast')}
                         </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="courseId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('lms.common.course')}</FormLabel>
+                    <Select
+                      value={field.value || 'none'}
+                      onValueChange={(v) =>
+                        field.onChange(v === 'none' ? '' : v)
+                      }
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-secondary border-border">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">
+                          {t('lms.common.not_selected')}
+                        </SelectItem>
+                        {courses.map((course) => (
+                          <SelectItem key={course.id} value={course.id}>
+                            {course.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

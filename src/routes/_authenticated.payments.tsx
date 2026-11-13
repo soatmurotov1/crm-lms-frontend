@@ -11,7 +11,7 @@ import {
 export type PaymentsSearch = {
   action?: 'create';
   branch_id?: string;
-  course_type?: 'tezkor' | 'avto_maktab';
+  course_type?: 'online' | 'offline';
   date_from?: string;
   date_to?: string;
   limit?: PageSizeOption;
@@ -29,7 +29,7 @@ export const Route = createFileRoute('/_authenticated/payments')({
     branch_id:
       typeof search.branch_id === 'string' ? search.branch_id : undefined,
     course_type:
-      search.course_type === 'tezkor' || search.course_type === 'avto_maktab'
+      search.course_type === 'online' || search.course_type === 'offline'
         ? search.course_type
         : undefined,
     date_from:

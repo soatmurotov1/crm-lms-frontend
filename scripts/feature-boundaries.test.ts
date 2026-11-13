@@ -11,47 +11,47 @@ const MESSAGE =
 const cases = [
   [
     'src/pages/Foo.tsx',
-    "import X from '@/features/vehicles/components/VehicleFormDialog';",
+    "import X from '@/features/subjects/components/SubjectFormDialog';",
     'error',
   ],
   [
     'src/pages/Foo.tsx',
-    "import { x } from '@/features/vehicles/api/vehicleService';",
+    "import { x } from '@/features/subjects/api/subjectService';",
     'no error',
   ],
   [
     'src/pages/Foo.tsx',
-    "import type { X } from '@/features/vehicles/types';",
+    "import type { X } from '@/features/subjects/types';",
     'no error',
   ],
   [
     'src/routes/foo.tsx',
-    "import X from '@/features/vehicles/pages/VehiclesPage';",
+    "import X from '@/features/subjects/pages/SubjectsPage';",
     'no error',
   ],
   [
     'src/routes/foo.tsx',
-    "import X from '@/features/vehicles/components/X';",
+    "import X from '@/features/subjects/components/X';",
     'error',
   ],
   [
-    'src/features/vehicles/pages/A.tsx',
-    "import X from '@/features/vehicles/components/X';",
+    'src/features/subjects/pages/A.tsx',
+    "import X from '@/features/subjects/components/X';",
     'no error',
   ],
   [
     'src/features/students/pages/A.tsx',
-    "import { x } from '@/features/vehicles/lib/x';",
+    "import { x } from '@/features/subjects/lib/x';",
     'error',
   ],
   [
     'src/pages/Foo.tsx',
-    "export * from '@/features/vehicles/components/X';",
+    "export * from '@/features/subjects/components/X';",
     'error',
   ],
   [
     'src/pages/Foo.tsx',
-    "export const load = () => import('@/features/vehicles/pages/VehiclesPage');",
+    "export const load = () => import('@/features/subjects/pages/SubjectsPage');",
     'error',
   ],
 ] as const;
@@ -68,5 +68,6 @@ describe('local/feature-boundaries', () => {
         .filter(({ ruleId }) => ruleId === 'local/feature-boundaries')
         .map(({ message, severity }) => ({ message, severity })),
     ).toEqual(expected === 'error' ? [{ message: MESSAGE, severity: 2 }] : []);
-  });
+    // ESLint'ning birinchi (sovuq) ishga tushishi to'liq to'plamda 5 s dan oshadi.
+  }, 30_000);
 });

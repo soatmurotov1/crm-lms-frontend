@@ -22,21 +22,6 @@ export type Capability =
   | 'viewPayments'
   | 'manageStudents'
   | 'manageGroups'
-  | 'viewFuel'
-  | 'viewInspections'
-  | 'viewVehicles'
-  | 'viewFleetMap'
-  | 'manageVehicles'
-  | 'viewTrainingPrograms'
-  | 'manageTrainingPrograms'
-  | 'viewTrainingEnrollments'
-  | 'createTrainingEnrollment'
-  | 'viewDrivingSessions'
-  | 'viewDrivingSummary'
-  | 'scheduleDrivingSessions'
-  | 'submitDrivingSession'
-  | 'reviewDrivingSessions'
-  | 'cancelDrivingSessions'
   | 'manageSchedule'
   | 'takeAttendance'
   | 'manageOwnLesson'
@@ -45,11 +30,15 @@ export type Capability =
   | 'viewExpenses'
   | 'navigateExpenseOverdueSweep'
   | 'manageCompanyFinance'
-  | 'viewOwnSettlements'
   | 'viewDeleted'
-  | 'viewSchoolLearning'
-  | 'manageSchoolLearning'
-  | 'accessLeads';
+  | 'accessLeads'
+  | 'viewDocuments'
+  | 'manageDocuments'
+  // LMS
+  | 'viewLearning'
+  | 'manageLearning'
+  | 'manageSubjects'
+  | 'sendNotifications';
 
 // Role groups — named so the matrix reads as intent, not a wall of literals.
 const OWNERS: readonly UserRole[] = ['dev', 'owner'];
@@ -78,21 +67,6 @@ export const CAPABILITIES: Record<Capability, readonly UserRole[]> = {
   viewPayments: [...OPS, 'accountant'],
   manageStudents: OPS,
   manageGroups: ['dev', 'owner', 'manager'],
-  viewFuel: ['owner', 'manager', 'teacher', 'accountant'],
-  viewInspections: ['owner', 'manager', 'teacher'],
-  viewVehicles: OPERATIONAL_ROLES,
-  viewFleetMap: ['dev', 'owner', 'manager'],
-  manageVehicles: ['dev', 'owner', 'manager'],
-  viewTrainingPrograms: OPERATIONAL_ROLES,
-  manageTrainingPrograms: OWNERS,
-  viewTrainingEnrollments: OPERATIONAL_ROLES,
-  createTrainingEnrollment: ['dev', 'owner', 'manager'],
-  viewDrivingSessions: OPERATIONAL_ROLES,
-  viewDrivingSummary: OPS,
-  scheduleDrivingSessions: OPS,
-  submitDrivingSession: ['teacher'],
-  reviewDrivingSessions: ['manager'],
-  cancelDrivingSessions: ['owner', 'manager', 'operator'],
   manageSchedule: OPS,
   takeAttendance: OPERATIONAL_ROLES,
   // Teacher creates an ad-hoc lesson for their own (server-scoped) group and
@@ -114,22 +88,23 @@ export const CAPABILITIES: Record<Capability, readonly UserRole[]> = {
   viewExpenses: ['owner', 'accountant', 'manager'],
   navigateExpenseOverdueSweep: ['owner', 'manager'],
   manageCompanyFinance: ['owner', 'accountant'],
-  // Teacher self-view of own settlements — activated at T8A; never finance roles.
-  viewOwnSettlements: ['teacher'],
-  // autodrive-cg9: "show deleted" toggle + restore action on the students/
+  // "show deleted" toggle + restore action on the students/
   // groups/users/branches list pages. No existing capability means this --
   // manageBranches/manageUsers/manageStudents/manageGroups are each scoped
   // to ONE entity's CRUD, and viewAudit/viewAllBranches/assignBranch each
   // already gate a different, unrelated feature. A dedicated OWNERS-only
   // capability keeps `useCan('viewDeleted')` self-documenting at each of
   // the four call sites instead of overloading an unrelated one.
-  // School question bank + test templates (#260). View mirrors backend GET
-  // roles (incl. operator inspect). Manage mirrors create/publish/assign
-  // (teacher/manager/owner/dev) — never platform_public authoring in CRM.
-  viewSchoolLearning: OPERATIONAL_ROLES,
-  manageSchoolLearning: ['dev', 'owner', 'manager', 'teacher'],
   viewDeleted: OWNERS,
   accessLeads: OPS,
+  viewDocuments: OPERATIONAL_ROLES,
+  manageDocuments: OPS,
+  // LMS: o'qish — barcha operatsion rollar; topshiriq/test/dastur yozish —
+  // admin rollar va o'qituvchi (backend o'qituvchini o'z guruhlari bilan cheklaydi).
+  viewLearning: OPERATIONAL_ROLES,
+  manageLearning: ['dev', 'owner', 'manager', 'teacher'],
+  manageSubjects: ['dev', 'owner', 'manager'],
+  sendNotifications: OPERATIONAL_ROLES,
 };
 
 /** Does this role have the capability? An absent/unknown role has none. */
@@ -158,21 +133,6 @@ const permissionForCapability: Record<Capability, readonly string[]> = {
   viewPayments: ['payments.read'],
   manageStudents: ['students.create'],
   manageGroups: ['groups.create'],
-  viewFuel: ['fuel.read'],
-  viewInspections: ['vehicle_inspections.read'],
-  viewVehicles: ['vehicles.read'],
-  viewFleetMap: ['vehicles.read'],
-  manageVehicles: ['vehicles.create'],
-  viewTrainingPrograms: ['training_programs.read'],
-  manageTrainingPrograms: ['training_programs.create'],
-  viewTrainingEnrollments: ['training_enrollments.read'],
-  createTrainingEnrollment: ['training_enrollments.create'],
-  viewDrivingSessions: ['driving_sessions.read'],
-  viewDrivingSummary: ['reports.read'],
-  scheduleDrivingSessions: ['driving_sessions.create'],
-  submitDrivingSession: ['driving_sessions.submit'],
-  reviewDrivingSessions: ['driving_sessions.review'],
-  cancelDrivingSessions: ['driving_sessions.cancel'],
   manageSchedule: ['schedule.create'],
   takeAttendance: ['attendance.mark'],
   manageOwnLesson: ['lessons.update'],
@@ -181,16 +141,25 @@ const permissionForCapability: Record<Capability, readonly string[]> = {
   viewExpenses: ['expenses.read'],
   navigateExpenseOverdueSweep: ['expenses.read'],
   manageCompanyFinance: ['expenses.create'],
-  viewOwnSettlements: ['expenses.read'],
   viewDeleted: [
     'students.restore',
     'groups.restore',
     'staff.restore',
     'branches.restore',
   ],
-  viewSchoolLearning: ['questions.read', 'test_templates.read'],
-  manageSchoolLearning: ['questions.create', 'test_templates.create'],
   accessLeads: ['leads.read'],
+  viewDocuments: ['documents.read'],
+  manageDocuments: ['documents.create'],
+  viewLearning: [
+    'subjects.read',
+    'curriculum.read',
+    'assignments.read',
+    'exams.read',
+    'grades.read',
+  ],
+  manageLearning: ['assignments.create', 'exams.create', 'curriculum.create'],
+  manageSubjects: ['subjects.create'],
+  sendNotifications: ['notifications.create'],
 };
 
 const legacyActionCapability: Record<string, Capability> = {
@@ -202,27 +171,19 @@ const legacyActionCapability: Record<string, Capability> = {
   lessons: 'manageOwnLesson',
   schedule: 'manageSchedule',
   attendance: 'takeAttendance',
-  vehicles: 'manageVehicles',
-  vehicle_documents: 'manageVehicles',
-  vehicle_maintenance: 'manageVehicles',
-  vehicle_transfers: 'manageVehicles',
-  vehicle_defects: 'manageVehicles',
-  vehicle_inspections: 'viewInspections',
-  fuel: 'viewFuel',
-  fuel_stations: 'viewFuel',
-  training_programs: 'manageTrainingPrograms',
-  training_enrollments: 'createTrainingEnrollment',
-  questions: 'manageSchoolLearning',
-  question_media: 'manageSchoolLearning',
-  test_templates: 'manageSchoolLearning',
-  test_assignments: 'manageSchoolLearning',
-  test_attempts: 'manageSchoolLearning',
   leads: 'accessLeads',
   lead_stages: 'accessLeads',
   lead_sources: 'accessLeads',
   payments: 'recordPayment',
   expenses: 'manageCompanyFinance',
   expense_payments: 'manageCompanyFinance',
+  documents: 'manageDocuments',
+  subjects: 'manageSubjects',
+  curriculum: 'manageLearning',
+  assignments: 'manageLearning',
+  exams: 'manageLearning',
+  grades: 'manageLearning',
+  notifications: 'sendNotifications',
 };
 
 const legacyAllows = (role: UserRole, permission: string) => {
@@ -252,7 +213,7 @@ export function userCan(
   if (user.role === 'owner') return true;
   if (user.role === 'dev') {
     if (legacy) return roleCan(user.role, capability as Capability);
-    if (/^(expenses|expense_payments|fuel|fuel_stations)\./.test(capability))
+    if (/^(expenses|expense_payments)\./.test(capability))
       return false;
     return legacyAllows(user.role, capability);
   }

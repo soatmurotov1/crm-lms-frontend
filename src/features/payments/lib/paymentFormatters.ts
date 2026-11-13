@@ -12,7 +12,7 @@ export const formatDate = (d: string) => {
 
 /** i18n key for a course type — same ternary the page inlined pre-extraction. */
 export const courseTypeLabelKey = (courseType: CourseType) =>
-  courseType === 'tezkor' ? 'payments.course_fast' : 'payments.course_school';
+  courseType === 'online' ? 'payments.course_fast' : 'payments.course_school';
 
 /** i18n key for a payment method (used by the Excel export). */
 export const paymentMethodLabelKey = (method: PaymentMethod) =>

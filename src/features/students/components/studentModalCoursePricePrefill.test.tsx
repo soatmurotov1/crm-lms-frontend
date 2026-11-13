@@ -5,8 +5,8 @@ import StudentModal from '@/features/students/api/StudentModal';
 import { useCreateStudent } from '@/features/students/api/studentService';
 import type { CourseType } from '@/features/students/types';
 
-// autodrive-0d6: total_price used to pre-fill from a hardcoded constant
-// (courseType === 'tezkor' ? 2500000 : 6000000). It now pre-fills from the
+// total_price used to pre-fill from a hardcoded constant
+// (courseType === 'online' ? 2500000 : 6000000). It now pre-fills from the
 // matching Course's real `price`, and stays editable (a discount is still
 // legitimate) instead of being locked to that value.
 
@@ -44,9 +44,9 @@ vi.mock('@/features/students/components/StudentExamsTab', () => ({
 
 const COURSE = {
   id: 'c1',
-  name: 'Tezkor kurs',
+  name: 'Onlayn kurs',
   branch_id: 'b1',
-  course_type: 'tezkor',
+  course_type: 'online',
   price: 3300000,
   duration_days: 14,
   is_active: true,
@@ -55,25 +55,25 @@ const COURSE = {
 
 // Every fixture states its course_type explicitly so a test can never pair a
 // course with a form of the other type by accident (#342 review).
-const SECOND_TEZKOR_COURSE = {
+const SECOND_ONLINE_COURSE = {
   ...COURSE,
   id: 'c2',
-  name: 'Tezkor kurs plus',
-  course_type: 'tezkor',
+  name: 'Onlayn kurs plus',
+  course_type: 'online',
   price: 4100000,
 };
-const AVTO_COURSE = {
+const OFFLINE_COURSE = {
   ...COURSE,
   id: 'a1',
-  name: 'Avto maktab B',
-  course_type: 'avto_maktab',
+  name: 'Matematika B',
+  course_type: 'offline',
   price: 6000000,
   duration_days: 90,
 };
-const SECOND_AVTO_COURSE = {
-  ...AVTO_COURSE,
+const SECOND_OFFLINE_COURSE = {
+  ...OFFLINE_COURSE,
   id: 'a2',
-  name: 'Avto maktab BC',
+  name: 'Matematika BC',
   price: 7500000,
 };
 const catalog: { courses: (typeof COURSE)[] } = { courses: [COURSE] };
@@ -101,14 +101,14 @@ describe('StudentModal total_price pre-fill from Course', () => {
         open
         onClose={vi.fn()}
         onSubmit={vi.fn()}
-        courseType="tezkor"
+        courseType="online"
       />,
     );
 
     await waitFor(() =>
       expect(digitsOnly(q('total_price').value)).toBe('3300000'),
     );
-    // Old hardcoded constant for tezkor was 2500000 -- must not win.
+    // Old hardcoded constant for online was 2500000 -- must not win.
     expect(digitsOnly(q('total_price').value)).not.toBe('2500000');
   });
 
@@ -119,7 +119,7 @@ describe('StudentModal total_price pre-fill from Course', () => {
         open
         onClose={vi.fn()}
         onSubmit={onSubmit}
-        courseType="tezkor"
+        courseType="online"
       />,
     );
 
@@ -128,9 +128,7 @@ describe('StudentModal total_price pre-fill from Course', () => {
     );
 
     fireEvent.change(q('last_name'), { target: { value: 'Karimov' } });
-    fireEvent.change(q('learner_password'), { target: { value: 'password1' } });
     fireEvent.change(q('first_name'), { target: { value: 'Aziz' } });
-    fireEvent.change(q('learner_password'), { target: { value: 'password1' } });
     fireEvent.change(q('phone'), { target: { value: '901234567' } });
     fireEvent.change(q('total_price'), { target: { value: '2000000' } });
     expect(digitsOnly(q('total_price').value)).toBe('2000000');
@@ -170,9 +168,6 @@ const fillSyntheticIdentity = () => {
   fireEvent.change(q('last_name'), { target: { value: 'Synthetic' } });
   fireEvent.change(q('first_name'), { target: { value: 'Student' } });
   fireEvent.change(q('phone'), { target: { value: '900000001' } });
-  fireEvent.change(q('learner_password'), {
-    target: { value: 'synthetic1' },
-  });
 };
 
 const postedBody = () => {
@@ -186,7 +181,7 @@ const postedBody = () => {
 describe('StudentModal quick create wire body (#342)', () => {
   it('sends the auto-selected course_id with the negotiated price and payment unchanged', async () => {
     network.post.mockResolvedValue({ data: { data: { id: 's-new' } } });
-    renderWithClient('tezkor');
+    renderWithClient('online');
 
     await waitFor(() =>
       expect(digitsOnly(q('total_price').value)).toBe('3300000'),
@@ -201,7 +196,7 @@ describe('StudentModal quick create wire body (#342)', () => {
     await waitFor(() => expect(network.post).toHaveBeenCalledTimes(1));
     const body = postedBody();
     expect(body).toMatchObject({
-      course_type: 'tezkor',
+      course_type: 'online',
       course_id: 'c1',
       total_price: 2000000,
       amount_paid: 500000,
@@ -211,22 +206,22 @@ describe('StudentModal quick create wire body (#342)', () => {
   });
 
   it('offers only courses of the form course_type and sends the chosen one', async () => {
-    // A tezkor course in the same catalog must not leak into avto_maktab.
-    catalog.courses = [COURSE, AVTO_COURSE, SECOND_AVTO_COURSE];
+    // A online course in the same catalog must not leak into offline.
+    catalog.courses = [COURSE, OFFLINE_COURSE, SECOND_OFFLINE_COURSE];
     network.post.mockResolvedValue({ data: { data: { id: 's-new' } } });
-    renderWithClient('avto_maktab');
+    renderWithClient('offline');
 
     fillSyntheticIdentity();
     fireEvent.click(
       screen.getByRole('combobox', { name: 'students.sections.course' }),
     );
     expect(
-      await screen.findByRole('option', { name: 'Avto maktab B' }),
+      await screen.findByRole('option', { name: 'Matematika B' }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole('option', { name: 'Tezkor kurs' }),
+      screen.queryByRole('option', { name: 'Onlayn kurs' }),
     ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('option', { name: 'Avto maktab BC' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Matematika BC' }));
     await waitFor(() =>
       expect(digitsOnly(q('total_price').value)).toBe('7500000'),
     );
@@ -236,7 +231,7 @@ describe('StudentModal quick create wire body (#342)', () => {
 
     await waitFor(() => expect(network.post).toHaveBeenCalledTimes(1));
     expect(postedBody()).toMatchObject({
-      course_type: 'avto_maktab',
+      course_type: 'offline',
       course_id: 'a2',
       total_price: 7500000,
       initial_payment: 1000000,
@@ -244,28 +239,28 @@ describe('StudentModal quick create wire body (#342)', () => {
   });
 
   it('does not auto-select or send a sole course of the other course_type', async () => {
-    catalog.courses = [AVTO_COURSE];
+    catalog.courses = [OFFLINE_COURSE];
     network.post.mockResolvedValue({ data: { data: { id: 's-new' } } });
-    renderWithClient('tezkor');
+    renderWithClient('online');
 
     fillSyntheticIdentity();
     expect(
       screen.getByRole('combobox', { name: 'students.sections.course' }),
-    ).not.toHaveTextContent('Avto maktab B');
+    ).not.toHaveTextContent('Matematika B');
     expect(digitsOnly(q('total_price').value)).toBe('');
     fireEvent.change(q('total_price'), { target: { value: '2500000' } });
     fireEvent.click(screen.getByRole('button', { name: 'common.add' }));
 
     await waitFor(() => expect(network.post).toHaveBeenCalledTimes(1));
     const body = postedBody();
-    expect(body).toMatchObject({ course_type: 'tezkor', total_price: 2500000 });
+    expect(body).toMatchObject({ course_type: 'online', total_price: 2500000 });
     expect(body).not.toHaveProperty('course_id');
   });
 
   it('omits course_id from the wire body when no course is selected', async () => {
-    catalog.courses = [COURSE, SECOND_TEZKOR_COURSE];
+    catalog.courses = [COURSE, SECOND_ONLINE_COURSE];
     network.post.mockResolvedValue({ data: { data: { id: 's-new' } } });
-    renderWithClient('tezkor');
+    renderWithClient('online');
 
     fillSyntheticIdentity();
     fireEvent.change(q('total_price'), { target: { value: '2500000' } });
@@ -356,17 +351,17 @@ describe('StudentModal scoped write options course_type filter (#342)', () => {
     catalog.courses = [];
   });
 
-  const TEZKOR_SCOPED = {
+  const ONLINE_SCOPED = {
     ...COURSE,
     id: 't-scoped',
-    name: 'Tezkor scoped',
-    course_type: 'tezkor',
+    name: 'Online scoped',
+    course_type: 'online',
     price: 3100000,
   };
 
   it.each([
-    ['tezkor', TEZKOR_SCOPED, AVTO_COURSE],
-    ['avto_maktab', AVTO_COURSE, TEZKOR_SCOPED],
+    ['online', ONLINE_SCOPED, OFFLINE_COURSE],
+    ['offline', OFFLINE_COURSE, ONLINE_SCOPED],
   ] as const)(
     'with mixed-type options, a %s form offers, auto-selects and sends only its own course',
     async (courseType, own, other) => {
@@ -409,9 +404,9 @@ describe('StudentModal scoped write options course_type filter (#342)', () => {
   );
 
   it('never shows, auto-selects or sends a sole course of the other course_type', async () => {
-    serveScopedOptions([AVTO_COURSE]);
+    serveScopedOptions([OFFLINE_COURSE]);
     network.post.mockResolvedValue({ data: { data: { id: 's-new' } } });
-    renderScoped('tezkor');
+    renderScoped('online');
 
     // Let the scoped options request resolve before asserting absence.
     await waitFor(() => expect(optionsRequested()).toBe(true));
@@ -425,11 +420,11 @@ describe('StudentModal scoped write options course_type filter (#342)', () => {
     const courseSelect = screen.getByRole('combobox', {
       name: 'students.sections.course',
     });
-    expect(courseSelect).not.toHaveTextContent('Avto maktab B');
+    expect(courseSelect).not.toHaveTextContent('Matematika B');
     expect(digitsOnly(q('total_price').value)).toBe('');
     fireEvent.click(courseSelect);
     expect(
-      screen.queryByRole('option', { name: 'Avto maktab B' }),
+      screen.queryByRole('option', { name: 'Matematika B' }),
     ).not.toBeInTheDocument();
     fireEvent.keyDown(document.activeElement ?? document.body, {
       key: 'Escape',
@@ -441,7 +436,7 @@ describe('StudentModal scoped write options course_type filter (#342)', () => {
 
     await waitFor(() => expect(network.post).toHaveBeenCalledTimes(1));
     const body = postedBody();
-    expect(body).toMatchObject({ course_type: 'tezkor', total_price: 2500000 });
+    expect(body).toMatchObject({ course_type: 'online', total_price: 2500000 });
     expect(body).not.toHaveProperty('course_id');
   });
 });

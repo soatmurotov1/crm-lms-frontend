@@ -117,13 +117,13 @@ describe('EntityDetailShell', () => {
         <EntityDetailShell
           onBack={onBack}
           backLabel="Back"
-          backHref="/vehicle-fuel"
+          backHref="/documents"
           isLoading={false}
           isError={false}
         />,
       );
       const link = screen.getByRole('link', { name: 'Back' });
-      expect(link).toHaveAttribute('href', '/vehicle-fuel');
+      expect(link).toHaveAttribute('href', '/documents');
       expect(link).toHaveClass('print:hidden');
       const event = new MouseEvent('click', {
         bubbles: true,

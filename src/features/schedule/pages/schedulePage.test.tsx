@@ -23,7 +23,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 // from "no counts passed" -- both render as the bare key. Override with a
 // spy that still returns just the key (so every existing getByText(key)
 // assertion below is unaffected) but also records call args, so the new
-// autodrive-52v.4 test can assert the exact {created, skipped} passed in.
+// test can assert the exact {created, skipped} passed in.
 const tSpy = vi.hoisted(() => vi.fn((key: string) => key));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -296,13 +296,13 @@ describe('SchedulePage', () => {
       initialEntry: '/schedule',
       routePattern: '/schedule',
     });
-    // Templates now live under the "Shablonlar" tab (autodrive-y5b).
+    // Templates now live under the "Shablonlar" tab.
     // Radix Tabs switches on mousedown, not click.
     fireEvent.mouseDown(screen.getByText('schedule.tab_templates'));
     expect(screen.getByText('Group A')).toBeInTheDocument();
   });
 
-  // Regression for autodrive-6cq.5.53: parseInt('') is NaN, and NaN<1 /
+  // Regression for parseInt('') is NaN, and NaN<1 /
   // NaN>12 are both false, so the guard used to let a cleared weeks field
   // through and call generateLessons with weeks: NaN.
   it('rejects a cleared weeks field instead of sending NaN', async () => {
@@ -333,7 +333,7 @@ describe('SchedulePage', () => {
     expect(mutateAsync).not.toHaveBeenCalled();
   });
 
-  // autodrive-52v.4: the success toast used to be a fixed "Lessons
+  // the success toast used to be a fixed "Lessons
   // generated" string no matter how many lessons were actually created vs
   // skipped. It must now report the real counts from the mutation result.
   it('reports the real created/skipped counts in the success toast', async () => {
@@ -365,7 +365,7 @@ describe('SchedulePage', () => {
     expect(toast.success).toHaveBeenCalledWith('schedule.lessons_generated');
   });
 
-  // autodrive-38m.3: clicking a week-strip lesson card opens the
+  // clicking a week-strip lesson card opens the
   // AttendanceDrawer for that lesson; marking a student via the toggle and
   // saving calls the shared batch-attendance mutation.
   it('opens the drawer from a lesson card, marks a student, and saves', async () => {

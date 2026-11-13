@@ -11,7 +11,7 @@ const STUDENT: Student = {
   first_name: 'Aziz',
   last_name: 'Karimov',
   phone: '+998901234567',
-  course_type: 'avto_maktab',
+  course_type: 'offline',
   branch_id: 'branch-1',
   payment_method: null,
   has_document: true,
@@ -25,7 +25,7 @@ describe('StudentModal create/edit form mapping', () => {
   it('uses the assigned default branch only when the user may assign branches', () => {
     expect(
       getCreateStudentFormValues({
-        courseType: 'tezkor',
+        courseType: 'online',
         canAssignBranch: true,
         defaultBranchId: 'branch-2',
         userBranchId: 'branch-1',
@@ -34,7 +34,7 @@ describe('StudentModal create/edit form mapping', () => {
 
     expect(
       getCreateStudentFormValues({
-        courseType: 'tezkor',
+        courseType: 'online',
         canAssignBranch: false,
         defaultBranchId: 'branch-2',
         userBranchId: 'branch-1',
@@ -54,7 +54,7 @@ describe('StudentModal create/edit form mapping', () => {
   it('normalizes the phone and sends an avto-maktab additional payment only while editing', () => {
     const values = {
       ...getCreateStudentFormValues({
-        courseType: 'avto_maktab',
+        courseType: 'offline',
         canAssignBranch: false,
         userBranchId: 'branch-1',
       }),
@@ -67,9 +67,9 @@ describe('StudentModal create/edit form mapping', () => {
     };
 
     expect(
-      toCreateStudentPayload(values, 'avto_maktab', false),
+      toCreateStudentPayload(values, 'offline', false),
     ).not.toHaveProperty('amount_paid');
-    expect(toCreateStudentPayload(values, 'avto_maktab', true)).toMatchObject({
+    expect(toCreateStudentPayload(values, 'offline', true)).toMatchObject({
       phone: '+998901234567',
       initial_payment: 1_000_000,
       amount_paid: 500_000,
@@ -77,7 +77,7 @@ describe('StudentModal create/edit form mapping', () => {
   });
 
   describe('course_id (#342)', () => {
-    const createValues = (courseType: 'tezkor' | 'avto_maktab') => ({
+    const createValues = (courseType: 'online' | 'offline') => ({
       ...getCreateStudentFormValues({
         courseType,
         canAssignBranch: false,
@@ -93,7 +93,7 @@ describe('StudentModal create/edit form mapping', () => {
       initial_payment: 700_000,
     });
 
-    it.each(['tezkor', 'avto_maktab'] as const)(
+    it.each(['online', 'offline'] as const)(
       'sends the selected course on %s create without changing any amount',
       (courseType) => {
         const values = createValues(courseType);
@@ -108,7 +108,7 @@ describe('StudentModal create/edit form mapping', () => {
         // The only difference is the association; money fields are identical.
         expect(withCourse).toEqual({ ...withoutCourse, course_id: 'course-1' });
         expect(withCourse.total_price).toBe(2_000_000);
-        if (courseType === 'tezkor') {
+        if (courseType === 'online') {
           expect(withCourse.amount_paid).toBe(300_000);
           expect(withCourse).not.toHaveProperty('initial_payment');
         } else {
@@ -120,8 +120,8 @@ describe('StudentModal create/edit form mapping', () => {
 
     it('omits course_id when no course is selected', () => {
       const payload = toCreateStudentPayload(
-        createValues('tezkor'),
-        'tezkor',
+        createValues('online'),
+        'online',
         false,
       );
       expect(payload).not.toHaveProperty('course_id');
@@ -130,7 +130,7 @@ describe('StudentModal create/edit form mapping', () => {
       );
     });
 
-    it.each(['tezkor', 'avto_maktab'] as const)(
+    it.each(['online', 'offline'] as const)(
       'never sends course_id while editing a %s student',
       (courseType) => {
         const payload = toCreateStudentPayload(

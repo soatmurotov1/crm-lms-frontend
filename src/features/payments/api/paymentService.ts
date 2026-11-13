@@ -11,7 +11,6 @@ import {
   PaymentSnapshot,
   PaymentSummary,
 } from '@/features/payments/types';
-import { track } from '@/lib/umami';
 import type { ListResponse } from '@/shared/types/list';
 import { parseListResponse } from '@/lib/listResponse';
 import { parseItemEnvelope } from '@/lib/apiEnvelope';
@@ -27,7 +26,7 @@ const toLocalDateStr = (d: Date): string =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 const toPaymentCourseType = (value?: string): PaymentsQuery['course_type'] =>
-  value === 'tezkor' || value === 'avto_maktab' ? value : undefined;
+  value === 'online' || value === 'offline' ? value : undefined;
 
 const toPaymentMethod = (value?: string): PaymentsQuery['payment_method'] =>
   value === 'naqd' || value === 'karta' || value === 'perechisleniya'
@@ -244,7 +243,6 @@ export const useCreatePayment = () => {
       qc.invalidateQueries({ queryKey: paymentKeys.all });
       qc.invalidateQueries({ queryKey: studentKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
-      track('payment_create');
     },
   });
 };
@@ -266,7 +264,6 @@ export const useUpdatePayment = () => {
       qc.invalidateQueries({ queryKey: paymentKeys.all });
       qc.invalidateQueries({ queryKey: studentKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
-      track('payment_update');
     },
     onError: (err) => {
       if (isConcurrentUpdateError(err)) {
@@ -287,7 +284,6 @@ export const useDeletePayment = () => {
       qc.invalidateQueries({ queryKey: paymentKeys.all });
       qc.invalidateQueries({ queryKey: studentKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
-      track('payment_delete');
     },
   });
 };

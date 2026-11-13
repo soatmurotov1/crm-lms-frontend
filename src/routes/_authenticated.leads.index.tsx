@@ -10,7 +10,6 @@ import {
 import type {
   LeadSource,
   CourseType,
-  Category,
 } from '@/features/leads/types/leads.types';
 
 type LeadsSearch = {
@@ -19,7 +18,7 @@ type LeadsSearch = {
   stage_id?: string;
   source?: LeadSource;
   course_type?: CourseType;
-  category?: Category;
+  direction?: string;
   assigned_to_me?: boolean;
   assignee_user_id?: string;
   overdue_only?: boolean;
@@ -45,12 +44,12 @@ export const Route = createFileRoute('/_authenticated/leads/')({
         ? (search.source as LeadSource)
         : undefined,
     course_type:
-      search.course_type === 'tezkor' || search.course_type === 'avto_maktab'
+      search.course_type === 'online' || search.course_type === 'offline'
         ? search.course_type
         : undefined,
-    category:
-      typeof search.category === 'string'
-        ? (search.category as Category)
+    direction:
+      typeof search.direction === 'string' && search.direction.trim()
+        ? search.direction.trim().slice(0, 100)
         : undefined,
     assigned_to_me:
       search.assigned_to_me === 'true' || search.assigned_to_me === true

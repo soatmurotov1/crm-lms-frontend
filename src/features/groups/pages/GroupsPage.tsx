@@ -42,7 +42,7 @@ const GroupsPage = () => {
   const user = useAuthStore((s) => s.user);
 
   // Filters/sort/page live in the URL so reload / back / share preserves
-  // them (autodrive-6cq.5.8) — same setParam/setParams pattern as
+  // them — same setParam/setParams pattern as
   // StudentsPage (src/hooks/useUrlParams.ts).
   const { searchParams, setParam, setParams } = useUrlParams();
   const { pageSize, setPageSize } = usePageSize();
@@ -61,7 +61,7 @@ const GroupsPage = () => {
 
   // Branch filter — owner/dev only (mirrors StudentsPage's cross-tenant
   // branch picker); manager/operator/teacher stay pinned to their own
-  // branch, same as before this change (autodrive-b85.5).
+  // branch, same as before this change.
   const defaultBranchId = isCrossTenant
     ? undefined
     : requestBranchId(user, useAuthStore.getState?.()?.activeBranchId) ||
@@ -98,11 +98,11 @@ const GroupsPage = () => {
   };
 
   const canViewDeleted = useCan('viewDeleted');
-  // autodrive-cg9: owner-only "show deleted" toggle -- local state (not
+  // owner-only "show deleted" toggle -- local state (not
   // URL), defaults off.
   const [includeDeleted, setIncludeDeleted] = useState(false);
 
-  // search/course_type/branch now filtered server-side (autodrive-b85.5) --
+  // search/course_type/branch now filtered server-side --
   // GET /groups gained these params, so we stop refetching-then-filtering.
   const {
     data: groups,
@@ -178,7 +178,7 @@ const GroupsPage = () => {
   const getBranchName = (branchId: string) =>
     branchList.find((b) => b.id === branchId)?.name || branchId;
 
-  // autodrive-cg9: enrolled-student count already lives on the group object
+  // enrolled-student count already lives on the group object
   // that populated the row the user clicked delete on -- no extra fetch.
   const deleteDescArgs = groupDeleteDescArgs(
     groups?.find((g) => g.id === deleteId),
@@ -306,7 +306,7 @@ const GroupsPage = () => {
         }
       />
 
-      {/* autodrive-cg9: restore only un-deletes this row -- honesty
+      {/* restore only un-deletes this row -- honesty
           requirement, see common.confirm_restore_desc. */}
       <ConfirmDialog
         open={!!restoreId}

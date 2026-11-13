@@ -40,7 +40,7 @@ const PaymentsPage = () => {
   const user = useAuthStore((s) => s.user);
 
   // Filters/sort/page live in the URL so reload / back / share preserves
-  // them (autodrive-6cq.5.8) — same setParam/setParams pattern as
+  // them — same setParam/setParams pattern as
   // StudentsPage (src/hooks/useUrlParams.ts).
   const { searchParams, setParam, setParams } = useUrlParams();
   const { pageSize, setPageSize } = usePageSize();
@@ -85,7 +85,7 @@ const PaymentsPage = () => {
     () => (rawDateTo ? parseCalendarDate(rawDateTo) : undefined),
     [rawDateTo],
   );
-  // Both keys must land in the same setSearchParams call (autodrive-6cq.5.70).
+  // Both keys must land in the same setSearchParams call.
   const setDateRange = (from: Date | undefined, to: Date | undefined) =>
     setParams({
       date_from: from ? toLocalDateStr(from) : undefined,
@@ -224,7 +224,7 @@ const PaymentsPage = () => {
   const totalPages = Math.max(1, paymentsPage?.meta.totalPages ?? 1);
 
   // Deleting the last row of the last page leaves currentPage pointing past
-  // the new totalPages -- clamp back, same fix as GroupsPage (autodrive-52v.3).
+  // the new totalPages -- clamp back, same fix as GroupsPage.
   useEffect(() => {
     if (paymentsPage && currentPage > totalPages) setCurrentPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -365,7 +365,7 @@ const PaymentsPage = () => {
         loading={createPayment.isPending}
         branchId={branchId}
         courseType={
-          courseTypeFilter === 'tezkor' || courseTypeFilter === 'avto_maktab'
+          courseTypeFilter === 'online' || courseTypeFilter === 'offline'
             ? courseTypeFilter
             : undefined
         }

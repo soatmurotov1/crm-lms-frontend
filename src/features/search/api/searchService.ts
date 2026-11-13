@@ -39,8 +39,8 @@ export const globalSearchQueryOptions = (query: string, enabled = true) => {
   });
 };
 
-// autodrive-cdy: GET /search?q= — tenant-scoped. Shape confirmed against
-// backend PR #114 (autodrive-backend src/modules/search/search.service.ts):
+// GET /search?q= — tenant-scoped. Shape confirmed against
+// backend PR #114 (src/modules/search/search.service.ts):
 // { students, groups, staff }, each item { id, label, subtitle }. No
 // separate "payments" group — a payment match surfaces as its student.
 export const useGlobalSearch = (query: string) => {

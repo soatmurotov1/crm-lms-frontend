@@ -1,57 +1,50 @@
-# AutoDrive tenant frontend
+# EduLMS — frontend
 
-React 19 + Vite tenant workspace for Automaktab driving schools. The public
-marketing site is a separate application; this app only serves authenticated
-owner, manager, operator and teacher workflows.
+React 19 + Vite ilovasi: o'quv markazlari uchun ta'lim boshqaruv platformasi (LMS).
+Egasi, menejer, operator, buxgalter va o'qituvchi rollari uchun autentifikatsiyadan
+o'tgan ish joyi.
 
-## Development
+## Ishga tushirish
 
 ```bash
+cp .env.example .env      # VITE_API_BASE_URL=http://localhost:4040/api/v2
 npm install
-npm run dev
-npm run lint
+npm run dev               # http://localhost:8080
+```
+
+Backend (`../backend`) `http://localhost:4040` da ishlab turgan bo'lishi kerak.
+
+## Tekshiruvlar
+
+```bash
 npm run typecheck
 npm test
 npm run build
-npm run check:bundle
 ```
 
-The app uses TanStack Router for file-based routes and TanStack Query for
-server state. `src/services/` contains feature query/mutation factories;
-`src/shared/api/schema.d.ts` is generated from the authenticated backend
-OpenAPI contract and must not be edited manually.
+## Tuzilma
 
-## API contract
+- `src/routes/` — TanStack Router fayl-asosidagi route'lar (`routeTree.gen.ts` avtomatik).
+- `src/features/<domen>/` — har bir domen: `api/` (TanStack Query hook'lari), `components/`, `pages/`, `types.ts`.
+- `src/features/lms/` — LMS: fanlar, o'quv dasturi (modul → dars → material),
+  kursga yozish, topshiriqlar, testlar/imtihonlar, baholar jurnali, progress,
+  bildirishnomalar, dashboard bloki.
+- `src/shared/api/schema.d.ts` — backend OpenAPI'dan generatsiya qilinadi, qo'lda tahrirlanmaydi.
 
-Set `OPENAPI_TOKEN` or `OPENAPI_USERNAME` plus `OPENAPI_PASSWORD` only in the
-runtime environment, then run:
+## API tiplari
+
+Lokal backend Swagger'i ochiq (`/api-json`), shuning uchun:
 
 ```bash
-npm run api:types
+npm run api:types   # OPENAPI_URL standart: http://localhost:4040/api-json
 npm run api:check
 ```
 
-Never use a `VITE_` prefix for contract credentials: Vite exposes those values
-to browser code. The tenant API base URL remains `VITE_API_BASE_URL`.
+Himoyalangan muhit uchun `OPENAPI_TOKEN` (yoki `OPENAPI_USERNAME` + `OPENAPI_PASSWORD`)
+faqat Node muhitida beriladi — hech qachon `VITE_` prefiksi bilan emas.
 
 ## Storybook
 
-Storybook hosts visual stories for the shadcn primitives this app uses, plus a
-`Foundations/Tokens` reference page that reads directly from
-`@autodrive/design-tokens` (so what you see is what ships).
-
 ```bash
-npm run storybook        # dev server on http://localhost:6006
-npm run build-storybook  # outputs to ./storybook-static (gitignored)
+npm run storybook
 ```
-
-Stories included:
-
-- `UI/Button` — all variants + sizes
-- `UI/Card` — basic and with header/footer
-- `UI/Input` — default, disabled, with label
-- `UI/Dialog` — open-by-default + trigger
-- `UI/Toaster` — success, error, info via `sonner`
-- `Foundations/Tokens` — color swatches, radii, font sizes
-
-Use the toolbar theme switcher to flip between light and dark modes.

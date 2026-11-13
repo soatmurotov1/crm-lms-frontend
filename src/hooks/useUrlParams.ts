@@ -31,7 +31,7 @@ const createSearchParams = (init: SearchParamsInit): URLSearchParams => {
 
 /**
  * List-page filter/sort/page state that lives in the URL, so reload, back
- * navigation, and shared links all restore it (autodrive-6cq.5.8). Extracted
+ * navigation, and shared links all restore it. Extracted
  * from StudentsPage's original inline setParam/setSearchParams pattern —
  * reuse this instead of re-inlining it per page.
  */
@@ -79,7 +79,7 @@ export function useUrlParams() {
 
   // Multiple keys must land in the same setSearchParams call — two
   // sequential setParam calls each snapshot `prev` independently and the
-  // second overwrites the first's write (autodrive-6cq.5.70).
+  // second overwrites the first's write.
   const setParams = useCallback(
     (updates: Record<string, string | undefined>) => {
       setSearchParams(

@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getDefaultAuthenticatedRoute } from '@/lib/defaultAuthenticatedRoute';
 import { useAuthStore } from '@/store/authStore';
+import { LmsOverview } from '@/features/lms/api/widgets';
 
 const LegacyMainDashboard = lazy(
   () => import('@/features/dashboard/pages/DashboardPage'),
@@ -33,9 +34,12 @@ const DashboardRouter = () => {
 
   if (user?.role === 'teacher') {
     return (
-      <Suspense fallback={fallback}>
-        <TeacherDashboard />
-      </Suspense>
+      <>
+        <LmsOverview />
+        <Suspense fallback={fallback}>
+          <TeacherDashboard />
+        </Suspense>
+      </>
     );
   }
 
@@ -49,16 +53,22 @@ const DashboardRouter = () => {
 
   if (user?.company_features?.company_dashboard_v2 === false) {
     return (
-      <Suspense fallback={fallback}>
-        <LegacyMainDashboard />
-      </Suspense>
+      <>
+        <LmsOverview />
+        <Suspense fallback={fallback}>
+          <LegacyMainDashboard />
+        </Suspense>
+      </>
     );
   }
 
   return (
+    <>
+    <LmsOverview />
     <Suspense fallback={fallback}>
       <CompanyRevenueDashboard />
     </Suspense>
+    </>
   );
 };
 

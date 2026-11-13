@@ -28,7 +28,7 @@ export const useAuditLogs = ({
   const canViewAudit = role === 'owner' || role === 'manager' || role === 'dev';
   return useQuery<AuditLogsResponse>({
     queryKey: auditLogKeys.page({ ...params, branchId }),
-    // autodrive-bpf: callers can gate firing beyond the role check — the
+    // callers can gate firing beyond the role check — the
     // dashboard only wants this for OWNERS (viewAudit), narrower than manager.
     enabled: canViewAudit && (enabledOpt ?? true),
     queryFn: async ({ signal }) => {

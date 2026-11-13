@@ -10,7 +10,7 @@ import {
 import axiosInstance from '@/api/axiosInstance';
 import { groupKeys, studentKeys } from '@/lib/queryKeys';
 
-// autodrive-cg9: owner-only "show deleted" toggle on GroupsPage. Pins the
+// owner-only "show deleted" toggle on GroupsPage. Pins the
 // wire contract (include_deleted=true only when the toggle is on, PATCH
 // /groups/:id/restore) and the query-key requirement (toggling on must not
 // serve the cached un-deleted list from a stale cache entry).
@@ -35,7 +35,7 @@ const makeWrapper = (queryClient: QueryClient) => {
   return Wrapper;
 };
 
-describe('useGroups includeDeleted (autodrive-cg9)', () => {
+describe('useGroups includeDeleted', () => {
   it('normalizes list cache keys exactly like request filters', () => {
     const raw = groupsListQueryOptions({
       authBranchId: 'b1',
@@ -128,7 +128,7 @@ describe('useGroups includeDeleted (autodrive-cg9)', () => {
   });
 });
 
-describe('useRestoreGroup (autodrive-cg9)', () => {
+describe('useRestoreGroup', () => {
   it('PATCHes /groups/:id/restore and invalidates the group list', async () => {
     (axiosInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({});
     const queryClient = new QueryClient({

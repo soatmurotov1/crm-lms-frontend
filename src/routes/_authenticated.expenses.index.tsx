@@ -25,7 +25,6 @@ export type ExpensesSearch = {
 const categories: ExpenseCategory[] = [
   'rent',
   'utilities',
-  'vehicle',
   'marketing',
   'supplies',
   'administrative',

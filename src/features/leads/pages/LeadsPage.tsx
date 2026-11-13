@@ -33,7 +33,6 @@ import type {
   ListLeadsQuery,
   LeadSource,
   CourseType,
-  Category,
 } from '../types/leads.types';
 
 export type LeadsViewMode = 'board' | 'list' | 'metrics';
@@ -44,7 +43,7 @@ const LEAD_FILTER_PARAM_KEYS = [
   'stage_id',
   'source',
   'course_type',
-  'category',
+  'direction',
   'assigned_to_me',
   'assignee_user_id',
   'overdue_only',
@@ -103,7 +102,7 @@ export const LeadsPage = () => {
       stage_id: searchParams.get('stage_id') || undefined,
       source: (searchParams.get('source') as LeadSource) || undefined,
       course_type: (searchParams.get('course_type') as CourseType) || undefined,
-      category: (searchParams.get('category') as Category) || undefined,
+      direction: searchParams.get('direction') || undefined,
       assigned_to_me:
         searchParams.get('assigned_to_me') === 'true' ? true : undefined,
       assignee_user_id: searchParams.get('assignee_user_id') || undefined,

@@ -8,7 +8,7 @@ import { renderWithRouter } from '@/test/utils/renderWithRouter';
 // an owner/dev-only endpoint -- so for a manager it rendered empty and
 // un-fillable. The branch a manager's teacher belongs to is fixed by the
 // JWT (backend assertBranchScope auto-assigns it), so the picker must only
-// appear for cross-branch roles (owner/dev). (autodrive-6ef.5)
+// appear for cross-branch roles (owner/dev).
 
 const auth = vi.hoisted(() => ({ role: 'manager' as string }));
 

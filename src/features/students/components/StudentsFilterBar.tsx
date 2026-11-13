@@ -56,7 +56,7 @@ export interface StudentsFilterBarProps {
   hasDebt?: boolean;
   setHasDebt?: (v: boolean | undefined) => void;
   onClearAll?: () => void;
-  // autodrive-cg9: owner-only "show deleted" toggle.
+  // owner-only "show deleted" toggle.
   canViewDeleted: boolean;
   includeDeleted: boolean;
   setIncludeDeleted: (v: boolean) => void;

@@ -33,10 +33,8 @@ describe('OpenAPI contract configuration', () => {
     );
   });
 
-  it('fails before the network when no runtime credential is configured', () => {
-    expect(() => buildOpenApiHeaders({})).toThrow(
-      'OPENAPI_USERNAME and OPENAPI_PASSWORD',
-    );
+  it('reads the local development contract without credentials', () => {
+    expect(buildOpenApiHeaders({})).toEqual({ accept: 'application/json' });
   });
 
   it('accepts only a complete OpenAPI 3 document', () => {

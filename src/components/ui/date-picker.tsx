@@ -46,7 +46,7 @@ const DISPLAY_PATTERNS: Record<CalendarDateLocale, string> = {
   en: 'MM/dd/yyyy',
 };
 
-// Shared calendar-date picker (autodrive-qsgc.3): the ONE date input for
+// Shared calendar-date picker: the ONE date input for
 // date-only fields. Built from the existing Calendar + Popover primitives —
 // no new dependency. Keyboard entry parses the locale's display pattern plus
 // ISO; the calendar is keyboard-navigable (react-day-picker) and both the

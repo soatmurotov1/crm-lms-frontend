@@ -19,7 +19,7 @@ const AuditLogPage = () => {
   const { t } = useTranslation();
 
   // Filter + page state lives in the URL so reload / back / share preserves
-  // it (autodrive-6cq.5.8) — same setParam/setParams pattern as StudentsPage
+  // it — same setParam/setParams pattern as StudentsPage
   // (src/hooks/useUrlParams.ts). Sort stays local (no other list page's
   // sort is URL-synced either).
   const { searchParams, setParam, setParams } = useUrlParams();
@@ -50,7 +50,7 @@ const AuditLogPage = () => {
   );
   // Both keys must land in the same setSearchParams call — two sequential
   // setParam calls would each snapshot `prev` independently and the second
-  // overwrites the first's write (autodrive-6cq.5.70).
+  // overwrites the first's write.
   const setDateRange = (from: Date | undefined, to: Date | undefined) =>
     setParams({
       date_from: from ? toLocalDateStr(from) : undefined,
@@ -72,7 +72,7 @@ const AuditLogPage = () => {
   };
 
   // Resolve the typed name to a real user id so filtering happens server-side
-  // across ALL pages, not just the ~50 rows already loaded (autodrive-6cq.5.51).
+  // across ALL pages, not just the ~50 rows already loaded.
   const debouncedSearch = useDebounce(search, 300);
   const { data: users } = useUsers();
   const searchUserId = useMemo(() => {

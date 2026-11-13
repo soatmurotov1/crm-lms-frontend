@@ -83,8 +83,8 @@ const overview = vi.hoisted(() => ({
       arpu: 1155000,
       cash_collection_rate: 87.5,
       revenue_by_course_type: {
-        tezkor: { revenue: 40000000, per_lesson: 200000 },
-        avto_maktab: { revenue: 29300000, per_lesson: null },
+        online: { revenue: 40000000, per_lesson: 200000 },
+        offline: { revenue: 29300000, per_lesson: null },
       },
     },
     revenue_trend: [
@@ -110,7 +110,7 @@ const overview = vi.hoisted(() => ({
         student_id: 'student-1',
         student_name: 'Ali Valiyev',
         branch_name: 'Chorsu',
-        course_type: 'avto_maktab',
+        course_type: 'offline',
         debt: 5000000,
         total_price: 10000000,
         last_payment_at: '2026-07-02T10:00:00.000Z',
@@ -119,7 +119,7 @@ const overview = vi.hoisted(() => ({
         student_id: 'student-2',
         student_name: 'Dilnoza Karimova',
         branch_name: 'Chorsu',
-        course_type: 'tezkor',
+        course_type: 'online',
         debt: 4000000,
         total_price: 10000000,
         last_payment_at: '2026-07-03T10:00:00.000Z',
@@ -128,7 +128,7 @@ const overview = vi.hoisted(() => ({
         student_id: 'student-3',
         student_name: 'Javohir Yusupov',
         branch_name: 'Chorsu',
-        course_type: 'avto_maktab',
+        course_type: 'offline',
         debt: 3000000,
         total_price: 10000000,
         last_payment_at: '2026-07-04T10:00:00.000Z',
@@ -137,7 +137,7 @@ const overview = vi.hoisted(() => ({
         student_id: 'student-4',
         student_name: 'Sevara Aliyeva',
         branch_name: 'Chorsu',
-        course_type: 'avto_maktab',
+        course_type: 'offline',
         debt: 2000000,
         total_price: 10000000,
         last_payment_at: '2026-07-05T10:00:00.000Z',
@@ -445,7 +445,7 @@ describe('CompanyRevenueDashboard', () => {
     expect(screen.queryByTestId('finance-summary-section')).toBeNull();
   });
 
-  it('renders Hierarchy B KPI strip (autodrive-9s5j dedupe)', async () => {
+  it('renders Hierarchy B KPI strip (dedupe)', async () => {
     await renderDashboard();
     const strip = screen.getByTestId('dashboard-v2-kpi-strip');
     expect(strip).toBeInTheDocument();
@@ -627,7 +627,7 @@ describe('CompanyRevenueDashboard', () => {
     await waitFor(() =>
       expect(
         new URLSearchParams(router.state.location.searchStr).get('course_type'),
-      ).toBe('tezkor'),
+      ).toBe('online'),
     );
   });
 
@@ -663,7 +663,7 @@ describe('CompanyRevenueDashboard', () => {
   });
 });
 
-// autodrive-ls5 — every dashboard click used to build uz-named paths
+// every dashboard click used to build uz-named paths
 // (/talabalar, /tolovlar, /filiallar) that don't match App.tsx's real
 // routes (students/payments/branches) and 404'd via the catch-all route.
 // These assert navigation actually lands on the real routes with filters
@@ -675,10 +675,10 @@ const todayInUz = () =>
     new Date(),
   );
 
-describe('CompanyRevenueDashboard navigation (autodrive-ls5)', () => {
+describe('CompanyRevenueDashboard navigation', () => {
   it.each(
     [undefined, 'branch-a', 'branch-b'].flatMap((branch) =>
-      ['tezkor', 'avto_maktab'].map((course) => [branch, course] as const),
+      ['online', 'offline'].map((course) => [branch, course] as const),
     ),
   )(
     'all debtors retains %s/%s and omits dashboard dates',
@@ -924,11 +924,11 @@ describe('CompanyRevenueDashboard navigation (autodrive-ls5)', () => {
   });
 });
 
-// autodrive-sgf.3 — academic block: null metrics must render a '—'
+// academic block: null metrics must render a '—'
 // placeholder (not "null%"/"NaN%"), and the enrollment-funnel bar width
 // must not divide by a zero `contract` denominator (NaN%/Infinity% in the
 // inline style would silently break the bar).
-describe('CompanyRevenueDashboard academic block (autodrive-sgf.3)', () => {
+describe('CompanyRevenueDashboard academic block', () => {
   it('shows — for null academic metrics and guards funnel divide-by-zero', async () => {
     const original = overview.data.kpis;
     overview.data.kpis = {
@@ -962,11 +962,11 @@ describe('CompanyRevenueDashboard academic block (autodrive-sgf.3)', () => {
   });
 });
 
-// autodrive-sgf.4 — the on-time attendance KPI is the one card in the staff
+// the on-time attendance KPI is the one card in the staff
 // block with real conditional rendering (tone flips on a threshold), so it's
 // the seam worth locking down; the other two staff-block KPIs are plain
 // pass-through display like every other KpiCard already covered above.
-describe('CompanyRevenueDashboard staff block (autodrive-sgf.4)', () => {
+describe('CompanyRevenueDashboard staff block', () => {
   afterEach(() => {
     Object.assign(overview.data.kpis, {
       on_time_attendance_marking_rate: undefined,

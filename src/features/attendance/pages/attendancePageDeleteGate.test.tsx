@@ -41,7 +41,7 @@ vi.mock('@/features/attendance/api/attendanceService', () => ({
 
 vi.mock('@/features/groups/api/groupService', () => ({
   useGroups: () => ({ data: [], isLoading: false }),
-  // AttendanceDrawer (autodrive-38m.3) is now reused by this page and calls
+  // AttendanceDrawer is now reused by this page and calls
   // the real useGroup for its roster fallback -- without a mock it'd hit
   // useQuery with no QueryClientProvider in this test tree.
   useGroup: () => ({ data: undefined }),
@@ -71,7 +71,7 @@ beforeEach(() => {
   } as unknown as ReturnType<typeof useCreateLesson>);
 });
 
-// Regression for autodrive-6cq.5.50: canCreate (manageSchedule) includes
+// Regression for canCreate (manageSchedule) includes
 // operator, but the backend's DELETE /lessons/:id is
 // @Roles(owner, manager) only -- operator always got a 403.
 describe('AttendancePage delete-lesson gate', () => {
@@ -104,7 +104,7 @@ describe('AttendancePage delete-lesson gate', () => {
   });
 });
 
-// autodrive-6ef.27: the dense row list + inline expand-to-table was replaced
+// the dense row list + inline expand-to-table was replaced
 // with cards that open the same AttendanceDrawer SchedulePage uses.
 describe('AttendancePage card -> drawer', () => {
   it('displays early lessons with their Tashkent date and time on the list card', async () => {
@@ -128,7 +128,7 @@ describe('AttendancePage card -> drawer', () => {
   });
 });
 
-// autodrive-6ef.27: Create Lesson dialog moved from manual useState fields to
+// Create Lesson dialog moved from manual useState fields to
 // react-hook-form + zod. Confirms required-field validation still blocks an
 // empty submit instead of silently sending a half-filled payload.
 describe('AttendancePage create-lesson form validation', () => {

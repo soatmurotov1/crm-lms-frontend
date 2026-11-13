@@ -49,7 +49,7 @@ interface RawLeadCardItem {
   branchId?: string;
   branchName?: string;
   source: LeadCard['source'];
-  category?: LeadCard['category'];
+  direction?: LeadCard['direction'];
   assignee?: RawLeadAssignee | null;
   assigneeUserId?: string | null;
   assigneeName?: string | null;
@@ -125,7 +125,7 @@ type LeadsRequestQuery = {
   stageId?: ListLeadsQuery['stage_id'];
   source?: ListLeadsQuery['source'];
   courseType?: ListLeadsQuery['course_type'];
-  category?: ListLeadsQuery['category'];
+  direction?: ListLeadsQuery['direction'];
   mine?: ListLeadsQuery['assigned_to_me'];
   assigneeId?: ListLeadsQuery['assignee_user_id'];
   overdueOnly?: ListLeadsQuery['overdue_only'];
@@ -142,7 +142,7 @@ function toLeadsRequestQuery(query: ListLeadsQuery): LeadsRequestQuery {
   if (query.stage_id !== undefined) params.stageId = query.stage_id;
   if (query.source !== undefined) params.source = query.source;
   if (query.course_type !== undefined) params.courseType = query.course_type;
-  if (query.category !== undefined) params.category = query.category;
+  if (query.direction !== undefined) params.direction = query.direction;
   if (query.assigned_to_me !== undefined) params.mine = query.assigned_to_me;
   if (query.assignee_user_id !== undefined) {
     params.assigneeId = query.assignee_user_id;
@@ -234,7 +234,7 @@ export const leadsApi = {
             branchId: item.branchId ?? '',
             branchName: item.branchName,
             source: item.source,
-            category: item.category ?? null,
+            direction: item.direction ?? null,
             assigneeUserId: item.assigneeUserId ?? item.assignee?.id ?? null,
             assigneeName: item.assigneeName ?? item.assignee?.name ?? null,
             stageId: item.stageId ?? stage.id,

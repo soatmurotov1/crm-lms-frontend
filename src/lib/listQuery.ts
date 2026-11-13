@@ -5,7 +5,7 @@ export type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
 export const DEFAULT_PAGE_SIZE: PageSizeOption = 10;
 
 /** Secondary persistence when a list URL has no `limit`. */
-export const LIST_PAGE_SIZE_STORAGE_KEY = 'autodrive-list-page-size';
+export const LIST_PAGE_SIZE_STORAGE_KEY = 'lms-list-page-size';
 
 export const isPageSizeOption = (value: number): value is PageSizeOption =>
   (PAGE_SIZE_OPTIONS as readonly number[]).includes(value);

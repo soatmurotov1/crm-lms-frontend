@@ -12,8 +12,8 @@ import type {
 
 export interface DashboardAnalytics {
   total_students: number;
-  active_tezkor: number;
-  active_avto: number;
+  active_online: number;
+  active_offline: number;
   new_this_month: number;
   new_last_month: number;
   total_revenue: number;
@@ -23,7 +23,7 @@ export interface DashboardAnalytics {
   last_month_revenue: number;
   payment_status: { paid: number; partial: number; debt: number };
   result_stats: { oqimoqda: number; topshirdi: number; yiqildi: number };
-  monthly_enrollment: { month: string; tezkor: number; avto_maktab: number }[];
+  monthly_enrollment: { month: string; online: number; offline: number }[];
   monthly_revenue: { month: string; amount: number }[];
   branch_stats: {
     branch: string;
@@ -139,7 +139,7 @@ export interface CompanyOverview {
       suspended?: number;
     };
     result_stats?: { oqimoqda: number; topshirdi: number; yiqildi: number };
-    course_mix: { tezkor: number; avto_maktab: number };
+    course_mix: { online: number; offline: number };
     collection: {
       paid: number;
       partial: number;
@@ -155,10 +155,10 @@ export interface CompanyOverview {
     arpu: number;
     cash_collection_rate: number;
     revenue_by_course_type: {
-      tezkor: { revenue: number; per_lesson: number | null };
-      avto_maktab: { revenue: number; per_lesson: number | null };
+      online: { revenue: number; per_lesson: number | null };
+      offline: { revenue: number; per_lesson: number | null };
     };
-    // O'quv jarayoni (academic) block — autodrive-sgf.3
+    // O'quv jarayoni (academic) block — 
     attendance_rate?: number | null;
     dropout_rate?: number;
     exam_first_attempt_pass_rate?: number | null;
@@ -169,7 +169,7 @@ export interface CompanyOverview {
       graduated: number;
       dropped_or_suspended: number;
     };
-    // Xodim (staff) block (autodrive-sgf.4)
+    // Xodim (staff) block
     teacher_load?: {
       avg_lessons_per_active_teacher: number | null;
       avg_students_per_teacher: number | null;
@@ -186,8 +186,8 @@ export interface CompanyOverview {
   }>;
   enrollment_trend?: Array<{
     month: string;
-    tezkor: number;
-    avto_maktab: number;
+    online: number;
+    offline: number;
   }>;
   branch_performance: Array<{
     id: string;
@@ -290,7 +290,6 @@ export interface ExpenseBreakdown {
     category:
       | 'rent'
       | 'utilities'
-      | 'vehicle'
       | 'marketing'
       | 'supplies'
       | 'administrative'

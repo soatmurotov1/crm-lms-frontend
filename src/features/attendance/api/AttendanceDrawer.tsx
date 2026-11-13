@@ -64,7 +64,7 @@ const initials = (name: string) =>
     .toUpperCase();
 
 // Slide-over roster + one-click attendance marking for a single lesson
-// (autodrive-38m.3), opened from a SchedulePage/AttendancePage lesson card.
+//, opened from a SchedulePage/AttendancePage lesson card.
 // exec-dash 8: this is the mock's "roster list card" + status-summary +
 // footer bar -- AttendancePage itself is a multi-lesson browser, not a
 // single roster, so those mock sections land here instead. Same

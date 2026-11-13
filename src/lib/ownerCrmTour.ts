@@ -1,4 +1,3 @@
-import { isDemoCompanyUser } from '@/lib/demoSession';
 
 export const CRM_TOUR_DESKTOP_QUERY = '(min-width: 1024px)';
 
@@ -47,17 +46,9 @@ export const crmTourTargetSelector = (stepId: OwnerCrmTourStepId) => {
   return CRM_TOUR_TARGET.payment;
 };
 
-/** Owner, not the demo company, tour still null, and no forced modal. */
+/** Owner, tour still null, and no forced modal. */
 export const shouldStartTour = (input: TourStartInput) => {
   if (input.blockingModal) return false;
   if (input.role !== 'owner') return false;
-  if (
-    isDemoCompanyUser({
-      email: input.email ?? '',
-      company_slug: input.companySlug,
-    })
-  ) {
-    return false;
-  }
   return !input.crmTourCompletedAt?.trim();
 };

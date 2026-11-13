@@ -45,7 +45,6 @@ import type {
   Lead,
   LeadSource,
   CourseType,
-  Category,
 } from '../types/leads.types';
 
 type ReferrerType = 'none' | 'student' | 'staff';
@@ -66,8 +65,7 @@ const SOURCES: LeadSource[] = [
   'other',
 ];
 
-const CATEGORIES: Category[] = ['A', 'B', 'BC', 'C', 'D', 'E'];
-const COURSE_TYPES: CourseType[] = ['tezkor', 'avto_maktab'];
+const COURSE_TYPES: CourseType[] = ['online', 'offline'];
 
 export const EditLeadDialog = ({
   lead,
@@ -88,7 +86,7 @@ export const EditLeadDialog = ({
   const [courseType, setCourseType] = useState<CourseType | ''>(
     lead.courseType || '',
   );
-  const [category, setCategory] = useState<Category | ''>(lead.category || '');
+  const [direction, setDirection] = useState(lead.direction ?? '');
   const [marketingConsent, setMarketingConsent] = useState(
     lead.marketingConsent,
   );
@@ -148,7 +146,7 @@ export const EditLeadDialog = ({
         source,
         sourceOther: source === 'other' ? sourceOther.trim() : undefined,
         courseType: courseType || undefined,
-        category: category || undefined,
+        direction: direction.trim() || undefined,
         marketingConsent,
         note: note.trim() || undefined,
         referrerStudentId:
@@ -426,37 +424,22 @@ export const EditLeadDialog = ({
               )}
             </div>
 
-            {/* Category & Course Type */}
+            {/* Direction & Course Type */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="edit-category">
-                  {t('vehicles.category', 'Toifa')}
+                <Label htmlFor="edit-direction">
+                  {t('leads.direction', "Yo'nalish")}
                 </Label>
-                <Select
-                  value={category || 'none'}
-                  onValueChange={(val) =>
-                    setCategory(val === 'none' ? '' : (val as Category))
-                  }
-                >
-                  <SelectTrigger id="edit-category" className="w-full">
-                    <SelectValue
-                      placeholder={t(
-                        'leads.select_category',
-                        'Toifani tanlang',
-                      )}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">
-                      {t('common.none', 'Belgilanmagan')}
-                    </SelectItem>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="edit-direction"
+                  value={direction}
+                  maxLength={100}
+                  onChange={(e) => setDirection(e.target.value)}
+                  placeholder={t(
+                    'leads.direction_placeholder',
+                    'Masalan: Frontend, IELTS',
+                  )}
+                />
               </div>
 
               <div className="space-y-1.5">
@@ -483,9 +466,9 @@ export const EditLeadDialog = ({
                     </SelectItem>
                     {COURSE_TYPES.map((ct) => (
                       <SelectItem key={ct} value={ct}>
-                        {ct === 'avto_maktab'
-                          ? t('courses.avto_maktab', 'Avto maktab')
-                          : t('courses.tezkor', 'Tezkor')}
+                        {ct === 'offline'
+                          ? t('courses.offline', 'Avto maktab')
+                          : t('courses.online', 'Onlayn')}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -9,6 +9,7 @@ import {
   useCreateCourse,
   useUpdateCourse,
 } from '@/features/courses/api/courseService';
+import { useSubjects } from '@/features/lms/api/lmsService';
 import { Course } from '@/features/courses/types';
 import { Branch } from '@/features/branches/types';
 import { Button } from '@/components/ui/button';
@@ -53,11 +54,12 @@ const makeCourseFormSchema = (t: (key: string) => string) =>
   z.object({
     name: z.string().trim().min(1, t('common.required')),
     branchId: z.string().trim().min(1, t('common.required')),
-    courseType: z.enum(['tezkor', 'avto_maktab']),
+    courseType: z.enum(['online', 'offline']),
     price: z
       .string()
       .refine((v) => Number(v.replace(/\D/g, '')) > 0, t('common.required')),
     durationDays: z.string().refine((v) => Number(v) > 0, t('common.required')),
+    subjectId: z.string().optional(),
   });
 
 type CourseFormValues = z.infer<ReturnType<typeof makeCourseFormSchema>>;
@@ -75,13 +77,15 @@ const CourseFormDialog = ({
   const { t } = useTranslation();
   const createMutation = useCreateCourse();
   const updateMutation = useUpdateCourse();
+  const { data: subjects } = useSubjects({ limit: 200 });
 
   const defaultFormValues = (): CourseFormValues => ({
     name: '',
     branchId: '',
-    courseType: 'avto_maktab',
+    courseType: 'offline',
     price: '',
     durationDays: '',
+    subjectId: '',
   });
 
   const form = useForm<CourseFormValues>({
@@ -110,6 +114,7 @@ const CourseFormDialog = ({
             courseType: editCourse.course_type,
             price: groupDigits(String(editCourse.price)),
             durationDays: String(editCourse.duration_days),
+            subjectId: editCourse.subject_id ?? '',
           }
         : defaultFormValues(),
     );
@@ -131,6 +136,7 @@ const CourseFormDialog = ({
       course_type: values.courseType,
       price: Number(values.price.replace(/\D/g, '')),
       duration_days: Number(values.durationDays),
+      subject_id: values.subjectId || null,
     };
     if (editCourse) {
       updateMutation.mutate(
@@ -232,12 +238,44 @@ const CourseFormDialog = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="tezkor">
-                          {t('courses.type_tezkor')}
+                        <SelectItem value="online">
+                          {t('courses.type_online')}
                         </SelectItem>
-                        <SelectItem value="avto_maktab">
-                          {t('courses.type_avto_maktab')}
+                        <SelectItem value="offline">
+                          {t('courses.type_offline')}
                         </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="subjectId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('lms.subjects.single')}</FormLabel>
+                    <Select
+                      value={field.value || 'none'}
+                      onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-secondary border-border">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">
+                          {t('lms.common.not_selected')}
+                        </SelectItem>
+                        {(subjects?.data ?? []).map((subject) => (
+                          <SelectItem key={subject.id} value={subject.id}>
+                            {subject.parent_name
+                              ? `${subject.parent_name} → ${subject.name}`
+                              : subject.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

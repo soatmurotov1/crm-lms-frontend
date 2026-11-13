@@ -24,10 +24,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { StudentExamsTab } from '@/features/students/components/StudentExamsTab';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { PasswordInput } from '@/components/ui/password-input';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -112,7 +110,7 @@ const StudentModal = ({
   const { data: groups } = useGroups();
 
   const studentFormSchema = useMemo(
-    () => makeStudentFormSchema(t, { requireLearnerPassword: !student }),
+    () => makeStudentFormSchema(t),
     [t, student],
   );
 
@@ -171,7 +169,6 @@ const StudentModal = ({
       completion_date: '',
       contract_number: '',
       registered_by: '',
-      learner_password: '',
     });
     focusNextRef.current = true;
   };
@@ -199,7 +196,7 @@ const StudentModal = ({
     };
   }, [watchedBranchId, watchedCourseId]);
 
-  // autodrive-553: create-time duplicate check -- phone primarily (once
+  // create-time duplicate check -- phone primarily (once
   // enough digits are typed), last name secondarily. Debounced like
   // PaymentModal/ReferralFields' search comboboxes, but rendered as a
   // dismissible list rather than a picker (no selection, just links out),
@@ -245,7 +242,7 @@ const StudentModal = ({
   );
   const dupMatches = !student ? (dupMatchesPage?.data ?? []) : [];
 
-  // autodrive-0d6: total_price used to be a hardcoded constant per
+  // total_price used to be a hardcoded constant per
   // courseType. Real prices now live on Course rows, scoped by branch +
   // course_type — fetch them and let the picker below drive the pre-fill.
   const options = useWriteOptions(
@@ -317,7 +314,7 @@ const StudentModal = ({
     yiqildi: t('students.status_failed'),
   };
 
-  // autodrive-rz3.1: Student.status (enrollment lifecycle) is separate from
+  // Student.status (enrollment lifecycle) is separate from
   // `result` (exam outcome) above -- distinct field, distinct label set.
   const localizedStudentStatusLabels: Record<StudentStatus, string> = {
     active: t('students.status_active'),
@@ -355,11 +352,11 @@ const StudentModal = ({
   // shows the right number in the same render as the keystroke.
   const debt = student
     ? // Both course types: amount_paid in edit mode = additional new payment
-      // (backend adds it). Advance payments (autodrive-6cq.11.6) are
+      // (backend adds it). Advance payments are
       // allowed, so this can go negative (credit) — do not clamp to 0.
       (student.debt || 0) - (Number(watchedAmountPaid) || 0)
     : (Number(watchedTotalPrice) || 0) -
-      (courseType === 'tezkor'
+      (courseType === 'online'
         ? Number(watchedAmountPaid) || 0
         : Number(watchedInitialPayment) || 0);
 
@@ -459,7 +456,7 @@ const StudentModal = ({
               {student ? t('students.edit') : t('students.add')}
               <span className="ml-2 text-sm font-normal text-muted-foreground">
                 (
-                {courseType === 'tezkor'
+                {courseType === 'online'
                   ? t('students.course_fast')
                   : t('students.course_school')}
                 )
@@ -475,14 +472,6 @@ const StudentModal = ({
           )}
 
           <Tabs defaultValue="info" className="w-full mt-2">
-            {student && (
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="info">{t('common.tab_info')}</TabsTrigger>
-                <TabsTrigger value="exams">
-                  {t('students.tab_exams')}
-                </TabsTrigger>
-              </TabsList>
-            )}
             <TabsContent value="info" className="m-0">
               <Form {...form}>
                 <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -564,28 +553,6 @@ const StudentModal = ({
                           </FormItem>
                         )}
                       />
-                      {!student && (
-                        <FormField
-                          control={form.control}
-                          name="learner_password"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel required>
-                                {t('students.learner_password')}
-                              </FormLabel>
-                              <FormControl>
-                                <PasswordInput
-                                  {...field}
-                                  autoComplete="new-password"
-                                  aria-required="true"
-                                  className="bg-secondary border-border"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
                       <FormField
                         control={form.control}
                         name="branch_id"
@@ -685,7 +652,7 @@ const StudentModal = ({
                         />
                       </div>
                     )}
-                    {courseType === 'tezkor' ? (
+                    {courseType === 'online' ? (
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
                         <FormField
                           control={form.control}
@@ -807,7 +774,7 @@ const StudentModal = ({
                           </FormItem>
                         )}
                       />
-                      {/* autodrive-rz3.1: edit-only -- a brand-new student is
+                      {/* edit-only -- a brand-new student is
                           always 'active' (defaultFormValues), so create mode
                           has nothing useful to pick here. */}
                       {student && (
@@ -929,7 +896,7 @@ const StudentModal = ({
                       />
                     </div>
 
-                    {courseType === 'tezkor' ? (
+                    {courseType === 'online' ? (
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
                         <FormField
                           control={form.control}
@@ -1088,7 +1055,7 @@ const StudentModal = ({
                       </h3>
                       <Separator className="mt-2" />
                     </div>
-                    {courseType !== 'tezkor' && (
+                    {courseType !== 'online' && (
                       <FormField
                         control={form.control}
                         name="contract_number"
@@ -1106,26 +1073,6 @@ const StudentModal = ({
                               />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                    {courseType !== 'tezkor' && (
-                      <FormField
-                        control={form.control}
-                        name="o83"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center gap-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value || false}
-                                onCheckedChange={(v) => field.onChange(!!v)}
-                                id="o83"
-                              />
-                            </FormControl>
-                            <FormLabel htmlFor="o83" className="!mt-0">
-                              O83
-                            </FormLabel>
                           </FormItem>
                         )}
                       />
@@ -1282,11 +1229,6 @@ const StudentModal = ({
                 </form>
               </Form>
             </TabsContent>
-            {student && (
-              <TabsContent value="exams" className="m-0">
-                <StudentExamsTab student={student} />
-              </TabsContent>
-            )}
           </Tabs>
         </DialogContent>
       </Dialog>

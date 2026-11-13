@@ -1,4 +1,4 @@
-export const DEFAULT_OPENAPI_URL = 'https://api.automaktab.uz/api/openapi.json';
+export const DEFAULT_OPENAPI_URL = 'http://localhost:4040/api-json';
 
 const isRecord = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -42,9 +42,8 @@ export function buildOpenApiHeaders(env = process.env) {
     return headers;
   }
 
-  throw new Error(
-    'Set OPENAPI_TOKEN or both OPENAPI_USERNAME and OPENAPI_PASSWORD.',
-  );
+  // Lokal backend Swagger'i (development) ochiq — avtorizatsiyasiz o'qiladi.
+  return headers;
 }
 
 export function assertOpenApiDocument(value) {

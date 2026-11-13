@@ -3,7 +3,7 @@ import { vi, describe, it, expect } from 'vitest';
 import StudentsPage from '@/features/students/pages/StudentsPage';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-6ef.18: whole row navigates to student detail; action buttons
+// whole row navigates to student detail; action buttons
 // (edit/delete) stopPropagation so they don't also trigger navigation.
 
 const STUDENT = {
@@ -12,7 +12,7 @@ const STUDENT = {
   first_name: 'Aziz',
   phone: '+998901234567',
   total_price: 3000000,
-  course_type: 'tezkor',
+  course_type: 'online',
   branch_id: 'b1',
   payment_method: 'naqd',
   debt: 0,

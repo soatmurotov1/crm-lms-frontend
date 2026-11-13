@@ -6,7 +6,7 @@ import { StudentsPageHeader } from '@/features/students/components/StudentsPageH
 import { formatMoney } from '@/lib/money';
 import type { Student } from '@/features/students/types';
 
-// autodrive-vh0.2: teacher must never see payment amounts. These three
+// teacher must never see payment amounts. These three
 // components previously rendered the debt/price columns, the mobile debt
 // field, and the Excel export button (which embeds total_price/debt columns
 // in every row) unconditionally -- no capability check existed at all.
@@ -19,7 +19,7 @@ const STUDENT: Student = {
   first_name: 'Aziz',
   phone: '+998901234567',
   total_price: 3000000,
-  course_type: 'tezkor',
+  course_type: 'online',
   branch_id: 'b1',
   payment_method: 'naqd',
   debt: 500000,
@@ -31,7 +31,7 @@ const STUDENT: Student = {
   initial_payment: 1000000,
 };
 
-// autodrive-vh0.6: total_price/debt are now honestly optional on Student --
+// total_price/debt are now honestly optional on Student --
 // the backend actually OMITS them for a teacher requester rather than the FE
 // merely hiding populated numbers. STUDENT above still models a non-teacher
 // payload (real numbers, hidden only by the canViewPayments prop); this
@@ -43,7 +43,7 @@ const TEACHER_STUDENT: Student = {
   last_name: 'Yusupova',
   first_name: 'Malika',
   phone: '+998907654321',
-  course_type: 'tezkor',
+  course_type: 'online',
   branch_id: 'b1',
   payment_method: 'naqd',
   has_document: true,
@@ -73,21 +73,21 @@ const tableProps = {
   onEdit: vi.fn(),
   onDelete: vi.fn(),
   onCreate: vi.fn(),
-  // autodrive-cg9: unrelated to this file's payment-visibility gating --
+  // unrelated to this file's payment-visibility gating --
   // just satisfying the now-required restore props.
   canViewDeleted: false,
   onRestore: vi.fn(),
 };
 
-describe('StudentsTable payment-column gating (autodrive-vh0.2)', () => {
-  // autodrive-vh0.5: the debt column is no longer dropped for a teacher --
+describe('StudentsTable payment-column gating', () => {
+  // the debt column is no longer dropped for a teacher --
   // it switches to a paid/owing badge. has_debt is undefined on the base
   // STUDENT fixture, so neither badge state nor the amount should render.
   it('keeps the debt column header but renders no amount or badge when has_debt is undefined and canViewPayments is false', () => {
     render(
       <StudentsTable
         {...tableProps}
-        courseType="tezkor"
+        courseType="online"
         canViewPayments={false}
       />,
     );
@@ -97,12 +97,12 @@ describe('StudentsTable payment-column gating (autodrive-vh0.2)', () => {
     expect(screen.queryByText('students.debt_status_paid')).toBeNull();
   });
 
-  it('shows the owing badge, never an amount, (tezkor) when canViewPayments is false and has_debt is true', () => {
+  it('shows the owing badge, never an amount, (online) when canViewPayments is false and has_debt is true', () => {
     render(
       <StudentsTable
         {...tableProps}
         students={[{ ...STUDENT, has_debt: true }]}
-        courseType="tezkor"
+        courseType="online"
         canViewPayments={false}
       />,
     );
@@ -111,12 +111,12 @@ describe('StudentsTable payment-column gating (autodrive-vh0.2)', () => {
     expect(screen.queryByText(formatMoney(STUDENT.debt))).toBeNull();
   });
 
-  it('shows the paid badge (tezkor) when canViewPayments is false and has_debt is false', () => {
+  it('shows the paid badge (online) when canViewPayments is false and has_debt is false', () => {
     render(
       <StudentsTable
         {...tableProps}
         students={[{ ...STUDENT, has_debt: false }]}
-        courseType="tezkor"
+        courseType="online"
         canViewPayments={false}
       />,
     );
@@ -124,29 +124,29 @@ describe('StudentsTable payment-column gating (autodrive-vh0.2)', () => {
     expect(screen.queryByText('students.debt_status_owed')).toBeNull();
   });
 
-  it('shows the debt column (tezkor) when canViewPayments is true (regression)', () => {
+  it('shows the debt column (online) when canViewPayments is true (regression)', () => {
     render(
       <StudentsTable
         {...tableProps}
-        courseType="tezkor"
+        courseType="online"
         canViewPayments={true}
       />,
     );
     expect(screen.getByText('students.debt')).toBeTruthy();
   });
 
-  it('hides all money columns (avto_maktab) when canViewPayments is false', () => {
+  it('hides all money columns (offline) when canViewPayments is false', () => {
     render(
       <StudentsTable
         {...tableProps}
-        courseType="avto_maktab"
+        courseType="offline"
         canViewPayments={false}
       />,
     );
     expect(screen.queryByText('students.initial_payment')).toBeNull();
     expect(screen.queryByText('2-students.payment')).toBeNull();
     expect(screen.queryByText('3-students.payment')).toBeNull();
-    // debt column header stays (badge, not amount -- autodrive-vh0.5); no
+    // debt column header stays (badge, not amount -- ); no
     // amount and no badge for this fixture's undefined has_debt.
     expect(screen.getByText('students.debt')).toBeTruthy();
     expect(screen.queryByText(formatMoney(STUDENT.debt))).toBeNull();
@@ -154,11 +154,11 @@ describe('StudentsTable payment-column gating (autodrive-vh0.2)', () => {
     expect(screen.getByText('students.last_name')).toBeTruthy();
   });
 
-  it('shows all money columns (avto_maktab) when canViewPayments is true (regression)', () => {
+  it('shows all money columns (offline) when canViewPayments is true (regression)', () => {
     render(
       <StudentsTable
         {...tableProps}
-        courseType="avto_maktab"
+        courseType="offline"
         canViewPayments={true}
       />,
     );
@@ -168,16 +168,16 @@ describe('StudentsTable payment-column gating (autodrive-vh0.2)', () => {
     expect(screen.getByText('students.debt')).toBeTruthy();
   });
 
-  // autodrive-52v.6: debt === 0 (a real, good "fully paid" state) rendered
+  // debt === 0 (a real, good "fully paid" state) rendered
   // as an ambiguous "N/A" -- indistinguishable from "amount unknown". The
   // aria-label on this cell already said "paid"; the visible text now
   // matches it instead of contradicting it.
-  it('shows "paid", not N/A, when debt is exactly 0 and canViewPayments is true (autodrive-52v.6)', () => {
+  it('shows "paid", not N/A, when debt is exactly 0 and canViewPayments is true', () => {
     render(
       <StudentsTable
         {...tableProps}
         students={[{ ...STUDENT, debt: 0 }]}
-        courseType="tezkor"
+        courseType="online"
         canViewPayments={true}
       />,
     );
@@ -189,7 +189,7 @@ describe('StudentsTable payment-column gating (autodrive-vh0.2)', () => {
   });
 });
 
-describe('StudentsMobileList debt field gating (autodrive-vh0.2)', () => {
+describe('StudentsMobileList debt field gating', () => {
   const mobileProps = {
     students: [STUDENT],
     isLoading: false,
@@ -201,7 +201,7 @@ describe('StudentsMobileList debt field gating (autodrive-vh0.2)', () => {
     onEdit: vi.fn(),
     onDelete: vi.fn(),
     onCreate: vi.fn(),
-    // autodrive-cg9: unrelated to this file's payment-visibility gating --
+    // unrelated to this file's payment-visibility gating --
     // just satisfying the now-required restore props.
     canViewDeleted: false,
     onRestore: vi.fn(),
@@ -217,7 +217,7 @@ describe('StudentsMobileList debt field gating (autodrive-vh0.2)', () => {
     expect(screen.getByText('students.detail.debt')).toBeTruthy();
   });
 
-  // autodrive-vh0.5: paid/owing badge instead of a blank for a teacher.
+  // paid/owing badge instead of a blank for a teacher.
   it('shows the owing badge when canViewPayments is false and has_debt is true', () => {
     render(
       <StudentsMobileList
@@ -242,12 +242,12 @@ describe('StudentsMobileList debt field gating (autodrive-vh0.2)', () => {
     expect(screen.getByText('students.debt_status_paid')).toBeTruthy();
   });
 
-  // autodrive-52v.6: same N/A-vs-paid ambiguity as StudentsTable, duplicated
+  // same N/A-vs-paid ambiguity as StudentsTable, duplicated
   // in this mobile-card variant of the same debt cell logic. (No negative
   // "common.na is absent" assertion here -- this fixture's group_name/
   // branch_name are unset, which legitimately render unrelated common.na
   // fields elsewhere on the same card.)
-  it('shows "paid", not N/A, when debt is exactly 0 and canViewPayments is true (autodrive-52v.6)', () => {
+  it('shows "paid", not N/A, when debt is exactly 0 and canViewPayments is true', () => {
     render(
       <StudentsMobileList
         {...mobileProps}
@@ -259,7 +259,7 @@ describe('StudentsMobileList debt field gating (autodrive-vh0.2)', () => {
   });
 });
 
-describe('StudentsPageHeader export-button gating (autodrive-vh0.2)', () => {
+describe('StudentsPageHeader export-button gating', () => {
   // Export embeds total_price/debt in every row -- must disappear entirely
   // for a teacher rather than leak payment data via a downloaded file.
   const headerProps = {
@@ -281,13 +281,13 @@ describe('StudentsPageHeader export-button gating (autodrive-vh0.2)', () => {
   });
 });
 
-describe('genuinely payment-less teacher payload: no money string, no misleading 0 (autodrive-vh0.6)', () => {
-  it('StudentsTable (tezkor): owing badge only, no money string anywhere when has_debt is true', () => {
+describe('genuinely payment-less teacher payload: no money string, no misleading 0', () => {
+  it('StudentsTable (online): owing badge only, no money string anywhere when has_debt is true', () => {
     render(
       <StudentsTable
         {...tableProps}
         students={[{ ...TEACHER_STUDENT, has_debt: true }]}
-        courseType="tezkor"
+        courseType="online"
         canViewPayments={false}
       />,
     );
@@ -296,12 +296,12 @@ describe('genuinely payment-less teacher payload: no money string, no misleading
     expect(screen.queryByText("0 so'm")).toBeNull();
   });
 
-  it('StudentsTable (tezkor): no badge and no money string when has_debt is absent', () => {
+  it('StudentsTable (online): no badge and no money string when has_debt is absent', () => {
     render(
       <StudentsTable
         {...tableProps}
         students={[TEACHER_STUDENT]}
-        courseType="tezkor"
+        courseType="online"
         canViewPayments={false}
       />,
     );
@@ -310,12 +310,12 @@ describe('genuinely payment-less teacher payload: no money string, no misleading
     expect(screen.queryAllByText(/so'm/)).toHaveLength(0);
   });
 
-  it('StudentsTable (avto_maktab): payment columns absent and no money string anywhere', () => {
+  it('StudentsTable (offline): payment columns absent and no money string anywhere', () => {
     render(
       <StudentsTable
         {...tableProps}
         students={[{ ...TEACHER_STUDENT, has_debt: true }]}
-        courseType="avto_maktab"
+        courseType="offline"
         canViewPayments={false}
       />,
     );

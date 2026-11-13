@@ -9,7 +9,6 @@ import axiosInstance from '@/api/axiosInstance';
 import { useIsCrossTenant } from '@/hooks/useCan';
 import { Student, CourseType, StudentStatus } from '@/features/students/types';
 import type { CreateStudentPayload } from '@/features/students/api/StudentModal';
-import { track } from '@/lib/umami';
 import type { ListResponse } from '@/shared/types/list';
 import { parseListResponse } from '@/lib/listResponse';
 import { parseItemEnvelope } from '@/lib/apiEnvelope';
@@ -51,7 +50,7 @@ export interface StudentListOptions {
   status?: StudentStatus;
   referredByUserId?: string;
   referredByStudentId?: string;
-  // autodrive-cg9: owner-only "show deleted" toggle on StudentsPage. Never
+  // owner-only "show deleted" toggle on StudentsPage. Never
   // sent unless the caller is an owner -- a non-owner sending it gets a 403.
   includeDeleted?: boolean;
   // CourseDetailPage's Talabalar roster tab (GET /students?course_id=<uuid>) --
@@ -210,25 +209,6 @@ export const studentDetailQueryOptions = (id?: string, enabled = !!id) =>
 export const useStudent = (id?: string) =>
   useQuery(studentDetailQueryOptions(id));
 
-export const useUpsertLearnerAccount = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, password }: { id: string; password: string }) => {
-      const { data } = await axiosInstance.put<unknown>(
-        `/students/${id}/learner-account`,
-        { password },
-      );
-      return parseItemEnvelope<{ has_learner_account: true }>(
-        data,
-        'learner account',
-      );
-    },
-    onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: studentKeys.detail(vars.id) });
-    },
-  });
-};
-
 export const useCreateStudent = () => {
   const qc = useQueryClient();
   return useMutation({
@@ -240,7 +220,6 @@ export const useCreateStudent = () => {
       qc.invalidateQueries({ queryKey: studentKeys.all });
       qc.invalidateQueries({ queryKey: paymentKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
-      track('student_create');
     },
   });
 };
@@ -266,7 +245,6 @@ export const useUpdateStudent = () => {
       qc.invalidateQueries({ queryKey: studentKeys.all });
       qc.invalidateQueries({ queryKey: paymentKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
-      track('student_update');
     },
     onError: (err) => {
       if (isConcurrentUpdateError(err)) {
@@ -286,12 +264,11 @@ export const useDeleteStudent = () => {
       qc.invalidateQueries({ queryKey: studentKeys.all });
       qc.invalidateQueries({ queryKey: paymentKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
-      track('student_delete');
     },
   });
 };
 
-// autodrive-cg9: owner-only restore, paired with the includeDeleted list
+// owner-only restore, paired with the includeDeleted list
 // toggle above. Un-deletes only this row -- see StudentsPage's restore
 // confirm copy (common.confirm_restore_desc) for the no-cascade caveat.
 export const useRestoreStudent = () => {
@@ -304,7 +281,6 @@ export const useRestoreStudent = () => {
       qc.invalidateQueries({ queryKey: studentKeys.all });
       qc.invalidateQueries({ queryKey: paymentKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
-      track('student_restore');
     },
   });
 };
@@ -326,7 +302,7 @@ export const useCreateStudentWithPayment = () => {
     mutationFn: async (payload: AddStudentPayload) => {
       // Student creation records the initial payment atomically in backend.
       // Referral fields are optional — undefined keys are dropped by JSON.
-      const request: CreateStudentRequest = {
+      const request: Omit<CreateStudentRequest, 'learner_password'> = {
         first_name: payload.first_name,
         last_name: payload.last_name,
         phone: payload.phone,
@@ -339,7 +315,6 @@ export const useCreateStudentWithPayment = () => {
         group_id: payload.group_id,
         completion_date: payload.completion_date,
         has_document: false,
-        o83: false,
         result: 'oqimoqda',
         notes: '',
         status: 'active',
@@ -352,7 +327,6 @@ export const useCreateStudentWithPayment = () => {
         lead_source_other: payload.lead_source_other,
         referred_by_student_id: payload.referred_by_student_id,
         referred_by_user_id: payload.referred_by_user_id,
-        learner_password: payload.learner_password,
       };
       const { data: studentData } = await axiosInstance.post<unknown>(
         '/students',
@@ -366,7 +340,6 @@ export const useCreateStudentWithPayment = () => {
       qc.invalidateQueries({ queryKey: paymentKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
       qc.invalidateQueries({ queryKey: groupKeys.all });
-      track('student_create_with_payment');
     },
   });
 };

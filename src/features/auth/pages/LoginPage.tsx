@@ -4,7 +4,6 @@ import type { FormEvent } from 'react';
 import { useLocation, useRouter } from '@tanstack/react-router';
 import { CircleNotch, Moon, Sun } from '@phosphor-icons/react';
 import { useLogin } from '@/features/auth/api/authService';
-import { isRootDomain, navigateFullPage, rootDomainAppUrl } from '@/lib/domain';
 import { queryClient, resetAuthSessionState } from '@/lib/queryClient';
 import { preconnectApi } from '@/lib/preconnectApi';
 import { ensureI18n } from '@/i18n/ensure';
@@ -17,10 +16,6 @@ import { PasswordField } from '@/components/ui/password-field';
 import { useAuthStore } from '@/store/authStore';
 import type { AuthResponse } from '@/features/staff/types';
 import { getDefaultAuthenticatedRoute } from '@/lib/defaultAuthenticatedRoute';
-import {
-  DEMO_LOGIN_EMAIL,
-  isOneClickDemoLoginEnabled,
-} from '@/lib/demoSession';
 import { getLoginCopy, readLoginLang } from '@/features/auth/lib/loginCopy';
 
 type FieldErrors = {
@@ -45,14 +40,12 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
-  const [demoIntentFailed, setDemoIntentFailed] = useState(false);
   const router = useRouter();
   const location = useLocation();
   const login = useLogin();
   const logout = useAuthStore((s) => s.logout);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hasCleanedInitialSession = useRef(false);
-  const hasTriedDemoIntent = useRef(false);
   const hasPreconnected = useRef(false);
   const emailId = 'login-email';
   const passwordId = 'login-password';
@@ -82,7 +75,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     const prev = document.title;
-    document.title = 'Kirish | Auto Maktab CRM';
+    document.title = 'Kirish | EduLMS';
     return () => {
       document.title = prev;
     };
@@ -118,12 +111,6 @@ const LoginPage = () => {
       void ensureI18n()
         .catch(() => undefined)
         .then(() => {
-          if (isRootDomain()) {
-            // automaktab.uz has no app UI of its own -- hand off to app. with a
-            // full navigation so the domain-wide auth cookie rides along.
-            navigateFullPage(rootDomainAppUrl(target));
-            return;
-          }
           void router.navigate({ href: target, replace: true });
         });
     },
@@ -144,62 +131,6 @@ const LoginPage = () => {
       { onSuccess, onError: handleError },
     );
   };
-
-  const fillDemoEmail = useCallback(() => {
-    setEmail(DEMO_LOGIN_EMAIL);
-    setPassword('');
-    setFieldErrors((current) => ({ ...current, email: undefined }));
-    setFormError(null);
-  }, []);
-
-  const startDemoLogin = useCallback(
-    (automatic: boolean) => {
-      if (!isOneClickDemoLoginEnabled()) {
-        fillDemoEmail();
-        return;
-      }
-
-      setDemoIntentFailed(false);
-      setFormError(null);
-      setFieldErrors({});
-      setEmail(DEMO_LOGIN_EMAIL);
-      setPassword('');
-      warmApiConnection();
-      login.mutate(undefined, {
-        onSuccess,
-        onError: (error) => {
-          if (automatic) {
-            setDemoIntentFailed(true);
-            return;
-          }
-          handleError(error);
-        },
-      });
-    },
-    [fillDemoEmail, handleError, login, onSuccess, warmApiConnection],
-  );
-
-  useEffect(() => {
-    const isDemoIntent =
-      new URLSearchParams(location.searchStr).get('demo') === '1';
-    if (
-      !isDemoIntent ||
-      !hasCleanedInitialSession.current ||
-      hasTriedDemoIntent.current
-    ) {
-      return;
-    }
-
-    hasTriedDemoIntent.current = true;
-    startDemoLogin(true);
-  }, [location.searchStr, startDemoLogin]);
-
-  const oneClickDemo = isOneClickDemoLoginEnabled();
-  const demoLabel = demoIntentFailed
-    ? copy.demoRetry
-    : oneClickDemo
-      ? copy.demoSignIn
-      : copy.demo;
 
   return (
     <div className="flex min-h-dvh flex-col bg-background px-5 py-6 sm:px-10 sm:py-8 lg:px-14">
@@ -367,28 +298,6 @@ const LoginPage = () => {
               ) : null}
               {login.isPending ? copy.submitting : copy.submit}
             </Button>
-            <div className="border-t border-border/70 pt-5">
-              {demoIntentFailed && (
-                <Alert
-                  variant="destructive"
-                  className="mb-3 border-border bg-destructive/5 px-3.5 py-3 text-sm leading-relaxed dark:border-border"
-                >
-                  {copy.demoAutoError}
-                </Alert>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                className="h-auto min-h-12 w-full whitespace-normal border-muted-foreground py-3 text-sm focus-visible:ring-foreground"
-                onClick={() => startDemoLogin(false)}
-                disabled={login.isPending}
-              >
-                {demoLabel}
-              </Button>
-              <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
-                {oneClickDemo ? copy.demoSignInHint : copy.demoHint}
-              </p>
-            </div>
           </form>
         </Card>
       </main>

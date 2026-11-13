@@ -83,11 +83,11 @@ describe('AppLayout mobile sidebar auto-close on navigation', () => {
 
     expect(screen.getByTestId('desktop-expanded')).toHaveTextContent('false');
     expect(contentShell.className).toContain('lg:ml-14');
-    expect(localStorage.getItem('autodrive-sidebar-expanded')).toBe('false');
+    expect(localStorage.getItem('lms-sidebar-expanded')).toBe('false');
   });
 
   it('restores the persisted desktop preference during initial render', async () => {
-    localStorage.setItem('autodrive-sidebar-expanded', 'false');
+    localStorage.setItem('lms-sidebar-expanded', 'false');
 
     await renderWithRouter(<AppLayout />, {
       initialEntry: '/home',
@@ -98,76 +98,5 @@ describe('AppLayout mobile sidebar auto-close on navigation', () => {
     expect(screen.getByRole('main').parentElement!.className).toContain(
       'lg:ml-14',
     );
-  });
-});
-
-describe('AppLayout demo company banner', () => {
-  it('shows the reset notice for a demo company slug', async () => {
-    useAuthStore.setState({
-      user: {
-        id: 'manager-1',
-        email: 'manager@example.com',
-        role: 'manager',
-        company_slug: 'automaktab-demo-2026',
-      },
-      isAuthenticated: true,
-      hasHydrated: true,
-    });
-
-    await renderWithRouter(<AppLayout />, {
-      initialEntry: '/home',
-      routePattern: '/home',
-    });
-
-    expect(screen.getByRole('status')).toHaveTextContent('common.demo_banner');
-    expect(screen.getByRole('status').parentElement).toHaveClass(
-      '[&>p]:bg-muted',
-      '[&>p]:px-2',
-      '[&>p]:lg:px-3',
-    );
-  });
-
-  it('shows the reset notice for the demo login email', async () => {
-    useAuthStore.setState({
-      user: {
-        id: 'demo-owner',
-        email: 'demo@automaktab.uz',
-        role: 'owner',
-        crm_tour_completed_at: null,
-      },
-      isAuthenticated: true,
-      hasHydrated: true,
-      sessionValidated: true,
-    });
-
-    await renderWithRouter(<AppLayout />, {
-      initialEntry: '/home',
-      routePattern: '/home',
-    });
-
-    expect(screen.getByRole('status')).toHaveTextContent('common.demo_banner');
-    expect(
-      screen.queryByRole('heading', { name: 'crm_tour.sidebar_title' }),
-    ).not.toBeInTheDocument();
-  });
-
-  it('hides the reset notice for another company', async () => {
-    useAuthStore.setState({
-      user: {
-        id: 'owner-1',
-        email: 'owner@school.uz',
-        role: 'owner',
-        company_slug: 'another-school',
-      },
-      isAuthenticated: true,
-      hasHydrated: true,
-    });
-
-    await renderWithRouter(<AppLayout />, {
-      initialEntry: '/home',
-      routePattern: '/home',
-    });
-
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 });

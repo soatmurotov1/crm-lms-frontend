@@ -26,7 +26,7 @@ interface GroupsMobileListProps {
   onEdit: (g: Group) => void;
   onDelete: (id: string) => void;
   canManageGroups: boolean;
-  // autodrive-cg9: owner-only "show deleted" toggle — a deleted card swaps
+  // owner-only "show deleted" toggle — a deleted card swaps
   // edit/delete for a single restore action.
   canViewDeleted: boolean;
   onRestore: (id: string) => void;
@@ -80,7 +80,7 @@ export const GroupMobileCard = ({
         {
           label: t('groups.course_type'),
           value:
-            g.course_type === 'avto_maktab'
+            g.course_type === 'offline'
               ? t('groups.course_school')
               : t('groups.course_fast'),
         },

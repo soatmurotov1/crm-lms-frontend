@@ -84,7 +84,7 @@ const StudentsPage = () => {
   const courseTypeFilter =
     courseType === 'all' ? undefined : (courseType as CourseType);
   const createCourseType: CourseType =
-    courseType === 'avto_maktab' ? 'avto_maktab' : 'tezkor';
+    courseType === 'offline' ? 'offline' : 'online';
 
   const defaultBranchId = isCrossTenant
     ? undefined
@@ -100,7 +100,7 @@ const StudentsPage = () => {
 
   // Callers: StudentsFilterBar + useStudentsPage. Wire: date_from/date_to
   // YYYY-MM-DD. Must use parseCalendarDate — never new Date('YYYY-MM-DD').
-  // User: "davom et" (autodrive-qsgc.4).
+  // User: "davom et".
   const rawDateFrom = searchParams.get('date_from');
   const dateFrom = useMemo(
     () => (rawDateFrom ? parseCalendarDate(rawDateFrom) : undefined),
@@ -115,7 +115,7 @@ const StudentsPage = () => {
 
   // date_from/date_to must land in the same setSearchParams call — two
   // sequential calls each snapshot `prev` independently and the second
-  // overwrites the first's write (autodrive-6cq.5.70).
+  // overwrites the first's write.
   const setDateRange = (from: Date | undefined, to: Date | undefined) =>
     setSearchParams(
       (prev) => {
@@ -141,7 +141,7 @@ const StudentsPage = () => {
   const setHasGroup = (v: boolean | undefined) =>
     setParam('has_group', v === undefined ? undefined : String(v));
 
-  // Dashboard drill-through filters (autodrive-ls5) — consumed from URL
+  // Dashboard drill-through filters — consumed from URL
   // when navigated to with status/debt context, now exposed via ActiveFilterChips.
   const status = (searchParams.get('status') as StudentStatus) || undefined;
   const setStatus = (v: StudentStatus | undefined) => setParam('status', v);
@@ -178,7 +178,7 @@ const StudentsPage = () => {
 
   // Local-only state (modal + sort UX — not worth persisting).
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  // autodrive-cg9: owner-only "show deleted" toggle -- local state (not
+  // owner-only "show deleted" toggle -- local state (not
   // URL, unlike the filters above) since it's not something worth
   // bookmarking/sharing, and defaults off so a share/reload never leaks a
   // stale include_deleted=true onto a session that re-renders before the
@@ -266,7 +266,7 @@ const StudentsPage = () => {
   const hasLoadedStudentsPage = studentsPage !== undefined;
 
   // Deleting the last row of the last page leaves currentPage pointing past
-  // the new totalPages -- clamp back, same fix as GroupsPage (autodrive-52v.3).
+  // the new totalPages -- clamp back, same fix as GroupsPage.
   useEffect(() => {
     // Do not clamp against the fallback `1` before a deep-linked page has a
     // response. Otherwise /students?page=2 requests page 1 during hydration.
@@ -307,7 +307,7 @@ const StudentsPage = () => {
         [t('students.last_name')]: s.last_name,
         [t('students.phone')]: formatPhone(s.phone),
         [t('students.course_fast')]:
-          s.course_type === 'tezkor'
+          s.course_type === 'online'
             ? t('students.course_fast')
             : t('students.course_school'),
         [t('common.branch')]: s.branch_name ?? t('common.na'),
@@ -572,7 +572,7 @@ const StudentsPage = () => {
         deleteLoading={deleteMutation.isPending}
       />
 
-      {/* autodrive-cg9: restore only un-deletes this row -- honesty
+      {/* restore only un-deletes this row -- honesty
           requirement, see common.confirm_restore_desc. */}
       <ConfirmDialog
         open={!!restoreId}

@@ -34,7 +34,7 @@ import {
   greetingKey,
 } from '@/features/dashboard/lib/dashboardCards';
 
-// autodrive-vh0.6: extracted out of DashboardPage.tsx (was an inline
+// extracted out of DashboardPage.tsx (was an inline
 // component there). Hero live-caption helpers below are TeacherDashboard-only
 // (nothing else in DashboardPage.tsx used them), so they moved wholesale
 // rather than through dashboardCards.tsx's shared-helper route.
@@ -121,7 +121,7 @@ const TeacherDashboard = () => {
         .length,
     };
   }, [lessons, todayUZ]);
-  // Binary paid/owing signal only (autodrive-vh0.5 hard rule): count rows
+  // Binary paid/owing signal only (hard rule): count rows
   // where has_debt === true, never a debt amount. See src/features/students/types.ts
   // and DebtStatusBadge for the same convention.
   const owingStudentsCount = owingStudentsPage?.meta.total ?? 0;

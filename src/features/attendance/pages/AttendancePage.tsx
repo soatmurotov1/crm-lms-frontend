@@ -95,7 +95,7 @@ interface LessonCardProps {
   onNavigateGroup: () => void;
 }
 
-// Decluttered lesson card (autodrive-38m.3 / autodrive-6ef.27): date, group,
+// Decluttered lesson card: date, group,
 // teacher, lesson-type dot, attendance-status chip. Clicking the card opens
 // the same AttendanceDrawer used by SchedulePage -- one attendance-marking
 // UI across both pages instead of this page's old inline expand-to-table.
@@ -226,7 +226,7 @@ const AttendancePage = () => {
 
   // manageSchedule: existing OPS create-any-group. manageOwnLesson
   // additionally lets a teacher create for their own (server-scoped) group
-  // (autodrive-vh0.4) without touching SchedulePage's manageSchedule-only
+  // without touching SchedulePage's manageSchedule-only
   // template/generate gates. Both hooks called unconditionally (not `||`
   // short-circuited) -- react-hooks/rules-of-hooks.
   const canManageScheduleLessons = useCan('lessons.create');
@@ -262,7 +262,7 @@ const AttendancePage = () => {
   }, [groups]);
 
   const [createOpen, setCreateOpen] = useState(false);
-  // SLICE B (autodrive-vh0.4): non-null while the create dialog above is
+  // SLICE B: non-null while the create dialog above is
   // reused in edit mode -- see openEdit/handleSave. groupId is pre-filled
   // from the lesson but never user-editable (Select is disabled below).
   const [editingLesson, setEditingLesson] = useState<LessonSummary | null>(
@@ -329,7 +329,7 @@ const AttendancePage = () => {
     [groupTeacherMap],
   );
 
-  // autodrive-vh0.6: deep link from the teacher dashboard's upcoming-lessons
+  // deep link from the teacher dashboard's upcoming-lessons
   // list -- ?lesson=<id> opens that lesson's drawer once the list has
   // loaded, then drops the param so closing the drawer doesn't reopen it.
   // openLesson(...) (which calls setSelectedLesson) can no longer live
@@ -491,7 +491,7 @@ const AttendancePage = () => {
       )}
 
       {/* Create/Edit Lesson Dialog -- edit mode reuses this same dialog and
-          schema (SLICE B, autodrive-vh0.4), pre-filled via openEdit. */}
+          schema (SLICE B, ), pre-filled via openEdit. */}
       <Dialog open={createOpen} onOpenChange={(o) => !o && attemptClose()}>
         <DialogContent>
           <DialogHeader>

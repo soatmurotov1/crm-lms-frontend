@@ -31,7 +31,7 @@ describe('search engine policy for the app shell', () => {
 
   it('lets crawlers reach only the shell and login page to read noindex', () => {
     const rules = read('public/robots.txt')
-      .split('\n')
+      .split(/\r?\n/)
       .filter((line) => line && !line.startsWith('#'));
     expect(rules).toEqual([
       'User-agent: *',

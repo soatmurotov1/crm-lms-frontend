@@ -3,7 +3,7 @@ import { vi, describe, it, expect, afterEach } from 'vitest';
 import AttendanceDrawer from '@/features/attendance/api/AttendanceDrawer';
 import type { CalendarLesson } from '@/features/schedule/types';
 
-// autodrive-vh0.3: the save button used to have NO capability check at all
+// the save button used to have NO capability check at all
 // (implicitly open to every role) -- this pins the new explicit
 // useCan('takeAttendance') gate: it must still enable save for a teacher
 // (takeAttendance is ALL-roles in permissions.ts) and must actually disable
@@ -39,7 +39,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe('AttendanceDrawer save control gating (autodrive-vh0.3)', () => {
+describe('AttendanceDrawer save control gating', () => {
   it('is enabled when the takeAttendance capability is granted (teacher case)', () => {
     canGate = true;
     render(<AttendanceDrawer lesson={LESSON} onClose={vi.fn()} />);

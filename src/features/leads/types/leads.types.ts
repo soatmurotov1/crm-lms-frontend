@@ -26,9 +26,7 @@ export type LeadSource =
   | 'recommendation'
   | 'banner';
 
-export type CourseType = 'tezkor' | 'avto_maktab';
-
-export type Category = 'A' | 'B' | 'BC' | 'C' | 'D' | 'E';
+export type CourseType = 'online' | 'offline';
 
 export interface LeadStage {
   id: string;
@@ -76,7 +74,7 @@ export interface Lead {
   phone: string;
   email: string | null;
   courseType: CourseType | null;
-  category: Category | null;
+  direction: string | null;
   source: LeadSource;
   sourceOther: string | null;
   referrerStudentId: string | null;
@@ -120,7 +118,7 @@ export interface LeadCard {
   branchId: string;
   branchName?: string;
   source: LeadSource;
-  category: Category | null;
+  direction: string | null;
   assigneeUserId: string | null;
   assigneeName?: string | null;
   stageId: string;
@@ -179,7 +177,7 @@ export interface ListLeadsQuery {
   stage_id?: string;
   source?: LeadSource;
   course_type?: CourseType;
-  category?: Category;
+  direction?: string;
   assigned_to_me?: boolean;
   assignee_user_id?: string;
   overdue_only?: boolean;
@@ -198,7 +196,7 @@ export interface CreateLeadPayload {
   branchId: string;
   stageId?: string;
   courseType?: CourseType;
-  category?: Category;
+  direction?: string;
   source: LeadSource;
   sourceOther?: string;
   referrerStudentId?: string;
@@ -223,7 +221,7 @@ export interface UpdateLeadPayload {
   email?: string;
   branchId?: string;
   courseType?: CourseType;
-  category?: Category;
+  direction?: string;
   source?: LeadSource;
   sourceOther?: string;
   referrerStudentId?: string;

@@ -11,7 +11,7 @@ import type { Group } from '@/features/groups/types';
 import type { UserRole } from '@/features/staff/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-cg9: owner-only "show deleted" toggle + restore on GroupsPage.
+// owner-only "show deleted" toggle + restore on GroupsPage.
 // Role-parameterized authStore mock (real permissions matrix), mirrors
 // src/test/sidebarTeacherNav.test.tsx.
 
@@ -26,7 +26,7 @@ const LIVE_GROUP: Group = {
   id: 'g-live',
   name: 'Alpha guruh',
   branch_id: 'b1',
-  course_type: 'tezkor',
+  course_type: 'online',
   active_students: 5,
   is_active: true,
   created_at: '2026-07-01T00:00:00.000Z',
@@ -91,7 +91,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe('GroupsPage "show deleted" toggle visibility (autodrive-cg9)', () => {
+describe('GroupsPage "show deleted" toggle visibility', () => {
   it('is absent for a manager', async () => {
     role = 'manager';
     h.useGroups.mockReturnValue(emptyResult);
@@ -114,7 +114,7 @@ describe('GroupsPage "show deleted" toggle visibility (autodrive-cg9)', () => {
   });
 });
 
-describe('GroupsPage "show deleted" toggle wiring (autodrive-cg9)', () => {
+describe('GroupsPage "show deleted" toggle wiring', () => {
   it('flips includeDeleted through to useGroups when switched on', async () => {
     role = 'owner';
     h.useGroups.mockReturnValue(emptyResult);
@@ -135,7 +135,7 @@ describe('GroupsPage "show deleted" toggle wiring (autodrive-cg9)', () => {
   });
 });
 
-describe('GroupsPage deleted-row rendering (autodrive-cg9)', () => {
+describe('GroupsPage deleted-row rendering', () => {
   it('shows the deleted badge and restore action only on the deleted row', async () => {
     role = 'owner';
     h.useGroups.mockReturnValue({
@@ -159,7 +159,7 @@ describe('GroupsPage deleted-row rendering (autodrive-cg9)', () => {
   });
 });
 
-describe('GroupsPage restore action (autodrive-cg9)', () => {
+describe('GroupsPage restore action', () => {
   it('fires the restore mutation with the row id after confirming', async () => {
     role = 'owner';
     h.useGroups.mockReturnValue({ ...emptyResult, data: [DELETED_GROUP] });

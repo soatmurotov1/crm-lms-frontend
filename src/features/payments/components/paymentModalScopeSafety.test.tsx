@@ -27,7 +27,7 @@ const student = {
   first_name: 'Demo',
   last_name: 'Student',
   branch_id: 'b1',
-  course_type: 'avto_maktab' as const,
+  course_type: 'offline' as const,
   group_name: 'Demo group',
   phone_last4: '1234',
   total_price: 1000,
@@ -94,17 +94,17 @@ describe('PaymentModal selection scope safety', () => {
         <PaymentModal
           {...props}
           branchId={change === 'active branch' ? undefined : 'b1'}
-          courseType="avto_maktab"
+          courseType="offline"
         />,
       );
       await selectStudent();
       fillAmount();
       if (change === 'branch prop')
         rerender(
-          <PaymentModal {...props} branchId="b2" courseType="avto_maktab" />,
+          <PaymentModal {...props} branchId="b2" courseType="offline" />,
         );
       else if (change === 'course')
-        rerender(<PaymentModal {...props} branchId="b1" courseType="tezkor" />);
+        rerender(<PaymentModal {...props} branchId="b1" courseType="online" />);
       else
         act(() =>
           useAuthStore.setState(
@@ -212,7 +212,7 @@ describe('PaymentModal selection scope safety', () => {
     async (change) => {
       const props = { onClose: vi.fn(), onSubmit: vi.fn() };
       const { rerender } = render(
-        <PaymentModal open {...props} branchId="b1" courseType="avto_maktab" />,
+        <PaymentModal open {...props} branchId="b1" courseType="offline" />,
       );
       await selectStudent();
       fillAmount('1200');
@@ -224,12 +224,12 @@ describe('PaymentModal selection scope safety', () => {
             open
             {...props}
             branchId="b2"
-            courseType="avto_maktab"
+            courseType="offline"
           />,
         );
       else if (change === 'course')
         rerender(
-          <PaymentModal open {...props} branchId="b1" courseType="tezkor" />,
+          <PaymentModal open {...props} branchId="b1" courseType="online" />,
         );
       else if (change === 'close/reopen') {
         rerender(
@@ -237,7 +237,7 @@ describe('PaymentModal selection scope safety', () => {
             open={false}
             {...props}
             branchId="b1"
-            courseType="avto_maktab"
+            courseType="offline"
           />,
         );
         rerender(
@@ -245,7 +245,7 @@ describe('PaymentModal selection scope safety', () => {
             open
             {...props}
             branchId="b1"
-            courseType="avto_maktab"
+            courseType="offline"
           />,
         );
       } else

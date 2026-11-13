@@ -71,17 +71,17 @@ export const LeadsTable = ({
                   <span>
                     {lead.firstName} {lead.lastName || ''}
                   </span>
-                  {lead.category && (
+                  {lead.direction && (
                     <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                      {lead.category}
+                      {lead.direction}
                     </span>
                   )}
                 </div>
                 {lead.courseType && (
                   <span className="text-[11px] text-muted-foreground/80 capitalize">
-                    {lead.courseType === 'avto_maktab'
-                      ? t('courses.avto_maktab', 'Avto maktab')
-                      : t('courses.tezkor', 'Tezkor')}
+                    {lead.courseType === 'offline'
+                      ? t('courses.offline', 'Avto maktab')
+                      : t('courses.online', 'Onlayn')}
                   </span>
                 )}
               </div>

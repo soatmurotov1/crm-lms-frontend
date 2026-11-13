@@ -7,7 +7,7 @@ import type { UserRole } from '@/features/staff/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
 // Controllable per-test fixture for isLoading/isError/data-not-found split
-// below (autodrive-d4j). Starts undefined (vi.hoisted runs before GROUP is
+// below. Starts undefined (vi.hoisted runs before GROUP is
 // initialized) -- backfilled to GROUP right after the const, same pattern as
 // branch.current in branchDetailPage.test.tsx.
 const groupQuery = vi.hoisted(() => ({
@@ -21,7 +21,7 @@ vi.mock('@/features/groups/api/groupService', () => ({
 }));
 
 // Real useCan/permissions.ts (not mocked) so the payment-amount gating tests
-// below (autodrive-vh0.2) exercise the actual CAPABILITIES map. Defaults to
+// below exercise the actual CAPABILITIES map. Defaults to
 // 'manager' -- irrelevant to the pre-existing error/not-found tests above,
 // which short-circuit before the students tab (and this gate) ever renders.
 const auth = vi.hoisted(() => ({ role: 'manager' as string }));
@@ -48,7 +48,7 @@ const GROUP = {
   name: 'B-1',
   branch_id: 'b1',
   branch_name: 'Yunusobod',
-  course_type: 'tezkor',
+  course_type: 'online',
   active_students: 5,
   is_active: true,
   created_at: '2026-07-01T00:00:00.000Z',
@@ -79,10 +79,10 @@ afterEach(() => {
   cleanup();
 });
 
-// autodrive-d4j: a real fetch error must not read the same as a genuine
+// a real fetch error must not read the same as a genuine
 // not-found -- distinct title/icon per EntityDetailShell's isError/
 // errorTitle/errorIcon props, same split AuditDetailPage already does.
-describe('GroupDetailPage error vs not-found (autodrive-d4j)', () => {
+describe('GroupDetailPage error vs not-found', () => {
   it('shows the not-found message when the group genuinely does not exist', async () => {
     groupQuery.data = undefined;
     groupQuery.isError = false;
@@ -100,13 +100,13 @@ describe('GroupDetailPage error vs not-found (autodrive-d4j)', () => {
   });
 });
 
-// autodrive-vh0.2: teacher must never see payment amounts. The per-student
+// teacher must never see payment amounts. The per-student
 // debt Field was unconditional, and the pencil "edit" button opened
 // StudentModal with an editable amount_paid ("extra payment") input and no
 // capability check at all -- gate both on the same caps StudentsTable
 // already uses (recordPayment for the amount display, manageStudents for
 // the edit affordance).
-describe('GroupDetailPage students-tab payment gating (autodrive-vh0.2)', () => {
+describe('GroupDetailPage students-tab payment gating', () => {
   const STUDENT = {
     id: 's1',
     last_name: 'Karimov',
@@ -135,10 +135,10 @@ describe('GroupDetailPage students-tab payment gating (autodrive-vh0.2)', () => 
   });
 });
 
-// autodrive-vh0.5: teacher gets a positive paid/owing signal instead of a
+// teacher gets a positive paid/owing signal instead of a
 // blank -- has_debt drives a badge in the same roster spot the amount Field
 // used to occupy for a payment-visible role, never an amount itself.
-describe('GroupDetailPage students-tab debt badge (autodrive-vh0.5)', () => {
+describe('GroupDetailPage students-tab debt badge', () => {
   const openStudentsTabWithStudent = async (
     role: UserRole,
     student: Record<string, unknown>,
@@ -186,11 +186,11 @@ describe('GroupDetailPage students-tab debt badge (autodrive-vh0.5)', () => {
   });
 });
 
-// autodrive-52v.6: debt === 0 (a real, good "fully paid" state) rendered as
+// debt === 0 (a real, good "fully paid" state) rendered as
 // an ambiguous "N/A" in the manager/owner (canViewPayments) amount view --
 // indistinguishable from "amount unknown". Distinct from the has_debt-driven
 // badge above, which was already correct.
-describe('GroupDetailPage students-tab debt amount at exactly 0 (autodrive-52v.6)', () => {
+describe('GroupDetailPage students-tab debt amount at exactly 0', () => {
   it('shows "paid", not N/A, for a manager when debt is exactly 0', async () => {
     auth.role = 'manager';
     groupQuery.data = {

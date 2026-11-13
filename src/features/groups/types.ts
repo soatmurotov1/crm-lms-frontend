@@ -15,6 +15,9 @@ export interface Group {
   branch_id: string;
   branch_name?: string;
   course_type: CourseType;
+  /** LMS kursi (o'quv dasturi shu kursdan olinadi). */
+  course_id?: string | null;
+  course_name?: string | null;
   active_students: number;
   is_active: boolean;
   created_at: string;
@@ -22,7 +25,7 @@ export interface Group {
   teacher_name: string | null;
   schedule: GroupScheduleEntry[];
   students: Student[];
-  // autodrive-cg9: present (non-null) only when include_deleted=true was
+  // present (non-null) only when include_deleted=true was
   // sent (owner-only) -- distinguishes a soft-deleted row from a live one.
   deleted_at?: string | null;
 }

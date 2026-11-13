@@ -158,8 +158,8 @@ export const LeadDetailPage = () => {
       isError={false}
       title={`${lead.firstName} ${lead.lastName || ''}`.trim()}
       description={[
-        lead.category
-          ? `${t('vehicles.category', 'Toifa')}: ${lead.category}`
+        lead.direction
+          ? `${t('leads.direction', "Yo'nalish")}: ${lead.direction}`
           : null,
         lead.branchName,
         new Date(lead.createdAt).toLocaleDateString(),

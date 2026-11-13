@@ -44,7 +44,7 @@ const dialogFor = (titleText: string) => {
   return dialog as HTMLElement;
 };
 
-// bd autodrive-9e4.2: a payment above the student's current debt is a
+// bd a payment above the student's current debt is a
 // deliberately supported credit-balance payment (bd 6cq.11.6) but must be
 // confirmed first -- zero friction for a normal within-debt payment.
 describe('PaymentModal exceeds-debt confirmation', () => {
@@ -158,7 +158,7 @@ describe('PaymentModal exceeds-debt confirmation', () => {
   });
 });
 
-// bd autodrive-9e4.3: idempotencyKeyRef must survive a failed-then-retried
+// bd idempotencyKeyRef must survive a failed-then-retried
 // submit within one open session (so the retry reuses the same key and the
 // backend's idempotency guard collapses it into the original payment), but
 // must regenerate on a genuinely fresh open.
@@ -237,7 +237,7 @@ describe('PaymentModal idempotency key retry safety', () => {
   });
 });
 
-// bd autodrive-9e4.6: `payment` prop present = edit mode, mirroring
+// bd `payment` prop present = edit mode, mirroring
 // StudentModal's create/edit dual-mode convention.
 describe('PaymentModal edit mode', () => {
   const PAYMENT: Payment = {
@@ -246,7 +246,7 @@ describe('PaymentModal edit mode', () => {
     student_name: 'Aziz Karimov',
     branch_id: 'b1',
     branch_name: 'Yunusobod',
-    course_type: 'tezkor',
+    course_type: 'online',
     total_price: 2000000,
     amount_paid: 500000,
     remaining_debt: 1500000,

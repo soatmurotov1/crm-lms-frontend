@@ -90,14 +90,6 @@ const ExpenseMobileCard = ({
             label: t('expenses.table.date'),
             value: formatDate(expense.expense_date),
           },
-          ...(expense.vehicle_plate_number
-            ? [
-                {
-                  label: t('expenses.table.vehicle'),
-                  value: expense.vehicle_plate_number,
-                },
-              ]
-            : []),
           {
             label: t('expenses.table.category'),
             value: t(`expenses.category.${expense.category}`),
@@ -171,11 +163,6 @@ export const ExpensesTable = ({
         columnHelper.accessor('branch_name', {
           header: t('expenses.table.branch'),
           cell: ({ getValue }) => getValue() ?? t('expenses.form.company_wide'),
-          meta: { cellClassName: 'text-muted-foreground' },
-        }),
-        columnHelper.accessor('vehicle_plate_number', {
-          header: t('expenses.table.vehicle'),
-          cell: ({ getValue }) => getValue() ?? t('common.na'),
           meta: { cellClassName: 'text-muted-foreground' },
         }),
         columnHelper.accessor('category', {

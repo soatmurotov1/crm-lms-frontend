@@ -5,8 +5,8 @@ import { tashkentToday } from '@/lib/tashkentDate';
 import { toLocalDateStr } from '@/features/students/api/studentService';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-6ef.19: branch detail page renders header + analytics fields.
-// autodrive-6ef.20: all 4 stat cards drill down into filtered lists / inline
+// branch detail page renders header + analytics fields.
+// all 4 stat cards drill down into filtered lists / inline
 // panels instead of showing a bare number.
 
 const BRANCH = {
@@ -114,7 +114,7 @@ describe('BranchDetailPage', () => {
   });
 });
 
-describe('BranchDetailPage drill-down navigation (autodrive-6ef.20)', () => {
+describe('BranchDetailPage drill-down navigation', () => {
   it('students count links to /students filtered by branch_id', async () => {
     const { router } = await renderPage();
     fireEvent.click(screen.getByText('42'));
@@ -181,14 +181,18 @@ describe('BranchDetailPage drill-down navigation (autodrive-6ef.20)', () => {
   it('falls back to a no-data state when monthly_revenue/top_debtors are absent', async () => {
     branch.current = { ...BRANCH, monthly_revenue: [], top_debtors: [] };
     await renderPage();
-    expect(await screen.findAllByText('common.no_data')).toHaveLength(2);
-  });
+    // The revenue chart is lazy (Suspense), so wait for both empty states.
+    await waitFor(
+      () => expect(screen.getAllByText('common.no_data')).toHaveLength(2),
+      { timeout: 10_000 },
+    );
+  }, 20_000);
 });
 
-// autodrive-d4j: a real fetch error must not read the same as a genuine
+// a real fetch error must not read the same as a genuine
 // not-found -- distinct title/icon per EntityDetailShell's isError/
 // errorTitle/errorIcon props, same split AuditDetailPage already does.
-describe('BranchDetailPage error vs not-found (autodrive-d4j)', () => {
+describe('BranchDetailPage error vs not-found', () => {
   it('shows the not-found message when the branch genuinely does not exist', async () => {
     branch.current = null;
     branch.isError = false;

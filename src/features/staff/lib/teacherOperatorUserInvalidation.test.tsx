@@ -18,7 +18,7 @@ import { useUsers } from '@/features/staff/api/userService';
 import { userKeys, teacherKeys, operatorKeys } from '@/lib/queryKeys';
 import axiosInstance from '@/api/axiosInstance';
 
-// autodrive-52v.2: useUpdateTeacher / useUpdateOperator only invalidated
+// useUpdateTeacher / useUpdateOperator only invalidated
 // their own domain root (teacherKeys.all / operatorKeys.all). UserDetailPage
 // (/users/:id, shared by every role incl. teacher/operator) reads via
 // userKeys.detail(id) -- a root neither covered -- so an already-open detail

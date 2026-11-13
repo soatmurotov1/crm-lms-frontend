@@ -33,56 +33,27 @@ export interface WriteOptions {
     id: string;
     name: string;
     branch_id: string;
-    specialization: 'THEORY' | 'PRACTICE';
+    specialization?: string;
   }[];
   students?: {
     id: string;
     first_name: string;
     last_name: string;
     branch_id: string;
-    course_type?: 'tezkor' | 'avto_maktab';
+    course_type?: 'online' | 'offline';
     group_name?: string | null;
     phone_last4?: string | null;
     total_price?: number;
     amount_paid?: number;
   }[];
-  /** Matching students before `limit` (payments and training enrollments). */
+  /** Matching students before `limit` (payment lookups). */
   students_total?: number;
-  programs?: {
-    id: string;
-    name: string;
-    branch_id: string;
-    required_minutes: number;
-    category?: string;
-  }[];
-  stations?: {
-    id: string;
-    name: string;
-    branch_id: string;
-    stir?: string | null;
-  }[];
-  vehicles?: {
-    id: string;
-    plate_number: string;
-    branch_id: string;
-    current_custodian_id?: string | null;
-    model?: string;
-    fuel_types?: string[];
-    available_for_booking: boolean;
-    categories: string[];
-  }[];
-  questions?: { id: string; topic: string; visibility: string }[];
-  enrollments?: {
-    id: string;
-    student: { id: string; first_name: string; last_name: string };
-    program: { id: string; title: string } | null;
-  }[];
 }
 
 /** Server-side narrowing for student lookups (backend #277). */
 export interface WriteOptionsLookup {
   search?: string;
-  course_type?: 'tezkor' | 'avto_maktab';
+  course_type?: 'online' | 'offline';
   limit?: number;
 }
 

@@ -17,16 +17,14 @@ const READ_RESOURCE: Record<string, string> = {
   payments: 'payments',
   expenses: 'expenses',
   'teacher-settlements': 'expenses',
-  vehicles: 'vehicles',
-  'vehicle-fuel': 'fuel',
-  'vehicle-inspections': 'vehicle_inspections',
-  'fuel-stations': 'fuel_stations',
-  'training-programs': 'training_programs',
-  'training-enrollments': 'training_enrollments',
-  'driving-sessions': 'driving_sessions',
-  questions: 'questions',
-  'school-tests': 'test_templates',
+  documents: 'documents',
+  subjects: 'subjects',
+  curriculum: 'curriculum',
+  enrollments: 'students',
+  assignments: 'assignments',
   exams: 'exams',
+  grades: 'grades',
+  progress: 'grades',
   leads: 'leads',
   'audit-logs': 'audit',
   dashboard: 'reports',
@@ -38,20 +36,10 @@ export const permissionForReadQuery = (
   const domain = typeof key[0] === 'string' ? key[0] : '';
   // Access management and the authenticated catalogue have their own server gates.
   if (domain === 'users' && key.at(-1) === 'access') return undefined;
-  if (domain === 'vehicle-fuel' && key.includes('vehicles'))
-    return 'fuel.create';
-  if (domain === 'vehicle-inspections' && key.includes('receivers'))
-    return 'vehicle_inspections.create';
   const resource =
-    domain === 'school-tests' && key[1] === 'assignments'
-      ? 'test_assignments'
-      : domain === 'leads' && key[1] === 'stages'
-        ? 'lead_stages'
-        : domain === 'vehicle-fuel' && key.includes('vehicles')
-          ? 'vehicles'
-          : domain === 'vehicle-inspections' && key.includes('defects')
-            ? 'vehicle_defects'
-            : READ_RESOURCE[domain];
+    domain === 'leads' && key[1] === 'stages'
+      ? 'lead_stages'
+      : READ_RESOURCE[domain];
   return resource ? `${resource}.read` : undefined;
 };
 

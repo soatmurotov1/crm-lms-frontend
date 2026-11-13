@@ -3,42 +3,21 @@
 # ---- build stage ----
 FROM node:24-alpine AS build
 WORKDIR /app
-# Husky's `prepare` script needs a git repo; skip it in Docker (mirrors backend Dockerfile's HUSKY=0).
+# Husky's `prepare` script needs a git repo; skip it in Docker.
 ENV HUSKY=0
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 
-# Vite bakes these into the static bundle at build time — must be build ARGs, not runtime env.
+# Vite bakes this into the static bundle at build time — build ARG, not runtime env.
+# Production build HTTPS manzil talab qiladi (vite.config.ts guard).
 ARG VITE_API_BASE_URL
-ARG VITE_UMAMI_SRC
-ARG VITE_UMAMI_WEBSITE_ID
-ARG VITE_FLEET_MAP_TILE_URL
-ARG VITE_FLEET_MAP_TILE_ATTRIBUTION
-ARG VITE_ENABLE_DEMO_LOGIN
-ARG VITE_ANALYTICS_ORIGIN
-ARG VITE_ANALYTICS_AUDIENCE
-ARG VITE_ANALYTICS_COLLECTOR_ORIGIN
-ARG VITE_ANALYTICS_ENVIRONMENT
-ARG VITE_DEMO_PASSWORD
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
-ENV VITE_UMAMI_SRC=$VITE_UMAMI_SRC
-ENV VITE_UMAMI_WEBSITE_ID=$VITE_UMAMI_WEBSITE_ID
-ENV VITE_FLEET_MAP_TILE_URL=$VITE_FLEET_MAP_TILE_URL
-ENV VITE_FLEET_MAP_TILE_ATTRIBUTION=$VITE_FLEET_MAP_TILE_ATTRIBUTION
-ENV VITE_ENABLE_DEMO_LOGIN=$VITE_ENABLE_DEMO_LOGIN
-ENV VITE_ANALYTICS_ORIGIN=$VITE_ANALYTICS_ORIGIN
-ENV VITE_ANALYTICS_AUDIENCE=$VITE_ANALYTICS_AUDIENCE
-ENV VITE_ANALYTICS_COLLECTOR_ORIGIN=$VITE_ANALYTICS_COLLECTOR_ORIGIN
-ENV VITE_ANALYTICS_ENVIRONMENT=$VITE_ANALYTICS_ENVIRONMENT
-ENV VITE_DEMO_PASSWORD=$VITE_DEMO_PASSWORD
 
-# Build the Vite SPA and its minimal online-first service worker.
 RUN npm run build
 
 # ---- runtime stage ----
-# Pinned minor version (not floating :alpine) + unprivileged variant (runs as
-# non-root by default, listens on 8080 not 80 — see nginx.conf/Caddyfile).
+# Unprivileged nginx (non-root, listens on 8080 — see nginx.conf).
 FROM nginxinc/nginx-unprivileged:1.27-alpine AS runtime
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html

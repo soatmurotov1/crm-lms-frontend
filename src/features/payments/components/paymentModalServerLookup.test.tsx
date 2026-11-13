@@ -34,7 +34,7 @@ const students = [
     first_name: 'Aziz',
     last_name: 'Karimov',
     branch_id: 'b1',
-    course_type: 'avto_maktab' as const,
+    course_type: 'offline' as const,
     group_name: 'B-1',
     phone_last4: '4567',
     total_price: 3_000_000,
@@ -45,7 +45,7 @@ const students = [
     first_name: 'Aziz',
     last_name: 'Karimov',
     branch_id: 'b1',
-    course_type: 'avto_maktab' as const,
+    course_type: 'offline' as const,
     group_name: 'B-2',
     phone_last4: null,
     total_price: 3_000_000,
@@ -83,7 +83,7 @@ describe('PaymentModal server-side student lookup', () => {
         open
         onClose={noop}
         onSubmit={noop}
-        courseType="avto_maktab"
+        courseType="offline"
       />,
     );
     fireEvent.click(
@@ -96,7 +96,7 @@ describe('PaymentModal server-side student lookup', () => {
     await waitFor(() =>
       expect(vi.mocked(useWriteOptions).mock.calls.at(-1)?.[4]).toEqual({
         search: '4567',
-        course_type: 'avto_maktab',
+        course_type: 'offline',
         limit: 50,
       }),
     );

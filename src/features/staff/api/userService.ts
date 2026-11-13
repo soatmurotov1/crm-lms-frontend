@@ -134,7 +134,7 @@ export const useUsers = (role?: UsersQuery['role']) => {
   const isCrossTenant = useIsCrossTenant();
   return useQuery<User[]>({
     queryKey: userKeys.list({ branchId, role, page: 1, limit: 100 }),
-    // autodrive-6ef.17: user lists are stable org structure, so they can use
+    // user lists are stable org structure, so they can use
     // a longer stale window than the 30s global default.
     staleTime: 5 * 60_000,
     queryFn: async ({ signal }) => {
@@ -148,7 +148,7 @@ export const useUsers = (role?: UsersQuery['role']) => {
   });
 };
 
-// Real server-side pagination for list pages (autodrive-0id) -- GET /users
+// Real server-side pagination for list pages -- GET /users
 // defaults to limit=10; UsersPage was fetching once via useUsers and
 // paginating client-side over that truncated result.
 export const useUsersPage = (
@@ -159,7 +159,7 @@ export const useUsersPage = (
     search?: string;
     branchId?: string;
     isActive?: boolean;
-    // autodrive-cg9: owner-only "show deleted" toggle on UsersPage. Never
+    // owner-only "show deleted" toggle on UsersPage. Never
     // sent unless the caller is an owner -- a non-owner sending it gets a
     // 403.
     includeDeleted?: boolean;
@@ -267,7 +267,7 @@ export const useChangeUserLifecycle = () => {
   });
 };
 
-// autodrive-cg9: owner-only restore, paired with the includeDeleted list
+// owner-only restore, paired with the includeDeleted list
 // toggle above. Un-deletes only this row -- see UsersPage's restore confirm
 // copy (common.confirm_restore_desc) for the no-cascade caveat.
 export const useRestoreUser = () => {

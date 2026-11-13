@@ -16,6 +16,10 @@ import CourseFormDialog from '@/features/courses/components/CourseFormDialog';
 import { useCourse } from '@/features/courses/api/courseService';
 import { useStudents } from '@/features/students/api/studentService';
 import { useBranches } from '@/features/branches/api/branchService';
+import {
+  CourseCurriculumPanel,
+  CourseEnrollmentsPanel,
+} from '@/features/lms/api/widgets';
 import { useIsCrossTenant } from '@/hooks/useCan';
 import { useAuthStore } from '@/store/authStore';
 import { formatMoney } from '@/lib/money';
@@ -28,7 +32,7 @@ const CourseDetailPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useUrlTab(
-    ['info', 'students'] as const,
+    ['info', 'curriculum', 'enrollments', 'students'] as const,
     'info',
   );
   const isCrossTenant = useIsCrossTenant();
@@ -77,9 +81,9 @@ const CourseDetailPage = () => {
   }
 
   const courseTypeLabel =
-    course.course_type === 'tezkor'
-      ? t('courses.type_tezkor')
-      : t('courses.type_avto_maktab');
+    course.course_type === 'online'
+      ? t('courses.type_online')
+      : t('courses.type_offline');
 
   return (
     <EntityDetailShell
@@ -115,19 +119,39 @@ const CourseDetailPage = () => {
       <Tabs
         value={activeTab}
         onValueChange={(value) =>
-          setActiveTab(value === 'students' ? 'students' : 'info')
+          setActiveTab(
+            value === 'curriculum' || value === 'enrollments' || value === 'students'
+              ? value
+              : 'info',
+          )
         }
       >
-        <TabsList>
-          <TabsTrigger value="info">{t('common.tab_info')}</TabsTrigger>
-          <TabsTrigger value="students">{t('students.title')}</TabsTrigger>
-        </TabsList>
+        <div className="min-w-0 max-w-full overflow-x-auto">
+          <TabsList className="w-max">
+            <TabsTrigger value="info">{t('common.tab_info')}</TabsTrigger>
+            <TabsTrigger value="curriculum">{t('lms.curriculum.tab')}</TabsTrigger>
+            <TabsTrigger value="enrollments">{t('lms.enrollments.tab')}</TabsTrigger>
+            <TabsTrigger value="students">{t('students.title')}</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="curriculum">
+          {activeTab === 'curriculum' ? <CourseCurriculumPanel courseId={course.id} /> : null}
+        </TabsContent>
+
+        <TabsContent value="enrollments">
+          {activeTab === 'enrollments' ? <CourseEnrollmentsPanel courseId={course.id} /> : null}
+        </TabsContent>
 
         <TabsContent value="info">
           <Card asChild>
             <dl className=" grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
               <Field label={t('courses.name')} value={course.name} />
               <Field label={t('courses.type')} value={courseTypeLabel} />
+              <Field
+                label={t('lms.subjects.single')}
+                value={course.subject_name ?? t('common.na')}
+              />
               <Field
                 label={t('courses.price')}
                 value={formatMoney(course.price)}

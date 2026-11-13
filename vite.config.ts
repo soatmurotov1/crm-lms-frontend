@@ -10,11 +10,13 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 // UI primitives those layouts pull in). csr + defs stay in one chunk;
 // IconBase/context are the shared Phosphor runtime those modules import.
 const ROUTE_PHOSPHOR_ICONS = [
+  'Bell',
   'BookOpen',
+  'Books',
   'Buildings',
   'Calendar',
-  'Car',
   'CaretRight',
+  'ChartBar',
   'Check',
   'Circle',
   'CircleNotch',
@@ -28,7 +30,6 @@ const ROUTE_PHOSPHOR_ICONS = [
   'List',
   'ListChecks',
   'MagnifyingGlass',
-  'MapTrifold',
   'Moon',
   'Plus',
   'PushPin',
@@ -82,7 +83,7 @@ const assertProductionApiBaseUrl = (value: string | undefined) => {
 };
 
 const productionApiGuard: Plugin = {
-  name: 'autodrive-production-api-guard',
+  name: 'educrm-production-api-guard',
   config(_config, { command, mode }) {
     if (command !== 'build' || mode !== 'production') return;
 
@@ -111,7 +112,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
     // ponytail: opt-in via ANALYZE=1 npm run build -- writes dist/stats.html,
-    // no effect on normal builds. autodrive-6ef.16 baseline harness.
+    // no effect on normal builds.
     !!process.env.ANALYZE &&
       visualizer({
         filename: 'dist/stats.html',
@@ -128,10 +129,10 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['offline.html', 'favicon.png'],
       },
       manifest: {
-        name: 'Auto Maktab CRM',
-        short_name: 'Auto Maktab',
+        name: 'EduLMS',
+        short_name: 'EduLMS',
         description:
-          "Avtomaktablar uchun boshqaruv tizimi: to'lov, davomat va dars jadvali bitta tizimda",
+          "Ta'lim platformasi (LMS): kurslar, darslar, topshiriqlar, testlar va o'quvchilar progressi",
         theme_color: '#092634',
         background_color: '#092634',
         display: 'standalone',

@@ -13,7 +13,7 @@ interface AttendanceStatusToggleProps {
 }
 
 // One-click status toggle replacing the per-row Select
-// dropdown (autodrive-38m.3). Shared by AttendancePage and AttendanceDrawer
+// dropdown. Shared by AttendancePage and AttendanceDrawer
 // so both surfaces mark attendance the same way. exec-dash 8:
 // restyled to the mock's segmented row (solid status color when active);
 // same attendance-status props contract.

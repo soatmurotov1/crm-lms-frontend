@@ -8,10 +8,8 @@ import {
 } from 'react';
 import { Outlet, useLocation } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { List } from '@phosphor-icons/react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
-import { DemoSessionBanner } from './DemoSessionBanner';
 import { Breadcrumbs } from './Breadcrumbs';
 import { useCommandPalette } from './useCommandPalette';
 import { PageLoader } from './PageLoader';
@@ -28,7 +26,7 @@ const OwnerCrmTour = lazy(() => import('@/components/tour/OwnerCrmTour'));
 
 const CommandPalette = lazy(() => import('./CommandPalette'));
 
-const DESKTOP_SIDEBAR_STORAGE_KEY = 'autodrive-sidebar-expanded';
+const DESKTOP_SIDEBAR_STORAGE_KEY = 'lms-sidebar-expanded';
 
 const readDesktopSidebarExpanded = () => {
   if (typeof window === 'undefined') return true;
@@ -49,16 +47,12 @@ export const AppLayout = () => {
   const sessionValidated = useAuthStore((state) => state.sessionValidated);
   const [tourDismissed, setTourDismissed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [mapSidebarExpanded, setMapSidebarExpanded] = useState(false);
   const [desktopSidebarExpanded, setDesktopSidebarExpanded] = useState(
     readDesktopSidebarExpanded,
   );
   const location = useLocation();
   const { pathname, href } = location;
-  const isMapWorkspace = pathname.replace(/\/$/, '') === '/fleet-map';
-  const sidebarExpanded = isMapWorkspace
-    ? mapSidebarExpanded
-    : desktopSidebarExpanded;
+  const sidebarExpanded = desktopSidebarExpanded;
   const prevPathnameRef = useRef(pathname);
   const mainRef = useRef<HTMLElement>(null);
   const palette = useCommandPalette();
@@ -147,58 +141,33 @@ export const AppLayout = () => {
           mobileOpen={mobileSidebarOpen}
           onMobileOpenChange={setMobileSidebarOpen}
           desktopExpanded={sidebarExpanded}
-          onDesktopExpandedChange={
-            isMapWorkspace
-              ? setMapSidebarExpanded
-              : handleDesktopSidebarExpandedChange
-          }
+          onDesktopExpandedChange={handleDesktopSidebarExpandedChange}
         />
         <div
           className={cn(
-            'relative flex flex-col',
-            isMapWorkspace ? 'h-dvh overflow-hidden' : 'min-h-dvh',
+            'relative flex min-h-dvh flex-col',
             sidebarExpanded ? 'lg:ml-64' : 'lg:ml-14',
           )}
         >
-          <div className={cn(!isMapWorkspace && 'sticky top-0 z-30')}>
-            <div className="[&>p]:border-border [&>p]:bg-muted [&>p]:text-left [&>p]:text-muted-foreground [&>p]:px-2 [&>p]:lg:px-3">
-              <DemoSessionBanner />
-            </div>
-            {!isMapWorkspace && (
-              <Topbar
-                onMobileMenuClick={() => setMobileSidebarOpen(true)}
-                onCommandPaletteOpen={() => palette.setOpen(true)}
-              />
-            )}
+          <div className="sticky top-0 z-30">
+            <Topbar
+              onMobileMenuClick={() => setMobileSidebarOpen(true)}
+              onCommandPaletteOpen={() => palette.setOpen(true)}
+            />
           </div>
           <main
             ref={mainRef}
             id="main-content"
             tabIndex={-1}
-            className={cn(
-              'flex-1 outline-none',
-              isMapWorkspace ? 'relative min-h-0' : 'p-2 lg:p-3',
-            )}
+            className="flex-1 p-2 outline-none lg:p-3"
           >
-            {isMapWorkspace && (
-              <button
-                type="button"
-                aria-label={t('actions.sidebar')}
-                onClick={() => setMobileSidebarOpen(true)}
-                className="absolute left-3 top-3 z-40 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-background text-foreground shadow-md hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:hidden"
-              >
-                <List className="h-5 w-5" aria-hidden="true" />
-              </button>
-            )}
-            <div className={isMapWorkspace ? 'h-full' : 'w-full'}>
-              {!isMapWorkspace && <Breadcrumbs />}
-              <div className={isMapWorkspace ? 'h-full' : undefined}>
-                <Suspense fallback={<PageLoader />}>
-                  <Outlet
-                    key={`${user?.id}:${user?.company_id}:${user?.access_version}:${activeBranchId}`}
-                  />
-                </Suspense>
-              </div>
+            <div className="w-full">
+              <Breadcrumbs />
+              <Suspense fallback={<PageLoader />}>
+                <Outlet
+                  key={`${user?.id}:${user?.company_id}:${user?.access_version}:${activeBranchId}`}
+                />
+              </Suspense>
             </div>
           </main>
         </div>

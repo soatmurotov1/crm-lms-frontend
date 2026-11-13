@@ -22,66 +22,66 @@ export type ApiRequest<Operation extends keyof operations> = JsonContent<
 export type ApiUnspecifiedResponse = unknown;
 
 export type StudentsQuery = NonNullable<
-  operations['StudentsController_findAll']['parameters']['query']
+  operations['V2StudentsController_list']['parameters']['query']
 >;
 export type PaymentsQuery = NonNullable<
-  operations['PaymentsController_findAll']['parameters']['query']
+  operations['V2PaymentsController_list']['parameters']['query']
 >;
 export type PaymentSummaryQuery = NonNullable<
-  operations['PaymentsController_getSummary']['parameters']['query']
+  operations['V2PaymentsController_summary']['parameters']['query']
 >;
 export type GroupsQuery = NonNullable<
-  operations['GroupsController_findAll']['parameters']['query']
+  operations['V2GroupsController_list']['parameters']['query']
 >;
 export type CoursesQuery = NonNullable<
-  operations['CoursesController_findAll']['parameters']['query']
+  operations['V2CoursesController_list']['parameters']['query']
 >;
 export type LessonsQuery = NonNullable<
-  operations['AttendanceController_findAll']['parameters']['query']
+  operations['V2LessonsController_list']['parameters']['query']
 > & { search?: string };
 export type AttendanceHistoryQuery = NonNullable<
-  operations['AttendanceController_findHistoryForStudent']['parameters']['query']
+  operations['V2AttendanceController_history']['parameters']['query']
 >;
 export type CalendarLessonsQuery = NonNullable<
-  operations['ScheduleController_getCalendarLessons']['parameters']['query']
+  operations['V2ScheduleController_calendar']['parameters']['query']
 >;
 export type UsersQuery = NonNullable<
-  operations['UsersController_findAll']['parameters']['query']
+  operations['V2UsersController_list']['parameters']['query']
 >;
 export type BranchesQuery = NonNullable<
-  operations['BranchesController_findAll']['parameters']['query']
+  operations['V2BranchesController_list']['parameters']['query']
 >;
 export type DashboardQuery = NonNullable<
-  operations['DashboardController_getAnalytics']['parameters']['query']
+  operations['V2DashboardController_analytics']['parameters']['query']
 >;
 export type CompanyOverviewQuery = NonNullable<
-  operations['DashboardController_getCompanyOverview']['parameters']['query']
+  operations['V2DashboardController_companyOverview']['parameters']['query']
 >;
 
-export type CreateStudentRequest = ApiRequest<'StudentsController_create'>;
-export type UpdateStudentRequest = ApiRequest<'StudentsController_update'>;
-export type CreateBranchRequest = ApiRequest<'BranchesController_create'>;
-export type UpdateBranchRequest = ApiRequest<'BranchesController_update'>;
-export type CreatePaymentRequest = ApiRequest<'PaymentsController_create'>;
-export type UpdatePaymentRequest = ApiRequest<'PaymentsController_update'>;
-export type CreateGroupRequest = ApiRequest<'GroupsController_create'>;
-export type UpdateGroupRequest = ApiRequest<'GroupsController_update'>;
-export type CreateCourseRequest = ApiRequest<'CoursesController_create'>;
-export type UpdateCourseRequest = ApiRequest<'CoursesController_update'>;
-export type CreateLessonRequest = ApiRequest<'AttendanceController_create'>;
-export type UpdateLessonRequest = ApiRequest<'AttendanceController_update'>;
+export type CreateStudentRequest = ApiRequest<'V2StudentsController_create'>;
+export type UpdateStudentRequest = ApiRequest<'V2StudentsController_update'>;
+export type CreateBranchRequest = ApiRequest<'V2BranchesController_create'>;
+export type UpdateBranchRequest = ApiRequest<'V2BranchesController_update'>;
+export type CreatePaymentRequest = ApiRequest<'V2PaymentsController_create'>;
+export type UpdatePaymentRequest = ApiRequest<'V2PaymentsController_update'>;
+export type CreateGroupRequest = ApiRequest<'V2GroupsController_create'>;
+export type UpdateGroupRequest = ApiRequest<'V2GroupsController_update'>;
+export type CreateCourseRequest = ApiRequest<'V2CoursesController_create'>;
+export type UpdateCourseRequest = ApiRequest<'V2CoursesController_update'>;
+export type CreateLessonRequest = ApiRequest<'V2LessonsController_create'>;
+export type UpdateLessonRequest = ApiRequest<'V2LessonsController_update'>;
 export type BatchAttendanceRequest =
-  ApiRequest<'AttendanceController_batchAttendance'>;
+  ApiRequest<'V2AttendanceController_batch'>;
 export type CreateTemplateRequest =
-  ApiRequest<'ScheduleController_createTemplate'>;
+  ApiRequest<'V2ScheduleController_createTemplate'>;
 export type UpdateTemplateRequest =
-  ApiRequest<'ScheduleController_updateTemplate'>;
+  ApiRequest<'V2ScheduleController_updateTemplate'>;
 export type GenerateLessonsRequest =
-  ApiRequest<'ScheduleController_generateLessons'>;
-export type CreateUserRequest = ApiRequest<'UsersController_create'>;
-export type UpdateUserRequest = ApiRequest<'UsersController_update'>;
-export type LoginRequest = ApiRequest<'AuthController_login'>;
-export type ChangePasswordRequest = ApiRequest<'AuthController_changePassword'>;
+  ApiRequest<'V2ScheduleController_generate'>;
+export type CreateUserRequest = ApiRequest<'V2UsersController_create'>;
+export type UpdateUserRequest = ApiRequest<'V2UsersController_update'>;
+export type LoginRequest = ApiRequest<'V2AuthController_login'>;
+export type ChangePasswordRequest = ApiRequest<'V2AuthController_changePassword'>;
 
 /** Finance contracts are kept explicit until the live OpenAPI schema publishes
  * the Expenses module. Wire names intentionally stay snake_case. */
@@ -89,7 +89,6 @@ export type CreateExpenseRequest = {
   category:
     | 'rent'
     | 'utilities'
-    | 'vehicle'
     | 'marketing'
     | 'supplies'
     | 'administrative'

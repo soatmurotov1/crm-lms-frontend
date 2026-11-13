@@ -1,6 +1,6 @@
 import { nowTashkentParts } from '@/lib/calendarDateTime';
 
-// autodrive-vh0.6: pulled out of DashboardPage.tsx so LegacyMainDashboard
+// pulled out of DashboardPage.tsx so LegacyMainDashboard
 // (still in DashboardPage.tsx) and dashboard/TeacherDashboard.tsx can share
 // these without duplication. DashboardPage.tsx imports TeacherDashboard, so
 // TeacherDashboard importing these back FROM DashboardPage.tsx would be a

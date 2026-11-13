@@ -199,9 +199,6 @@ export const ExpensesFilterBar = ({
               <SelectItem value="utilities">
                 {t('expenses.category.utilities')}
               </SelectItem>
-              <SelectItem value="vehicle">
-                {t('expenses.category.vehicle')}
-              </SelectItem>
               <SelectItem value="marketing">
                 {t('expenses.category.marketing')}
               </SelectItem>

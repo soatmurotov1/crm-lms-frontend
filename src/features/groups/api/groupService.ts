@@ -8,7 +8,6 @@ import axiosInstance from '@/api/axiosInstance';
 import { useAuthStore } from '@/store/authStore';
 import { useIsCrossTenant } from '@/hooks/useCan';
 import { Group, GroupOverview } from '@/features/groups/types';
-import { track } from '@/lib/umami';
 import { parseListEnvelope, parseItemEnvelope } from '@/lib/apiEnvelope';
 import { groupKeys, studentKeys } from '@/lib/queryKeys';
 import type {
@@ -20,14 +19,14 @@ import type {
 const toGroupCourseType = (
   value: string,
 ): NonNullable<GroupsQuery['course_type']> => {
-  if (value === 'tezkor' || value === 'avto_maktab') return value;
+  if (value === 'online' || value === 'offline') return value;
   throw new Error(`Unsupported group course type: ${value}`);
 };
 
 const toOptionalGroupCourseType = (
   value?: string,
 ): GroupsQuery['course_type'] =>
-  value === 'tezkor' || value === 'avto_maktab' ? value : undefined;
+  value === 'online' || value === 'offline' ? value : undefined;
 
 type GroupCreateRequest = Omit<
   CreateGroupRequest,
@@ -49,7 +48,7 @@ export interface GroupListParams {
   search?: string;
   branchId?: string;
   courseType?: string;
-  // autodrive-cg9: owner-only "show deleted" toggle on GroupsPage. Never
+  // owner-only "show deleted" toggle on GroupsPage. Never
   // sent unless the caller is an owner -- a non-owner sending it gets a 403.
   includeDeleted?: boolean;
 }
@@ -98,7 +97,7 @@ export const groupsListQueryOptions = (
 // Callers that don't pass params (StudentModal, SchedulePage, AttendancePage)
 // keep getting the full tenant-scoped list, unchanged. GroupsPage passes
 // search/branchId/courseType so GET /groups filters server-side instead of
-// the page re-filtering the full list client-side (autodrive-b85.5).
+// the page re-filtering the full list client-side.
 export const useGroups = (params: GroupListParams = {}, enabled = true) => {
   const authBranchId = useAuthStore(
     (s) => s.activeBranchId ?? s.user?.branch_id ?? undefined,
@@ -169,7 +168,6 @@ export const useCreateGroup = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: groupKeys.all });
-      track('group_create');
     },
   });
 };
@@ -206,7 +204,7 @@ export const useUpdateGroup = () => {
   });
 };
 
-// autodrive-cg9: owner-only restore, paired with the includeDeleted list
+// owner-only restore, paired with the includeDeleted list
 // toggle above. Deliberately does NOT invalidate studentKeys (unlike
 // useDeleteGroup below) -- restore does not un-null the groupId that delete
 // cleared on each enrolled student (see GroupsPage's restore confirm copy,
@@ -219,7 +217,6 @@ export const useRestoreGroup = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: groupKeys.all });
-      track('group_restore');
     },
   });
 };
@@ -235,7 +232,7 @@ export const useDeleteGroup = () => {
       // so one call now covers what used to be two separate invalidations.
       qc.invalidateQueries({ queryKey: groupKeys.all });
       // Backend nulls groupId on every enrolled student in the same
-      // transaction (autodrive-f9u.11) -- without this, a cached student
+      // transaction -- without this, a cached student
       // list/detail view keeps showing the deleted group. studentKeys.all
       // (root 'students') also covers the old singular 'student' detail key.
       qc.invalidateQueries({ queryKey: studentKeys.all });

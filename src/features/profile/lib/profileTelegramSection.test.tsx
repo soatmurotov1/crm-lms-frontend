@@ -7,7 +7,7 @@ import {
   useTelegramUnlink,
 } from '@/features/profile/api/telegramService';
 
-// bd autodrive-1ju.7: Profile page Telegram link/unlink + daily-report
+// bd Profile page Telegram link/unlink + daily-report
 // toggle. Backend PATCH /telegram/daily-report is @Roles(owner, manager)
 // only (403 for others), so the FE toggle must be gated the same way.
 

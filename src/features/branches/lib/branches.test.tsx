@@ -115,7 +115,7 @@ describe('BranchesPage Component', () => {
     expect(phoneInput.value).toBe('+998 90 123 45 67');
   });
 
-  // autodrive-6ef.19: card navigates to branch detail; edit/delete buttons
+  // card navigates to branch detail; edit/delete buttons
   // stopPropagation so they don't also trigger navigation.
   it('navigates to the detail page when a card is clicked, but not via the edit button', async () => {
     const { router } = await renderComponent();
@@ -129,7 +129,7 @@ describe('BranchesPage Component', () => {
     );
   });
 
-  // autodrive-6cq.5.15: overlay/Escape used to call onOpenChange -> close
+  // overlay/Escape used to call onOpenChange -> close
   // directly, silently discarding whatever the user had just typed.
   it('confirms before closing the edit dialog via Escape when the form is dirty', async () => {
     await renderComponent();
@@ -156,11 +156,11 @@ describe('BranchesPage Component', () => {
   });
 });
 
-// Regression test for autodrive-f9u.9: canManageBranches used to be an
+// Regression test for canManageBranches used to be an
 // ad-hoc `role === 'owner'` check in authStore, excluding `dev` -- which
 // permissions.ts documents as a strict superset of `owner`. Now derived
 // from the same CAPABILITIES matrix via useCan('manageBranches').
-describe('BranchesPage manage-branches capability (autodrive-f9u.9)', () => {
+describe('BranchesPage manage-branches capability', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockBranchesData = [];
@@ -185,7 +185,7 @@ describe('BranchesPage manage-branches capability (autodrive-f9u.9)', () => {
   });
 });
 
-// autodrive-cg9: branch delete really does cascade -- branches.service.ts
+// branch delete really does cascade -- branches.service.ts
 // remove() soft-deletes every student (plus staff/groups/schedules/lessons)
 // scoped to the branch in the same transaction -- so active_students
 // (already shown on the same card) is a genuine blast-radius count. Same
@@ -193,7 +193,7 @@ describe('BranchesPage manage-branches capability (autodrive-f9u.9)', () => {
 // is asserted directly because the suite's react-i18next mock drops
 // interpolation options, so a rendered count is never observable via
 // screen.getByText.
-describe('branchDeleteDescArgs (autodrive-cg9)', () => {
+describe('branchDeleteDescArgs', () => {
   it('picks the with-students key and carries the real count for a branch with students', () => {
     expect(
       branchDeleteDescArgs({ name: 'Yunusobod', active_students: 7 }),
@@ -217,7 +217,7 @@ describe('branchDeleteDescArgs (autodrive-cg9)', () => {
   });
 });
 
-describe('BranchesPage delete confirmation blast radius (autodrive-cg9)', () => {
+describe('BranchesPage delete confirmation blast radius', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     auth.role = 'owner';

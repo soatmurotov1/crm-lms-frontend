@@ -76,7 +76,7 @@ const mockColumns: LeadBoardColumn[] = [
         branchId: 'b-1',
         branchName: 'Chilonzor',
         source: 'telegram',
-        category: 'B',
+        direction: 'Frontend',
         assigneeUserId: 'u-1',
         assigneeName: 'Admin',
         stageId: 'stage-new',

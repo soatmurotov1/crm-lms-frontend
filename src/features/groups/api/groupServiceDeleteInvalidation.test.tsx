@@ -10,13 +10,13 @@ vi.mock('@/api/axiosInstance', () => ({
   default: { delete: vi.fn() },
 }));
 
-// Regression test for autodrive-f9u.11: useDeleteGroup only invalidated
+// Regression test for useDeleteGroup only invalidated
 // ['groups']/['groups-overview']. The backend nulls out groupId on every
 // enrolled student in the same transaction when a group is deleted, but
 // students weren't invalidated -- a cached student list/detail view kept
 // showing the deleted group.
 //
-// Stage 2 (autodrive-6cq.8) nests groupKeys.overview/studentKeys.detail
+// Stage 2 nests groupKeys.overview/studentKeys.detail
 // under the 'groups'/'students' roots, so a single root-only invalidation
 // now prefix-matches both the base list AND the nested key -- seed cache
 // entries at those nested shapes to prove the invalidation actually reaches

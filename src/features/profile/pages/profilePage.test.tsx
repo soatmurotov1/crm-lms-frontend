@@ -40,7 +40,7 @@ async function renderAsRole(role: string) {
   });
 }
 
-// autodrive-cwe: the role badge must come from i18n (setup.ts mocks t() to echo
+// the role badge must come from i18n (setup.ts mocks t() to echo
 // the key), never the old hardcoded Uzbek strings that mislabeled every
 // non-owner role as "Filial menejeri".
 describe('ProfilePage role badge', () => {

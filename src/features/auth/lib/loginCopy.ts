@@ -25,26 +25,20 @@ export type LoginCopy = {
   rateLimit: string;
   networkError: string;
   companyInactive: string;
-  demo: string;
-  demoHint: string;
-  demoSignIn: string;
-  demoSignInHint: string;
-  demoRetry: string;
-  demoAutoError: string;
 };
 
 const copy: Record<LoginLang, LoginCopy> = {
   uz: {
-    appTitle: 'Auto Maktab',
+    appTitle: 'EduLMS',
     themeDark: 'Tungi rejim',
     themeLight: "Yorug' rejim",
     required: 'Majburiy',
     showPassword: "Parolni ko'rsatish",
     hidePassword: 'Parolni yashirish',
-    workspaceLabel: 'Avtomaktab boshqaruv tizimi',
-    workspaceTitle: 'Avtomaktabingiz. Bitta tizimda.',
+    workspaceLabel: "Ta'lim boshqaruv platformasi (LMS)",
+    workspaceTitle: "O'quv markazingiz. Bitta tizimda.",
     workspaceDescription:
-      'O‘quvchilar, dars jadvali va to‘lovlar. Kundalik ishlaringizni bir joydan boshqaring.',
+      'Kurslar, darslar, topshiriqlar, testlar va o‘quvchilar progressi — barchasi bir joyda.',
     formDescription: 'Davom etish uchun hisobingizga kiring.',
     title: 'Tizimga kirish',
     emailLabel: 'Email',
@@ -59,25 +53,18 @@ const copy: Record<LoginLang, LoginCopy> = {
     networkError: "Server bilan ulanish yo'q.",
     companyInactive:
       "Kompaniyangiz hali faollashtirilmagan. Administrator bilan bog'laning.",
-    demo: "Demo emailni to'ldirish",
-    demoHint: "Demo parolini kiriting, so'ng tizimga kiring",
-    demoSignIn: 'Roʻyxatdan oʻtmasdan demoga kiring',
-    demoSignInHint: "Namunaviy ma'lumotlar bilan demo markaz ochiladi",
-    demoRetry: 'Demo kirishni qayta urinish',
-    demoAutoError:
-      "Demo avtomatik ochilmadi. Pastdagi tugma bilan qayta urinib ko'ring.",
   },
   ru: {
-    appTitle: 'Auto Maktab',
+    appTitle: 'EduLMS',
     themeDark: 'Тёмная тема',
     themeLight: 'Светлая тема',
     required: 'Обязательно',
     showPassword: 'Показать пароль',
     hidePassword: 'Скрыть пароль',
-    workspaceLabel: 'Система управления автошколой',
-    workspaceTitle: 'Ваша автошкола. Одна система.',
+    workspaceLabel: 'Платформа управления обучением (LMS)',
+    workspaceTitle: 'Ваш учебный центр. Одна система.',
     workspaceDescription:
-      'Ученики, расписание и платежи. Управляйте ежедневной работой в одном месте.',
+      'Курсы, уроки, задания, тесты и прогресс учеников — всё в одном месте.',
     formDescription: 'Войдите в свой аккаунт, чтобы продолжить.',
     title: 'Вход в систему',
     emailLabel: 'Email',
@@ -92,25 +79,18 @@ const copy: Record<LoginLang, LoginCopy> = {
     networkError: 'Не удалось подключиться к серверу.',
     companyInactive:
       'Ваша компания ещё не активирована. Свяжитесь с администратором.',
-    demo: 'Подставить демо-email',
-    demoHint: 'Введите демо-пароль, затем войдите',
-    demoSignIn: 'Попробовать демо без регистрации',
-    demoSignInHint: 'Открывает демо-центр с примерными данными',
-    demoRetry: 'Повторить демо-вход',
-    demoAutoError:
-      'Демо не открылось автоматически. Повторите попытку кнопкой ниже.',
   },
   en: {
-    appTitle: 'Auto Maktab',
+    appTitle: 'EduLMS',
     themeDark: 'Dark mode',
     themeLight: 'Light mode',
     required: 'Required',
     showPassword: 'Show password',
     hidePassword: 'Hide password',
-    workspaceLabel: 'Driving school management',
-    workspaceTitle: 'Your driving school. One workspace.',
+    workspaceLabel: 'Learning management platform',
+    workspaceTitle: 'Your education center. One workspace.',
     workspaceDescription:
-      'Students, schedules and payments. Manage your day-to-day work in one place.',
+      'Courses, lessons, assignments, tests and student progress — all in one place.',
     formDescription: 'Sign in to your account to continue.',
     title: 'Sign in',
     emailLabel: 'Email',
@@ -125,13 +105,6 @@ const copy: Record<LoginLang, LoginCopy> = {
     networkError: 'Unable to connect to the server.',
     companyInactive:
       'Your company is not activated yet. Contact your administrator.',
-    demo: 'Fill demo email',
-    demoHint: 'Enter the demo password, then sign in',
-    demoSignIn: 'Try the demo without signing up',
-    demoSignInHint: 'Opens the demo center with sample data',
-    demoRetry: 'Retry demo sign-in',
-    demoAutoError:
-      'The demo did not open automatically. Retry with the button below.',
   },
 };
 

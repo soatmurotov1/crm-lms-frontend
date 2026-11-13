@@ -29,7 +29,7 @@ export const formatDateTime = (d: string) => {
   }
 };
 
-// Same labels StudentModal shows in its result <Select> (autodrive-6cq.11.4)
+// Same labels StudentModal shows in its result <Select>
 // — built from the caller's `t` rather than exported as a constant so tests
 // that mock '@/features/students/api/StudentModal' don't need to also stub this map.
 export const resultLabels = (

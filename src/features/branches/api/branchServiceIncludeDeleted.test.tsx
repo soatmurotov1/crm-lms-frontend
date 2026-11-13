@@ -9,7 +9,7 @@ import {
 import axiosInstance from '@/api/axiosInstance';
 import { branchKeys } from '@/lib/queryKeys';
 
-// autodrive-cg9: owner-only "show deleted" toggle on BranchesPage. Pins the
+// owner-only "show deleted" toggle on BranchesPage. Pins the
 // wire contract (include_deleted=true only when the toggle is on, PATCH
 // /branches/:id/restore) and the query-key requirement (toggling on must
 // not serve the cached un-deleted list from a stale cache entry).
@@ -29,7 +29,7 @@ const makeWrapper = (queryClient: QueryClient) => {
   return Wrapper;
 };
 
-describe('useBranches includeDeleted (autodrive-cg9)', () => {
+describe('useBranches includeDeleted', () => {
   it('sends include_deleted=true on the wire when the toggle is on', async () => {
     (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { data: [] },
@@ -94,7 +94,7 @@ describe('useBranches includeDeleted (autodrive-cg9)', () => {
   });
 });
 
-describe('useRestoreBranch (autodrive-cg9)', () => {
+describe('useRestoreBranch', () => {
   it('PATCHes /branches/:id/restore and invalidates the branch list', async () => {
     (axiosInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({});
     const queryClient = new QueryClient({

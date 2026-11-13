@@ -85,7 +85,7 @@ describe('ProtectedRoute logout redirect', () => {
       token: null,
       user: {
         id: 'u1',
-        email: 'demo@automaktab.uz',
+        email: 'demo@lms.local',
         name: 'Demo',
         role: 'manager',
         company_id: 'c1',

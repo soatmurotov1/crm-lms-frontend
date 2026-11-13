@@ -14,8 +14,8 @@ vi.mock('@/store/authStore', () => ({
     selector({ user: { role: auth.role } }),
 }));
 
-// Controllable per-test fixture for the group history tab (autodrive
-// "Guruh tarixi") — group-change audit entries for student s1.
+// Controllable per-test fixture for the group history tab
+// ("Guruh tarixi") — group-change audit entries for student s1.
 const auditMock = vi.hoisted(() => ({ logs: [] as Record<string, unknown>[] }));
 
 vi.mock('@/features/audit/api/auditService', () => ({
@@ -30,7 +30,7 @@ vi.mock('@/features/groups/api/groupService', () => ({
 }));
 
 // Controllable per-test fixture for isLoading/isError/data-not-found split
-// below (autodrive-d4j). Starts undefined (vi.hoisted runs before STUDENT is
+// below. Starts undefined (vi.hoisted runs before STUDENT is
 // initialized) -- backfilled to STUDENT right after the const, same as
 // branch.current in branchDetailPage.test.tsx.
 const studentQuery = vi.hoisted(() => ({
@@ -59,7 +59,7 @@ const STUDENT = {
   phone: '+998 90 123 45 67',
   branch_name: 'Yunusobod',
   group_name: 'B-1',
-  course_type: 'tezkor',
+  course_type: 'online',
   total_price: 3000000,
   debt: 1200000,
   referrals_count: 2,
@@ -77,7 +77,7 @@ const PAYMENT_ROW = {
   student_name: 'Karimov Aziz',
   branch_id: 'b1',
   branch_name: 'Yunusobod',
-  course_type: 'tezkor',
+  course_type: 'online',
   total_price: 3000000,
   amount_paid: 500000,
   remaining_debt: 700000,
@@ -156,11 +156,13 @@ afterEach(() => {
   learnerLoginMutation.reset.mockClear();
 });
 
+// O'quvchi portaliga kirish taklifi paneldan olib tashlangan (LMS'da
+// o'quvchi hisobi alohida boshqariladi) — tugma hech bir rolga ko'rinmaydi.
 describe('StudentDetailPage learner login', () => {
-  it('shows the invitation action only to roles allowed by the backend', async () => {
+  it('does not offer the removed learner-login action to any role', async () => {
     auth.role = 'manager';
     await renderPage();
-    expect(screen.getByText('students.detail.login_button')).toBeTruthy();
+    expect(screen.queryByText('students.detail.login_button')).toBeNull();
     cleanup();
 
     auth.role = 'teacher';
@@ -168,14 +170,10 @@ describe('StudentDetailPage learner login', () => {
     expect(screen.queryByText('students.detail.login_button')).toBeNull();
   });
 
-  it('opens an email form for a manager', async () => {
+  it('shows the LMS progress tab', async () => {
     auth.role = 'manager';
     await renderPage();
-    fireEvent.click(screen.getByText('students.detail.login_button'));
-    expect(screen.getByText('students.detail.login_title')).toBeTruthy();
-    expect(
-      screen.getByLabelText('students.detail.login_password'),
-    ).toBeTruthy();
+    expect(screen.getByText('lms.progress.tab')).toBeTruthy();
   });
 });
 
@@ -195,11 +193,11 @@ describe('StudentDetailPage payments-tab gating', () => {
   });
 });
 
-// autodrive-vh0.2: teacher must never see payment amounts anywhere on this
+// teacher must never see payment amounts anywhere on this
 // page, not just the payments tab -- the header debt badge and the info
 // tab's total_price/debt/payment_method/amount_paid Fields used to render
 // unconditionally regardless of canRecordPayment.
-describe('StudentDetailPage payment-amount gating (autodrive-vh0.2)', () => {
+describe('StudentDetailPage payment-amount gating', () => {
   it('hides the header debt badge and info-tab money fields for a teacher', async () => {
     auth.role = 'teacher';
     const { container } = await renderPage();
@@ -229,7 +227,7 @@ describe('StudentDetailPage payment-amount gating (autodrive-vh0.2)', () => {
   });
 });
 
-// autodrive-6ef.26: read-only attendance history tab, visible to every role
+// read-only attendance history tab, visible to every role
 // (unlike payments, which is gated on the recordPayment capability).
 describe('StudentDetailPage attendance history tab', () => {
   it('shows the attendance tab for a teacher too', async () => {
@@ -273,12 +271,12 @@ describe('StudentDetailPage referrals_count Field', () => {
   });
 });
 
-// Regression test for autodrive-f9u.12: Student.payment_method is nullable
+// Regression test for Student.payment_method is nullable
 // on the backend (a student may never have made a payment), but was typed
 // non-null on the frontend -- methodLabels[student.payment_method] rendered
 // blank with no compile-time warning for exactly this STUDENT fixture,
 // which has never set payment_method.
-describe('StudentDetailPage payment_method null-safety (autodrive-f9u.12)', () => {
+describe('StudentDetailPage payment_method null-safety', () => {
   it('shows a fallback instead of a blank value when payment_method is unset', async () => {
     auth.role = 'manager';
     await renderPage();
@@ -385,7 +383,7 @@ describe('StudentDetailPage group history tab content', () => {
   });
 });
 
-// autodrive-9e4.5: the previously read-only payments ledger now gets the
+// the previously read-only payments ledger now gets the
 // same delete/edit row actions as PaymentsTable, gated on the same
 // recordPayment capability that already gates the tab itself.
 describe('StudentDetailPage payments-tab row actions', () => {
@@ -438,10 +436,10 @@ describe('StudentDetailPage payments-tab row actions', () => {
   });
 });
 
-// autodrive-d4j: a real fetch error must not read the same as a genuine
+// a real fetch error must not read the same as a genuine
 // not-found -- distinct title (and icon) per EntityDetailShell's isError/
 // errorTitle/errorIcon props, same split AuditDetailPage already does.
-describe('StudentDetailPage error vs not-found (autodrive-d4j)', () => {
+describe('StudentDetailPage error vs not-found', () => {
   it('shows the not-found message when the student genuinely does not exist', async () => {
     studentQuery.data = undefined;
     studentQuery.isError = false;

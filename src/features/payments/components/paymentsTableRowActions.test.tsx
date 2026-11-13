@@ -6,7 +6,7 @@ import { renderWithRouter } from '@/test/utils/renderWithRouter';
 import type { Payment } from '@/features/payments/types';
 
 // Role-gated action column: PaymentsTable owns its own delete/edit mutations
-// and modals (autodrive-9e4.4/5/6) -- PaymentsPage.tsx is out of scope for
+// and modals (/5/6) -- PaymentsPage.tsx is out of scope for
 // this change, so the table is self-contained rather than the
 // StudentsTable/GroupsTable callback-up pattern.
 
@@ -63,7 +63,7 @@ const PAYMENT: Payment = {
   student_name: 'Aziz Karimov',
   branch_id: 'b1',
   branch_name: 'Yunusobod',
-  course_type: 'tezkor',
+  course_type: 'online',
   total_price: 2000000,
   amount_paid: 500000,
   remaining_debt: 1500000,

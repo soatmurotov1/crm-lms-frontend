@@ -4,7 +4,7 @@ import { CommandPalette } from '@/components/layout/CommandPalette';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 import type { UserRole } from '@/features/staff/types';
 
-// autodrive-vh0.2: CommandPalette (Cmd+K) keeps its own NAV_ENTRIES list,
+// CommandPalette (Cmd+K) keeps its own NAV_ENTRIES list,
 // separate from Sidebar's navItems, gated the same way (cap + useCan filter)
 // -- it had the identical "Payments visible to everyone" gap. Uses the REAL
 // permissions.ts matrix (unlike commandPaletteSearch.test.tsx's blanket
@@ -31,7 +31,7 @@ const renderPalette = () =>
     routePattern: '/dashboard',
   });
 
-describe('CommandPalette teacher nav trim (autodrive-vh0.2)', () => {
+describe('CommandPalette teacher nav trim', () => {
   it('hides the Payments entry for a teacher', async () => {
     role = 'teacher';
     await renderPalette();

@@ -21,8 +21,6 @@ const makeExpense = (id: string, overdueDays = 1): Expense => ({
   id,
   branch_id: 'branch-1',
   branch_name: 'Chilonzor',
-  vehicle_id: null,
-  vehicle_plate_number: null,
   created_by_id: 'owner-1',
   category: 'rent',
   title: `Expense ${id}`,
@@ -309,7 +307,7 @@ describe('overdue expense sweep service', () => {
       '2026-09-02',
     ).queryKey;
     const changedFilters = overdueExpenseSweepQueryOptions(
-      { ...filters, category: 'vehicle', dateTo: '2026-09-01' },
+      { ...filters, category: 'rent', dateTo: '2026-09-01' },
       true,
       '2026-09-01',
     ).queryKey;

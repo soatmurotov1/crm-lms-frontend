@@ -47,7 +47,7 @@ interface GroupsTableProps {
   onEdit: (g: Group) => void;
   onDelete: (id: string) => void;
   canManageGroups: boolean;
-  // autodrive-cg9: owner-only "show deleted" toggle — a deleted row swaps
+  // owner-only "show deleted" toggle — a deleted row swaps
   // edit/delete for a single restore action.
   canViewDeleted: boolean;
   onRestore: (id: string) => void;
@@ -126,9 +126,9 @@ const GroupsTable = ({
       meta: { align: 'center' },
       cell: ({ getValue }) => (
         <span
-          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${getValue() === 'avto_maktab' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent-foreground'}`}
+          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${getValue() === 'offline' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent-foreground'}`}
         >
-          {getValue() === 'avto_maktab'
+          {getValue() === 'offline'
             ? t('groups.course_school')
             : t('groups.course_fast')}
         </span>

@@ -12,7 +12,7 @@ vi.mock('@/api/axiosInstance', () => ({
 
 vi.mock('@/lib/umami', () => ({ track: vi.fn() }));
 
-// Regression test for autodrive-6cq.11.8: a group created elsewhere
+// Regression test for a group created elsewhere
 // (GroupsPage) didn't show up in StudentModal's group selector until a full
 // page reload. The original fix forced StudentModal to call refetch() on
 // every open -- that forced fetch is now removed (it defeated groupService's
@@ -46,7 +46,7 @@ describe('useCreateGroup cache invalidation', () => {
     result.current.mutate({
       name: 'New Group',
       branchId: 'b1',
-      courseType: 'tezkor',
+      courseType: 'online',
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));

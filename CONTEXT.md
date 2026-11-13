@@ -1,34 +1,34 @@
-# AutoDrive Frontend — Domain Context
+# EduLMS Frontend — Domain Context
 
 Domain glossary and product boundaries. Routes, state, UI architecture, generated API types, and i18n setup live in `docs/architecture/overview.md`.
 
 ## Overview
 
-React 19 + Vite + TypeScript frontend for an Uzbek driving school CRM. Tenant-facing application serving owners, managers, accountants, operators, and teachers across driving school branches. Built with shadcn/ui, TanStack Router, TanStack Query, Zustand, and a tenant-local **Warm Paper** visual system (warm off-white surfaces, rust accent). Shared `@autodrive/design-tokens` remain the package default; the tenant CRM overrides palette in `src/index.css` so the admin panel stays unchanged.
+React 19 + Vite + TypeScript frontend for a learning management platform (LMS) used by Uzbek education centers. Tenant-facing application serving owners, managers, accountants, operators, and teachers across branches. Built with shadcn/ui, TanStack Router, TanStack Query, Zustand, and the shared design tokens in `src/index.css` / `src/styles/`.
 
 ## Product boundaries
 
-**Tenant App**:
-The authenticated driving-school workspace used by owners, managers, accountants, operators, and teachers. It contains no public marketing or editorial pages.
-_Avoid_: website, landing app, public app
-
-**Public Web**:
-The public Automaktab presence containing the landing pages and blog. It is separate from the Tenant App.
-_Avoid_: CRM, tenant app
+**Tenant App**: the authenticated workspace used by owners, managers, accountants, operators, and teachers. It contains no public marketing pages. Students use a separate learner portal (legacy `/api` endpoints); in this app staff record student answers on their behalf.
 
 ---
 
 ## Domain Glossary
 
-| Term (UZ)     | English         | Definition                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Filial        | Branch          | Tenant boundary — each branch has its own manager, operators, teachers, students, groups, schedule. Equivalent to a franchise location or school office.                                                                                                                                                                                                                                                                                            |
-| Guruh         | Group           | A class of students. Has a teacher, a course type (teoriya / amaliy), a schedule template, and a fixed capacity.                                                                                                                                                                                                                                                                                                                                    |
-| Talaba        | Student         | Two types: **tezkor** (express course, shorter duration, compact payment plan) and **avto_maktab** (full course, standard duration, more expensive, installment payments). Students carry payment fields (debt, total_amount, paid_amount). `group_id`/`group_name` are optional for both course types — a student (tezkor or avto_maktab) can exist with no assigned group; no frontend validation requires one.                                   |
-| Dars          | Lesson          | Individual session — either **teoriya** (theory, classroom) or **amaliy** (practice, driving). Linked to a group. Generated automatically from a schedule template.                                                                                                                                                                                                                                                                                 |
-| Davomat       | Attendance      | Per-student-per-lesson record. States: **present** (keldi), **absent** (kelmadi), **late** (kech qoldi), **excused** (uzrli).                                                                                                                                                                                                                                                                                                                       |
-| Jadval        | Schedule        | Weekly schedule template assigned to a group. Defines which days/hours lessons occur. Auto-generates lessons for the scheduled period.                                                                                                                                                                                                                                                                                                              |
-| To'lov        | Payment         | Student payment record. Supports partial payments, installment tracking, and debt management. `debt` is a single running balance, not an invoice/ledger entity — it can go **negative**, meaning the student has a credit balance (overpaid / advance payment), not an amount owed. UI treats `debt > 0` as owed (destructive/red), `debt < 0` as credit (shown via `students.credit_label`, abs value, success/green), `debt === 0` as fully paid. |
-| Foydalanuvchi | User            | Roles: **dev** (platform developer, all access), **owner** (company owner, cross-branch analytics + branch CRUD), **manager** (branch manager, full branch operations), **accountant** (company accountant), **operator** (day-to-day registrar), **teacher** (read-only on assigned students/groups).                                                                                                                                              |
-| Sana oralig‘i | Date Range      | Inclusive pair of Calendar Dates (`from` / `to` as `YYYY-MM-DD`). Same-day allowed. Wire params stay `date_from` / `date_to`. _Avoid_: period, interval, date filter.                                                                                                                                                                                                                                                                               |
-| —             | DateRangePicker | Single-trigger + range calendar for Date Range in filter bars (Students, Payments, Audit, Dashboard). _Avoid_: DateRangeFields, dual DatePicker.                                                                                                                                                                                                                                                                                                    |
+| Term (UZ)          | English            | Definition |
+| ------------------ | ------------------ | ---------- |
+| Filial             | Branch             | Tenant boundary — each branch has its own manager, operators, teachers, students, groups and schedule. |
+| Fan / Kategoriya   | Subject / Category | Two-level catalogue (category → subject). A course may belong to one subject. |
+| Kurs               | Course             | A paid program (online/offline, price, duration). Owns the curriculum. |
+| O‘quv dasturi      | Curriculum         | Ordered **modules** → **lessons** (text, video link, duration) → **materials** (file, video, link). |
+| Guruh              | Group              | A class of students taught by one teacher, optionally linked to a course. |
+| Kursga yozilish    | Enrollment         | A student is enrolled in a course directly (`course_id`) or through an active membership in one of the course's groups. |
+| Topshiriq          | Assignment         | Homework for a course or group with a due date and max score. Each student has at most one **submission** (submitted → graded / returned). |
+| Test / Imtihon     | Quiz / Exam        | Question bank (single, multiple, text answers), pass percent, attempt limit. Draft → published → closed. Attempts are graded automatically; text answers without an answer key need manual review. |
+| Baholar jurnali    | Gradebook          | Union of graded submissions and graded quiz attempts. |
+| Progress           | Progress           | Per student: lesson completion per course, attendance rate, assignment and test averages. |
+| Dars (jadval)      | Lesson (schedule)  | A scheduled class session for a group (`theory` / `practice`), generated from schedule templates; carries attendance. Distinct from a curriculum lesson. |
+| Davomat            | Attendance         | Per-student-per-lesson record: present, absent, late, excused. |
+| To'lov             | Payment            | Student payment record. `debt` is a running balance; negative means credit. |
+| Bildirishnoma      | Notification       | Message to everyone, teachers, students, a group or one person; read state is per recipient. |
+| Foydalanuvchi      | User               | Roles: **dev**, **owner**, **manager**, **accountant** (finance only), **operator**, **teacher** (LMS writes limited to own groups). |
+| Sana oralig‘i      | Date Range         | Inclusive pair of calendar dates (`date_from` / `date_to`). |

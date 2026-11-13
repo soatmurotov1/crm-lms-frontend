@@ -11,8 +11,8 @@ import { renderWithRouter } from '@/test/utils/renderWithRouter';
 //  2. URL filter params drive the useStudentsPage fetch args
 //  3. explicit empty state (not a blank table) when the list is empty
 //  4. role gating: teacher sees no add/edit/delete controls, nor payment
-//     amounts (price columns, Excel export) — autodrive-vh0.2. The debt
-//     column becomes a paid/owing badge instead of an amount — autodrive-vh0.5
+//     amounts (price columns, Excel export) — . The debt
+//     column becomes a paid/owing badge instead of an amount — 
 // They must pass unmodified before AND after the decomposition.
 
 const h = vi.hoisted(() => ({
@@ -40,7 +40,7 @@ const STUDENTS = [
     first_name: 'aziz',
     phone: '+998901234567',
     total_price: 3000000,
-    course_type: 'tezkor',
+    course_type: 'online',
     branch_id: 'b1',
     branch_name: 'Chilonzor',
     group_name: 'G-12',
@@ -57,7 +57,7 @@ const STUDENTS = [
     first_name: 'malika',
     phone: '+998907654321',
     total_price: 3000000,
-    course_type: 'tezkor',
+    course_type: 'online',
     branch_id: 'b1',
     branch_name: 'Chilonzor',
     group_name: 'G-12',
@@ -189,13 +189,13 @@ describe('StudentsPage characterization', () => {
 
   it('feeds URL filter params into the students fetch', async () => {
     await renderPage(
-      '/students?course_type=avto_maktab&branch_id=b9&operator_id=op7' +
+      '/students?course_type=offline&branch_id=b9&operator_id=op7' +
         '&q=aziz&status=active&has_debt=true&has_group=false' +
         '&date_from=2026-07-01&date_to=2026-07-03',
     );
 
     const last = h.useStudentsPage.mock.calls.at(-1)!;
-    expect(last[0]).toBe('avto_maktab'); // courseType
+    expect(last[0]).toBe('offline'); // courseType
     expect(last[1]).toBe('b9'); // branchId
     expect(last[4]).toBe('op7'); // operatorId
     expect(last[5]).toMatchObject({
@@ -207,9 +207,8 @@ describe('StudentsPage characterization', () => {
     expect(last[5].dateFrom).toBeInstanceOf(Date);
     expect(last[5].dateTo).toBeInstanceOf(Date);
 
-    // avto_maktab course type switches the desktop table columns.
+    // offline course type switches the desktop table columns.
     expect(screen.getByText('students.contract_number')).toBeInTheDocument();
-    expect(screen.getByText('students.o83')).toBeInTheDocument();
   });
 
   it('renders the authoritative current debtor pages without applying a creation-date cutoff', async () => {
@@ -240,7 +239,7 @@ describe('StudentsPage characterization', () => {
       refetch: vi.fn(),
     }));
     await renderPage(
-      '/students?branch_id=b1&course_type=tezkor&status=active&has_debt=true&limit=10',
+      '/students?branch_id=b1&course_type=online&status=active&has_debt=true&limit=10',
     );
     const last = h.useStudentsPage.mock.calls.at(-1)!;
     expect(last[5]).toMatchObject({ status: 'active', hasDebt: true });
@@ -318,12 +317,12 @@ describe('StudentsPage characterization', () => {
     expect(screen.queryByRole('button', { name: 'students.add' })).toBeNull();
     expect(screen.queryAllByLabelText('common.edit').length).toBe(0);
     expect(screen.queryAllByLabelText('common.delete').length).toBe(0);
-    // autodrive-vh0.2: export embeds total_price/debt in every row -- a
+    // export embeds total_price/debt in every row -- a
     // teacher (no recordPayment) must not see the button at all.
     expect(
       screen.queryByRole('button', { name: /students\.export_excel/ }),
     ).toBeNull();
-    // autodrive-vh0.5: the debt column header stays (it's now a paid/owing
+    // the debt column header stays (it's now a paid/owing
     // badge slot, not dropped), but this fixture has no has_debt so neither
     // badge state renders, and the amount never leaks.
     expect(screen.getByText('students.debt')).toBeInTheDocument();
@@ -332,7 +331,7 @@ describe('StudentsPage characterization', () => {
     expect(screen.queryByText(formatMoney(500000))).toBeNull();
   });
 
-  // autodrive-52v.3: deleting the last row of the last page left currentPage
+  // deleting the last row of the last page left currentPage
   // pointing past the new (shrunk) totalPages -- the page silently kept
   // requesting a page that no longer exists. Same clamp GroupsPage already
   // had; StudentsPage, PaymentsPage and UsersPage didn't.
@@ -379,7 +378,6 @@ const fillDraft = () => {
     last_name: 'Synthetic',
     first_name: 'Student',
     phone: '901234567',
-    learner_password: 'synthetic123',
   })) {
     fireEvent.change(draftInput(name), { target: { value } });
   }
@@ -394,7 +392,7 @@ describe('Save-and-add real parent mutation wiring', () => {
       }),
     );
     h.user = { role: 'manager', branch_id: 'b1' };
-    await renderPage('/students?course_type=tezkor');
+    await renderPage('/students?course_type=online');
     fireEvent.click(screen.getAllByRole('button', { name: 'students.add' })[0]);
     fillDraft();
     fireEvent.click(
@@ -410,7 +408,7 @@ describe('Save-and-add real parent mutation wiring', () => {
       last_name: 'Synthetic',
       first_name: 'Student',
       branch_id: 'b1',
-      course_type: 'tezkor',
+      course_type: 'online',
       phone: '+998901234567',
     });
     expect(draftInput('last_name')).toHaveValue('Synthetic');
@@ -451,12 +449,12 @@ describe('Save-and-add real parent mutation wiring', () => {
         id: 'c1',
         name: 'Synthetic course',
         branch_id: 'b1',
-        course_type: 'tezkor',
+        course_type: 'online',
         price: 120000,
         is_active: true,
       },
     ];
-    await renderPage('/students?course_type=tezkor');
+    await renderPage('/students?course_type=online');
     fireEvent.click(screen.getAllByRole('button', { name: 'students.add' })[0]);
     fillDraft();
     fireEvent.change(draftInput('amount_paid'), { target: { value: '20000' } });
@@ -484,7 +482,6 @@ describe('Save-and-add real parent mutation wiring', () => {
     expect(
       screen.getByRole('combobox', { name: 'students.sections.course' }),
     ).toHaveTextContent('Synthetic course');
-    expect(draftInput('learner_password')).toHaveValue('synthetic123');
     expect(draftInput('amount_paid')).toHaveValue('20 000');
     expect(draftInput('last_name')).toBeEnabled();
     expect(document.querySelector('textarea[name="notes"]')).toHaveValue(
@@ -523,7 +520,7 @@ describe('Save-and-add real parent mutation wiring', () => {
         <StudentsPage />
       </QueryClientProvider>,
       {
-        initialEntry: '/students?course_type=tezkor',
+        initialEntry: '/students?course_type=online',
         routePattern: '/students',
       },
     );
@@ -550,7 +547,7 @@ describe('Save-and-add real parent mutation wiring', () => {
 
   it('preserves dirty cancellation and starts a fresh draft when reopened', async () => {
     h.user = { role: 'manager', branch_id: 'b1' };
-    await renderPage('/students?course_type=tezkor');
+    await renderPage('/students?course_type=online');
     fireEvent.click(screen.getAllByRole('button', { name: 'students.add' })[0]);
     fillDraft();
     fireEvent.click(screen.getByRole('button', { name: 'common.cancel' }));

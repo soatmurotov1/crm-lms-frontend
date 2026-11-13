@@ -4,7 +4,6 @@ import { useNavigate } from '@tanstack/react-router';
 import type { AxiosError } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { AuthResponse, User } from '@/features/staff/types';
-import { track } from '@/lib/umami';
 import { resetAuthSessionState } from '@/lib/queryClient';
 import { preconnectApi } from '@/lib/preconnectApi';
 import { authKeys } from '@/lib/queryKeys';
@@ -27,14 +26,13 @@ export const useLogin = () => {
   const queryClient = useQueryClient();
   const setAuth = useAuthStore((s) => s.setAuth);
   return useMutation({
-    mutationFn: async (creds?: LoginRequest) => {
-      const { demoLoginRequest, loginRequest } = await loadAuthApi();
-      return creds ? loginRequest(creds) : demoLoginRequest();
+    mutationFn: async (creds: LoginRequest) => {
+      const { loginRequest } = await loadAuthApi();
+      return loginRequest(creds);
     },
     onSuccess: (data) => {
       setAuth(data.token, data.user);
       queryClient.setQueryData(authKeys.me(), data.user);
-      track('login_success', { role: data.user.role });
     },
   });
 };

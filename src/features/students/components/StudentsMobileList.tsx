@@ -39,7 +39,7 @@ interface StudentsMobileListProps {
   onEdit: (student: Student) => void;
   onDelete: (id: string) => void;
   onCreate: () => void;
-  // autodrive-cg9: owner-only "show deleted" toggle — a deleted card swaps
+  // owner-only "show deleted" toggle — a deleted card swaps
   // edit/delete for a single restore action.
   canViewDeleted: boolean;
   onRestore: (id: string) => void;
@@ -102,7 +102,7 @@ export const StudentsMobileList = ({
             {
               label: t('students.detail.course'),
               value:
-                s.course_type === 'tezkor'
+                s.course_type === 'online'
                   ? t('students.course_fast')
                   : t('students.course_school'),
             },
@@ -133,7 +133,7 @@ export const StudentsMobileList = ({
                   ]
                 : []
               : // Teacher: paid/owing badge instead of an amount
-                // (autodrive-vh0.5). Omit the field entirely rather than
+                //. Omit the field entirely rather than
                 // show a label with no value when has_debt is missing.
                 s.has_debt !== undefined
                 ? [

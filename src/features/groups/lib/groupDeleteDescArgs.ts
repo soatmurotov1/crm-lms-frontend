@@ -1,6 +1,6 @@
 import { Group } from '@/features/groups/types';
 
-// Blast-radius copy for the delete confirm (autodrive-cg9) -- exported as a
+// Blast-radius copy for the delete confirm -- exported as a
 // pure function (own file, not GroupsPage.tsx, so react-refresh/only-
 // export-components stays happy) so the branch (empty vs N-enrolled) is
 // unit-testable without fighting the test suite's react-i18next mock

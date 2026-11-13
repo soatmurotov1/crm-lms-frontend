@@ -9,7 +9,7 @@ describe('payment page request contract', () => {
     expect(
       toPaymentQueryParams({
         branchId: 'branch-1',
-        courseType: 'tezkor',
+        courseType: 'online',
         startDate: new Date(2026, 6, 1),
         endDate: new Date(2026, 6, 9),
         page: 3,
@@ -23,7 +23,7 @@ describe('payment page request contract', () => {
       }),
     ).toEqual({
       branch_id: 'branch-1',
-      course_type: 'tezkor',
+      course_type: 'online',
       start_date: '2026-07-01',
       end_date: '2026-07-09',
       page: 3,

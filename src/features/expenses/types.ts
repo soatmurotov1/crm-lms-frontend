@@ -1,7 +1,6 @@
 export type ExpenseCategory =
   | 'rent'
   | 'utilities'
-  | 'vehicle'
   | 'marketing'
   | 'supplies'
   | 'administrative'
@@ -14,8 +13,6 @@ export interface Expense {
   id: string;
   branch_id: string | null;
   branch_name: string | null;
-  vehicle_id: string | null;
-  vehicle_plate_number: string | null;
   created_by_id: string;
   category: ExpenseCategory;
   title: string;
@@ -110,14 +107,6 @@ export interface ExpenseBranchOption {
   name: string;
 }
 
-export interface ExpenseVehicleOption {
-  id: string;
-  plate_number: string;
-  branch_id: string;
-  make: string;
-  model: string;
-}
-
 /** Active teachers with a branch — from GET /expenses/teacher-options. */
 export interface ExpenseTeacherOption {
   id: string;
@@ -195,7 +184,6 @@ export interface CreateExpensePayload {
   payee?: string | null;
   note?: string | null;
   branch_id?: string | null;
-  vehicle_id?: string;
   idempotency_key: string;
 }
 
@@ -208,7 +196,6 @@ export interface UpdateExpensePayload {
   payee?: string | null;
   note?: string | null;
   branch_id?: string | null;
-  vehicle_id?: string | null;
   expected_version: number;
 }
 

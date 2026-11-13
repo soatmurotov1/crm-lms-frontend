@@ -6,7 +6,6 @@ import {
   branchKeys,
   courseKeys,
   dashboardKeys,
-  examKeys,
   groupKeys,
   lessonKeys,
   operatorKeys,
@@ -17,8 +16,6 @@ import {
   teacherKeys,
   telegramKeys,
   userKeys,
-  questionKeys,
-  schoolTestKeys,
 } from './queryKeys';
 
 describe('studentKeys (base list/page/detail shape)', () => {
@@ -147,11 +144,6 @@ describe('non-base-shape domains (attendance, schedule, dashboard, exams, search
     expect(t).not.toEqual(c);
   });
 
-  it('examKeys.byStudent varies with studentId', () => {
-    expect(examKeys.byStudent('s1')).toEqual(examKeys.byStudent('s1'));
-    expect(examKeys.byStudent('s1')).not.toEqual(examKeys.byStudent('s2'));
-  });
-
   it('searchKeys.query varies with the search term', () => {
     expect(searchKeys.query('abc')).toEqual(searchKeys.query('abc'));
     expect(searchKeys.query('abc')).not.toEqual(searchKeys.query('xyz'));
@@ -160,25 +152,5 @@ describe('non-base-shape domains (attendance, schedule, dashboard, exams, search
   it('authKeys.me and telegramKeys.linkStatus are stable, argument-free keys', () => {
     expect(authKeys.me()).toEqual(authKeys.me());
     expect(telegramKeys.linkStatus()).toEqual(telegramKeys.linkStatus());
-  });
-});
-
-describe('question and school-test keys (#260)', () => {
-  it('questionKeys.page and availableForTests stay distinct', () => {
-    expect(questionKeys.page({ visibility: 'school_private' })).toEqual(
-      questionKeys.page({ visibility: 'school_private' }),
-    );
-    expect(questionKeys.page({ visibility: 'school_private' })).not.toEqual(
-      questionKeys.availableForTests({ page: 1 }),
-    );
-  });
-
-  it('schoolTestKeys.assignments varies with template id', () => {
-    expect(schoolTestKeys.assignments('t1')).toEqual(
-      schoolTestKeys.assignments('t1'),
-    );
-    expect(schoolTestKeys.assignments('t1')).not.toEqual(
-      schoolTestKeys.assignments('t2'),
-    );
   });
 });

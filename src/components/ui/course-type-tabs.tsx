@@ -26,8 +26,8 @@ export function CourseTypeTabs({
   const { t } = useTranslation();
   const options: Array<{ value: CourseTypeTab; label: string }> = [
     { value: 'all', label: t('common.all') },
-    { value: 'tezkor', label: t('students.course_fast') },
-    { value: 'avto_maktab', label: t('students.course_school') },
+    { value: 'online', label: t('students.course_fast') },
+    { value: 'offline', label: t('students.course_school') },
   ];
 
   return (

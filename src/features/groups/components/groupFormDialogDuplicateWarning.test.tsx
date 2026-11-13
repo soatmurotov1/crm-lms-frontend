@@ -10,7 +10,7 @@ import GroupFormDialog from '@/features/groups/components/GroupFormDialog';
 import type { Branch } from '@/features/branches/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-553: create-time duplicate check for group names, normalized
+// create-time duplicate check for group names, normalized
 // (trim + case-insensitive) and scoped to the currently-selected branch --
 // a same-named group in a DIFFERENT branch must NOT trigger the warning.
 // Debounce timing test follows the convention in
@@ -41,7 +41,7 @@ vi.mock('@/features/groups/api/groupService', () => ({
 }));
 
 // GroupFormDialog now also calls useTeachers for its teacher selector
-// (autodrive-vh0.1) -- stub it so the real hook doesn't throw for lack of a
+// -- stub it so the real hook doesn't throw for lack of a
 // QueryClientProvider in this tree.
 vi.mock('@/features/staff/api/teacherService', () => ({
   useTeachers: () => ({ data: [] }),

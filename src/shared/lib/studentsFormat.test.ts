@@ -7,7 +7,7 @@ import { formatDate } from '@/shared/lib/studentsFormat';
  * API: formatDate(d?: string) → 'dd.MM.yyyy' | '—' | raw fallback.
  * Schema: none — display helper only; calendar inputs are YYYY-MM-DD wire strings.
  * User instruction (verbatim): "davom et"
- * Ticket: autodrive-qsgc.3 — never use new Date('YYYY-MM-DD') for calendar dates.
+ * Ticket: never use new Date('YYYY-MM-DD') for calendar dates.
  */
 describe('formatDate (calendar-date safe)', () => {
   it('formats YYYY-MM-DD via local calendar parse (not UTC midnight)', () => {

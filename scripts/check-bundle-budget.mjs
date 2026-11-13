@@ -128,7 +128,7 @@ for (const { prefix, limit } of optionalBudgets) {
   assertBudget(`Optional chunk ${name}`, gzipBytes(`assets/${name}`), limit);
 }
 
-if (/fonts\.googleapis|fonts\.gstatic|api\.automaktab\.uz/.test(html)) {
+if (/fonts\.googleapis|fonts\.gstatic/.test(html)) {
   throw new Error(
     'index.html still references Google Fonts or preconnects the API.',
   );

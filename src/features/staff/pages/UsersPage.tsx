@@ -139,7 +139,7 @@ const UsersPage = () => {
   const canUpdateStaff = useCan('staff.update');
   const isOwner = useAuthStore((state) => state.user?.role === 'owner');
 
-  // Filter state lives in the URL (autodrive-b85.2), same pattern as
+  // Filter state lives in the URL, same pattern as
   // StudentsPage's searchParams/setParam.
   const { searchParams, setParam, setParams } = useUrlParams();
   const search = searchParams.get('q') ?? '';
@@ -173,7 +173,7 @@ const UsersPage = () => {
 
   const debouncedSearch = useDebounce(search, 300);
 
-  // autodrive-cg9: owner-only "show deleted" toggle -- local state (not
+  // owner-only "show deleted" toggle -- local state (not
   // URL), defaults off.
   const [includeDeleted, setIncludeDeleted] = useState(false);
 
@@ -200,7 +200,7 @@ const UsersPage = () => {
   const totalPages = Math.max(1, usersPage?.meta.totalPages ?? 1);
 
   // Deleting the last row of the last page leaves currentPage pointing past
-  // the new totalPages -- clamp back, same fix as GroupsPage (autodrive-52v.3).
+  // the new totalPages -- clamp back, same fix as GroupsPage.
   useEffect(() => {
     if (usersPage && currentPage > totalPages) setCurrentPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -877,7 +877,7 @@ const UsersPage = () => {
         }
       />
 
-      {/* autodrive-cg9: restore only un-deletes this row -- honesty
+      {/* restore only un-deletes this row -- honesty
           requirement, see common.confirm_restore_desc. */}
       <ConfirmDialog
         open={!!restoreId}

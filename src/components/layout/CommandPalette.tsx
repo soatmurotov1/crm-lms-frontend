@@ -40,16 +40,9 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
     recordPayment: useCan('recordPayment'),
     viewPayments: useCan('viewPayments'),
     viewExpenses: useCan('viewExpenses'),
-    viewOwnSettlements: useCan('viewOwnSettlements'),
-    viewFuel: useCan('viewFuel'),
-    viewInspections: useCan('viewInspections'),
-    viewVehicles: useCan('viewVehicles'),
-    viewFleetMap: useCan('viewFleetMap'),
-    viewTrainingPrograms: useCan('viewTrainingPrograms'),
-    viewTrainingEnrollments: useCan('viewTrainingEnrollments'),
-    viewDrivingSessions: useCan('viewDrivingSessions'),
-    viewSchoolLearning: useCan('viewSchoolLearning'),
     accessLeads: useCan('accessLeads'),
+    viewDocuments: useCan('viewDocuments'),
+    viewLearning: useCan('viewLearning'),
   };
 
   const user = useAuthStore((state) => state.user);
@@ -79,7 +72,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
     if (!o) setQuery('');
   };
 
-  // autodrive-cdy: backend already groups results by entity type
+  // backend already groups results by entity type
   // ({ students, groups, staff } — see searchService.ts), so render each
   // key as its own CommandGroup instead of re-bucketing a flat list.
   const searchGroups: {
@@ -176,7 +169,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
                   // ponytail: prefix with the live query so cmdk's own
                   // fuzzy filter never hides a result the server already
                   // matched (e.g. phone-number search where the label is
-                  // just a name) — see autodrive-cdy.
+                  // just a name) — see .
                   value={`${query} ${item.label} ${item.subtitle ?? ''}`}
                   onSelect={() => go(`${g.route}/${item.id}`)}
                 >

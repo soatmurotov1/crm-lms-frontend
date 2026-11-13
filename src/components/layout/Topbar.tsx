@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Brand } from './Brand';
+import { NotificationBell } from '@/features/lms/api/widgets';
 
 interface TopbarProps {
   onMobileMenuClick: () => void;
@@ -194,6 +195,8 @@ export const Topbar = ({
           </kbd>
         </button>
       )}
+
+      <NotificationBell />
 
       <button
         type="button"

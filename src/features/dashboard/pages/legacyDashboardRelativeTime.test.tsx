@@ -62,7 +62,7 @@ vi.mock('@/features/payments/api/paymentService', () => ({
             id: 'p1',
             student_name: 'Ali Valiyev',
             branch_name: 'Chorsu',
-            course_type: 'avto_maktab',
+            course_type: 'offline',
             amount_paid: 500000,
             created_at: '2026-07-25T09:55:00.000Z',
           },
@@ -76,8 +76,8 @@ vi.mock('@/features/dashboard/api/dashboardService', () => ({
   useDashboardAnalytics: () => ({
     data: {
       total_students: 10,
-      active_tezkor: 4,
-      active_avto: 6,
+      active_online: 4,
+      active_offline: 6,
       new_this_month: 2,
       new_last_month: 1,
       total_revenue: 1000000,
@@ -88,8 +88,8 @@ vi.mock('@/features/dashboard/api/dashboardService', () => ({
       payment_status: { paid: 5, partial: 0, debt: 0 },
       result_stats: { oqimoqda: 5, topshirdi: 3, yiqildi: 1 },
       monthly_enrollment: [
-        { month: '2026-06', tezkor: 1, avto_maktab: 1 },
-        { month: '2026-07', tezkor: 1, avto_maktab: 1 },
+        { month: '2026-06', online: 1, offline: 1 },
+        { month: '2026-07', online: 1, offline: 1 },
       ],
       monthly_revenue: [{ month: '2026-07', amount: 100000 }],
       branch_stats: [],

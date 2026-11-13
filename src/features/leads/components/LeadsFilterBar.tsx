@@ -14,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SearchWithHotkey } from '@/components/filter/SearchWithHotkey';
 import { ActiveFilterChips } from '@/components/filter/ActiveFilterChips';
@@ -29,7 +30,6 @@ import { leadsApi } from '../api/leadsApi';
 import type {
   ListLeadsQuery,
   LeadSource,
-  Category,
 } from '../types/leads.types';
 
 export interface LeadsFilterBarProps {
@@ -49,7 +49,6 @@ const SOURCES: LeadSource[] = [
   'other',
 ];
 
-const CATEGORIES: Category[] = ['A', 'B', 'BC', 'C', 'D', 'E'];
 
 export const LeadsFilterBar = ({
   filters,
@@ -66,7 +65,7 @@ export const LeadsFilterBar = ({
   const countableFilters = [
     Boolean(filters.stage_id),
     Boolean(filters.source),
-    Boolean(filters.category),
+    Boolean(filters.direction),
     Boolean(filters.assigned_to_me),
     Boolean(filters.overdue_only),
     Boolean(canViewAllBranches && filters.branch_id),
@@ -121,12 +120,12 @@ export const LeadsFilterBar = ({
       });
     }
 
-    if (filters.category) {
+    if (filters.direction) {
       list.push({
-        id: 'category',
-        label: t('vehicles.category', 'Toifa'),
-        value: filters.category,
-        onRemove: () => onChange({ category: undefined }),
+        id: 'direction',
+        label: t('leads.direction', "Yo'nalish"),
+        value: filters.direction,
+        onRemove: () => onChange({ direction: undefined }),
       });
     }
 
@@ -339,34 +338,22 @@ export const LeadsFilterBar = ({
       </div>
 
       <div>
-        <Label className="mb-1.5 block text-xs text-muted-foreground">
-          {t('vehicles.category', 'Toifa')}
-        </Label>
-        <Select
-          value={filters.category || 'ALL'}
-          onValueChange={(val) =>
-            onChange({
-              category: val === 'ALL' ? undefined : (val as Category),
-            })
-          }
+        <Label
+          htmlFor="leads-direction-filter"
+          className="mb-1.5 block text-xs text-muted-foreground"
         >
-          <SelectTrigger
-            className="h-11 w-full border-border bg-secondary"
-            aria-label={t('vehicles.category', 'Toifa')}
-          >
-            <SelectValue placeholder={t('common.all_categories', 'Barchasi')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">
-              {t('common.all_categories', 'Barchasi')}
-            </SelectItem>
-            {CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          {t('leads.direction', "Yo'nalish")}
+        </Label>
+        <Input
+          id="leads-direction-filter"
+          className="h-11 w-full border-border bg-secondary"
+          value={filters.direction ?? ''}
+          maxLength={100}
+          onChange={(event) =>
+            onChange({ direction: event.target.value || undefined })
+          }
+          placeholder={t('leads.direction_placeholder', 'Masalan: Frontend, IELTS')}
+        />
       </div>
     </>
   );

@@ -9,7 +9,7 @@ import { describe, it, expect, vi } from 'vitest';
 import StudentModal from '@/features/students/api/StudentModal';
 import type { Student } from '@/features/students/types';
 
-// autodrive-rz3.1: Student.status was already modelled end-to-end (zod
+// Student.status was already modelled end-to-end (zod
 // schema, defaults, load-from-student, submit payload) but no FormField
 // ever rendered it -- every student was stuck 'active' forever. This locks
 // in the fix: the control shows up in edit mode (and only edit mode) and a
@@ -38,7 +38,7 @@ const STUDENT: Student = {
   last_name: 'Karimov',
   first_name: 'Aziz',
   phone: '+998901234567',
-  course_type: 'tezkor',
+  course_type: 'online',
   branch_id: 'b1',
   payment_method: 'naqd',
   has_document: true,
@@ -54,7 +54,7 @@ const pickSelectOption = (labelText: string, optionText: string) => {
   fireEvent.click(within(screen.getByRole('listbox')).getByText(optionText));
 };
 
-describe('StudentModal status field (autodrive-rz3.1)', () => {
+describe('StudentModal status field', () => {
   it('renders the status control in edit mode and sends a changed value on submit', async () => {
     const onSubmit = vi.fn();
     render(
@@ -63,7 +63,7 @@ describe('StudentModal status field (autodrive-rz3.1)', () => {
         onClose={vi.fn()}
         onSubmit={onSubmit}
         student={STUDENT}
-        courseType="tezkor"
+        courseType="online"
       />,
     );
 
@@ -84,7 +84,7 @@ describe('StudentModal status field (autodrive-rz3.1)', () => {
         open
         onClose={vi.fn()}
         onSubmit={vi.fn()}
-        courseType="tezkor"
+        courseType="online"
       />,
     );
 

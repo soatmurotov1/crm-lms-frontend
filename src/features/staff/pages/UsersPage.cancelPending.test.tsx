@@ -3,7 +3,7 @@ import { vi, describe, it, expect, afterEach } from 'vitest';
 import UsersPage from '@/features/staff/pages/UsersPage';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// Regression (autodrive-6cq.11.1): Cancel used to close the create-manager
+// Regression: Cancel used to close the create-manager
 // modal even while createMut was still in flight, because useConfirmedClose
 // was only guarded by form dirtiness, not the pending mutation. Clicking
 // Cancel while saving must surface the discard-changes confirm step instead

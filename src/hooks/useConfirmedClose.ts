@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 /**
  * Guards a dialog's close (overlay click, Escape, Cancel button) behind a
- * confirm step when the form has unsaved changes (autodrive-6cq.5.15).
+ * confirm step when the form has unsaved changes.
  * Pass `shouldConfirm` = form.formState.isDirty (RHF) — or that OR'd with a
  * pending mutation, if closing mid-submit should also warn.
  *

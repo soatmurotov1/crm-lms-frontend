@@ -1,6 +1,6 @@
 import { format, isValid, parse } from 'date-fns';
 
-// autodrive-qsgc.3: calendar dates (no time-of-day) are plain YYYY-MM-DD
+// calendar dates (no time-of-day) are plain YYYY-MM-DD
 // strings at every boundary — form, wire, API. Date objects exist ONLY as
 // local-midnight constructions inside the picker; new Date('YYYY-MM-DD')
 // (implicit UTC parse, which shifts the day under positive offsets like

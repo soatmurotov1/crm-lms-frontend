@@ -102,8 +102,8 @@ const archetypes = [
   {
     title: 'A6 Exceptions',
     description:
-      'The fleet map (full bleed) and Login/NotFound (standalone layouts).',
-    blocks: ['Fleet map · full bleed', 'Login / NotFound · standalone'],
+      'Login/NotFound (standalone layouts).',
+    blocks: ['Login / NotFound · standalone'],
   },
 ];
 const roles = [

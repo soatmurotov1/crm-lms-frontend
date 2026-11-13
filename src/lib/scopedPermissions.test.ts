@@ -43,7 +43,7 @@ describe('scoped permissions', () => {
 });
 
 import { useAuthStore } from '@/store/authStore';
-import { studentKeys, vehicleKeys } from '@/lib/queryKeys';
+import { groupKeys, studentKeys } from '@/lib/queryKeys';
 import { queryClient } from '@/lib/queryClient';
 
 describe('access cache isolation', () => {
@@ -72,11 +72,11 @@ describe('access cache isolation', () => {
       activeBranchId: 'a',
     });
     const a = studentKeys.detail('student');
-    const vehicleA = vehicleKeys.detail('vehicle');
+    const groupA = groupKeys.detail('group');
     queryClient.setQueryData(a, { branch: 'a' });
     useAuthStore.getState().setActiveBranch('b');
     expect(studentKeys.detail('student')).not.toEqual(a);
-    expect(vehicleKeys.detail('vehicle')).not.toEqual(vehicleA);
+    expect(groupKeys.detail('group')).not.toEqual(groupA);
     expect(queryClient.getQueryData(a)).toBeUndefined();
     expect(useAuthStore.getState().activeBranchId).toBe('b');
     useAuthStore.getState().setActiveBranch('outside');

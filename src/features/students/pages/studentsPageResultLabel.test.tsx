@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import StudentsPage from '@/features/students/pages/StudentsPage';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// Regression for autodrive-6cq.11.4: the table rendered the raw
+// Regression for the table rendered the raw
 // ResultStatus enum value ('oqimoqda') instead of a localized label, so it
 // looked permanently "stuck" to non-Uzbek-reading users. It must render the
 // same label StudentModal's result <Select> shows.
@@ -13,7 +13,7 @@ const STUDENT = {
   first_name: 'Aziz',
   phone: '+998901234567',
   total_price: 3000000,
-  course_type: 'tezkor',
+  course_type: 'online',
   branch_id: 'b1',
   payment_method: 'naqd',
   debt: 0,

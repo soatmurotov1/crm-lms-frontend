@@ -265,7 +265,7 @@ export const Sidebar = ({
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const pinStorageKey = user?.id
-    ? `autodrive-sidebar-pins:${user.company_id ?? 'default'}:${user.id}`
+    ? `lms-sidebar-pins:${user.company_id ?? 'default'}:${user.id}`
     : null;
   const [pinnedState, setPinnedState] = useState(() => ({
     storageKey: pinStorageKey,
@@ -289,16 +289,9 @@ export const Sidebar = ({
     recordPayment: useCan('recordPayment'),
     viewPayments: useCan('viewPayments'),
     viewExpenses: useCan('viewExpenses'),
-    viewOwnSettlements: useCan('viewOwnSettlements'),
-    viewFuel: useCan('viewFuel'),
-    viewInspections: useCan('viewInspections'),
-    viewVehicles: useCan('viewVehicles'),
-    viewFleetMap: useCan('viewFleetMap'),
-    viewTrainingPrograms: useCan('viewTrainingPrograms'),
-    viewTrainingEnrollments: useCan('viewTrainingEnrollments'),
-    viewDrivingSessions: useCan('viewDrivingSessions'),
-    viewSchoolLearning: useCan('viewSchoolLearning'),
     accessLeads: useCan('accessLeads'),
+    viewDocuments: useCan('viewDocuments'),
+    viewLearning: useCan('viewLearning'),
   };
   const activeBranchId = useAuthStore((state) => state.activeBranchId);
   const canSee = (item: NavItem) =>
@@ -324,7 +317,7 @@ export const Sidebar = ({
     visibleItems.find((item) => isNavActive(location.pathname, item.path))
       ?.section ?? null;
   const sectionStorageKey = user?.id
-    ? `autodrive-sidebar-sections:${user.company_id ?? 'default'}:${user.id}`
+    ? `lms-sidebar-sections:${user.company_id ?? 'default'}:${user.id}`
     : null;
   const [sectionState, setSectionState] = useState(() => ({
     storageKey: sectionStorageKey,

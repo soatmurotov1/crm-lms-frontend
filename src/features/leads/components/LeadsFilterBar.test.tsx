@@ -159,10 +159,10 @@ describe('LeadsFilterBar', () => {
       branch_id: 'branch-1',
       stage_id: 'stage-1',
       source: 'telegram',
-      category: 'B',
+      direction: 'Frontend',
       assigned_to_me: false,
       overdue_only: false,
-      course_type: 'tezkor',
+      course_type: 'online',
       assignee_user_id: 'user-1',
       has_task: true,
       period: '30d',
@@ -204,7 +204,7 @@ describe('LeadsFilterBar', () => {
     const filters: ListLeadsQuery = {
       q: 'ali',
       source: 'telegram',
-      category: 'B',
+      direction: 'Frontend',
       assigned_to_me: true,
     };
     renderBar(filters);

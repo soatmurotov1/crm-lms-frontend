@@ -9,7 +9,7 @@ import { vi, describe, it, expect, afterEach } from 'vitest';
 import UsersPage from '@/features/staff/pages/UsersPage';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-rz3.3: UsersPage only ever rendered PersonModal in create mode --
+// UsersPage only ever rendered PersonModal in create mode --
 // no edit/delete affordance existed even though useUpdateUser and
 // DELETE /users/:id were both already wired. This mirrors OperatorsPage's
 // edit/delete pattern (same PersonModal, same ConfirmDialog, same row

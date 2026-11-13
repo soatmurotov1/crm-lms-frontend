@@ -19,7 +19,7 @@ export const useOperators = () => {
   const isCrossTenant = useIsCrossTenant();
   return useQuery<User[]>({
     queryKey: operatorKeys.list({ branchId, page: 1, limit: 100 }),
-    // autodrive-6ef.17: operator lists are stable org structure, so they can
+    // operator lists are stable org structure, so they can
     // use a longer stale window than the 30s global default.
     staleTime: 5 * 60_000,
     queryFn: async ({ signal }) => {
@@ -33,9 +33,9 @@ export const useOperators = () => {
   });
 };
 
-// Real server-side pagination for OperatorsPage (autodrive-0id). `search` is
-// forwarded to GET /users too (autodrive-b85.3) -- it now matches
-// name/email/phone (autodrive-3kl), so the page no longer needs to
+// Real server-side pagination for OperatorsPage. `search` is
+// forwarded to GET /users too -- it now matches
+// name/email/phone, so the page no longer needs to
 // re-filter the current page client-side.
 export const useOperatorsPage = (
   page: number,
@@ -112,7 +112,7 @@ export const useUpdateOperator = () => {
     },
     // UserDetailPage (/users/:id) reads via userKeys.detail(id), a root
     // operatorKeys.all doesn't cover -- an already-open detail tab kept
-    // showing the pre-edit name/phone for up to 30s (autodrive-52v.2).
+    // showing the pre-edit name/phone for up to 30s.
     // Same dual-invalidate idiom as paymentService's payment mutations.
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: operatorKeys.all });

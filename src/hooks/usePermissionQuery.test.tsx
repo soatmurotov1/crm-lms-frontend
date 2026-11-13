@@ -51,11 +51,11 @@ describe('permission read queries', () => {
   });
   it('keeps another feature lookup disabled without its own read grant', () => {
     expect(permissionForReadQuery(['teachers', 'list'])).toBe('staff.read');
-    expect(
-      permissionForReadQuery(['vehicle-inspections', 'scope', 'defects']),
-    ).toBe('vehicle_defects.read');
-    expect(permissionForReadQuery(['school-tests', 'assignments'])).toBe(
-      'test_assignments.read',
+    expect(permissionForReadQuery(['documents', 'list'])).toBe(
+      'documents.read',
+    );
+    expect(permissionForReadQuery(['leads', 'stages'])).toBe(
+      'lead_stages.read',
     );
     expect(
       permissionForReadQuery(['users', 'detail', 'id', 'access']),

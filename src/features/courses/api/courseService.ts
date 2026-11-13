@@ -11,7 +11,6 @@ import {
   CreateCoursePayload,
   UpdateCoursePayload,
 } from '@/features/courses/types';
-import { track } from '@/lib/umami';
 import { parseListEnvelope, parseItemEnvelope } from '@/lib/apiEnvelope';
 import { courseKeys } from '@/lib/queryKeys';
 import type { CoursesQuery } from '@/shared/api/contract';
@@ -83,7 +82,6 @@ export const useCreateCourse = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: courseKeys.all });
-      track('course_create');
     },
   });
 };
@@ -103,7 +101,6 @@ export const useUpdateCourse = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: courseKeys.all });
-      track('course_update');
     },
   });
 };
@@ -116,7 +113,6 @@ export const useDeleteCourse = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: courseKeys.all });
-      track('course_delete');
     },
   });
 };

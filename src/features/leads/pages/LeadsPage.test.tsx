@@ -236,7 +236,7 @@ describe('LeadsPage', () => {
 
   it('clears only lead filter params in one URL update', () => {
     queryState.search =
-      'q=Aziz&branch_id=branch-b&stage_id=s-1&source=telegram&course_type=tezkor&category=B&assigned_to_me=true&assignee_user_id=user-1&overdue_only=true&has_task=true&period=7d&tab=new&page=4&view=list&limit=50&company_id=company-1';
+      'q=Aziz&branch_id=branch-b&stage_id=s-1&source=telegram&course_type=online&assigned_to_me=true&assignee_user_id=user-1&overdue_only=true&has_task=true&period=7d&tab=new&page=4&view=list&limit=50&company_id=company-1';
 
     render(<LeadsPage />);
     fireEvent.click(screen.getByRole('button', { name: 'clear all' }));

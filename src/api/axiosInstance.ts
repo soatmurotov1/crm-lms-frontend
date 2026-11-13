@@ -3,7 +3,7 @@ import { useAuthStore } from '@/store/authStore';
 import { queryClient, resetAuthSessionState } from '@/lib/queryClient';
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4040/api/v2';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -17,15 +17,8 @@ axiosInstance.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  const explicitBranch = config.headers.get('X-Branch-Id');
-  const hasProgramCreateBranch =
-    config.method?.toLowerCase() === 'post' &&
-    config.url === '/training-programs' &&
-    typeof explicitBranch === 'string' &&
-    explicitBranch.trim().length > 0;
   if (
     activeBranchId &&
-    !hasProgramCreateBranch &&
     !/^\/(auth|permissions)(\/|$)|\/users\/[^/]+\/(access|delegation)$/.test(
       config.url ?? '',
     )

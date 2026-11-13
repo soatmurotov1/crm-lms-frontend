@@ -163,7 +163,7 @@ const LegacyMainDashboard = () => {
       .reverse()
       .map((m) => {
         const v = acc;
-        acc -= (m.tezkor || 0) + (m.avto_maktab || 0);
+        acc -= (m.online || 0) + (m.offline || 0);
         return v;
       })
       .reverse();
@@ -182,12 +182,12 @@ const LegacyMainDashboard = () => {
     ? computeDelta(analytics.new_this_month, analytics.new_last_month)
     : null;
 
-  // Course mix (tezkor / avto_maktab)
+  // Course mix (online / offline)
   const totalCourseMix =
-    (analytics?.active_tezkor ?? 0) + (analytics?.active_avto ?? 0);
+    (analytics?.active_online ?? 0) + (analytics?.active_offline ?? 0);
   const donutData = useMemo(() => {
-    const tezkor = analytics?.active_tezkor ?? 0;
-    const avto = analytics?.active_avto ?? 0;
+    const online = analytics?.active_online ?? 0;
+    const avto = analytics?.active_offline ?? 0;
     return [
       {
         name: t('dashboard.chart_school'),
@@ -199,14 +199,14 @@ const LegacyMainDashboard = () => {
       },
       {
         name: t('dashboard.chart_fast'),
-        value: tezkor,
+        value: online,
         pct: totalCourseMix
-          ? Math.round((tezkor / totalCourseMix) * 1000) / 10
+          ? Math.round((online / totalCourseMix) * 1000) / 10
           : 0,
         fill: 'hsl(var(--warning))',
       },
     ];
-  }, [analytics?.active_tezkor, analytics?.active_avto, totalCourseMix, t]);
+  }, [analytics?.active_online, analytics?.active_offline, totalCourseMix, t]);
 
   // Top branches: sort by revenue desc
   const topBranches = useMemo(
@@ -681,7 +681,7 @@ const LegacyMainDashboard = () => {
                     </div>
                     <div className="truncate text-xs text-muted-foreground">
                       {p.branch_name} ·{' '}
-                      {p.course_type === 'tezkor'
+                      {p.course_type === 'online'
                         ? t('dashboard.chart_fast')
                         : t('dashboard.chart_school')}
                     </div>

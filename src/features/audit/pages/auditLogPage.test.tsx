@@ -5,7 +5,7 @@ import AuditLogPage from '@/features/audit/pages/AuditLogPage';
 import type { AuditLog } from '@/features/audit/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// Characterization tests for AuditLogPage (autodrive decomposition ticket):
+// Characterization tests for AuditLogPage (decomposition ticket):
 // pin current observable behavior before/after extracting src/features/audit/components/*.
 // No role-gating test: the page itself has no role branching — gating lives
 // in auditService (`enabled: canViewAudit`) and route config, both mocked out

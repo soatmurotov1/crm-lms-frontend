@@ -11,5 +11,5 @@ it('uses pressed buttons without dangling tab-panel references', () => {
   expect(selected).not.toHaveAttribute('aria-controls');
 
   fireEvent.click(screen.getByRole('button', { name: 'students.course_fast' }));
-  expect(onChange).toHaveBeenCalledWith('tezkor');
+  expect(onChange).toHaveBeenCalledWith('online');
 });

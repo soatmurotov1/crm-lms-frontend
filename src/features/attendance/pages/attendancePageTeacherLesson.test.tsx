@@ -10,7 +10,7 @@ import {
 import { LessonSummary } from '@/features/attendance/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-vh0.4: a teacher adds an ad-hoc lesson for their own
+// a teacher adds an ad-hoc lesson for their own
 // (server-scoped) group, and may delete/edit only a lesson they created
 // themselves. Reuses the exact create/delete UI and services
 // attendancePageDeleteGate.test.tsx already covers for owner/manager/
@@ -68,7 +68,7 @@ vi.mock('@/features/attendance/api/attendanceService', () => ({
 }));
 
 vi.mock('@/features/groups/api/groupService', () => ({
-  // Teacher-scoped server-side (autodrive-vh0.2) -- GET /groups already
+  // Teacher-scoped server-side -- GET /groups already
   // returns only the teacher's own group(s) by the time it reaches this
   // page, so the create-lesson dialog's group Select needs no extra
   // FE-side filtering.
@@ -101,7 +101,7 @@ beforeEach(() => {
   } as unknown as ReturnType<typeof useUpdateLesson>);
 });
 
-describe('AttendancePage add-lesson affordance for a teacher (autodrive-vh0.4)', () => {
+describe('AttendancePage add-lesson affordance for a teacher', () => {
   it('forwards the debounced list search to the server query', async () => {
     await renderAsRole('teacher', 'teacher-1', '/attendance?q=Group%20A');
     await waitFor(() =>
@@ -125,7 +125,7 @@ describe('AttendancePage add-lesson affordance for a teacher (autodrive-vh0.4)',
   });
 });
 
-describe('AttendancePage delete-own-lesson for a teacher (autodrive-vh0.4)', () => {
+describe('AttendancePage delete-own-lesson for a teacher', () => {
   it('shows delete only on the lesson the teacher created, not the other one', async () => {
     await renderAsRole('teacher', 'teacher-1');
     const deleteButtons = screen.getAllByLabelText('attendance.delete_title');
@@ -143,7 +143,7 @@ describe('AttendancePage delete-own-lesson for a teacher (autodrive-vh0.4)', () 
 // Regression guard for the exact asymmetry manageOwnLesson exists to avoid:
 // operator can create (manageSchedule) but must never get a delete button
 // for a lesson operator created themselves -- the backend does not grant it.
-describe('AttendancePage operator excluded from delete-own (autodrive-vh0.4)', () => {
+describe('AttendancePage operator excluded from delete-own', () => {
   it('hides delete for operator even on a lesson operator created', async () => {
     await renderAsRole('operator', 'teacher-1'); // matches ownLesson.created_by_id
     expect(
@@ -152,9 +152,9 @@ describe('AttendancePage operator excluded from delete-own (autodrive-vh0.4)', (
   });
 });
 
-// SLICE B (autodrive-vh0.4): PATCH /lessons/:id, same ownership shape as
+// SLICE B: PATCH /lessons/:id, same ownership shape as
 // delete -- a teacher edits only a lesson they created for their own group.
-describe('AttendancePage edit-own-lesson for a teacher (autodrive-vh0.4)', () => {
+describe('AttendancePage edit-own-lesson for a teacher', () => {
   it('shows edit only on the lesson the teacher created, not on others or a schedule-generated one', async () => {
     await renderAsRole('teacher', 'teacher-1');
     const editButtons = screen.getAllByLabelText('attendance.edit_title');
@@ -173,7 +173,7 @@ describe('AttendancePage edit-own-lesson for a teacher (autodrive-vh0.4)', () =>
 // for the delete-own affordance), but PATCH /lessons/:id is
 // @Roles(teacher) ONLY -- a non-teacher must never see edit, even on a
 // lesson they created themselves, or clicking it would 403.
-describe('AttendancePage non-teacher excluded from edit (autodrive-vh0.4)', () => {
+describe('AttendancePage non-teacher excluded from edit', () => {
   it('hides edit for manager even on a lesson manager created (teacher-only endpoint)', async () => {
     await renderAsRole('manager', 'teacher-1'); // matches ownLesson.created_by_id
     expect(
@@ -182,7 +182,7 @@ describe('AttendancePage non-teacher excluded from edit (autodrive-vh0.4)', () =
   });
 });
 
-describe('AttendancePage edit-lesson submit (autodrive-vh0.4)', () => {
+describe('AttendancePage edit-lesson submit', () => {
   it('pre-fills the form and sends only the editable fields to the update mutation, never groupId', async () => {
     const mutateAsync = vi.fn().mockResolvedValue({});
     vi.mocked(useUpdateLesson).mockReturnValue({
@@ -218,7 +218,7 @@ describe('AttendancePage edit-lesson submit (autodrive-vh0.4)', () => {
     ).toHaveValue('10.07.2026');
   });
 
-  // autodrive-vh0.6: the teacher dashboard's upcoming-lessons rows link to
+  // the teacher dashboard's upcoming-lessons rows link to
   // /attendance?lesson=<id>. The page must open THAT lesson's drawer directly
   // (summary -> detail drilldown), not just land on the list.
   it('opens the drawer for a lesson deep-linked via ?lesson=<id>', async () => {

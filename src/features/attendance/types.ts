@@ -37,7 +37,7 @@ export type LessonSummary = Omit<Lesson, 'attendance'> & {
 
 export type CreateLessonPayload = CreateLessonRequest;
 
-// SLICE B (autodrive-vh0.4): mirrors the backend's UpdateLessonDto
+// SLICE B: mirrors the backend's UpdateLessonDto
 // (PartialType(OmitType(CreateLessonDto, ['groupId']))) -- groupId is
 // deliberately not editable.
 export type UpdateLessonPayload = UpdateLessonRequest;

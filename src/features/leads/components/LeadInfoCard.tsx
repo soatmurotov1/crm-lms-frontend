@@ -185,14 +185,14 @@ export const LeadInfoCard = ({ lead, className }: LeadInfoCardProps) => {
             </div>
           )}
 
-          {lead.category && (
+          {lead.direction && (
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-muted-foreground">
                 <Tag className="h-4 w-4 shrink-0" />
-                <span>{t('vehicles.category', 'Toifa')}</span>
+                <span>{t('leads.direction', "Yo'nalish")}</span>
               </span>
               <span className="rounded-md bg-secondary px-2 py-0.5 font-bold text-secondary-foreground">
-                {lead.category}
+                {lead.direction}
               </span>
             </div>
           )}
@@ -204,9 +204,9 @@ export const LeadInfoCard = ({ lead, className }: LeadInfoCardProps) => {
                 <span>{t('courses.course_type', 'Kurs turi')}</span>
               </span>
               <span className="font-medium capitalize text-foreground">
-                {lead.courseType === 'avto_maktab'
-                  ? t('courses.avto_maktab', 'Avto maktab')
-                  : t('courses.tezkor', 'Tezkor')}
+                {lead.courseType === 'offline'
+                  ? t('courses.offline', 'Avto maktab')
+                  : t('courses.online', 'Onlayn')}
               </span>
             </div>
           )}

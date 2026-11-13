@@ -11,7 +11,7 @@ import type { Branch } from '@/features/branches/types';
 import type { Group } from '@/features/groups/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-vh0.1: the group form gains an optional teacher selector.
+// the group form gains an optional teacher selector.
 // mutate is a spy (not a real mutation) so these assert on the payload the
 // component builds, same seam as groupFormDialogDuplicateWarning.test.tsx.
 
@@ -43,7 +43,7 @@ const GROUP: Group = {
   id: 'g1',
   name: '11-guruh',
   branch_id: 'b1',
-  course_type: 'avto_maktab',
+  course_type: 'offline',
   active_students: 0,
   is_active: true,
   created_at: '2026-07-01T00:00:00.000Z',

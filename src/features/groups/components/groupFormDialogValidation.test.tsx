@@ -11,7 +11,7 @@ import GroupFormDialog from '@/features/groups/components/GroupFormDialog';
 import type { Branch } from '@/features/branches/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-52v.1: submitting with the required branch <Select> left unset
+// submitting with the required branch <Select> left unset
 // used to just `return` with no toast/inline error -- the dialog looked
 // frozen. Regression: it must now surface an inline <FormMessage> (zod
 // `common.required`) on the branch field, and must not call the mutation.

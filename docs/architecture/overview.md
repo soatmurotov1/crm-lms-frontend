@@ -1,6 +1,6 @@
 # Tenant frontend architecture overview
 
-UI architecture, state management, routes, tech stack, generated API types, cross-repo relationships, and i18n setup for `autodrive-frontend`. Product language, roles, and product boundaries live in `CONTEXT.md`.
+UI architecture, state management, routes, tech stack, generated API types, cross-repo relationships, and i18n setup for the LMS `frontend`. Product language, roles, and product boundaries live in `CONTEXT.md`.
 
 ## UI Architecture — Warm Paper (tenant CRM)
 
@@ -21,7 +21,7 @@ Domain code is feature-first: adding or changing a domain touches one folder.
 ```text
 src/
   routes/               TanStack Router file routes; they compose feature pages
-  features/<feature>/   one folder per domain (vehicles, driving-sessions, auth, …)
+  features/<feature>/   one folder per domain (subjects, lms, courses, auth, …)
     api/                public domain API: hooks, fetchers, and intentionally shared UI
     types.ts            public domain types
     pages/              route-level components                                  routes only
@@ -89,7 +89,7 @@ Route files live in `src/routes/`; `src/app/routeAccess.ts` maps each protected 
 - Operational pages exclude accountants. Accountants use the finance dashboard and expense routes.
 - Company user and branch administration require owner/dev access; manager staff-detail access is narrower than the company-wide user list.
 - Expense visibility is separate from finance mutation permission. Direct dev sessions do not receive company-finance capabilities; impersonation uses the effective owner role.
-- Teachers have their own settlement routes. Driving-session routes also honor feature availability.
+- Teachers see only the LMS records (assignments, tests, grades) of the groups they teach.
 
 TanStack Router compiles file routes into route-local chunks; heavy chart and
 export dependencies are deferred to the routes that use them.
@@ -138,13 +138,12 @@ export dependencies are deferred to the routes that use them.
 
 ## Cross-Repo Relationships
 
-This frontend communicates with **autodrive-backend** (NestJS API) exclusively via REST. The backend is the source of truth for:
+This frontend communicates with the **backend** (NestJS API, `/api/v2`) exclusively via REST. The backend is the source of truth for:
 
 - Auth (JWT generation, session, RBAC)
 - Tenant scoping (branch isolation enforced server-side)
 - Business logic (payment calculations, schedule generation, attendance rules)
 
-The **autodrive-admin-panel** is a separate React app for platform-level administration (dev tool, company switching, cross-tenant views). Not intended for tenant users.
 
 ---
 

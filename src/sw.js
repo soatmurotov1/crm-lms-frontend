@@ -1,4 +1,4 @@
-const CACHE_PREFIX = 'autodrive-offline';
+const CACHE_PREFIX = 'lms-offline';
 const CACHE_NAME = `${CACHE_PREFIX}-v1`;
 const PRECACHE_URLS = self.__WB_MANIFEST.map((entry) => entry.url);
 

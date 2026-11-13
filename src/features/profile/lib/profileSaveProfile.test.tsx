@@ -5,7 +5,7 @@ import { useUpdateUser } from '@/features/staff/api/userService';
 import { useTelegramLinkStatus } from '@/features/profile/api/telegramService';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// Regression test for autodrive-f9u.8: the Save button used to have no
+// Regression test for the Save button used to have no
 // onClick and the inputs were uncontrolled -- editing them and clicking
 // Save silently did nothing. PATCH /users/:id is @Roles(owner, manager,
 // dev) only, so operator/teacher can't use it -- their fields must stay

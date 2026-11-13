@@ -52,7 +52,7 @@ vi.mock('@/features/branches/api/branchService', () => ({
 }));
 
 // GroupFormDialog (always mounted, just closed) now also calls useTeachers
-// for its teacher selector (autodrive-vh0.1) -- needs stubbing same as
+// for its teacher selector -- needs stubbing same as
 // groupService/branchService above, or the real hook throws for lack of a
 // QueryClientProvider in this tree.
 vi.mock('@/features/staff/api/teacherService', () => ({
@@ -65,7 +65,7 @@ const GROUPS: Partial<Group>[] = [
     name: 'Alpha guruh',
     branch_id: 'b1',
     branch_name: 'Yunusobod filiali',
-    course_type: 'avto_maktab',
+    course_type: 'offline',
     active_students: 12,
     is_active: true,
     created_at: '2026-07-01T00:00:00.000Z',
@@ -75,7 +75,7 @@ const GROUPS: Partial<Group>[] = [
     name: 'Beta guruh',
     branch_id: 'b2',
     branch_name: 'Chilonzor filiali',
-    course_type: 'tezkor',
+    course_type: 'online',
     active_students: 5,
     is_active: false,
     created_at: '2026-06-15T00:00:00.000Z',
@@ -182,8 +182,8 @@ describe('GroupsPage rendering', () => {
 
 describe('GroupsPage URL filter params', () => {
   it('feeds q/course_type/branch_id from the URL into useGroups', async () => {
-    await renderPage('/groups?q=alpha&course_type=tezkor&branch_id=b2');
-    // autodrive-553: GroupFormDialog (always mounted, just closed) now also
+    await renderPage('/groups?q=alpha&course_type=online&branch_id=b2');
+    // GroupFormDialog (always mounted, just closed) now also
     // calls useGroups for its own create-time duplicate check, so `.at(-1)`
     // is no longer reliably the page's call -- only the page passes
     // `courseType` explicitly.
@@ -193,7 +193,7 @@ describe('GroupsPage URL filter params', () => {
     expect(lastCall).toEqual({
       search: 'alpha',
       branchId: 'b2',
-      courseType: 'tezkor',
+      courseType: 'online',
       includeDeleted: false,
     });
     // Search input is hydrated from the URL too.
@@ -287,7 +287,7 @@ describe('GroupsPage role gating', () => {
   });
 });
 
-// autodrive-cg9: delete confirmations used to say nothing about what the
+// delete confirmations used to say nothing about what the
 // deletion affects. Group delete cascades -- groups.service.ts remove()
 // unenrolls (groupId -> null) every student in the group before soft-
 // deleting it -- so active_students (already rendered in the same row/card,
@@ -300,7 +300,7 @@ describe('GroupsPage role gating', () => {
 // rendered "12" is never observable via screen.getByText. Testing the pure
 // function is the only way to actually pin the count value; the render-level
 // tests below cover the (still real) risk of the wrong branch/key firing.
-describe('groupDeleteDescArgs (autodrive-cg9)', () => {
+describe('groupDeleteDescArgs', () => {
   it('picks the with-students key and carries the real count for an enrolled group', () => {
     expect(
       groupDeleteDescArgs({ name: 'Alpha guruh', active_students: 12 }),
@@ -324,7 +324,7 @@ describe('groupDeleteDescArgs (autodrive-cg9)', () => {
   });
 });
 
-describe('GroupsPage delete confirmation blast radius (autodrive-cg9)', () => {
+describe('GroupsPage delete confirmation blast radius', () => {
   it('renders the with-students copy key for a group that has enrolled students', async () => {
     await renderPage();
     // GROUPS[0] (Alpha guruh) has active_students: 12 -- table row renders

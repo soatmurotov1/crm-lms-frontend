@@ -23,7 +23,6 @@ import {
   UserPlus,
   UsersThree,
   Wallet,
-  GasPump,
 } from '@phosphor-icons/react';
 import {
   Collapsible,
@@ -65,9 +64,6 @@ const RevenueTrendChart = lazy(
   () => import('@/features/dashboard/components/RevenueTrendChart'),
 );
 
-const FleetWorkloadOperationsCenter = lazy(
-  () => import('@/features/dashboard/components/FleetWorkloadOperationsCenter'),
-);
 
 const UZ_TIMEZONE = 'Asia/Tashkent';
 const freshnessTimestampFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -230,7 +226,7 @@ const FilterBar = ({
         max={today}
         onChange={(nextFrom, nextTo) => {
           // Always one updateParam('range') so from/to stay in sync
-          // (same batching rule as autodrive-6cq.5.70).
+          // (same batching rule as ).
           const f = nextFrom ?? startOfMonthInUz();
           const t = nextTo ?? today;
           onChange('range', `${f <= t ? f : t}|${f <= t ? t : f}`);
@@ -612,7 +608,7 @@ const CompanyRevenueDashboard = () => {
     'revenue' | 'active_students' | 'outstanding_debt' | 'collection_rate'
   >('revenue');
   const [detailView, setDetailView] = useState<
-    'financial' | 'academic' | 'staff' | 'operations'
+    'financial' | 'academic' | 'staff'
   >('financial');
   const { data: branches = [] } = useBranches(canViewAllBranches);
   const query = useMemo(
@@ -831,16 +827,6 @@ const CompanyRevenueDashboard = () => {
         'O‘qituvchi yuklamasi va ishlarning o‘z vaqtida bajarilishi.',
       ),
       icon: UsersThree,
-    },
-    {
-      key: 'operations',
-      label: t('operations.title', 'Instruktorlar va Avtopark Nazorati'),
-      buttonLabel: t('operations.tab_operations', 'Operatsion Radar'),
-      description: t(
-        'operations.subtitle',
-        'Filiallar kesimida amaliyot soatlari, toliqish xavfi va yoqilg‘i sarfi me’yorlari monitoringi.',
-      ),
-      icon: GasPump,
     },
   ];
   const activeDetailView =
@@ -1666,7 +1652,7 @@ const CompanyRevenueDashboard = () => {
                           )}
                         </h4>
                         <div className="mt-2 divide-y divide-border/70">
-                          {(['tezkor', 'avto_maktab'] as const).map(
+                          {(['online', 'offline'] as const).map(
                             (courseType) => {
                               const entry =
                                 kpis.revenue_by_course_type[courseType];
@@ -1878,24 +1864,6 @@ const CompanyRevenueDashboard = () => {
                   </>
                 )}
 
-                {detailView === 'operations' && (
-                  <Suspense
-                    fallback={
-                      <div
-                        role="status"
-                        aria-live="polite"
-                        aria-busy="true"
-                        className="space-y-4 pt-2"
-                      >
-                        <span className="sr-only">{t('common.loading')}</span>
-                        <Skeleton className="h-32 w-full rounded-lg" />
-                        <Skeleton className="h-64 w-full rounded-lg" />
-                      </div>
-                    }
-                  >
-                    <FleetWorkloadOperationsCenter />
-                  </Suspense>
-                )}
 
                 {detailView === 'staff' && (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -1971,7 +1939,7 @@ const CompanyRevenueDashboard = () => {
                       )}
                       icon={<UserCheck className="h-4 w-4" />}
                       tone="info"
-                      onClick={() => navigate({ to: '/operators' })}
+                      onClick={() => navigate({ to: '/users' })}
                     />
                   </div>
                 )}

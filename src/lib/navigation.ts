@@ -5,7 +5,6 @@ import {
   GraduationCap,
   CreditCard,
   Wallet,
-  Headphones,
   UsersThree,
   User,
   Stack,
@@ -14,45 +13,39 @@ import {
   Calendar,
   ListChecks,
   BookOpen,
-  Car,
-  MapTrifold,
-  Exam,
-  ClipboardText,
   Briefcase,
-  SteeringWheel,
   GearSix,
+  FileText,
+  Books,
+  ClipboardText,
+  Exam,
+  ChartBar,
+  Bell,
 } from '@phosphor-icons/react';
 import type { Capability } from '@/lib/permissions';
-import { drivingSessionsEnabled } from '@/lib/featureAvailability';
 
 export type NavSectionId =
-  'workspace' | 'vehicles' | 'learning' | 'team' | 'system';
+  'workspace' | 'learning' | 'team' | 'system';
 
 export type AppRoutePath =
   | '/dashboard'
   | '/schedule'
   | '/attendance'
   | '/groups'
-  | '/vehicle-fuel'
-  | '/vehicle-inspections'
-  | '/fuel-stations'
-  | '/vehicles'
-  | '/fleet-map'
-  | '/training-programs'
-  | '/training-enrollments'
-  | '/driving-sessions'
   | '/courses'
   | '/students'
   | '/leads'
-  | '/questions'
-  | '/school-tests'
   | '/payments'
   | '/expenses'
-  | '/my-settlements'
   | '/branches'
-  | '/operators'
   | '/teachers'
   | '/users'
+  | '/documents'
+  | '/subjects'
+  | '/assignments'
+  | '/exams'
+  | '/grades'
+  | '/notifications'
   | '/audit'
   | '/design-system'
   | '/profile';
@@ -80,7 +73,6 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Briefcase,
     collapsible: false,
   },
-  { id: 'vehicles', labelKey: 'nav_sections.vehicles', icon: SteeringWheel },
   { id: 'learning', labelKey: 'nav_sections.learning', icon: GraduationCap },
   { id: 'team', labelKey: 'nav_sections.team', icon: UsersThree },
   { id: 'system', labelKey: 'nav_sections.system', icon: GearSix },
@@ -127,62 +119,6 @@ const allNavItems: NavItem[] = [
     cap: 'accessOperations',
   },
   {
-    path: '/vehicle-fuel',
-    labelKey: 'fuel.title',
-    icon: Car,
-    section: 'vehicles',
-    cap: 'viewFuel',
-  },
-  {
-    path: '/vehicle-inspections',
-    labelKey: 'inspections.title',
-    icon: ShieldCheck,
-    section: 'vehicles',
-    cap: 'viewInspections',
-  },
-  {
-    path: '/fuel-stations',
-    labelKey: 'fuel.stations',
-    icon: Buildings,
-    section: 'vehicles',
-    cap: 'viewFuel',
-  },
-  {
-    path: '/vehicles',
-    labelKey: 'nav.vehicles',
-    icon: Car,
-    section: 'vehicles',
-    cap: 'viewVehicles',
-  },
-  {
-    path: '/fleet-map',
-    labelKey: 'nav.fleet_map',
-    icon: MapTrifold,
-    section: 'vehicles',
-    cap: 'viewFleetMap',
-  },
-  {
-    path: '/training-programs',
-    labelKey: 'nav.training_programs',
-    icon: BookOpen,
-    section: 'learning',
-    cap: 'viewTrainingPrograms',
-  },
-  {
-    path: '/training-enrollments',
-    labelKey: 'nav.training_enrollments',
-    icon: GraduationCap,
-    section: 'learning',
-    cap: 'viewTrainingEnrollments',
-  },
-  {
-    path: '/driving-sessions',
-    labelKey: 'nav.driving_sessions',
-    icon: Car,
-    section: 'learning',
-    cap: 'viewDrivingSessions',
-  },
-  {
     path: '/courses',
     labelKey: 'nav.courses',
     icon: BookOpen,
@@ -197,18 +133,34 @@ const allNavItems: NavItem[] = [
     cap: 'accessOperations',
   },
   {
-    path: '/questions',
-    labelKey: 'nav.questions',
-    icon: Exam,
+    path: '/subjects',
+    labelKey: 'nav.subjects',
+    icon: Books,
     section: 'learning',
-    cap: 'viewSchoolLearning',
+    cap: 'viewLearning',
   },
   {
-    path: '/school-tests',
-    labelKey: 'nav.school_tests',
+    path: '/assignments',
+    labelKey: 'nav.assignments',
     icon: ClipboardText,
     section: 'learning',
-    cap: 'viewSchoolLearning',
+    cap: 'viewLearning',
+    pinnable: true,
+  },
+  {
+    path: '/exams',
+    labelKey: 'nav.exams',
+    icon: Exam,
+    section: 'learning',
+    cap: 'viewLearning',
+    pinnable: true,
+  },
+  {
+    path: '/grades',
+    labelKey: 'nav.grades',
+    icon: ChartBar,
+    section: 'learning',
+    cap: 'viewLearning',
   },
   {
     path: '/payments',
@@ -225,25 +177,11 @@ const allNavItems: NavItem[] = [
     cap: 'viewExpenses',
   },
   {
-    path: '/my-settlements',
-    labelKey: 'nav.my_settlements',
-    icon: Wallet,
-    section: 'workspace',
-    cap: 'viewOwnSettlements',
-  },
-  {
     path: '/branches',
     labelKey: 'nav.branches',
     icon: Buildings,
     section: 'team',
     cap: 'manageBranches',
-  },
-  {
-    path: '/operators',
-    labelKey: 'nav.operators',
-    icon: Headphones,
-    section: 'team',
-    cap: 'manageStaff',
   },
   {
     path: '/teachers',
@@ -258,6 +196,19 @@ const allNavItems: NavItem[] = [
     icon: UserGear,
     section: 'team',
     cap: 'manageUsers',
+  },
+  {
+    path: '/notifications',
+    labelKey: 'nav.notifications',
+    icon: Bell,
+    section: 'workspace',
+  },
+  {
+    path: '/documents',
+    labelKey: 'nav.documents',
+    icon: FileText,
+    section: 'workspace',
+    cap: 'viewDocuments',
   },
   {
     path: '/audit',
@@ -282,6 +233,4 @@ const allNavItems: NavItem[] = [
   },
 ];
 
-export const NAV_ITEMS = allNavItems.filter(
-  (item) => drivingSessionsEnabled || item.path !== '/driving-sessions',
-);
+export const NAV_ITEMS = allNavItems;

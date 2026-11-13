@@ -10,13 +10,13 @@ import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { CommandPalette } from '@/components/layout/CommandPalette';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-cdy: Cmd+K palette wires a debounced (300ms, 2+ chars) call to
+// Cmd+K palette wires a debounced (300ms, 2+ chars) call to
 // the global search endpoint alongside the existing static page-name
 // matching, renders results grouped by type (Talabalar/Guruhlar/Xodimlar),
 // and navigates to the right detail route on select.
 
 const searchSpy = vi.fn();
-// autodrive-cdy: real backend shape (PR #114) — { students, groups, staff },
+// real backend shape (PR #114) — { students, groups, staff },
 // each item { id, label, subtitle }. Not a flat type-tagged array.
 const RESULTS = {
   students: [{ id: 's1', label: 'Aziz Karimov', subtitle: '+998901234567' }],
@@ -25,7 +25,7 @@ const RESULTS = {
 };
 const EMPTY_RESULTS = { students: [], groups: [], staff: [] };
 
-// autodrive-d88: lets tests drive isFetching independently of data, to
+// lets tests drive isFetching independently of data, to
 // cover the in-flight loading/disabled states. hasData=false simulates
 // TanStack Query's `data: undefined` before the first fetch resolves.
 const mockQueryState: { isFetching: boolean; hasData: boolean } = {

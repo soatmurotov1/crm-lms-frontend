@@ -4,6 +4,7 @@ import { requireCapability } from '@/app/routeGuards';
 import { ROUTE_CAPABILITIES } from '@/app/routeAccess';
 
 const STUDENT_DETAIL_TABS = [
+  'progress',
   'payments',
   'exams',
   'attendance',

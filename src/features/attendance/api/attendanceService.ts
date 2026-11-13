@@ -17,7 +17,6 @@ import {
   AttendanceHistoryRecord,
 } from '@/features/attendance/types';
 import type { CalendarLesson } from '@/features/schedule/types';
-import { track } from '@/lib/umami';
 import { parseListResponse } from '@/lib/listResponse';
 import { parseListEnvelope, parseItemEnvelope } from '@/lib/apiEnvelope';
 import { lessonKeys, attendanceKeys, scheduleKeys } from '@/lib/queryKeys';
@@ -72,7 +71,7 @@ export const useLessons = (page = 1, limit = 50, search?: string) => {
   );
 };
 
-// A student's attendance history across lessons (autodrive-6ef.26) — distinct
+// A student's attendance history across lessons — distinct
 // from useLessons/useLessonById, which query per-lesson rosters.
 export const attendanceHistoryQueryOptions = (
   studentId?: string,
@@ -121,12 +120,11 @@ export const useCreateLesson = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: lessonKeys.all });
-      track('lesson_create');
     },
   });
 };
 
-// SLICE B (autodrive-vh0.4): PATCH /lessons/:id, teacher-only on the
+// SLICE B: PATCH /lessons/:id, teacher-only on the
 // backend (@Roles(teacher)) -- see AttendancePage's canEditLesson for the
 // matching FE gate. Mirrors useCreateLesson/useDeleteLesson's invalidation.
 export const useUpdateLesson = () => {
@@ -144,7 +142,6 @@ export const useUpdateLesson = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: lessonKeys.all });
-      track('lesson_update');
     },
   });
 };
@@ -227,7 +224,6 @@ export const useBatchAttendance = () => {
       }
     },
     onSuccess: () => {
-      track('attendance_mark');
     },
     onSettled: () =>
       Promise.all([

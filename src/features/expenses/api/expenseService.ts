@@ -17,7 +17,6 @@ import {
   expenseKeys,
   teacherSettlementKeys,
 } from '@/lib/queryKeys';
-import { track } from '@/lib/umami';
 import { tashkentTodayCalendarDate } from '@/lib/tashkentDate';
 import type {
   CreateExpensePayload,
@@ -28,7 +27,6 @@ import type {
   ExpenseHistory,
   ExpensePayment,
   ExpenseBranchOption,
-  ExpenseVehicleOption,
   ExpenseTeacherOption,
   ExpenseMonthCloseCsvFilters,
   DeletedExpenseHistoryFilters,
@@ -524,7 +522,6 @@ export const useCreateExpensePayment = (expenseId: string) => {
     },
     onSuccess: () => {
       invalidateExpenseQueries(queryClient, expenseId);
-      track('expense_payment_create');
     },
   });
 };
@@ -556,39 +553,6 @@ export const useExpenseBranchOptions = () => {
   );
 };
 
-export const expenseVehicleOptionsQueryOptions = (
-  branchId: string | undefined,
-  enabled = true,
-) =>
-  queryOptions({
-    queryKey: expenseKeys.vehicleOptions({ ...expenseIdentity(branchId) }),
-    enabled: enabled && !!branchId,
-    queryFn: async ({ signal }) => {
-      const { data } = await axiosInstance.get<unknown>(
-        '/expenses/vehicle-options',
-        {
-          params: { branch_id: branchId },
-          signal,
-        },
-      );
-      return parseListEnvelope<ExpenseVehicleOption>(data, 'expense-vehicles')
-        .data;
-    },
-  });
-
-export const useExpenseVehicleOptions = (branchId?: string, enabled = true) => {
-  const canViewExpenses = useCan('viewExpenses');
-  const user = useAuthStore((state) => state.user);
-  const scopedBranchId =
-    user?.role === 'manager' ? (user.branch_id ?? undefined) : branchId;
-  return useQuery(
-    expenseVehicleOptionsQueryOptions(
-      scopedBranchId,
-      enabled && canViewExpenses && !!user?.company_id,
-    ),
-  );
-};
-
 export const teacherOptionsQueryOptions = (
   companyId: string | undefined,
   enabled = true,
@@ -615,60 +579,6 @@ export const useExpenseTeacherOptions = (enabled = true) => {
   );
 };
 
-const MY_SETTLEMENTS_PAGE_SIZE = 10;
-
-export const mySettlementsQueryOptions = (
-  page = 1,
-  enabled = true,
-  limit = MY_SETTLEMENTS_PAGE_SIZE,
-) =>
-  queryOptions({
-    queryKey: [
-      ...teacherSettlementKeys.me(page, limit),
-      expenseIdentity(),
-    ] as const,
-    enabled,
-    queryFn: async ({ signal }) => {
-      const { data } = await axiosInstance.get<unknown>(
-        '/teacher-settlements/me',
-        { params: { page, limit }, signal },
-      );
-      return parseListEnvelope<Expense>(data, 'teacher-settlements');
-    },
-  });
-
-export const useMySettlements = (
-  page = 1,
-  enabled = true,
-  limit = MY_SETTLEMENTS_PAGE_SIZE,
-) => {
-  const canViewOwn = useCan('viewOwnSettlements');
-  return useQuery(
-    mySettlementsQueryOptions(page, enabled && canViewOwn, limit),
-  );
-};
-
-export const mySettlementDetailQueryOptions = (id?: string, enabled = !!id) =>
-  queryOptions({
-    queryKey: [
-      ...teacherSettlementKeys.meDetail(id),
-      expenseIdentity(),
-    ] as const,
-    enabled,
-    queryFn: async ({ signal }) => {
-      const { data } = await axiosInstance.get<unknown>(
-        `/teacher-settlements/me/${id}`,
-        { signal },
-      );
-      return parseItemEnvelope<ExpenseHistory>(data, 'teacher-settlement');
-    },
-  });
-
-export const useMySettlementDetail = (id?: string) => {
-  const canViewOwn = useCan('viewOwnSettlements');
-  return useQuery(mySettlementDetailQueryOptions(id, canViewOwn && !!id));
-};
-
 export const useCreateExpense = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -679,7 +589,6 @@ export const useCreateExpense = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: expenseKeys.all });
       invalidateFinanceDashboardQueries(queryClient);
-      track('expense_create');
     },
   });
 };
@@ -703,7 +612,6 @@ export const useCreateTeacherSettlement = () => {
       queryClient.invalidateQueries({
         queryKey: teacherSettlementKeys.all,
       });
-      track('teacher_settlement_create');
     },
   });
 };
@@ -723,7 +631,6 @@ export const useUpdateExpense = () => {
     },
     onSuccess: (_expense, variables) => {
       invalidateExpenseQueries(queryClient, variables.id);
-      track('expense_update');
     },
     onError: (_error, variables) => {
       // A concurrent payment/lifecycle mutation leaves the rendered version
@@ -746,7 +653,6 @@ export const useCancelExpense = (expenseId: string) => {
     },
     onSuccess: () => {
       invalidateExpenseQueries(queryClient, expenseId);
-      track('expense_cancel');
     },
     onError: () => {
       invalidateExpenseQueries(queryClient, expenseId);
@@ -762,7 +668,6 @@ export const useDeleteExpense = (expenseId: string) => {
     },
     onSuccess: () => {
       invalidateExpenseQueries(queryClient, expenseId);
-      track('expense_delete');
     },
     onError: () => {
       invalidateExpenseQueries(queryClient, expenseId);
@@ -785,7 +690,6 @@ export const useVoidExpensePayment = (expenseId: string) => {
     },
     onSuccess: () => {
       invalidateExpenseQueries(queryClient, expenseId);
-      track('expense_payment_void');
     },
     onError: () => {
       invalidateExpenseQueries(queryClient, expenseId);
@@ -796,7 +700,6 @@ export const useVoidExpensePayment = (expenseId: string) => {
 export const expenseCategoryValues: ExpenseCategory[] = [
   'rent',
   'utilities',
-  'vehicle',
   'marketing',
   'supplies',
   'administrative',

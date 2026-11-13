@@ -8,19 +8,10 @@ const SEGMENT_KEYS: Record<string, string> = {
   dashboard: 'nav.dashboard',
   branches: 'nav.branches',
   groups: 'nav.groups',
-  vehicles: 'nav.vehicles',
-  'vehicle-inspections': 'inspections.title',
-  'vehicle-fuel': 'fuel.title',
-  'fuel-stations': 'fuel.stations',
-  'fleet-map': 'nav.fleet_map',
-  'training-programs': 'nav.training_programs',
-  'training-enrollments': 'nav.training_enrollments',
-  'driving-sessions': 'nav.driving_sessions',
   students: 'nav.students',
   payments: 'nav.payments',
   expenses: 'nav.expenses',
-  hujjatlar: 'nav.documents',
-  operators: 'nav.operators',
+  documents: 'nav.documents',
   teachers: 'nav.teachers',
   users: 'nav.users',
   audit: 'nav.audit',
@@ -33,18 +24,10 @@ const ROOT_PATHS: Record<string, AppRoutePath> = {
   dashboard: '/dashboard',
   branches: '/branches',
   groups: '/groups',
-  vehicles: '/vehicles',
-  'vehicle-inspections': '/vehicle-inspections',
-  'vehicle-fuel': '/vehicle-fuel',
-  'fuel-stations': '/fuel-stations',
-  'fleet-map': '/fleet-map',
-  'training-programs': '/training-programs',
-  'training-enrollments': '/training-enrollments',
-  'driving-sessions': '/driving-sessions',
   students: '/students',
   payments: '/payments',
   expenses: '/expenses',
-  operators: '/operators',
+  documents: '/documents',
   teachers: '/teachers',
   users: '/users',
   audit: '/audit',
@@ -58,7 +41,8 @@ const titleCase = (s: string) =>
 
 const ID_SEGMENT =
   /^(\d+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
-const VIEW_LABEL_ROOTS = ['vehicle-inspections', 'vehicle-fuel'];
+/** Detail routes whose last segment shows a generic "view" label. */
+const VIEW_LABEL_ROOTS: string[] = [];
 
 export const Breadcrumbs = () => {
   const { pathname } = useLocation();

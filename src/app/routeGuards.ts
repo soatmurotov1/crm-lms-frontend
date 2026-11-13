@@ -1,7 +1,6 @@
 import { redirect } from '@tanstack/react-router';
 import { type Capability } from '@/lib/permissions';
 import { canAccessRoute } from '@/app/routeAccess';
-import { drivingSessionsEnabled } from '@/lib/featureAvailability';
 import { getDefaultAuthenticatedRoute } from '@/lib/defaultAuthenticatedRoute';
 import { useAuthStore } from '@/store/authStore';
 
@@ -53,15 +52,6 @@ export function requireCapability(
       to: getDefaultAuthenticatedRoute(auth.user),
       replace: true,
     });
-  }
-
-  if (
-    auth.hasHydrated &&
-    auth.isAuthenticated &&
-    capability === 'viewDrivingSessions' &&
-    !drivingSessionsEnabled
-  ) {
-    throw redirect({ to: '/training-enrollments', replace: true });
   }
 }
 

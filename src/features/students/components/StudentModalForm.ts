@@ -6,35 +6,27 @@ import type {
 } from '@/shared/api/contract';
 import type { CourseType, Student } from '@/features/students/types';
 
-// Shared by create and edit: create validation supplies learner_password,
-// while edit mode omits it and only adds idempotency_key.
+// Shared by create and edit: edit mode only adds idempotency_key.
 export type CreateStudentPayload = Omit<
   CreateStudentRequest,
   'learner_password'
 > &
-  Partial<Pick<CreateStudentRequest, 'learner_password'>> &
   Pick<UpdateStudentRequest, 'idempotency_key'>;
 
 export const makeStudentFormSchema = (
   t: (key: string) => string,
-  opts: { requireLearnerPassword?: boolean } = {},
+  // Kept for call-site compatibility; learner portal logins were removed.
+  _opts: { requireLearnerPassword?: boolean } = {},
 ) =>
   z.object({
     first_name: z.string().min(1, t('students.validation_required')),
     last_name: z.string().min(1, t('students.validation_required')),
     phone: z.string().refine(isValidUzPhone, t('students.phone_invalid')),
-    learner_password: opts.requireLearnerPassword
-      ? z
-          .string()
-          .min(8, t('students.learner_password_requirements'))
-          .regex(/[0-9]/, t('students.learner_password_requirements'))
-      : z.string().optional(),
-    course_type: z.enum(['tezkor', 'avto_maktab']),
+    course_type: z.enum(['online', 'offline']),
     branch_id: z.string().min(1, t('students.validation_branch')),
     payment_method: z.enum(['naqd', 'karta', 'perechisleniya']).optional(),
     result: z.enum(['oqimoqda', 'topshirdi', 'yiqildi']).optional(),
     has_document: z.boolean().optional(),
-    o83: z.boolean().optional(),
     total_price: z.coerce
       .number()
       .nonnegative(t('students.validation_required')),
@@ -77,7 +69,6 @@ export const getCreateStudentFormValues = ({
   payment_method: 'naqd',
   result: 'oqimoqda',
   has_document: false,
-  o83: false,
   // The selected Course fills this in during create mode.
   total_price: 0,
   amount_paid: 0,
@@ -89,7 +80,6 @@ export const getCreateStudentFormValues = ({
   notes: '',
   status: 'active',
   registered_by: '',
-  learner_password: '',
 });
 
 export const getEditStudentFormValues = (student: Student) => ({
@@ -101,7 +91,6 @@ export const getEditStudentFormValues = (student: Student) => ({
   payment_method: student.payment_method ?? ('naqd' as const),
   result: student.result,
   has_document: student.has_document,
-  o83: student.o83,
   total_price: student.total_price,
   // Editing records an additional payment; it must never replay prior totals.
   amount_paid: 0,
@@ -114,7 +103,6 @@ export const getEditStudentFormValues = (student: Student) => ({
   notes: student.notes === undefined ? '' : student.notes,
   status: student.status || ('active' as const),
   registered_by: student.registered_by_id || '',
-  learner_password: '',
 });
 
 export const toCreateStudentPayload = (
@@ -126,9 +114,6 @@ export const toCreateStudentPayload = (
     first_name: values.first_name,
     last_name: values.last_name,
     phone: uzPhoneE164(values.phone),
-    ...(values.learner_password
-      ? { learner_password: values.learner_password }
-      : {}),
     course_type: courseType,
     total_price: Number(values.total_price),
     payment_method: values.payment_method || undefined,
@@ -144,7 +129,7 @@ export const toCreateStudentPayload = (
     ...(!isEditing && values.course_id ? { course_id: values.course_id } : {}),
   };
 
-  if (courseType === 'tezkor') {
+  if (courseType === 'online') {
     payload.amount_paid = Number(values.amount_paid) || 0;
     payload.group_id = values.group_id || undefined;
     return payload;
@@ -154,7 +139,6 @@ export const toCreateStudentPayload = (
   payload.group_id = values.group_id || undefined;
   payload.completion_date = values.completion_date || undefined;
   payload.contract_number = values.contract_number || undefined;
-  payload.o83 = values.o83;
 
   const additionalPayment = Number(values.amount_paid) || 0;
   if (isEditing && additionalPayment > 0) {

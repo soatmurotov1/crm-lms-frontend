@@ -43,9 +43,9 @@ export function CoursesGrid({
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const courseTypeLabel = (type: Course['course_type']) =>
-    type === 'tezkor'
-      ? t('courses.type_tezkor')
-      : t('courses.type_avto_maktab');
+    type === 'online'
+      ? t('courses.type_online')
+      : t('courses.type_offline');
 
   const columns = columnHelper.columns([
     columnHelper.accessor('name', {

@@ -35,7 +35,7 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
-// autodrive-qsgc.3: avto_maktab's completion_date went through
+// offline's completion_date went through
 // <Input type="date">. It's now the shared DatePicker (@/lib/calendarDate),
 // whose public contract is a plain 'YYYY-MM-DD' string. This proves the
 // create-student submit payload carries that exact string, not a Date.
@@ -95,7 +95,7 @@ describe('StudentModal course label', () => {
           open
           onClose={vi.fn()}
           onSubmit={vi.fn()}
-          courseType="tezkor"
+          courseType="online"
         />,
       );
 
@@ -111,7 +111,7 @@ describe('StudentModal course label', () => {
   );
 });
 
-describe('StudentModal calendar-date wiring (autodrive-qsgc.3)', () => {
+describe('StudentModal calendar-date wiring', () => {
   it('submits completion_date as a YYYY-MM-DD string, never a Date', async () => {
     const onSubmit = vi.fn();
     render(
@@ -120,13 +120,12 @@ describe('StudentModal calendar-date wiring (autodrive-qsgc.3)', () => {
         onClose={vi.fn()}
         onSubmit={onSubmit}
         loading={false}
-        courseType="avto_maktab"
+        courseType="offline"
       />,
     );
 
     fireEvent.change(q('last_name'), { target: { value: 'Ivanov' } });
     fireEvent.change(q('first_name'), { target: { value: 'Ivan' } });
-    fireEvent.change(q('learner_password'), { target: { value: 'password1' } });
     fireEvent.change(q('phone'), { target: { value: '901234567' } });
 
     const completionDateInput = q('completion_date');
@@ -156,13 +155,12 @@ describe('StudentModal calendar-date wiring (autodrive-qsgc.3)', () => {
         onClose={vi.fn()}
         onSubmit={onSubmit}
         loading={false}
-        courseType="avto_maktab"
+        courseType="offline"
       />,
     );
 
     fireEvent.change(q('last_name'), { target: { value: 'Petrov' } });
     fireEvent.change(q('first_name'), { target: { value: 'Petr' } });
-    fireEvent.change(q('learner_password'), { target: { value: 'password1' } });
     fireEvent.change(q('phone'), { target: { value: '911234567' } });
 
     fireEvent.click(screen.getByRole('button', { name: 'common.add' }));
@@ -182,13 +180,13 @@ describe('StudentModal current group on edit', () => {
         onClose={vi.fn()}
         onSubmit={onSubmit}
         loading={false}
-        courseType="avto_maktab"
+        courseType="offline"
         student={{
           id: 's1',
           first_name: 'Ivan',
           last_name: 'Ivanov',
           phone: '+998901234567',
-          course_type: 'avto_maktab',
+          course_type: 'offline',
           branch_id: 'b1',
           payment_method: 'naqd',
           has_document: false,
@@ -217,7 +215,7 @@ const ControlledCreateModal = ({ open }: { open: boolean }) => {
   return (
     <StudentModal
       open={open}
-      courseType="tezkor"
+      courseType="online"
       onClose={vi.fn()}
       onSubmit={vi.fn()}
       onSaveAndAdd={(body) => create.mutateAsync(body)}
@@ -247,7 +245,6 @@ describe('StudentModal retired real mutation', () => {
       last_name: 'Old synthetic',
       first_name: 'Student',
       phone: '901234567',
-      learner_password: 'synthetic123',
     })) {
       fireEvent.change(q(name), { target: { value } });
     }

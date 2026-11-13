@@ -74,7 +74,7 @@ export const LeadCard = memo(({ lead, className }: LeadCardProps) => {
     displayName,
     lead.phone,
     lead.branchName,
-    lead.category ? `${lead.category} toifasi` : null,
+    lead.direction ? lead.direction : null,
     taskStatus === 'overdue' ? t('leads.overdue', 'Kechikkan') : null,
   ]
     .filter(Boolean)
@@ -102,14 +102,14 @@ export const LeadCard = memo(({ lead, className }: LeadCardProps) => {
       )}
       data-testid={`lead-card-${lead.id}`}
     >
-      {/* Name and Category */}
+      {/* Name and Direction */}
       <div className="flex items-start justify-between gap-2">
         <h4 className="font-semibold text-sm leading-tight text-foreground group-hover:text-primary transition-colors">
           {displayName}
         </h4>
-        {lead.category && (
+        {lead.direction && (
           <span className="shrink-0 rounded-md bg-secondary px-1.5 py-0.5 font-bold text-[10px] text-secondary-foreground uppercase">
-            {lead.category}
+            {lead.direction}
           </span>
         )}
       </div>

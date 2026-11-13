@@ -4,7 +4,7 @@ import { queryClient } from '@/lib/queryClient';
 import { useAuthStore } from '@/store/authStore';
 import { User } from '@/features/staff/types';
 
-const STORAGE_KEY = 'autodrive-auth';
+const STORAGE_KEY = 'lms-auth';
 const user: User = { id: 'u1', email: 'o@x.com', role: 'owner' };
 
 // token is NOT persisted (XSS protection — PR #49); only user/isAuthenticated survive reload
@@ -38,7 +38,7 @@ describe('auth persisted token clearing', () => {
 
     // Seed the shared query cache so we can prove it gets wiped — a hard
     // window.location.href reload used to do this implicitly; the SPA-nav
-    // fix (autodrive-6cq.5.9) must clear it explicitly instead.
+    // fix must clear it explicitly instead.
     queryClient.setQueryData(['tenant-data'], { leaked: true });
 
     axiosInstance.defaults.adapter = async (config) =>

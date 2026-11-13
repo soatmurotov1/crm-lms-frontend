@@ -18,7 +18,7 @@ const user: User = {
   branch_id: 'b1',
 };
 
-// Regression test for autodrive-6cq.5.52: PaymentsPage used to fetch every
+// Regression test for PaymentsPage used to fetch every
 // matching page via fetchAllPayments and sum client-side on every
 // filter/search change. usePaymentSummary should hit the backend's single
 // /payments/summary aggregate instead — exactly one request, filters

@@ -1,4 +1,4 @@
-export type CourseType = 'tezkor' | 'avto_maktab';
+export type CourseType = 'online' | 'offline';
 export type PaymentMethod = 'naqd' | 'karta' | 'perechisleniya';
 export type ResultStatus = 'oqimoqda' | 'topshirdi' | 'yiqildi';
 export type StudentStatus = 'active' | 'completed' | 'dropped' | 'suspended';
@@ -25,7 +25,7 @@ export interface Student {
   birth_date?: string;
   gender?: 'male' | 'female';
   address?: string;
-  // Omitted by the backend for a teacher requester (autodrive-vh0.6) — see
+  // Omitted by the backend for a teacher requester — see
   // has_debt below. Never assume present; always gate on canViewPayments.
   total_price?: number;
   course_type: CourseType;
@@ -35,7 +35,7 @@ export interface Student {
   branch_name?: string;
   payment_method: PaymentMethod | null;
   debt?: number;
-  // Teacher-scoped reads only (autodrive-vh0.5): binary paid/owing signal,
+  // Teacher-scoped reads only: binary paid/owing signal,
   // no amount. Absent on every other role's payload -- treat undefined as
   // "no data", never as a false "paid".
   has_debt?: boolean;
@@ -46,11 +46,11 @@ export interface Student {
   notes?: string;
   created_at: string;
   status?: StudentStatus;
-  // autodrive-cg9: present (non-null) only when include_deleted=true was
+  // present (non-null) only when include_deleted=true was
   // sent (owner-only) -- distinguishes a soft-deleted row from a live one.
   deleted_at?: string | null;
 
-  // Tezkor only
+  // Online course only
   amount_paid?: number;
 
   // Avto maktab only
@@ -60,7 +60,6 @@ export interface Student {
   group_name?: string;
   group_id?: string;
   completion_date?: string;
-  o83?: boolean;
   contract_number?: string;
 
   // New fields from detailed registration

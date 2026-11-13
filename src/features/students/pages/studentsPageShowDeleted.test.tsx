@@ -11,7 +11,7 @@ import type { Student } from '@/features/students/types';
 import type { UserRole } from '@/features/staff/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-cg9: owner-only "show deleted" toggle + restore on StudentsPage.
+// owner-only "show deleted" toggle + restore on StudentsPage.
 // Role-parameterized authStore mock (not a hardcoded useCan stub) so this
 // exercises the REAL permissions matrix -- mirrors
 // src/test/sidebarTeacherNav.test.tsx.
@@ -28,7 +28,7 @@ const LIVE_STUDENT: Student = {
   last_name: 'Karimov',
   first_name: 'Aziz',
   phone: '+998901112233',
-  course_type: 'tezkor',
+  course_type: 'online',
   branch_id: 'b1',
   payment_method: null,
   has_document: false,
@@ -123,7 +123,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe('StudentsPage "show deleted" toggle visibility (autodrive-cg9)', () => {
+describe('StudentsPage "show deleted" toggle visibility', () => {
   it('is absent for a manager', async () => {
     role = 'manager';
     h.useStudentsPage.mockReturnValue(emptyResult);
@@ -166,7 +166,7 @@ describe('StudentsPage "show deleted" toggle visibility (autodrive-cg9)', () => 
   });
 });
 
-describe('StudentsPage "show deleted" toggle wiring (autodrive-cg9)', () => {
+describe('StudentsPage "show deleted" toggle wiring', () => {
   it('flips includeDeleted through to useStudentsPage when switched on', async () => {
     role = 'owner';
     h.useStudentsPage.mockReturnValue(emptyResult);
@@ -218,7 +218,7 @@ describe('StudentsPage "show deleted" toggle wiring (autodrive-cg9)', () => {
   });
 });
 
-describe('StudentsPage deleted-row rendering (autodrive-cg9)', () => {
+describe('StudentsPage deleted-row rendering', () => {
   it('shows the deleted badge and restore action only on the deleted row', async () => {
     role = 'owner';
     h.useStudentsPage.mockReturnValue({
@@ -259,7 +259,7 @@ describe('StudentsPage deleted-row rendering (autodrive-cg9)', () => {
   });
 });
 
-describe('StudentsPage restore action (autodrive-cg9)', () => {
+describe('StudentsPage restore action', () => {
   it('fires the restore mutation with the row id after confirming', async () => {
     role = 'owner';
     h.useStudentsPage.mockReturnValue({

@@ -48,7 +48,7 @@ const GroupDetailPage = () => {
   const updateStudent = useUpdateStudent();
   const [editStudent, setEditStudent] = useState<Student | null>(null);
   // Teacher must never see payment amounts, and this edit modal also exposes
-  // an editable "extra payment" field for tezkor students — gate both the
+  // an editable "extra payment" field for online students — gate both the
   // debt display and the edit affordance itself (same caps StudentsTable
   // already uses for its debt column / edit button).
   const canViewPayments = useCan('recordPayment');
@@ -86,7 +86,7 @@ const GroupDetailPage = () => {
   }
 
   const courseLabel = t(
-    group.course_type === 'avto_maktab'
+    group.course_type === 'offline'
       ? 'groups.course_school'
       : 'groups.course_fast',
   );
@@ -205,7 +205,7 @@ const GroupDetailPage = () => {
                           ]
                         : []
                       : // Teacher: paid/owing badge instead of an amount
-                        // (autodrive-vh0.5). Omit the field entirely rather
+                        //. Omit the field entirely rather
                         // than show a label with no value when has_debt is
                         // missing.
                         s.has_debt !== undefined

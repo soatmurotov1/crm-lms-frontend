@@ -267,14 +267,10 @@ export function detectViolations(source, file) {
         );
         const navigationIndicator =
           fullTag === 'NavigationMenuPrimitive.Indicator';
-        const mapOverlay =
-          file === 'src/features/vehicles/pages/FleetMapPage.tsx' &&
-          attrs.some((a) => a.name.getText(ast) === 'data-map-overlay');
         const exempt =
           chartOverlay ||
           toastControl ||
           navigationIndicator ||
-          mapOverlay ||
           tourOverlay ||
           controls.has(tag) ||
           overlays.has(tag) ||

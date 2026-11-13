@@ -28,14 +28,13 @@ const buildPayload = (): AddStudentPayload => ({
   address: 'Tashkent, Chilonzor',
   branch_id: 'b1',
   course_id: 'c1',
-  course_type: 'tezkor',
+  course_type: 'online',
   course_price: 1000000,
   start_date: '2026-07-16',
   amount: 500000,
   payment_method: 'naqd',
   first_payment_date: '2026-07-16',
   contract_signed: true,
-  learner_password: 'password1',
 });
 
 describe('useCreateStudentWithPayment payload', () => {
@@ -68,7 +67,6 @@ describe('useCreateStudentWithPayment payload', () => {
       address: 'Tashkent, Chilonzor',
       gender: 'female',
       payment_method: 'naqd',
-      learner_password: 'password1',
     });
     expect(body).not.toHaveProperty('payment_type');
   });

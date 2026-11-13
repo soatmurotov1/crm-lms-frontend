@@ -10,7 +10,7 @@ import UsersPage from '@/features/staff/pages/UsersPage';
 import type { User, UserRole } from '@/features/staff/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-cg9: owner-only "show deleted" toggle + restore on UsersPage
+// owner-only "show deleted" toggle + restore on UsersPage
 // (managers). Role-parameterized authStore mock (real permissions matrix),
 // mirrors src/test/sidebarTeacherNav.test.tsx.
 
@@ -89,7 +89,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe('UsersPage "show deleted" toggle visibility (autodrive-cg9)', () => {
+describe('UsersPage "show deleted" toggle visibility', () => {
   it('is absent for a manager', async () => {
     role = 'manager';
     h.useUsersPage.mockReturnValue(emptyResult);
@@ -112,7 +112,7 @@ describe('UsersPage "show deleted" toggle visibility (autodrive-cg9)', () => {
   });
 });
 
-describe('UsersPage "show deleted" toggle wiring (autodrive-cg9)', () => {
+describe('UsersPage "show deleted" toggle wiring', () => {
   it('flips includeDeleted through to useUsersPage when switched on', async () => {
     role = 'owner';
     h.useUsersPage.mockReturnValue(emptyResult);
@@ -127,7 +127,7 @@ describe('UsersPage "show deleted" toggle wiring (autodrive-cg9)', () => {
   });
 });
 
-describe('UsersPage deleted-row rendering (autodrive-cg9)', () => {
+describe('UsersPage deleted-row rendering', () => {
   it('shows the deleted badge and restore action only on the deleted row', async () => {
     role = 'owner';
     h.useUsersPage.mockReturnValue({
@@ -153,7 +153,7 @@ describe('UsersPage deleted-row rendering (autodrive-cg9)', () => {
   });
 });
 
-describe('UsersPage restore action (autodrive-cg9)', () => {
+describe('UsersPage restore action', () => {
   it('fires the restore mutation with the row id after confirming', async () => {
     role = 'owner';
     h.useUsersPage.mockReturnValue({
@@ -181,11 +181,11 @@ describe('UsersPage restore action (autodrive-cg9)', () => {
   });
 });
 
-// autodrive-52v.3: deleting the last row of the last page left currentPage
+// deleting the last row of the last page left currentPage
 // pointing past the new (shrunk) totalPages -- the page silently kept
 // requesting a page that no longer exists. Same clamp GroupsPage already
 // had; StudentsPage, PaymentsPage and UsersPage didn't.
-describe('UsersPage pagination clamp (autodrive-52v.3)', () => {
+describe('UsersPage pagination clamp', () => {
   it('clamps currentPage back to 1 once totalPages shrinks below the URL page', async () => {
     role = 'owner';
     // emptyResult.data.meta.totalPages is already 1 -- URL page=3 below is

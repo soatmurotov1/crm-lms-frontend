@@ -37,7 +37,7 @@ describe('useUrlParams', () => {
     );
   });
 
-  it('writes multiple params atomically without clobbering each other (autodrive-6cq.5.70)', async () => {
+  it('writes multiple params atomically without clobbering each other', async () => {
     const { result } = await renderUrlParamsHook();
 
     act(() =>

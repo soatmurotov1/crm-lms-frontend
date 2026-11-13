@@ -95,7 +95,7 @@ interface LessonCardProps {
   onOpen: () => void;
 }
 
-// Decluttered lesson cell for the week-strip (autodrive-38m.3): type tag,
+// Decluttered lesson cell for the week-strip: type tag,
 // time, group, teacher, attendance-status chip. A native <button> gives
 // Tab/Enter keyboard access for free. exec-dash 8: mock's tinted lesson-cell
 // treatment -- no "room" field in CalendarLesson, so the cell shows teacher
@@ -147,7 +147,7 @@ const LessonCard = ({ lesson, typeLabel, onOpen }: LessonCardProps) => {
 
 // Two independent RHF forms on this page: create-template (dirty-guarded)
 // and generate-lessons (no dirty guard, matching the original plain-state
-// behavior -- autodrive-6cq.5.15 only ever guarded the template form).
+// behavior -- only ever guarded the template form).
 const makeTemplateFormSchema = (t: (key: string) => string) =>
   z.object({
     groupId: z.string().trim().min(1, t('common.required')),
@@ -384,7 +384,7 @@ const SchedulePage = () => {
         weeks: parseInt(values.weeks),
         ...(values.groupId ? { groupId: values.groupId } : {}),
       });
-      // Report the real created/skipped counts (autodrive-52v.4) -- the old
+      // Report the real created/skipped counts -- the old
       // fixed "generated" string showed the same success toast even for
       // "0 created, 12 skipped".
       toast.success(

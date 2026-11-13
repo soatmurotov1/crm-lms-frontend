@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 import type { UserRole } from '@/features/staff/types';
 
-// autodrive-vh0.2: teacher self-service nav trim. Unlike sidebarRail.test.tsx
+// teacher self-service nav trim. Unlike sidebarRail.test.tsx
 // (which mocks useCan as one global boolean shared by every capability, fine
 // for testing the filter mechanism in isolation), this exercises the REAL
 // useCan/permissions.ts matrix via a role-parameterized authStore mock -- so
@@ -42,7 +42,7 @@ const renderSidebar = () =>
     { initialEntry: '/dashboard', routePattern: '/dashboard' },
   );
 
-describe('Sidebar teacher nav trim (autodrive-vh0.2)', () => {
+describe('Sidebar teacher nav trim', () => {
   it.each(['dev', 'owner'] as const)(
     'shows the design system for %s',
     async (testRole) => {

@@ -27,7 +27,7 @@ export interface GroupsFilterBarProps {
   branchId: string | undefined;
   onBranchChange: (v: string | undefined) => void;
   branches: Branch[];
-  // autodrive-cg9: owner-only "show deleted" toggle.
+  // owner-only "show deleted" toggle.
   canViewDeleted: boolean;
   includeDeleted: boolean;
   setIncludeDeleted: (v: boolean) => void;

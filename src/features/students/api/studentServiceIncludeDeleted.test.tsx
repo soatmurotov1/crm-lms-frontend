@@ -11,7 +11,7 @@ import {
 import axiosInstance from '@/api/axiosInstance';
 import { studentKeys } from '@/lib/queryKeys';
 
-// autodrive-cg9: owner-only "show deleted" toggle on StudentsPage. Pins the
+// owner-only "show deleted" toggle on StudentsPage. Pins the
 // exact wire contract the backend is building to in parallel --
 // include_deleted=true only when the toggle is on, and PATCH /students/:id/
 // restore for the restore action -- plus the query-key requirement called
@@ -50,7 +50,7 @@ const makeWrapper = (queryClient: QueryClient) => {
   return Wrapper;
 };
 
-describe('useStudentsPage includeDeleted (autodrive-cg9)', () => {
+describe('useStudentsPage includeDeleted', () => {
   it('normalizes page and list cache keys exactly like request filters', async () => {
     const rawPage = studentsPageQueryOptions({
       branchId: 'b1',
@@ -181,7 +181,7 @@ describe('useStudentsPage includeDeleted (autodrive-cg9)', () => {
   });
 });
 
-describe('useRestoreStudent (autodrive-cg9)', () => {
+describe('useRestoreStudent', () => {
   it('PATCHes /students/:id/restore and invalidates the student list', async () => {
     (axiosInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({});
     const queryClient = new QueryClient({

@@ -53,13 +53,13 @@ interface StudentsTableProps {
   // Teacher must never see payment amounts (recordPayment cap) — hides the
   // initial/second/third-payment columns entirely (no orphan money-only
   // header left behind) and switches the debt column to a paid/owing badge
-  // (autodrive-vh0.5) instead of dropping it.
+  // instead of dropping it.
   canViewPayments: boolean;
   onOpenStudent: (student: Student, el: HTMLElement) => void;
   onEdit: (student: Student) => void;
   onDelete: (id: string) => void;
   onCreate: () => void;
-  // autodrive-cg9: owner-only "show deleted" toggle — a deleted row swaps
+  // owner-only "show deleted" toggle — a deleted row swaps
   // edit/delete for a single restore action.
   canViewDeleted: boolean;
   onRestore: (id: string) => void;
@@ -186,7 +186,7 @@ export const StudentsTable = ({
 
   // Shared by both course types (was duplicated identically in each) --
   // switches from the amount to a paid/owing badge for a teacher instead of
-  // being dropped, unlike the pure-money columns below (autodrive-vh0.5).
+  // being dropped, unlike the pure-money columns below.
   // Sort disabled in the badge form: sorting the full list by the hidden
   // amount would leak relative debt ranking a teacher shouldn't have.
   const debtColumn = columnHelper.accessor('debt', {
@@ -206,7 +206,7 @@ export const StudentsTable = ({
       ),
   });
 
-  const tezkorColumns = columnHelper.columns([
+  const onlineColumns = columnHelper.columns([
     debtColumn,
     columnHelper.display({
       id: 'group',
@@ -248,7 +248,7 @@ export const StudentsTable = ({
     }),
   ]);
 
-  const avtoMaktabColumns = columnHelper.columns([
+  const offlineColumns = columnHelper.columns([
     ...(canViewPayments ? paymentColumns : []),
     debtColumn,
     columnHelper.display({
@@ -260,15 +260,6 @@ export const StudentsTable = ({
       header: t('students.completion_date'),
       meta: { cellClassName: 'text-muted-foreground tabular-nums' },
       cell: ({ getValue }) => formatDate(getValue()),
-    }),
-    columnHelper.accessor('o83', {
-      header: t('students.o83'),
-      meta: { align: 'center' },
-      cell: ({ getValue }) => (
-        <span className={getValue() ? 'text-success' : 'text-destructive'}>
-          {getValue() ? t('students.o83_yes') : t('students.o83_no')}
-        </span>
-      ),
     }),
     columnHelper.accessor('contract_number', {
       header: t('students.contract_number'),
@@ -349,17 +340,17 @@ export const StudentsTable = ({
     header: t('students.course_type'),
     meta: { cellClassName: 'text-muted-foreground' },
     cell: ({ getValue }) =>
-      getValue() === 'tezkor'
+      getValue() === 'online'
         ? t('students.course_fast')
         : t('students.course_school'),
   });
 
   const midColumns =
-    courseType === 'tezkor'
-      ? tezkorColumns
-      : courseType === 'avto_maktab'
-        ? avtoMaktabColumns
-        : [courseTypeColumn, ...tezkorColumns];
+    courseType === 'online'
+      ? onlineColumns
+      : courseType === 'offline'
+        ? offlineColumns
+        : [courseTypeColumn, ...onlineColumns];
 
   // TanStack columns intentionally carry different cell-value types.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

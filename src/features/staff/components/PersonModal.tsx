@@ -109,7 +109,7 @@ const makePersonFormSchema = (t: (key: string) => string, isEdit: boolean) =>
       branchId: z.string().optional(),
       email: z.string().optional(),
       password: z.string().optional(),
-      specialization: z.enum(['THEORY', 'PRACTICE']).optional(),
+      specialization: z.string().trim().max(100).optional(),
       role: z.enum(['manager', 'accountant', 'operator', 'teacher']),
     })
     .superRefine((data, ctx) => {
@@ -129,13 +129,6 @@ const makePersonFormSchema = (t: (key: string) => string, isEdit: boolean) =>
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['branchId'],
-          message: 'Required',
-        });
-      }
-      if (role === 'teacher' && !data.specialization) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['specialization'],
           message: 'Required',
         });
       }
@@ -210,7 +203,7 @@ const PersonModal = ({
     branchId: '',
     email: '',
     password: '',
-    specialization: 'THEORY',
+    specialization: '',
     role,
   });
 
@@ -240,7 +233,7 @@ const PersonModal = ({
         branchId: person.branch_id || '',
         email: '',
         password: '',
-        specialization: person.specialization || 'THEORY',
+        specialization: person.specialization || '',
         role: person.role === 'accountant' ? 'accountant' : role,
       });
     } else {
@@ -269,7 +262,7 @@ const PersonModal = ({
       payload.password = values.password;
     }
     if (selectedRole === 'teacher') {
-      payload.specialization = values.specialization;
+      payload.specialization = values.specialization?.trim() || undefined;
     }
     if (visibleSelectableRoles && visibleSelectableRoles.length > 1) {
       payload.role = selectedRole;
@@ -427,27 +420,16 @@ const PersonModal = ({
                   name="specialization"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('teachers.specialization')} *</FormLabel>
-                      <Select
-                        value={field.value || 'THEORY'}
-                        onValueChange={(v) =>
-                          field.onChange(v as Specialization)
-                        }
-                      >
-                        <FormControl>
-                          <SelectTrigger className="bg-secondary border-border">
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="THEORY">
-                            {t('teachers.spec_theory')}
-                          </SelectItem>
-                          <SelectItem value="PRACTICE">
-                            {t('teachers.spec_practice')}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>{t('teachers.specialization')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value ?? ''}
+                          maxLength={100}
+                          placeholder={t('teachers.spec_placeholder')}
+                          className="bg-secondary border-border"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

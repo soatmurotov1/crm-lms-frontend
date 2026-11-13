@@ -55,7 +55,6 @@ import { leadsApi } from '../api/leadsApi';
 import type {
   LeadSource,
   CourseType,
-  Category,
   DuplicateCheckResult,
 } from '../types/leads.types';
 
@@ -78,8 +77,7 @@ const SOURCES: LeadSource[] = [
   'other',
 ];
 
-const CATEGORIES: Category[] = ['A', 'B', 'BC', 'C', 'D', 'E'];
-const COURSE_TYPES: CourseType[] = ['tezkor', 'avto_maktab'];
+const COURSE_TYPES: CourseType[] = ['online', 'offline'];
 
 export const CreateLeadDialog = ({
   open,
@@ -139,7 +137,7 @@ export const CreateLeadDialog = ({
   const [source, setSource] = useState<LeadSource | ''>('');
   const [sourceOther, setSourceOther] = useState('');
   const [courseType, setCourseType] = useState<CourseType | ''>('');
-  const [category, setCategory] = useState<Category | ''>('');
+  const [direction, setDirection] = useState('');
   const [note, setNote] = useState('');
 
   // Referrer state
@@ -219,7 +217,7 @@ export const CreateLeadDialog = ({
     setSource('');
     setSourceOther('');
     setCourseType('');
-    setCategory('');
+    setDirection('');
     setNote('');
     setReferrerType('none');
     setReferrerStudentId(undefined);
@@ -301,7 +299,7 @@ export const CreateLeadDialog = ({
         source,
         sourceOther: source === 'other' ? sourceOther.trim() : undefined,
         courseType: courseType || undefined,
-        category: category || undefined,
+        direction: direction.trim() || undefined,
         note: note.trim() || undefined,
         referrerStudentId,
         referrerStaffId,
@@ -746,7 +744,7 @@ export const CreateLeadDialog = ({
               )}
             </div>
 
-            {/* Course Type & Category */}
+            {/* Course Type & Direction */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="lead-course-type">
@@ -775,29 +773,19 @@ export const CreateLeadDialog = ({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="lead-category">
-                  {t('vehicles.category', 'Toifa')}
+                <Label htmlFor="lead-direction">
+                  {t('leads.direction', "Yo'nalish")}
                 </Label>
-                <Select
-                  value={category}
-                  onValueChange={(val) => setCategory(val as Category)}
-                >
-                  <SelectTrigger id="lead-category" className="w-full">
-                    <SelectValue
-                      placeholder={t(
-                        'vehicles.select_category',
-                        'Tanlang (ixtiyoriy)',
-                      )}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="lead-direction"
+                  value={direction}
+                  maxLength={100}
+                  onChange={(e) => setDirection(e.target.value)}
+                  placeholder={t(
+                    'leads.direction_placeholder',
+                    'Masalan: Frontend, IELTS',
+                  )}
+                />
               </div>
             </div>
 

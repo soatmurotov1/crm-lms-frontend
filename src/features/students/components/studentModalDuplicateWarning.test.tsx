@@ -3,7 +3,7 @@ import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 import StudentModal from '@/features/students/api/StudentModal';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-553: create-time duplicate check -- a debounced search (phone
+// create-time duplicate check -- a debounced search (phone
 // primarily, once enough digits are typed; last name secondarily) against
 // GET /students?search=, rendered as a dismissible, non-blocking warning
 // panel linking to the match. Debounce timing test follows the convention
@@ -67,7 +67,7 @@ const renderModal = () =>
       open
       onClose={vi.fn()}
       onSubmit={vi.fn()}
-      courseType="tezkor"
+      courseType="online"
     />,
     { initialEntry: '/students', routePattern: '/students' },
   );

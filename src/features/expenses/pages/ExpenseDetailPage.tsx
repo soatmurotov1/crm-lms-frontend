@@ -27,7 +27,6 @@ import {
   useExpense,
   useExpenseBranchOptions,
   useExpenseHistory,
-  useMySettlementDetail,
   useVoidExpensePayment,
 } from '@/features/expenses/api/expenseService';
 import type {
@@ -81,7 +80,6 @@ const ExpenseDetailPage = () => {
     persistDefault: true,
   });
   const canViewExpenses = useCan('viewExpenses');
-  const canViewOwnSettlements = useCan('viewOwnSettlements');
   const canManageFinance = useCan('manageCompanyFinance');
   const mayUpdate = useCan('expenses.update');
   const mayDelete = useCan('expenses.delete');
@@ -91,14 +89,10 @@ const ExpenseDetailPage = () => {
   const mayReadPayments = useCan('expense_payments.read');
   const authUser = useAuthStore((state) => state.user);
   const isManager = canViewExpenses && !canManageFinance;
-  const isOwnSettlementView =
-    canViewOwnSettlements && location.pathname.startsWith('/my-settlements/');
-  const canAccessDetail = canViewExpenses || isOwnSettlementView;
-  const expenseQuery = useExpense(isOwnSettlementView ? undefined : id);
-  const mySettlementQuery = useMySettlementDetail(
-    isOwnSettlementView ? id : undefined,
-  );
-  const historyQuery = useExpenseHistory(isOwnSettlementView ? undefined : id);
+  const isOwnSettlementView = false;
+  const canAccessDetail = canViewExpenses;
+  const expenseQuery = useExpense(id);
+  const historyQuery = useExpenseHistory(id);
   const branchOptionsQuery = useExpenseBranchOptions();
   const payRemainingConsumedFor = useRef<string | null>(null);
   const payRemainingRequestGeneration = useRef(0);
@@ -131,21 +125,14 @@ const ExpenseDetailPage = () => {
   const [voidPaymentTarget, setVoidPaymentTarget] =
     useState<ExpensePayment | null>(null);
   const [voidPaymentConflict, setVoidPaymentConflict] = useState(false);
-  const activeDetailQuery = isOwnSettlementView
-    ? mySettlementQuery
-    : expenseQuery;
-  const expense = isOwnSettlementView
-    ? mySettlementQuery.data?.expense
-    : expenseQuery.data;
+  const activeDetailQuery = expenseQuery;
+  const expense = expenseQuery.data;
   const isNotFound =
     (activeDetailQuery.error as { response?: { status?: number } } | null)
       ?.response?.status === 404;
   const hasPayRemainingIntent =
     !isOwnSettlementView && searchParams.get('action') === 'pay_remaining';
   const backToExpenses = () => {
-    if (isOwnSettlementView) {
-      return navigate({ to: '/my-settlements' });
-    }
     const returnAttentionValues = searchParams.getAll('return_attention');
     const returnAttention =
       returnAttentionValues.length === 1 &&
@@ -326,9 +313,7 @@ const ExpenseDetailPage = () => {
       : !requestedTab && hasPayRemainingIntent && canViewPaymentHistory
         ? 'payments'
         : urlTab;
-  const serverExpense = isOwnSettlementView
-    ? (mySettlementQuery.data?.expense ?? expense)
-    : canManageFinance
+  const serverExpense = canManageFinance
       ? (historyQuery.data?.expense ?? expense)
       : expense;
   if (!serverExpense) {
@@ -573,12 +558,6 @@ const ExpenseDetailPage = () => {
                   serverExpense.branch_name ?? t('expenses.form.company_wide')
                 }
               />
-              {serverExpense.vehicle_plate_number && (
-                <DetailField
-                  label={t('expenses.detail.vehicle')}
-                  value={serverExpense.vehicle_plate_number}
-                />
-              )}
               <DetailField
                 label={t('expenses.detail.payee')}
                 value={serverExpense.payee ?? t('common.na')}
@@ -606,12 +585,8 @@ const ExpenseDetailPage = () => {
                   {t('expenses.payments.title')}
                 </h2>
                 {(() => {
-                  const paymentsQuery = isOwnSettlementView
-                    ? mySettlementQuery
-                    : historyQuery;
-                  const payments = isOwnSettlementView
-                    ? (mySettlementQuery.data?.payments ?? [])
-                    : (historyQuery.data?.payments ?? []);
+                  const paymentsQuery = historyQuery;
+                  const payments = historyQuery.data?.payments ?? [];
                   return (
                     <>
                       {paymentsQuery.isLoading && (

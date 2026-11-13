@@ -10,7 +10,7 @@ import BranchesPage from '@/features/branches/pages/BranchesPage';
 import type { Branch } from '@/features/branches/types';
 import { renderWithRouter } from '@/test/utils/renderWithRouter';
 
-// autodrive-cg9: owner-only "show deleted" toggle + restore on BranchesPage.
+// owner-only "show deleted" toggle + restore on BranchesPage.
 // Role-parameterized authStore mock (real permissions matrix), mirrors
 // src/test/sidebarTeacherNav.test.tsx.
 
@@ -62,7 +62,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe('BranchesPage "show deleted" toggle visibility (autodrive-cg9)', () => {
+describe('BranchesPage "show deleted" toggle visibility', () => {
   it('is absent for a manager', async () => {
     auth.role = 'manager';
     h.useBranches.mockReturnValue({ data: [], isLoading: false });
@@ -85,7 +85,7 @@ describe('BranchesPage "show deleted" toggle visibility (autodrive-cg9)', () => 
   });
 });
 
-describe('BranchesPage "show deleted" toggle wiring (autodrive-cg9)', () => {
+describe('BranchesPage "show deleted" toggle wiring', () => {
   it('flips includeDeleted through to useBranches when switched on', async () => {
     auth.role = 'owner';
     h.useBranches.mockReturnValue({ data: [], isLoading: false });
@@ -100,7 +100,7 @@ describe('BranchesPage "show deleted" toggle wiring (autodrive-cg9)', () => {
   });
 });
 
-describe('BranchesPage deleted-row rendering (autodrive-cg9)', () => {
+describe('BranchesPage deleted-row rendering', () => {
   it('shows the deleted badge and restore action only on the deleted row', async () => {
     auth.role = 'owner';
     h.useBranches.mockReturnValue({
@@ -124,7 +124,7 @@ describe('BranchesPage deleted-row rendering (autodrive-cg9)', () => {
   });
 });
 
-describe('BranchesPage restore action (autodrive-cg9)', () => {
+describe('BranchesPage restore action', () => {
   it('fires the restore mutation with the row id after confirming', async () => {
     auth.role = 'owner';
     h.useBranches.mockReturnValue({ data: [DELETED_BRANCH], isLoading: false });

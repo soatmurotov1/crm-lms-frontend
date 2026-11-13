@@ -6,7 +6,7 @@ import { renderWithRouter } from '@/test/utils/renderWithRouter';
 import type { Lesson } from '@/features/attendance/types';
 import type { Student } from '@/features/students/types';
 
-// autodrive-vh0.6: teacher dashboard redesign. Role-parameterized authStore
+// teacher dashboard redesign. Role-parameterized authStore
 // mock + real permissions matrix precedent: sidebarTeacherNav.test.tsx,
 // studentsPaymentVisibility.test.tsx.
 
@@ -101,7 +101,7 @@ const baseStudent: Omit<Student, 'id' | 'has_debt'> = {
   first_name: 'Test',
   phone: '+998900000000',
   total_price: 10_000_000,
-  course_type: 'tezkor',
+  course_type: 'online',
   branch_id: 'b1',
   payment_method: 'naqd',
   debt: 5_000_000,
@@ -208,7 +208,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe('TeacherDashboard KPIs (autodrive-vh0.6)', () => {
+describe('TeacherDashboard KPIs', () => {
   it('renders the 4 scoped KPIs from mocked data', async () => {
     state.lessons.data = {
       data: LESSONS,
@@ -276,7 +276,7 @@ describe('TeacherDashboard KPIs (autodrive-vh0.6)', () => {
   });
 });
 
-describe('TeacherDashboard upcoming lessons (autodrive-vh0.6)', () => {
+describe('TeacherDashboard upcoming lessons', () => {
   it('renders the next 5 lessons soonest-first and caps at 5', async () => {
     state.lessons.data = {
       data: LESSONS,
@@ -323,7 +323,7 @@ describe('TeacherDashboard upcoming lessons (autodrive-vh0.6)', () => {
     );
   });
 
-  // autodrive-vh0.6: drilldown -- the row must carry the lesson id so
+  // drilldown -- the row must carry the lesson id so
   // AttendancePage can open that exact lesson's drawer, not just the list.
   it('a row deep-links to the specific lesson it shows', async () => {
     state.lessons.data = {
@@ -343,7 +343,7 @@ describe('TeacherDashboard upcoming lessons (autodrive-vh0.6)', () => {
   });
 });
 
-describe('TeacherDashboard empty states (autodrive-vh0.6)', () => {
+describe('TeacherDashboard empty states', () => {
   it('renders a no-groups empty state and no KPI cards when active_groups is 0', async () => {
     state.analytics.data = {
       active_groups: 0,

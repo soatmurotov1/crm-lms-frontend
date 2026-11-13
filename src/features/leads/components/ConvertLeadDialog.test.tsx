@@ -24,8 +24,8 @@ const mockLead: Lead = {
   lastName: 'Aliyev',
   phone: '+998901234567',
   email: 'temur@example.com',
-  courseType: 'tezkor',
-  category: 'B',
+  courseType: 'online',
+  direction: 'Frontend',
   source: 'telegram',
   sourceOther: null,
   referrerStudentId: null,
@@ -72,7 +72,6 @@ describe('ConvertLeadDialog', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Temur Aliyev')).toBeInTheDocument();
     expect(screen.getByText('Chilonzor')).toBeInTheDocument();
-    expect(screen.getByText('B')).toBeInTheDocument();
   });
 
   it('submits conversion mutation on confirm click', () => {

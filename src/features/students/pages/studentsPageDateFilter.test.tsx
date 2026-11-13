@@ -129,7 +129,7 @@ describe('StudentsPage date-range filter', () => {
 
   it('keeps search and course visible without counting them in the filter badge', async () => {
     await renderWithRouter(<StudentsPage />, {
-      initialEntry: '/students?q=aziz&course_type=tezkor',
+      initialEntry: '/students?q=aziz&course_type=online',
       routePattern: '/students',
     });
 
@@ -148,7 +148,7 @@ describe('StudentsPage date-range filter', () => {
   it('counts only additional student filters as logical badge items', async () => {
     await renderWithRouter(<StudentsPage />, {
       initialEntry:
-        '/students?q=aziz&course_type=tezkor&branch_id=b9&operator_id=op7&has_group=false&date_from=2026-07-10&date_to=2026-07-12&status=active&has_debt=false',
+        '/students?q=aziz&course_type=online&branch_id=b9&operator_id=op7&has_group=false&date_from=2026-07-10&date_to=2026-07-12&status=active&has_debt=false',
       routePattern: '/students',
     });
 

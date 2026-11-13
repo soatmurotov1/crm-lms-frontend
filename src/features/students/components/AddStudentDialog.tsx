@@ -47,7 +47,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { PasswordInput } from '@/components/ui/password-input';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -83,7 +82,7 @@ export interface AddStudentPayload {
   // Step 2: Course & Branch
   branch_id: string;
   course_id: string;
-  course_type: 'tezkor' | 'avto_maktab';
+  course_type: 'online' | 'offline';
   course_price: number;
   group_id?: string;
   start_date: string;
@@ -94,7 +93,6 @@ export interface AddStudentPayload {
   payment_method: 'naqd' | 'karta' | 'perechisleniya';
   first_payment_date: string;
   contract_signed: boolean;
-  learner_password: string;
 
   // Referral / acquisition — all optional.
   lead_source?: LeadSource;
@@ -177,10 +175,6 @@ const buildSchemas = (t: (key: string) => string) => {
     contract_signed: z
       .boolean()
       .refine((value) => value, t('students.wizard.contract_required')),
-    learner_password: z
-      .string()
-      .min(8, t('students.learner_password_requirements'))
-      .regex(/[0-9]/, t('students.learner_password_requirements')),
   });
 
   return { step1, step2, step3, all: step1.merge(step2).merge(step3) };
@@ -401,7 +395,6 @@ const AddStudentDialog = ({
       payment_method: 'naqd',
       first_payment_date: todayCalendarDate(),
       contract_signed: false,
-      learner_password: '',
       lead_source: undefined,
       lead_source_other: '',
       referred_by_student_id: '',
@@ -436,7 +429,6 @@ const AddStudentDialog = ({
       amount: 0,
       first_payment_date: todayCalendarDate(),
       contract_signed: false,
-      learner_password: '',
       lead_source: undefined,
       lead_source_other: '',
       referred_by_student_id: '',
@@ -1282,25 +1274,6 @@ const AddStudentDialog = ({
                       />
                     </div>
 
-                    <FormField
-                      control={form.control}
-                      name="learner_password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>
-                            {t('students.learner_password')}
-                          </FormLabel>
-                          <FormControl>
-                            <PasswordInput
-                              {...field}
-                              autoComplete="new-password"
-                              aria-required="true"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
 
                     {/* Summary Card */}
                     <WizardSummary

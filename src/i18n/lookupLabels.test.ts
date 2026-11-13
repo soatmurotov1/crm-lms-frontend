@@ -4,23 +4,12 @@ import ru from './locales/ru.json';
 import en from './locales/en.json';
 
 const keys = [
-  'vehicles.plate_number',
   'common.previous',
   'branches.address',
   'branches.phone',
   'branches.name_placeholder',
   'students.student',
-  'training.add_enrollment_desc',
   'common.select_branch',
-  'training.find_student',
-  'training.search_student_placeholder',
-  'training.selected_student',
-  'training.search_student_hint',
-  'training.student_lookup_truncated',
-  'training.student_lookup_failed',
-  'training.student_lookup_empty',
-  'training.student_lookup_forbidden',
-  'training.select_program',
 ];
 
 describe('lookup labels', () => {

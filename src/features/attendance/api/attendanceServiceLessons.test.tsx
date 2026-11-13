@@ -89,7 +89,7 @@ describe('useLessons', () => {
     expect(result.current.data?.data[0].id).toBe('l1');
   });
 
-  // Regression test for autodrive-6cq.5.71: parseListResponse's fallback
+  // Regression test for parseListResponse's fallback
   // has no branch for a flat `total` sibling, so it fell back to
   // data.length (this page's row count) instead of the backend's real
   // cross-page total, hiding lessons on page 2+.
@@ -116,7 +116,7 @@ describe('useLessons', () => {
   });
 });
 
-// Regression test for autodrive-6cq.5.17: useLessonById used to
+// Regression test for useLessonById used to
 // `.catch(() => null)`, so a real backend failure resolved as a
 // successful "not found" instead of surfacing isError.
 describe('useLessonById', () => {

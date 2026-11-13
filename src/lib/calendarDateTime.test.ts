@@ -8,7 +8,7 @@ import {
   type DateTimeParts,
 } from '@/lib/calendarDateTime';
 
-// autodrive-qsgc.5: datetime instants are interpreted in Asia/Tashkent (UTC+5,
+// datetime instants are interpreted in Asia/Tashkent (UTC+5,
 // no DST). Assertions use fixed UTC instants and explicit offset math — must
 // hold under TZ=UTC and TZ=Asia/Tashkent.
 

@@ -32,25 +32,6 @@ describe('shouldStartTour', () => {
     ).toBe(false);
   });
 
-  it('stays off for the demo company email or slug', () => {
-    expect(
-      shouldStartTour({ ...ownerReady(), email: 'demo@automaktab.uz' }),
-    ).toBe(false);
-    expect(
-      shouldStartTour({
-        ...ownerReady(),
-        email: 'Demo@AutoMaktab.uz',
-        companySlug: null,
-      }),
-    ).toBe(false);
-    expect(
-      shouldStartTour({
-        ...ownerReady(),
-        companySlug: 'automaktab-demo-2026',
-      }),
-    ).toBe(false);
-  });
-
   it('stays off for every non-owner role', () => {
     for (const role of [
       'dev',

@@ -7,7 +7,7 @@ interface DebtStatusBadgeProps {
 
 /**
  * Binary paid/owing signal for a teacher, who must never see a payment
- * amount (autodrive-vh0.5). `hasDebt === undefined` (payload didn't include
+ * amount. `hasDebt === undefined` (payload didn't include
  * it, e.g. stale cache or a non-teacher-scoped read) renders nothing rather
  * than a misleading "paid" -- callers must not fall back to `!hasDebt`.
  */
