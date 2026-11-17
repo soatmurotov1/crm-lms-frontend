@@ -17,7 +17,7 @@ export const NotificationBell = () => {
       to="/notifications"
       aria-label={label}
       title={label}
-      className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="relative inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <Bell className="h-5 w-5" aria-hidden="true" />
       {unread > 0 ? (

@@ -343,3 +343,15 @@ export const useCreateStudentWithPayment = () => {
     },
   });
 };
+
+/** O'quvchi kabineti parolini o'rnatish yoki yangilash (o'quvchi telefon + shu parol bilan kiradi). */
+export const useUpsertLearnerAccount = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (password: string) =>
+      axiosInstance.put(`/students/${id}/learner-account`, { password }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: studentKeys.all });
+    },
+  });
+};

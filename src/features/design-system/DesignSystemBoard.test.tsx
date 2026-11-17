@@ -1,5 +1,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { toast } from 'sonner';
+
+vi.mock('sonner', () => ({ toast: vi.fn() }));
 import {
   Select,
   SelectContent,
@@ -11,6 +14,29 @@ import { DesignSystemBoard } from './DesignSystemBoard';
 
 afterEach(cleanup);
 describe('DesignSystemBoard', () => {
+  it('gives feedback when a sample button is pressed', () => {
+    render(<DesignSystemBoard />);
+    fireEvent.click(screen.getByRole('button', { name: 'Default action' }));
+    expect(toast).toHaveBeenCalledWith(
+      'Namuna: «Default action» bosildi',
+      expect.any(Object),
+    );
+  });
+
+  it('section links scroll to and focus their section', () => {
+    render(<DesignSystemBoard />);
+    const scrollIntoView = vi.fn();
+    const target = document.getElementById('ds-03')!;
+    target.scrollIntoView = scrollIntoView;
+    fireEvent.click(screen.getByRole('link', { name: /Foundations/ }));
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      behavior: 'smooth',
+      block: 'start',
+    });
+    expect(window.location.hash).toBe('#ds-03');
+    expect(document.activeElement).toBe(target);
+  });
+
   it('defaults to dark and can inspect light locally', () => {
     const { container } = render(<DesignSystemBoard />);
     expect(container.firstElementChild).toHaveClass('dark');

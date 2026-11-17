@@ -1,3 +1,4 @@
+import { safeUrl } from '@/lib/safeUrl';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -191,7 +192,7 @@ export const CurriculumEditor = ({ courseId }: { courseId: string }) => {
                         ) : null}
                         {lesson.video_url ? (
                           <a
-                            href={lesson.video_url}
+                            href={safeUrl(lesson.video_url)}
                             target="_blank"
                             rel="noreferrer noopener"
                             className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
@@ -301,7 +302,7 @@ const MaterialChip = ({
     <li className="flex items-center gap-1 rounded-full border border-border bg-muted/40 py-1 pl-3 pr-1 text-sm">
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       {material.url ? (
-        <a href={material.url} target="_blank" rel="noreferrer noopener" className="max-w-[14rem] truncate hover:underline">
+        <a href={safeUrl(material.url)} target="_blank" rel="noreferrer noopener" className="max-w-[14rem] truncate hover:underline">
           {material.title}
         </a>
       ) : (

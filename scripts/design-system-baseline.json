@@ -1,13 +1,6 @@
 {
   "version": 1,
-  "files": {
-    "src/components/ui/navigation-menu.tsx": {
-      "shadow": 1
-    },
-    "src/components/ui/sidebar.tsx": {
-      "shadow": 2
-    }
-  },
+  "files": {},
   "zeroFiles": [
     "src/components/layout/Sidebar.tsx",
     "src/components/layout/Topbar.tsx",
@@ -22,6 +15,8 @@
     "src/components/ui/StatCard.tsx",
     "src/components/ui/card.stories.tsx",
     "src/components/ui/card.tsx",
+    "src/components/ui/navigation-menu.tsx",
+    "src/components/ui/sidebar.tsx",
     "src/components/ui/toast.tsx",
     "src/features/attendance/api/AttendanceDrawer.tsx",
     "src/features/attendance/pages/AttendancePage.tsx",
@@ -65,6 +60,7 @@
     "src/features/leads/components/LeadStagesSettingsDialog.tsx",
     "src/features/leads/components/LeadsTable.tsx",
     "src/features/leads/pages/LeadDetailPage.tsx",
+    "src/features/lms/components/NotificationBell.tsx",
     "src/features/payments/api/PaymentModal.tsx",
     "src/features/payments/components/PaymentPeriodSummary.tsx",
     "src/features/payments/components/PaymentSnapshotCards.tsx",

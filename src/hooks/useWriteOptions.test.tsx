@@ -288,9 +288,9 @@ describe('minimal write options', () => {
           : {
               groups: [
                 {
-                  id: config?.params.branchId,
+                  id: (config?.params as { branchId?: string } | undefined)?.branchId,
                   name: 'TEST',
-                  branch_id: config?.params.branchId,
+                  branch_id: (config?.params as { branchId?: string } | undefined)?.branchId,
                 },
               ],
             },
@@ -345,7 +345,7 @@ describe('minimal write options', () => {
             }
           : {
               students: [],
-              students_total: config?.params?.search === 'ali' ? 3 : 90,
+              students_total: (config?.params as { search?: string } | undefined)?.search === 'ali' ? 3 : 90,
             },
     }));
     const client = new QueryClient({
@@ -421,7 +421,10 @@ describe('minimal write options', () => {
               own_resources: [],
             },
           };
-        const search = config?.params?.search;
+        const params = config?.params as
+          | { search?: string; limit?: number }
+          | undefined;
+        const search = params?.search;
         if (search === 'old')
           return new Promise((resolve) => {
             resolveOld = resolve;
@@ -435,7 +438,7 @@ describe('minimal write options', () => {
           : corpus;
         return {
           data: {
-            students: matches.slice(0, config?.params?.limit),
+            students: matches.slice(0, params?.limit),
             students_total: matches.length,
           },
         };

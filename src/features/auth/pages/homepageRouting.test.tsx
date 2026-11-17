@@ -12,13 +12,13 @@ describe('homepage routing', () => {
     useAuthStore.getState().logout();
   });
 
-  it('sends anonymous visitors from / to the app login page', async () => {
+  it('shows anonymous visitors the landing page with the interactive demo', async () => {
     window.history.pushState({}, '', '/');
 
     render(<App />);
 
-    expect(await screen.findByText(copy.title)).toBeInTheDocument();
-    expect(screen.getByText(copy.emailLabel)).toBeInTheDocument();
+    expect(await screen.findByText('Rahbar paneli')).toBeInTheDocument();
+    expect(screen.getAllByText(/Demoni ochish/).length).toBeGreaterThan(0);
   });
 
   it('still protects the dashboard route and sends anonymous users to login', async () => {

@@ -11,7 +11,8 @@ export const Route = createFileRoute('/_authenticated/design-system')({
     const { t } = useTranslation();
     return (
       <>
-        <title>{t('design_system.title')} · Auto Maktab</title>
+        {/* React 19: <title> faqat bitta matn qabul qiladi, aks holda bo'sh qoladi. */}
+        <title>{`${t('design_system.title')} · EduLMS`}</title>
         <meta name="description" content={t('design_system.description')} />
         <DesignSystemBoard />
       </>

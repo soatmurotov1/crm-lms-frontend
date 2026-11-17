@@ -1,4 +1,5 @@
-import { useId, useState, type ReactNode } from 'react';
+import { useId, useState, type MouseEvent, type ReactNode } from 'react';
+import { toast } from 'sonner';
 import { SquaresFour } from '@phosphor-icons/react';
 import { StatCard } from '@/components/ui/StatCard';
 import { DataCard } from '@/components/ui/DataCard';
@@ -138,6 +139,29 @@ function stateClass(state: SampleState) {
     return 'bg-accent text-accent-foreground';
   return '';
 }
+/** Namuna tugmasi bosilganini ko'rsatadi — namunalar haqiqiy amal bajarmaydi. */
+function sampleClick(label: string) {
+  return () => {
+    toast(`Namuna: «${label}» bosildi`, {
+      description: 'Bu dizayn tizimi namunasi — haqiqiy amal bajarilmaydi.',
+    });
+  };
+}
+
+/**
+ * Bo'lim havolasi. Oddiy `#hash` ga tayanilmaydi: router va `scroll-behavior`
+ * ba'zi brauzerlarda sakrashni bekor qiladi. Shuning uchun skroll aniq
+ * chaqiriladi va manzil `replaceState` bilan yangilanadi.
+ */
+function jumpToSection(event: MouseEvent<HTMLAnchorElement>, id: string) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  event.preventDefault();
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window.history.replaceState(window.history.state, '', `#${id}`);
+  target.focus({ preventScroll: true });
+}
+
 function Section({
   number,
   children,
@@ -148,6 +172,7 @@ function Section({
   return (
     <section
       id={`ds-0${number}`}
+      tabIndex={-1}
       aria-labelledby={`ds-heading-${number}`}
       className="scroll-mt-20 space-y-6 border-t border-border py-8 lg:py-12"
     >
@@ -294,7 +319,7 @@ export function DesignSystemBoard() {
       <div className="w-full bg-background p-2 font-sans text-foreground lg:p-3">
         <header className="space-y-4 py-8">
           <p className="font-mono text-xs text-muted-foreground">
-            AUTO MAKTAB / DESIGN SYSTEM / WAVE 0
+            EDULMS / DESIGN SYSTEM / WAVE 0
           </p>
           <h1 className="text-[44px] font-semibold leading-tight tracking-tight sm:text-5xl">
             One system. Clear decisions.
@@ -320,6 +345,7 @@ export function DesignSystemBoard() {
               <a
                 key={name}
                 href={`#ds-0${index}`}
+                onClick={(event) => jumpToSection(event, `ds-0${index}`)}
                 className="shrink-0 rounded-md px-3 py-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <span className="mr-2 font-mono text-muted-foreground">
@@ -544,7 +570,9 @@ export function DesignSystemBoard() {
                     />
                   </CardContent>
                   <CardFooter className="justify-end">
-                    <Button size="sm">Sample action</Button>
+                    <Button size="sm" onClick={sampleClick('Sample action')}>
+                      Sample action
+                    </Button>
                   </CardFooter>
                 </Card>
                 <div className="space-y-3 p-4">
@@ -602,6 +630,11 @@ export function DesignSystemBoard() {
                     disabled={state === 'Disabled'}
                     aria-pressed={state === 'Selected' ? true : undefined}
                     className={stateClass(state)}
+                    onClick={sampleClick(
+                      state === 'Destructive'
+                        ? 'Delete sample'
+                        : `${state} action`,
+                    )}
                   >
                     {state === 'Destructive'
                       ? 'Delete sample'
@@ -612,6 +645,7 @@ export function DesignSystemBoard() {
                   variant="outline"
                   size="icon"
                   aria-label="Dashboard icon sample"
+                  onClick={sampleClick('Dashboard icon')}
                 >
                   <SquaresFour aria-hidden="true" />
                 </Button>
@@ -683,6 +717,11 @@ export function DesignSystemBoard() {
                         }
                         disabled={state === 'Disabled'}
                         size="sm"
+                        onClick={sampleClick(
+                          state === 'Error'
+                            ? 'Retry sample'
+                            : `${state} card action`,
+                        )}
                       >
                         {state === 'Error'
                           ? 'Retry sample'
@@ -712,7 +751,11 @@ export function DesignSystemBoard() {
                     { label: 'Status', value: <Badge>Active</Badge> },
                   ]}
                   actions={
-                    <Button size="sm" variant="outline">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={sampleClick('View')}
+                    >
                       View
                     </Button>
                   }
@@ -730,6 +773,7 @@ export function DesignSystemBoard() {
                     disabled={state === 'Disabled'}
                     aria-current={state === 'Selected' ? 'page' : undefined}
                     className={stateClass(state)}
+                    onClick={sampleClick(`${state} navigation`)}
                   >
                     <SquaresFour aria-hidden="true" />
                     {state} navigation

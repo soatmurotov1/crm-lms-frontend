@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as LearnerRouteImport } from './routes/learner'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authenticated.attendance'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
@@ -21,8 +22,17 @@ import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPermissionTemplatesRouteImport } from './routes/_authenticated.permission-templates'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated.schedule'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedSubjectsRouteImport } from './routes/_authenticated.subjects'
 import { Route as AuthenticatedTeachersRouteImport } from './routes/_authenticated.teachers'
+import { Route as LearnerIndexRouteImport } from './routes/learner.index'
+import { Route as LearnerAssignmentsRouteImport } from './routes/learner.assignments'
+import { Route as LearnerAttendanceRouteImport } from './routes/learner.attendance'
+import { Route as LearnerGradesRouteImport } from './routes/learner.grades'
+import { Route as LearnerNotificationsRouteImport } from './routes/learner.notifications'
+import { Route as LearnerPaymentsRouteImport } from './routes/learner.payments'
+import { Route as LearnerProfileRouteImport } from './routes/learner.profile'
+import { Route as LearnerScheduleRouteImport } from './routes/learner.schedule'
 import { Route as AuthenticatedAssignmentsIndexRouteImport } from './routes/_authenticated.assignments.index'
 import { Route as AuthenticatedAssignmentsIdRouteImport } from './routes/_authenticated.assignments.$id'
 import { Route as AuthenticatedAuditIndexRouteImport } from './routes/_authenticated.audit.index'
@@ -44,6 +54,10 @@ import { Route as AuthenticatedStudentsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedStudentsIdRouteImport } from './routes/_authenticated.students.$id'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated.users.index'
 import { Route as AuthenticatedUsersIdRouteImport } from './routes/_authenticated.users.$id'
+import { Route as LearnerCoursesIndexRouteImport } from './routes/learner.courses.index'
+import { Route as LearnerCoursesIdRouteImport } from './routes/learner.courses.$id'
+import { Route as LearnerQuizzesIndexRouteImport } from './routes/learner.quizzes.index'
+import { Route as LearnerQuizzesIdRouteImport } from './routes/learner.quizzes.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +66,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnerRoute = LearnerRouteImport.update({
+  id: '/learner',
+  path: '/learner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -107,6 +126,11 @@ const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   path: '/schedule',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedSubjectsRoute = AuthenticatedSubjectsRouteImport.update({
   id: '/subjects',
   path: '/subjects',
@@ -116,6 +140,46 @@ const AuthenticatedTeachersRoute = AuthenticatedTeachersRouteImport.update({
   id: '/teachers',
   path: '/teachers',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const LearnerIndexRoute = LearnerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerAssignmentsRoute = LearnerAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerAttendanceRoute = LearnerAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerGradesRoute = LearnerGradesRouteImport.update({
+  id: '/grades',
+  path: '/grades',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerNotificationsRoute = LearnerNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerPaymentsRoute = LearnerPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerProfileRoute = LearnerProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerScheduleRoute = LearnerScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => LearnerRoute,
 } as any)
 const AuthenticatedAssignmentsIndexRoute =
   AuthenticatedAssignmentsIndexRouteImport.update({
@@ -230,9 +294,30 @@ const AuthenticatedUsersIdRoute = AuthenticatedUsersIdRouteImport.update({
   path: '/users/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const LearnerCoursesIndexRoute = LearnerCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerCoursesIdRoute = LearnerCoursesIdRouteImport.update({
+  id: '/courses/$id',
+  path: '/courses/$id',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerQuizzesIndexRoute = LearnerQuizzesIndexRouteImport.update({
+  id: '/quizzes/',
+  path: '/quizzes/',
+  getParentRoute: () => LearnerRoute,
+} as any)
+const LearnerQuizzesIdRoute = LearnerQuizzesIdRouteImport.update({
+  id: '/quizzes/$id',
+  path: '/quizzes/$id',
+  getParentRoute: () => LearnerRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/learner': typeof LearnerRouteWithChildren
   '/login': typeof LoginRoute
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -243,8 +328,17 @@ export interface FileRoutesByFullPath {
   '/permission-templates': typeof AuthenticatedPermissionTemplatesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/subjects': typeof AuthenticatedSubjectsRoute
   '/teachers': typeof AuthenticatedTeachersRoute
+  '/learner/assignments': typeof LearnerAssignmentsRoute
+  '/learner/attendance': typeof LearnerAttendanceRoute
+  '/learner/grades': typeof LearnerGradesRoute
+  '/learner/notifications': typeof LearnerNotificationsRoute
+  '/learner/payments': typeof LearnerPaymentsRoute
+  '/learner/profile': typeof LearnerProfileRoute
+  '/learner/schedule': typeof LearnerScheduleRoute
+  '/learner/': typeof LearnerIndexRoute
   '/assignments/$id': typeof AuthenticatedAssignmentsIdRoute
   '/audit/$id': typeof AuthenticatedAuditIdRoute
   '/branches/$id': typeof AuthenticatedBranchesIdRoute
@@ -255,6 +349,8 @@ export interface FileRoutesByFullPath {
   '/leads/$id': typeof AuthenticatedLeadsIdRoute
   '/students/$id': typeof AuthenticatedStudentsIdRoute
   '/users/$id': typeof AuthenticatedUsersIdRoute
+  '/learner/courses/$id': typeof LearnerCoursesIdRoute
+  '/learner/quizzes/$id': typeof LearnerQuizzesIdRoute
   '/assignments/': typeof AuthenticatedAssignmentsIndexRoute
   '/audit/': typeof AuthenticatedAuditIndexRoute
   '/branches/': typeof AuthenticatedBranchesIndexRoute
@@ -266,6 +362,8 @@ export interface FileRoutesByFullPath {
   '/leads/': typeof AuthenticatedLeadsIndexRoute
   '/students/': typeof AuthenticatedStudentsIndexRoute
   '/users/': typeof AuthenticatedUsersIndexRoute
+  '/learner/courses/': typeof LearnerCoursesIndexRoute
+  '/learner/quizzes/': typeof LearnerQuizzesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -279,8 +377,17 @@ export interface FileRoutesByTo {
   '/permission-templates': typeof AuthenticatedPermissionTemplatesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/subjects': typeof AuthenticatedSubjectsRoute
   '/teachers': typeof AuthenticatedTeachersRoute
+  '/learner/assignments': typeof LearnerAssignmentsRoute
+  '/learner/attendance': typeof LearnerAttendanceRoute
+  '/learner/grades': typeof LearnerGradesRoute
+  '/learner/notifications': typeof LearnerNotificationsRoute
+  '/learner/payments': typeof LearnerPaymentsRoute
+  '/learner/profile': typeof LearnerProfileRoute
+  '/learner/schedule': typeof LearnerScheduleRoute
+  '/learner': typeof LearnerIndexRoute
   '/assignments/$id': typeof AuthenticatedAssignmentsIdRoute
   '/audit/$id': typeof AuthenticatedAuditIdRoute
   '/branches/$id': typeof AuthenticatedBranchesIdRoute
@@ -291,6 +398,8 @@ export interface FileRoutesByTo {
   '/leads/$id': typeof AuthenticatedLeadsIdRoute
   '/students/$id': typeof AuthenticatedStudentsIdRoute
   '/users/$id': typeof AuthenticatedUsersIdRoute
+  '/learner/courses/$id': typeof LearnerCoursesIdRoute
+  '/learner/quizzes/$id': typeof LearnerQuizzesIdRoute
   '/assignments': typeof AuthenticatedAssignmentsIndexRoute
   '/audit': typeof AuthenticatedAuditIndexRoute
   '/branches': typeof AuthenticatedBranchesIndexRoute
@@ -302,11 +411,14 @@ export interface FileRoutesByTo {
   '/leads': typeof AuthenticatedLeadsIndexRoute
   '/students': typeof AuthenticatedStudentsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/learner/courses': typeof LearnerCoursesIndexRoute
+  '/learner/quizzes': typeof LearnerQuizzesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/learner': typeof LearnerRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/attendance': typeof AuthenticatedAttendanceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -317,8 +429,17 @@ export interface FileRoutesById {
   '/_authenticated/permission-templates': typeof AuthenticatedPermissionTemplatesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/subjects': typeof AuthenticatedSubjectsRoute
   '/_authenticated/teachers': typeof AuthenticatedTeachersRoute
+  '/learner/assignments': typeof LearnerAssignmentsRoute
+  '/learner/attendance': typeof LearnerAttendanceRoute
+  '/learner/grades': typeof LearnerGradesRoute
+  '/learner/notifications': typeof LearnerNotificationsRoute
+  '/learner/payments': typeof LearnerPaymentsRoute
+  '/learner/profile': typeof LearnerProfileRoute
+  '/learner/schedule': typeof LearnerScheduleRoute
+  '/learner/': typeof LearnerIndexRoute
   '/_authenticated/assignments/$id': typeof AuthenticatedAssignmentsIdRoute
   '/_authenticated/audit/$id': typeof AuthenticatedAuditIdRoute
   '/_authenticated/branches/$id': typeof AuthenticatedBranchesIdRoute
@@ -329,6 +450,8 @@ export interface FileRoutesById {
   '/_authenticated/leads/$id': typeof AuthenticatedLeadsIdRoute
   '/_authenticated/students/$id': typeof AuthenticatedStudentsIdRoute
   '/_authenticated/users/$id': typeof AuthenticatedUsersIdRoute
+  '/learner/courses/$id': typeof LearnerCoursesIdRoute
+  '/learner/quizzes/$id': typeof LearnerQuizzesIdRoute
   '/_authenticated/assignments/': typeof AuthenticatedAssignmentsIndexRoute
   '/_authenticated/audit/': typeof AuthenticatedAuditIndexRoute
   '/_authenticated/branches/': typeof AuthenticatedBranchesIndexRoute
@@ -340,11 +463,14 @@ export interface FileRoutesById {
   '/_authenticated/leads/': typeof AuthenticatedLeadsIndexRoute
   '/_authenticated/students/': typeof AuthenticatedStudentsIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/learner/courses/': typeof LearnerCoursesIndexRoute
+  '/learner/quizzes/': typeof LearnerQuizzesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/learner'
     | '/login'
     | '/attendance'
     | '/dashboard'
@@ -355,8 +481,17 @@ export interface FileRouteTypes {
     | '/permission-templates'
     | '/profile'
     | '/schedule'
+    | '/settings'
     | '/subjects'
     | '/teachers'
+    | '/learner/assignments'
+    | '/learner/attendance'
+    | '/learner/grades'
+    | '/learner/notifications'
+    | '/learner/payments'
+    | '/learner/profile'
+    | '/learner/schedule'
+    | '/learner/'
     | '/assignments/$id'
     | '/audit/$id'
     | '/branches/$id'
@@ -367,6 +502,8 @@ export interface FileRouteTypes {
     | '/leads/$id'
     | '/students/$id'
     | '/users/$id'
+    | '/learner/courses/$id'
+    | '/learner/quizzes/$id'
     | '/assignments/'
     | '/audit/'
     | '/branches/'
@@ -378,6 +515,8 @@ export interface FileRouteTypes {
     | '/leads/'
     | '/students/'
     | '/users/'
+    | '/learner/courses/'
+    | '/learner/quizzes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -391,8 +530,17 @@ export interface FileRouteTypes {
     | '/permission-templates'
     | '/profile'
     | '/schedule'
+    | '/settings'
     | '/subjects'
     | '/teachers'
+    | '/learner/assignments'
+    | '/learner/attendance'
+    | '/learner/grades'
+    | '/learner/notifications'
+    | '/learner/payments'
+    | '/learner/profile'
+    | '/learner/schedule'
+    | '/learner'
     | '/assignments/$id'
     | '/audit/$id'
     | '/branches/$id'
@@ -403,6 +551,8 @@ export interface FileRouteTypes {
     | '/leads/$id'
     | '/students/$id'
     | '/users/$id'
+    | '/learner/courses/$id'
+    | '/learner/quizzes/$id'
     | '/assignments'
     | '/audit'
     | '/branches'
@@ -414,10 +564,13 @@ export interface FileRouteTypes {
     | '/leads'
     | '/students'
     | '/users'
+    | '/learner/courses'
+    | '/learner/quizzes'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/learner'
     | '/login'
     | '/_authenticated/attendance'
     | '/_authenticated/dashboard'
@@ -428,8 +581,17 @@ export interface FileRouteTypes {
     | '/_authenticated/permission-templates'
     | '/_authenticated/profile'
     | '/_authenticated/schedule'
+    | '/_authenticated/settings'
     | '/_authenticated/subjects'
     | '/_authenticated/teachers'
+    | '/learner/assignments'
+    | '/learner/attendance'
+    | '/learner/grades'
+    | '/learner/notifications'
+    | '/learner/payments'
+    | '/learner/profile'
+    | '/learner/schedule'
+    | '/learner/'
     | '/_authenticated/assignments/$id'
     | '/_authenticated/audit/$id'
     | '/_authenticated/branches/$id'
@@ -440,6 +602,8 @@ export interface FileRouteTypes {
     | '/_authenticated/leads/$id'
     | '/_authenticated/students/$id'
     | '/_authenticated/users/$id'
+    | '/learner/courses/$id'
+    | '/learner/quizzes/$id'
     | '/_authenticated/assignments/'
     | '/_authenticated/audit/'
     | '/_authenticated/branches/'
@@ -451,11 +615,14 @@ export interface FileRouteTypes {
     | '/_authenticated/leads/'
     | '/_authenticated/students/'
     | '/_authenticated/users/'
+    | '/learner/courses/'
+    | '/learner/quizzes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LearnerRoute: typeof LearnerRouteWithChildren
   LoginRoute: typeof LoginRoute
 }
 
@@ -473,6 +640,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learner': {
+      id: '/learner'
+      path: '/learner'
+      fullPath: '/learner'
+      preLoaderRoute: typeof LearnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -545,6 +719,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedScheduleRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/subjects': {
       id: '/_authenticated/subjects'
       path: '/subjects'
@@ -558,6 +739,62 @@ declare module '@tanstack/react-router' {
       fullPath: '/teachers'
       preLoaderRoute: typeof AuthenticatedTeachersRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/learner/': {
+      id: '/learner/'
+      path: '/'
+      fullPath: '/learner/'
+      preLoaderRoute: typeof LearnerIndexRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/assignments': {
+      id: '/learner/assignments'
+      path: '/assignments'
+      fullPath: '/learner/assignments'
+      preLoaderRoute: typeof LearnerAssignmentsRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/attendance': {
+      id: '/learner/attendance'
+      path: '/attendance'
+      fullPath: '/learner/attendance'
+      preLoaderRoute: typeof LearnerAttendanceRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/grades': {
+      id: '/learner/grades'
+      path: '/grades'
+      fullPath: '/learner/grades'
+      preLoaderRoute: typeof LearnerGradesRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/notifications': {
+      id: '/learner/notifications'
+      path: '/notifications'
+      fullPath: '/learner/notifications'
+      preLoaderRoute: typeof LearnerNotificationsRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/payments': {
+      id: '/learner/payments'
+      path: '/payments'
+      fullPath: '/learner/payments'
+      preLoaderRoute: typeof LearnerPaymentsRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/profile': {
+      id: '/learner/profile'
+      path: '/profile'
+      fullPath: '/learner/profile'
+      preLoaderRoute: typeof LearnerProfileRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/schedule': {
+      id: '/learner/schedule'
+      path: '/schedule'
+      fullPath: '/learner/schedule'
+      preLoaderRoute: typeof LearnerScheduleRouteImport
+      parentRoute: typeof LearnerRoute
     }
     '/_authenticated/assignments/': {
       id: '/_authenticated/assignments/'
@@ -706,6 +943,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/learner/courses/': {
+      id: '/learner/courses/'
+      path: '/courses'
+      fullPath: '/learner/courses/'
+      preLoaderRoute: typeof LearnerCoursesIndexRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/courses/$id': {
+      id: '/learner/courses/$id'
+      path: '/courses/$id'
+      fullPath: '/learner/courses/$id'
+      preLoaderRoute: typeof LearnerCoursesIdRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/quizzes/': {
+      id: '/learner/quizzes/'
+      path: '/quizzes'
+      fullPath: '/learner/quizzes/'
+      preLoaderRoute: typeof LearnerQuizzesIndexRouteImport
+      parentRoute: typeof LearnerRoute
+    }
+    '/learner/quizzes/$id': {
+      id: '/learner/quizzes/$id'
+      path: '/quizzes/$id'
+      fullPath: '/learner/quizzes/$id'
+      preLoaderRoute: typeof LearnerQuizzesIdRouteImport
+      parentRoute: typeof LearnerRoute
+    }
   }
 }
 
@@ -719,6 +984,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPermissionTemplatesRoute: typeof AuthenticatedPermissionTemplatesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSubjectsRoute: typeof AuthenticatedSubjectsRoute
   AuthenticatedTeachersRoute: typeof AuthenticatedTeachersRoute
   AuthenticatedAssignmentsIdRoute: typeof AuthenticatedAssignmentsIdRoute
@@ -754,6 +1020,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPermissionTemplatesRoute: AuthenticatedPermissionTemplatesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSubjectsRoute: AuthenticatedSubjectsRoute,
   AuthenticatedTeachersRoute: AuthenticatedTeachersRoute,
   AuthenticatedAssignmentsIdRoute: AuthenticatedAssignmentsIdRoute,
@@ -783,9 +1050,43 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface LearnerRouteChildren {
+  LearnerAssignmentsRoute: typeof LearnerAssignmentsRoute
+  LearnerAttendanceRoute: typeof LearnerAttendanceRoute
+  LearnerGradesRoute: typeof LearnerGradesRoute
+  LearnerNotificationsRoute: typeof LearnerNotificationsRoute
+  LearnerPaymentsRoute: typeof LearnerPaymentsRoute
+  LearnerProfileRoute: typeof LearnerProfileRoute
+  LearnerScheduleRoute: typeof LearnerScheduleRoute
+  LearnerIndexRoute: typeof LearnerIndexRoute
+  LearnerCoursesIdRoute: typeof LearnerCoursesIdRoute
+  LearnerQuizzesIdRoute: typeof LearnerQuizzesIdRoute
+  LearnerCoursesIndexRoute: typeof LearnerCoursesIndexRoute
+  LearnerQuizzesIndexRoute: typeof LearnerQuizzesIndexRoute
+}
+
+const LearnerRouteChildren: LearnerRouteChildren = {
+  LearnerAssignmentsRoute: LearnerAssignmentsRoute,
+  LearnerAttendanceRoute: LearnerAttendanceRoute,
+  LearnerGradesRoute: LearnerGradesRoute,
+  LearnerNotificationsRoute: LearnerNotificationsRoute,
+  LearnerPaymentsRoute: LearnerPaymentsRoute,
+  LearnerProfileRoute: LearnerProfileRoute,
+  LearnerScheduleRoute: LearnerScheduleRoute,
+  LearnerIndexRoute: LearnerIndexRoute,
+  LearnerCoursesIdRoute: LearnerCoursesIdRoute,
+  LearnerQuizzesIdRoute: LearnerQuizzesIdRoute,
+  LearnerCoursesIndexRoute: LearnerCoursesIndexRoute,
+  LearnerQuizzesIndexRoute: LearnerQuizzesIndexRoute,
+}
+
+const LearnerRouteWithChildren =
+  LearnerRoute._addFileChildren(LearnerRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LearnerRoute: LearnerRouteWithChildren,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport

@@ -68,7 +68,7 @@ export const QuestionFormDialog = ({ quizId, question, onClose }: Props) => {
     if (!Number.isInteger(score) || score < 0 || score > 100)
       return setError(t('lms.questions.points_invalid'));
     let payloadOptions: string[] = [];
-    let payloadCorrect: (number | string)[] = [];
+    let payloadCorrect: (number | string)[];
     if (type === 'text') {
       payloadCorrect = answers.split('\n').map((v) => v.trim()).filter(Boolean);
     } else {

@@ -17,6 +17,17 @@ import { useAuthStore } from '@/store/authStore';
 import type { AuthResponse } from '@/features/staff/types';
 import { getDefaultAuthenticatedRoute } from '@/lib/defaultAuthenticatedRoute';
 import { getLoginCopy, readLoginLang } from '@/features/auth/lib/loginCopy';
+import { learnerLogin } from '@/features/learner/api/learnerApi';
+import { useLearnerStore } from '@/features/learner/api/learnerStore';
+import { cn } from '@/lib/utils';
+
+type LoginMode = 'staff' | 'student';
+
+const initialMode = (): LoginMode =>
+  typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).get('as') === 'student'
+    ? 'student'
+    : 'staff';
 
 type FieldErrors = {
   email?: string;
@@ -32,17 +43,32 @@ const notify = (kind: 'success' | 'error', message: string) => {
     .catch(() => undefined);
 };
 
+// Bosh sahifadagi "Demoni ochish" → /login?demo=1. Demo hisob .env orqali
+// berilgan bo'lsa, maydonlar oldindan to'ldiriladi.
+const DEMO_EMAIL = import.meta.env.VITE_DEMO_EMAIL ?? '';
+const DEMO_PASSWORD = import.meta.env.VITE_DEMO_PASSWORD ?? '';
+const isDemoRequest = () =>
+  Boolean(DEMO_EMAIL) &&
+  typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).get('demo') === '1';
+
 const LoginPage = () => {
   const lang = useMemo(() => readLoginLang(), []);
   const copy = useMemo(() => getLoginCopy(lang), [lang]);
   const { theme, toggle } = useTheme();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const demo = useMemo(() => isDemoRequest(), []);
+  const [mode, setMode] = useState<LoginMode>(initialMode);
+  const [studentPending, setStudentPending] = useState(false);
+  const setLearnerSession = useLearnerStore((s) => s.setSession);
+  const isStudent = mode === 'student';
+  const [email, setEmail] = useState(demo ? DEMO_EMAIL : '');
+  const [password, setPassword] = useState(demo ? DEMO_PASSWORD : '');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
   const location = useLocation();
   const login = useLogin();
+  const busy = login.isPending || studentPending;
   const logout = useAuthStore((s) => s.logout);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hasCleanedInitialSession = useRef(false);
@@ -126,6 +152,25 @@ const LoginPage = () => {
     if (nextErrors.email || nextErrors.password) return;
 
     warmApiConnection();
+    if (isStudent) {
+      setStudentPending(true);
+      learnerLogin(email.trim(), password.trim())
+        .then(async ({ token, user }) => {
+          setLearnerSession(token, user);
+          notify('success', copy.success);
+          await ensureI18n().catch(() => undefined);
+          await router.navigate({ href: '/learner', replace: true });
+        })
+        .catch((error: unknown) => {
+          const response = errorResponse(error);
+          if (response?.status === 429) notify('error', copy.rateLimit);
+          else if (response?.status === 403) setFormError(copy.studentClosed);
+          else if (!response) notify('error', copy.networkError);
+          else setFormError(copy.studentError);
+        })
+        .finally(() => setStudentPending(false));
+      return;
+    }
     login.mutate(
       { email, password: password.trim() },
       { onSuccess, onError: handleError },
@@ -174,6 +219,36 @@ const LoginPage = () => {
         </section>
 
         <Card className="mx-auto w-full max-w-md ">
+          <div
+            role="tablist"
+            aria-label={copy.title}
+            className="mb-6 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1"
+          >
+            {(['staff', 'student'] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={mode === value}
+                onClick={() => {
+                  setMode(value);
+                  setEmail('');
+                  setPassword('');
+                  setFormError(null);
+                  setFieldErrors({});
+                }}
+                className={cn(
+                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  mode === value
+                    ? 'bg-background text-foreground shadow-none'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {value === 'staff' ? copy.tabStaff : copy.tabStudent}
+              </button>
+            ))}
+          </div>
+
           <div className="mb-6">
             <h1
               id="login-title"
@@ -182,19 +257,26 @@ const LoginPage = () => {
               {copy.title}
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              {copy.formDescription}
+              {isStudent ? copy.studentDescription : copy.formDescription}
             </p>
           </div>
 
+          {demo ? (
+            <Alert className="mb-5 border-border px-3.5 py-3 text-sm leading-relaxed">
+              Demo hisob: <b>{DEMO_EMAIL}</b> / <b>{DEMO_PASSWORD}</b> — namuna
+              o‘quv markazi. "{copy.submit}" tugmasini bosing.
+            </Alert>
+          ) : null}
+
           <span role="status" aria-live="polite" className="sr-only">
-            {login.isPending ? copy.submitting : ''}
+            {busy ? copy.submitting : ''}
           </span>
 
           <form
             onSubmit={onSubmit}
             onFocus={warmApiConnection}
             className="space-y-5"
-            aria-busy={login.isPending}
+            aria-busy={busy}
           >
             <div className="space-y-2">
               <label
@@ -205,13 +287,13 @@ const LoginPage = () => {
                     : 'text-sm font-medium leading-none'
                 }
               >
-                {copy.emailLabel}
+                {isStudent ? copy.phoneLabel : copy.emailLabel}
               </label>
               <Input
                 id={emailId}
                 value={email}
-                type="email"
-                autoComplete="email"
+                type={isStudent ? 'tel' : 'email'}
+                autoComplete={isStudent ? 'tel' : 'email'}
                 aria-invalid={fieldErrors.email ? true : undefined}
                 aria-describedby={
                   fieldErrors.email ? `${emailId}-error` : undefined
@@ -223,7 +305,9 @@ const LoginPage = () => {
                     current.email ? { ...current, email: undefined } : current,
                   );
                 }}
-                placeholder={copy.emailPlaceholder}
+                placeholder={
+                  isStudent ? copy.phonePlaceholder : copy.emailPlaceholder
+                }
                 className="h-12 border-muted-foreground bg-background/50 px-3.5 focus-visible:ring-foreground md:text-base"
               />
               {fieldErrors.email ? (
@@ -288,15 +372,15 @@ const LoginPage = () => {
             <Button
               type="submit"
               className="h-12 w-full text-base font-semibold focus-visible:ring-foreground"
-              disabled={login.isPending}
+              disabled={busy}
             >
-              {login.isPending ? (
+              {busy ? (
                 <CircleNotch
                   aria-hidden="true"
                   className="animate-spin motion-reduce:animate-none"
                 />
               ) : null}
-              {login.isPending ? copy.submitting : copy.submit}
+              {busy ? copy.submitting : copy.submit}
             </Button>
           </form>
         </Card>

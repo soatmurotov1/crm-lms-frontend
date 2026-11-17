@@ -161,6 +161,20 @@ const OwnerCrmTour = ({
     onFinishedRef.current();
   }, []);
 
+  /*
+    Tur faqat tanishtiradi, foydalanuvchini ushlab turmaydi. U menyudan
+    boshqa sahifaga o'tsa (yoki manzilni o'zi yozsa), tur yopiladi — aks holda
+    har bir qadamning `before` bosqichi uni yana /dashboard'ga qaytarib,
+    hech bir menyu bandi ishlamayotgandek ko'rinardi.
+  */
+  useEffect(() => {
+    if (!run || !sawTooltipRef.current) return;
+    const onTourRoute = OWNER_CRM_TOUR_STEPS.some(
+      (step) => step.route === normalizeTourPath(pathname),
+    );
+    if (!onTourRoute) finish(true);
+  }, [finish, pathname, run]);
+
   useEffect(() => {
     if (!run) return undefined;
     const onKey = (event: KeyboardEvent) => {
@@ -241,7 +255,9 @@ const OwnerCrmTour = ({
         ...colors,
         backgroundColor: colors.arrowColor,
         beforeTimeout: 16000,
-        blockTargetInteraction: true,
+        // Yoritilgan menyu bosiladigan qoladi: bosilsa tur yopiladi va
+        // tanlangan sahifa ochiladi.
+        blockTargetInteraction: false,
         buttons: ['skip', 'back', 'primary'],
         dismissKeyAction: false,
         overlayClickAction: false,

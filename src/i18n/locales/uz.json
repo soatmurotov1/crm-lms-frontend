@@ -35,7 +35,8 @@
     "assignments": "Topshiriqlar",
     "exams": "Testlar va imtihonlar",
     "grades": "Baholar",
-    "notifications": "Bildirishnomalar"
+    "notifications": "Bildirishnomalar",
+    "settings": "Sozlamalar"
   },
   "nav_sections": {
     "pinned": "Biriktirilganlar",
@@ -1929,5 +1930,236 @@
       "empty_title": "Bildirishnomalar yo‘q",
       "bell_unread": "{{count}} ta o‘qilmagan bildirishnoma"
     }
+  },
+  "learner": {
+    "portal": "O'quvchi kabineti",
+    "hello": "Salom, {{name}}!",
+    "logout": "Chiqish",
+    "nav": {
+      "dashboard": "Bosh sahifa",
+      "schedule": "Jadval",
+      "courses": "Kurslar",
+      "assignments": "Topshiriqlar",
+      "quizzes": "Testlar",
+      "grades": "Baholar",
+      "attendance": "Davomat",
+      "payments": "To'lovlar",
+      "notifications": "Xabarlar",
+      "profile": "Profil"
+    },
+    "dashboard": {
+      "subtitle": "Bugungi holatingiz bir qarashda",
+      "groups": "Guruhlar",
+      "pending_assignments": "Bajarilmagan topshiriqlar",
+      "open_quizzes": "Ochiq testlar",
+      "attendance": "Davomat",
+      "debt": "Qarzdorlik",
+      "no_debt": "Qarz yo'q",
+      "unread": "O'qilmagan xabarlar",
+      "next_lessons": "Yaqin darslar",
+      "no_lessons": "Yaqin kunlarda dars yo'q",
+      "my_groups": "Guruhlarim",
+      "teacher": "O'qituvchi"
+    },
+    "schedule": {
+      "title": "Dars jadvali",
+      "subtitle": "Guruhlaringiz darslari va davomatingiz",
+      "empty": "Bu haftada dars yo'q",
+      "prev": "Oldingi hafta",
+      "next": "Keyingi hafta",
+      "today": "Bugun",
+      "weekly": "Haftalik jadval"
+    },
+    "days": {
+      "1": "Dushanba",
+      "2": "Seshanba",
+      "3": "Chorshanba",
+      "4": "Payshanba",
+      "5": "Juma",
+      "6": "Shanba",
+      "7": "Yakshanba"
+    },
+    "lesson_type": {
+      "theory": "Nazariy",
+      "practice": "Amaliy"
+    },
+    "attendance_status": {
+      "present": "Keldi",
+      "absent": "Kelmadi",
+      "late": "Kechikdi",
+      "excused": "Sababli",
+      "none": "Belgilanmagan"
+    },
+    "courses": {
+      "title": "Kurslarim",
+      "subtitle": "O'quv dasturi, darslar va materiallar",
+      "empty": "Siz hali kursga yozilmagansiz",
+      "lessons": "{{done}}/{{total}} dars",
+      "open": "Ochish",
+      "back": "Kurslarga qaytish",
+      "mark_done": "O'qidim",
+      "done": "O'qilgan",
+      "video": "Videoni ko'rish",
+      "materials": "Materiallar",
+      "download": "Yuklab olish",
+      "minutes": "{{count}} daq",
+      "no_lessons": "Bu modulda dars yo'q"
+    },
+    "assignments": {
+      "title": "Topshiriqlar",
+      "subtitle": "Uy vazifalari va loyihalar",
+      "empty": "Hozircha topshiriq yo'q",
+      "due": "Muddat: {{date}}",
+      "no_due": "Muddatsiz",
+      "max_score": "Maks. ball: {{score}}",
+      "answer": "Javobingiz",
+      "answer_placeholder": "Javobni yozing yoki havola qoldiring…",
+      "submit": "Yuborish",
+      "resubmit": "Qayta yuborish",
+      "submitted_ok": "Javob yuborildi",
+      "score": "Ball: {{score}}/{{max}}",
+      "feedback": "O'qituvchi izohi",
+      "status": {
+        "pending": "Bajarilmagan",
+        "overdue": "Muddati o'tgan",
+        "submitted": "Yuborilgan",
+        "returned": "Qaytarilgan",
+        "graded": "Baholangan"
+      }
+    },
+    "quizzes": {
+      "title": "Testlar va imtihonlar",
+      "subtitle": "Bilimingizni sinang",
+      "empty": "Hozircha test yo'q",
+      "questions": "{{count}} ta savol",
+      "attempts": "Urinish: {{used}}/{{max}}",
+      "pass": "O'tish bali: {{percent}}%",
+      "start": "Boshlash",
+      "best": "Eng yaxshi natija: {{percent}}%",
+      "passed": "O'tdi",
+      "failed": "O'tmadi",
+      "review": "Tekshirilmoqda",
+      "unavailable": "Hozir topshirib bo'lmaydi",
+      "submit": "Javoblarni yuborish",
+      "submit_confirm": "Javoblar yuborilgach o'zgartirib bo'lmaydi. Yuborasizmi?",
+      "result_title": "Natija",
+      "back": "Testlarga qaytish",
+      "text_placeholder": "Javobingiz…",
+      "duration": "{{count}} daqiqa",
+      "answered": "{{count}}/{{total}} javob berildi",
+      "kind": {
+        "quiz": "Test",
+        "exam": "Imtihon"
+      }
+    },
+    "grades": {
+      "title": "Baholar",
+      "subtitle": "Topshiriq va testlardagi natijalaringiz",
+      "average": "O'rtacha natija",
+      "empty": "Hali baho yo'q",
+      "kind": {
+        "assignment": "Topshiriq",
+        "quiz": "Test",
+        "exam": "Imtihon"
+      }
+    },
+    "attendance": {
+      "title": "Davomat",
+      "subtitle": "Darslarga qatnashishingiz",
+      "percent": "Qatnashish",
+      "total": "Jami darslar",
+      "empty": "Davomat hali belgilanmagan"
+    },
+    "payments": {
+      "title": "To'lovlar",
+      "subtitle": "Kurs narxi, to'lovlar va qarzdorlik",
+      "total": "Kurs narxi",
+      "paid": "To'langan",
+      "debt": "Qarzdorlik",
+      "advance": "Avans",
+      "history": "To'lovlar tarixi",
+      "empty": "Hali to'lov yo'q",
+      "method": {
+        "cash": "Naqd",
+        "card": "Karta",
+        "transfer": "O'tkazma"
+      }
+    },
+    "notifications": {
+      "title": "Xabarlar",
+      "subtitle": "Markazdan kelgan e'lonlar",
+      "empty": "Xabar yo'q",
+      "mark_all": "Hammasini o'qildi deb belgilash",
+      "new": "Yangi"
+    },
+    "profile": {
+      "title": "Profil",
+      "phone": "Telefon",
+      "branch": "Filial",
+      "center": "O'quv markazi",
+      "change_password": "Parolni o'zgartirish",
+      "current": "Joriy parol",
+      "new": "Yangi parol",
+      "new_hint": "Kamida 6 belgi, ichida raqam",
+      "save": "Saqlash",
+      "saved": "Parol o'zgartirildi"
+    },
+    "login": {
+      "staff": "Xodim",
+      "student": "O'quvchi",
+      "phone": "Telefon raqam",
+      "phone_placeholder": "+998 90 123 45 67",
+      "student_hint": "Parolni o'quv markazingiz beradi.",
+      "error": "Telefon raqam yoki parol xato"
+    },
+    "errors": {
+      "generic": "Ma'lumotni yuklab bo'lmadi",
+      "section_disabled": "Bu bo'lim o'quv markazi tomonidan o'chirilgan",
+      "closed": "O'quvchi kabineti vaqtincha yopilgan"
+    }
+  },
+  "settings": {
+    "title": "Sozlamalar",
+    "subtitle": "Kim nima qila olishini va o'quvchi kabinetini sozlang",
+    "staff_title": "Xodimlar ruxsatlari",
+    "staff_desc": "Har bir rol uchun ruxsatlar shablonini tuzing yoki har bir xodimga alohida ruxsat bering: ko'rish, yaratish, tahrirlash, o'chirish.",
+    "open_templates": "Ruxsat shablonlari",
+    "open_users": "Xodimlar ro'yxati",
+    "roles_title": "Rollar va panellar",
+    "roles": {
+      "owner": "Markaz egasi — hamma narsa va sozlamalar",
+      "manager": "Menejer — filial ishi, guruhlar, o'quvchilar, xodimlar",
+      "operator": "Operator — o'quvchilar, to'lovlar, lidlar, jadval",
+      "accountant": "Buxgalter — to'lovlar, xarajatlar, hisobotlar",
+      "teacher": "O'qituvchi — o'z guruhlari: davomat, topshiriq, test, baho",
+      "student": "O'quvchi — o'z kabineti (quyida sozlanadi)"
+    },
+    "learner_title": "O'quvchi kabineti",
+    "learner_desc": "O'quvchilar telefon raqami va markaz bergan parol bilan kiradi. Qaysi bo'limlarni ko'rishini tanlang.",
+    "enabled": "Kabinet yoqilgan",
+    "enabled_desc": "O'chirilsa, o'quvchilar kira olmaydi",
+    "sections": {
+      "schedule": "Dars jadvali",
+      "courses": "Kurslar va o'quv dasturi",
+      "assignments": "Topshiriqlar",
+      "quizzes": "Testlar va imtihonlar",
+      "grades": "Baholar",
+      "attendance": "Davomat",
+      "payments": "To'lovlar va qarzdorlik",
+      "notifications": "Xabarlar"
+    },
+    "saved": "Sozlama saqlandi",
+    "owner_only": "Faqat markaz egasi o'zgartira oladi"
+  },
+  "students_learner": {
+    "title": "O'quvchi kabineti",
+    "has": "Kirish ochilgan",
+    "none": "Kirish ochilmagan",
+    "desc": "O'quvchi telefon raqami ({{phone}}) va shu parol bilan kabinetga kiradi.",
+    "password": "Parol",
+    "set": "Kirishni ochish",
+    "update": "Parolni yangilash",
+    "saved": "Parol saqlandi",
+    "min": "Kamida 6 belgi, ichida raqam"
   }
 }

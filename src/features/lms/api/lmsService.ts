@@ -358,15 +358,16 @@ export const useDeleteAssignment = () =>
 
 export const useRecordSubmission = (assignmentId: string) =>
   useAssignmentMutation(
-    (vars: { studentId: string; text?: string; file?: File | null }) => {
+    async (vars: { studentId: string; text?: string; file?: File | null }) => {
       if (vars.file) {
         const form = new FormData();
         form.append('student_id', vars.studentId);
         if (vars.text?.trim()) form.append('text', vars.text.trim());
         form.append('file', vars.file);
-        return axiosInstance.post(`/assignments/${assignmentId}/submissions`, form);
+        await axiosInstance.post(`/assignments/${assignmentId}/submissions`, form);
+        return;
       }
-      return axiosInstance.post(`/assignments/${assignmentId}/submissions`, {
+      await axiosInstance.post(`/assignments/${assignmentId}/submissions`, {
         student_id: vars.studentId,
         text: vars.text,
       });

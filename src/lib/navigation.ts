@@ -24,8 +24,7 @@ import {
 } from '@phosphor-icons/react';
 import type { Capability } from '@/lib/permissions';
 
-export type NavSectionId =
-  'workspace' | 'learning' | 'team' | 'system';
+export type NavSectionId = 'workspace' | 'learning' | 'team' | 'system';
 
 export type AppRoutePath =
   | '/dashboard'
@@ -48,6 +47,7 @@ export type AppRoutePath =
   | '/notifications'
   | '/audit'
   | '/design-system'
+  | '/settings'
   | '/profile';
 
 export type NavItem = {
@@ -216,6 +216,13 @@ const allNavItems: NavItem[] = [
     icon: ShieldCheck,
     section: 'system',
     cap: 'viewAudit',
+  },
+  {
+    path: '/settings',
+    labelKey: 'nav.settings',
+    icon: GearSix,
+    section: 'system',
+    cap: 'manageUsers',
   },
   {
     path: '/design-system',

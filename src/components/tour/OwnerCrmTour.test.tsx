@@ -56,4 +56,37 @@ describe('OwnerCrmTour', () => {
       screen.queryByRole('heading', { name: 'crm_tour.dashboard_title' }),
     ).not.toBeInTheDocument();
   });
+
+  it('closes instead of pulling the user back when they navigate away', async () => {
+    HTMLElement.prototype.getClientRects = () =>
+      [{ width: 40, height: 40 }] as unknown as DOMRectList;
+
+    const onFinished = vi.fn();
+    vi.mocked(persistCrmTourCompletion).mockClear();
+
+    const { router } = await renderWithRouter(
+      <>
+        <nav data-tour="crm-sidebar-mobile">menu</nav>
+        <div data-tour="crm-dashboard">filters</div>
+        <OwnerCrmTour
+          onFinished={onFinished}
+          prepareChrome={vi.fn()}
+          releaseChrome={vi.fn()}
+        />
+      </>,
+      { initialEntry: '/dashboard', routePattern: '/$' },
+    );
+
+    expect(
+      await screen.findByRole('heading', { name: 'crm_tour.sidebar_title' }),
+    ).toBeInTheDocument();
+
+    await router.navigate({ to: '/design-system' as never });
+
+    await waitFor(() => {
+      expect(onFinished).toHaveBeenCalledTimes(1);
+    });
+    expect(persistCrmTourCompletion).toHaveBeenCalledTimes(1);
+    expect(router.state.location.pathname).toBe('/design-system');
+  });
 });

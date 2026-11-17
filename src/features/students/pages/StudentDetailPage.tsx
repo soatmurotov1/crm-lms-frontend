@@ -42,6 +42,7 @@ import { useAttendanceHistory } from '@/features/attendance/api/attendanceServic
 import { useAuditLogs } from '@/features/audit/api/auditService';
 import { useGroups } from '@/features/groups/api/groupService';
 import { useCan } from '@/hooks/useCan';
+import { LearnerAccessCard } from '@/features/students/components/LearnerAccessCard';
 import { statusColors } from '@/lib/attendanceStatus';
 import { extractErrorMessage } from '@/lib/errors';
 import { formatMoney } from '@/lib/money';
@@ -334,6 +335,13 @@ const StudentDetailPage = () => {
               />
             </dl>
           </Card>
+          {mayUpdate ? (
+            <LearnerAccessCard
+              studentId={student.id}
+              phone={student.phone}
+              hasAccount={Boolean(student.has_learner_account)}
+            />
+          ) : null}
         </TabsContent>
 
         {canReadPayments && (

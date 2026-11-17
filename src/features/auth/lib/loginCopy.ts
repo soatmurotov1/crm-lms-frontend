@@ -25,6 +25,13 @@ export type LoginCopy = {
   rateLimit: string;
   networkError: string;
   companyInactive: string;
+  tabStaff: string;
+  tabStudent: string;
+  phoneLabel: string;
+  phonePlaceholder: string;
+  studentDescription: string;
+  studentError: string;
+  studentClosed: string;
 };
 
 const copy: Record<LoginLang, LoginCopy> = {
@@ -53,6 +60,14 @@ const copy: Record<LoginLang, LoginCopy> = {
     networkError: "Server bilan ulanish yo'q.",
     companyInactive:
       "Kompaniyangiz hali faollashtirilmagan. Administrator bilan bog'laning.",
+    tabStaff: 'Xodim',
+    tabStudent: "O'quvchi",
+    phoneLabel: 'Telefon raqam',
+    phonePlaceholder: '+998 90 123 45 67',
+    studentDescription:
+      "O'quvchi kabinetiga kiring. Parolni o'quv markazingiz beradi.",
+    studentError: 'Telefon raqam yoki parol xato',
+    studentClosed: "O'quvchi kabineti vaqtincha yopilgan.",
   },
   ru: {
     appTitle: 'EduLMS',
@@ -79,6 +94,14 @@ const copy: Record<LoginLang, LoginCopy> = {
     networkError: 'Не удалось подключиться к серверу.',
     companyInactive:
       'Ваша компания ещё не активирована. Свяжитесь с администратором.',
+    tabStaff: 'Сотрудник',
+    tabStudent: 'Ученик',
+    phoneLabel: 'Номер телефона',
+    phonePlaceholder: '+998 90 123 45 67',
+    studentDescription:
+      'Вход в кабинет ученика. Пароль выдаёт ваш учебный центр.',
+    studentError: 'Неверный телефон или пароль',
+    studentClosed: 'Кабинет ученика временно закрыт.',
   },
   en: {
     appTitle: 'EduLMS',
@@ -105,6 +128,14 @@ const copy: Record<LoginLang, LoginCopy> = {
     networkError: 'Unable to connect to the server.',
     companyInactive:
       'Your company is not activated yet. Contact your administrator.',
+    tabStaff: 'Staff',
+    tabStudent: 'Student',
+    phoneLabel: 'Phone number',
+    phonePlaceholder: '+998 90 123 45 67',
+    studentDescription:
+      'Sign in to the student portal. Your center gives you the password.',
+    studentError: 'Wrong phone number or password',
+    studentClosed: 'The student portal is temporarily closed.',
   },
 };
 

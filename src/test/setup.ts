@@ -1,5 +1,10 @@
 import '@testing-library/jest-dom';
+import { configure } from '@testing-library/react';
 import { vi } from 'vitest';
+
+// findBy*/waitFor default to 1s, which lazy-loaded routes miss when the whole
+// suite runs in parallel. Give async queries more headroom.
+configure({ asyncUtilTimeout: 10_000 });
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
